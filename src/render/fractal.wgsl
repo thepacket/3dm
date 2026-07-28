@@ -357,16 +357,58 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
 }
 
 // ---------------------------------------------------------------------------
-// Distance probe
+// Cursor probe
 // ---------------------------------------------------------------------------
 
-// Evaluates the estimator once, at the camera, into a 1x1 target the CPU reads
-// back. That single number is how far the camera can move before it touches
-// anything, which is what lets forward flight approach a surface asymptotically
-// instead of sailing through it. Nothing else in the frame needs it, so it is
-// its own tiny pass rather than a channel stolen from the main one.
+// Two numbers the CPU cannot work out for itself, read back from a 2x1 target.
+//
+// Pixel 0 marches the ray under the mouse and reports where it lands, which is
+// what turns "zoom" into "go there": the wheel closes on a point the user chose
+// rather than on the middle of the scene. Pixel 1 reports the clear space at
+// the camera, which is what keeps forward flight from crossing a surface — a
+// different question, since flight follows the view axis and the cursor
+// usually does not.
 @fragment
 fn fs_probe(in: VsOut) -> @location(0) vec4<f32> {
-    let field = fractal_de(dm3_u.cam_pos.xyz);
-    return vec4<f32>(field.dist, 0.0, 0.0, 1.0);
+    let ro = dm3_u.cam_pos.xyz;
+
+    // Pixel 1: clear space straight ahead.
+    if (in.clip_pos.x >= 1.0) {
+        return vec4<f32>(fractal_de(ro).dist, 0.0, 0.0, 0.0);
+    }
+
+    // Pixel 0: march the cursor ray. The cursor's normalised position rides in
+    // the spare w slots of the camera basis, which were padding.
+    let aspect = dm3_u.screen.x / max(dm3_u.screen.y, 1.0);
+    let tan_half = dm3_u.cam_pos.w;
+    let rd = normalize(
+        dm3_u.cam_fwd.xyz
+        + dm3_u.cam_right.xyz * dm3_u.cam_right.w * aspect * tan_half
+        + dm3_u.cam_up.xyz * dm3_u.cam_up.w * tan_half
+    );
+
+    let pixel_angle = 2.0 * tan_half / max(dm3_u.screen.y, 1.0);
+    let bounds = max(dm3_u.march.w, 0.1);
+    let b = dot(rd, ro);
+    let disc = b * b - (dot(ro, ro) - bounds * bounds);
+    if (disc < 0.0) {
+        // The cursor is off the fractal entirely; w < 0 says "no target".
+        return vec4<f32>(ro, -1.0);
+    }
+
+    var t = max(-b - sqrt(disc), 0.0);
+    let max_steps = i32(dm3_u.march.x);
+    var steps = 0;
+    loop {
+        if (steps >= max_steps) { break; }
+        let d = fractal_de(ro + rd * t).dist * dm3_u.fractal.w;
+        let eps = max(pixel_angle * t * dm3_u.march.z, 1e-6);
+        if (d < eps) {
+            return vec4<f32>(ro + rd * t, t);
+        }
+        t = t + d;
+        if (t > dm3_u.march.y) { break; }
+        steps = steps + 1;
+    }
+    return vec4<f32>(ro, -1.0);
 }

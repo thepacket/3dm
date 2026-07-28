@@ -253,7 +253,14 @@ async fn run(out_dir: Option<&str>, hybrid: bool, rotate: bool, stagger: bool) {
             pipeline.ensure(&device, key, &source);
             pipeline.upload(
                 &queue,
-                &Uniforms::build(&camera, &params, [W as f32, H as f32], 0.0, !format.is_srgb()),
+                &Uniforms::build(
+                    &camera,
+                    &params,
+                    [W as f32, H as f32],
+                    0.0,
+                    !format.is_srgb(),
+                    [0.0, 0.0],
+                ),
             );
             let pixels =
                 draw(&device, &queue, &view, &target, &readback, &mut pipeline, key).await;
@@ -301,7 +308,14 @@ async fn run(out_dir: Option<&str>, hybrid: bool, rotate: bool, stagger: bool) {
         let pixels = if built {
             pipeline.upload(
                 &queue,
-                &Uniforms::build(&camera, &params, [W as f32, H as f32], 0.0, !format.is_srgb()),
+                &Uniforms::build(
+                    &camera,
+                    &params,
+                    [W as f32, H as f32],
+                    0.0,
+                    !format.is_srgb(),
+                    [0.0, 0.0],
+                ),
             );
             Some(draw(&device, &queue, &view, &target, &readback, &mut pipeline, key).await)
         } else {

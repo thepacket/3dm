@@ -110,6 +110,21 @@ impl Camera {
         }
     }
 
+    /// Close on a world point by a fraction of the gap between it and the eye.
+    ///
+    /// This is the gesture Mandelbulber's wheel performs: pick a spot, then
+    /// approach *that*, rather than whatever the camera happens to orbit. The
+    /// orbit target travels with the eye, so the point stays put on screen and
+    /// what follows — orbiting, panning — pivots around where you were heading.
+    ///
+    /// A fraction, so it can be applied repeatedly without ever arriving.
+    pub fn approach(&mut self, point: [f32; 3], fraction: f32) {
+        let eye = self.position();
+        for (i, target) in self.target.iter_mut().enumerate() {
+            *target += (point[i] - eye[i]) * fraction;
+        }
+    }
+
     /// Pan the target across the view plane. `dx`/`dy` are in screen fractions;
     /// the movement is scaled by distance so it tracks the cursor at any zoom.
     pub fn pan(&mut self, dx: f32, dy: f32) {

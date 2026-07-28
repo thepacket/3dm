@@ -29,7 +29,10 @@ pub const POOL_VEC4S: usize = MAX_SLOTS * POOL_VEC4S_PER_SLOT;
 
 /// A single float per probe reading. `r32float` is renderable without any
 /// optional feature, which matters because this has to work on the web too.
-const PROBE_FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::R32Float;
+const PROBE_FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Rgba32Float;
+
+/// Two pixels: the cursor ray's landing point, and the clear space ahead.
+const PROBE_WIDTH: u32 = 2;
 
 /// GPU-side scene description. Laid out as `vec4`s so that WGSL's `uniform`
 /// address space alignment rules are satisfied without any padding fields.
@@ -66,6 +69,8 @@ impl Uniforms {
         viewport_px: [f32; 2],
         time: f32,
         encode_srgb: bool,
+        // Cursor position in normalised device coords, y up.
+        cursor_ndc: [f32; 2],
     ) -> Self {
         let eye = camera.position();
         let (right, up, fwd) = camera.basis();
@@ -98,8 +103,10 @@ impl Uniforms {
 
         Self {
             cam_pos: [eye[0], eye[1], eye[2], camera.tan_half_fov()],
-            cam_right: [right[0], right[1], right[2], 0.0],
-            cam_up: [up[0], up[1], up[2], 0.0],
+            // The basis `w` slots were padding; the cursor's normalised
+            // position rides in them so the probe can build its ray.
+            cam_right: [right[0], right[1], right[2], cursor_ndc[0]],
+            cam_up: [up[0], up[1], up[2], cursor_ndc[1]],
             cam_fwd: [fwd[0], fwd[1], fwd[2], 0.0],
             screen: [
                 viewport_px[0],
@@ -153,32 +160,46 @@ mod probe_state {
     pub const MAPPING: u8 = 2;
 }
 
-/// The distance estimate at the camera, read back from the GPU.
+/// Where the cursor is pointing, and how much room is ahead — read back from
+/// the GPU because only the GPU can evaluate the estimator.
 ///
-/// Forward flight needs to know how much empty space is ahead — without it the
-/// camera crosses the surface and ends up inside the solid, which just looks
-/// like the screen going black. The estimator already computes exactly this
-/// number; it only ever ran on the GPU.
+/// Two separate questions. The cursor's landing point is what lets the wheel
+/// zoom somewhere the user chose rather than at the middle of the scene. The
+/// clear space at the camera is what keeps forward flight from crossing a
+/// surface, and it follows the view axis, which the cursor usually does not.
 #[derive(Clone)]
-pub struct CameraDistance {
-    bits: Arc<AtomicU32>,
+pub struct CursorProbe {
+    /// World position under the cursor, then the ray distance to it. A
+    /// negative distance means the cursor is not over the fractal.
+    target: Arc<[AtomicU32; 4]>,
+    clearance: Arc<AtomicU32>,
     state: Arc<AtomicU8>,
 }
 
-impl CameraDistance {
+impl CursorProbe {
     fn new() -> Self {
         Self {
-            // Starts effectively unbounded: until a reading lands, nothing
-            // should be restricted by it.
-            bits: Arc::new(AtomicU32::new(f32::INFINITY.to_bits())),
+            target: Arc::new([0, 0, 0, (-1.0f32).to_bits()].map(AtomicU32::new)),
+            // Effectively unbounded until a reading lands, so nothing is
+            // restricted by a measurement that does not exist yet.
+            clearance: Arc::new(AtomicU32::new(f32::INFINITY.to_bits())),
             state: Arc::new(AtomicU8::new(probe_state::IDLE)),
         }
     }
 
-    /// Metres of clear space ahead of the camera, or infinity before the first
+    /// Clear space directly ahead of the camera, or infinity before the first
     /// reading arrives.
-    pub fn get(&self) -> f32 {
-        f32::from_bits(self.bits.load(Ordering::Relaxed))
+    pub fn clearance(&self) -> f32 {
+        f32::from_bits(self.clearance.load(Ordering::Relaxed))
+    }
+
+    /// World point under the cursor, and how far along the ray it sits.
+    /// `None` when the cursor is not over the fractal.
+    pub fn target(&self) -> Option<([f32; 3], f32)> {
+        let v: [f32; 4] =
+            std::array::from_fn(|i| f32::from_bits(self.target[i].load(Ordering::Relaxed)));
+        let distance: f32 = v[3];
+        (distance > 0.0 && distance.is_finite()).then(|| ([v[0], v[1], v[2]], distance))
     }
 }
 
@@ -196,7 +217,7 @@ pub struct FractalPipeline {
     probe_target: wgpu::Texture,
     probe_view: wgpu::TextureView,
     probe_readback: wgpu::Buffer,
-    pub camera_distance: CameraDistance,
+    pub cursor: CursorProbe,
     /// True when the surface format is linear and we must apply the sRGB
     /// transfer function in the shader ourselves.
     pub encode_srgb: bool,
@@ -238,7 +259,7 @@ impl FractalPipeline {
         let probe_target = device.create_texture(&wgpu::TextureDescriptor {
             label: Some("3dm.probe.target"),
             size: wgpu::Extent3d {
-                width: 1,
+                width: PROBE_WIDTH,
                 height: 1,
                 depth_or_array_layers: 1,
             },
@@ -267,7 +288,7 @@ impl FractalPipeline {
             probe_target,
             probe_view,
             probe_readback,
-            camera_distance: CameraDistance::new(),
+            cursor: CursorProbe::new(),
             encode_srgb: !target_format.is_srgb(),
         }
     }
@@ -335,7 +356,11 @@ impl FractalPipeline {
                 targets: &[Some(wgpu::ColorTargetState {
                     format: PROBE_FORMAT,
                     blend: None,
-                    write_mask: wgpu::ColorWrites::RED,
+                    // All four: the cursor pixel carries a position *and* a
+                    // distance. Masked to RED, as it was when this target held
+                    // one number, the position reads back as (x, 0, 0) and the
+                    // distance as whatever the clear left behind.
+                    write_mask: wgpu::ColorWrites::ALL,
                 })],
                 compilation_options: Default::default(),
             }),
@@ -360,8 +385,8 @@ impl FractalPipeline {
     /// the frame; the mapping is requested a frame later, once that submission
     /// has certainly happened.
     pub fn step_probe(&self, device: &wgpu::Device, encoder: &mut wgpu::CommandEncoder, key: u64) {
-        let distance = &self.camera_distance;
-        match distance.state.load(Ordering::Acquire) {
+        let probe = &self.cursor;
+        match probe.state.load(Ordering::Acquire) {
             probe_state::IDLE => {
                 let Some(pipeline) = self.probes.get(&key) else {
                     return;
@@ -398,30 +423,38 @@ impl FractalPipeline {
                         },
                     },
                     wgpu::Extent3d {
-                        width: 1,
+                        width: PROBE_WIDTH,
                         height: 1,
                         depth_or_array_layers: 1,
                     },
                 );
-                distance.state.store(probe_state::COPIED, Ordering::Release);
+                probe.state.store(probe_state::COPIED, Ordering::Release);
             }
             probe_state::COPIED => {
-                distance.state.store(probe_state::MAPPING, Ordering::Release);
-                let bits = Arc::clone(&distance.bits);
-                let state = Arc::clone(&distance.state);
+                probe.state.store(probe_state::MAPPING, Ordering::Release);
+                let target = Arc::clone(&probe.target);
+                let clearance = Arc::clone(&probe.clearance);
+                let state = Arc::clone(&probe.state);
                 let buffer = self.probe_readback.clone();
                 self.probe_readback.slice(..).map_async(
                     wgpu::MapMode::Read,
                     move |result| {
                         if result.is_ok() {
                             let raw = buffer.slice(..).get_mapped_range();
-                            let value = f32::from_le_bytes([raw[0], raw[1], raw[2], raw[3]]);
+                            let at = |i: usize| {
+                                let b = i * 4;
+                                f32::from_le_bytes([raw[b], raw[b + 1], raw[b + 2], raw[b + 3]])
+                            };
+                            // Pixel 0 is the cursor's landing point, pixel 1 the
+                            // clear space at the camera.
+                            for i in 0..4 {
+                                target[i].store(at(i).to_bits(), Ordering::Relaxed);
+                            }
+                            let ahead = at(4);
                             drop(raw);
                             buffer.unmap();
-                            // A miss reports a huge number; keep it finite so
-                            // arithmetic downstream stays well behaved.
-                            if value.is_finite() && value >= 0.0 {
-                                bits.store(value.to_bits(), Ordering::Relaxed);
+                            if ahead.is_finite() && ahead >= 0.0 {
+                                clearance.store(ahead.to_bits(), Ordering::Relaxed);
                             }
                         }
                         state.store(probe_state::IDLE, Ordering::Release);

@@ -6,7 +6,7 @@ use std::time::Duration;
 use crate::camera::Camera;
 use crate::formulas::{Builtin, DeMode, FormulaKind, FormulaSlot, generated::GENERATED};
 use crate::params::{DebugView, SceneParams};
-use crate::render::{CameraDistance, FractalPipeline, Uniforms, callback};
+use crate::render::{CursorProbe, FractalPipeline, Uniforms, callback};
 
 /// Radians of orbit per point of mouse travel.
 const ORBIT_SENSITIVITY: f32 = 0.007;
@@ -49,6 +49,12 @@ const KEY_FLY_BLIND: f32 = 0.8;
 /// Screen heights of pan per second.
 const KEY_PAN: f32 = 0.9;
 
+/// Fraction of the way to the cursor's target that one wheel notch travels.
+///
+/// Kept well under one so the gesture is repeatable: each notch closes a fifth
+/// of what is left, which never arrives and so never overshoots into the solid.
+const WHEEL_APPROACH: f32 = 0.2;
+
 pub struct App {
     camera: Camera,
     params: SceneParams,
@@ -66,9 +72,11 @@ pub struct App {
     elapsed: f32,
     /// Smoothed frame time, for the readout in the top bar.
     frame_ms: f32,
-    /// How much clear space is in front of the camera, read back from the GPU.
-    /// Forward flight is capped by it, so the surface cannot be crossed.
-    camera_distance: CameraDistance,
+    /// What the GPU last reported about the cursor ray and the space ahead.
+    /// Drives both the zoom-toward-cursor gesture and the flight speed.
+    cursor: CursorProbe,
+    /// Cursor position over the viewport in normalised device coords, y up.
+    cursor_ndc: [f32; 2],
     /// Generated WGSL for the current stack, together with the signature it was
     /// generated from. Regenerated only when the stack's structure changes, so
     /// dragging a parameter never rebuilds a shader.
@@ -82,7 +90,7 @@ impl App {
 
         let pipeline = FractalPipeline::new(&render_state.device, render_state.target_format);
         let encode_srgb = pipeline.encode_srgb;
-        let camera_distance = pipeline.camera_distance.clone();
+        let cursor = pipeline.cursor.clone();
 
         // egui hands these resources back to us inside the paint callback.
         render_state
@@ -104,7 +112,8 @@ impl App {
             camera: Camera::default(),
             params,
             formula_filter: String::new(),
-            camera_distance,
+            cursor,
+            cursor_ndc: [0.0, 0.0],
             encode_srgb,
             adaptive_quality: true,
             interacting: false,
@@ -304,6 +313,58 @@ impl App {
         }
     }
 
+    /// The target cross and its readout.
+    ///
+    /// The numbers are the point the wheel would travel to and how far away it
+    /// is, which is worth showing for the same reason Mandelbulber shows them:
+    /// the gesture is "go *there*", and without the cross there is no there.
+    /// `dist` doubles as a depth gauge — watching it fall by orders of
+    /// magnitude is how a descent is read.
+    fn draw_crosshair(&self, ui: &egui::Ui, rect: egui::Rect, pos: egui::Pos2) {
+        let painter = ui.painter_at(rect);
+        let Some((point, distance)) = self.cursor.target() else {
+            return;
+        };
+
+        let pale = egui::Color32::from_white_alpha(120);
+        let stroke = egui::Stroke::new(1.0, pale);
+        let gap = 6.0;
+        for (from, to) in [
+            (egui::pos2(rect.left(), pos.y), egui::pos2(pos.x - gap, pos.y)),
+            (egui::pos2(pos.x + gap, pos.y), egui::pos2(rect.right(), pos.y)),
+            (egui::pos2(pos.x, rect.top()), egui::pos2(pos.x, pos.y - gap)),
+            (egui::pos2(pos.x, pos.y + gap), egui::pos2(pos.x, rect.bottom())),
+        ] {
+            painter.line_segment([from, to], stroke);
+        }
+
+        // Enough digits to watch a deep descent: by the time `dist` is 1e-6 the
+        // leading figures have stopped changing and only the tail moves.
+        let text = format!(
+            "x: {:.9}\ny: {:.9}\nz: {:.9}\ndist: {:.9}",
+            point[0], point[1], point[2], distance
+        );
+        let anchor = egui::pos2(pos.x + 12.0, pos.y + 12.0);
+        let galley = painter.layout(
+            text,
+            egui::FontId::monospace(11.0),
+            egui::Color32::from_white_alpha(220),
+            f32::INFINITY,
+        );
+        // Flip the label back inside when the pointer nears an edge.
+        let size = galley.size();
+        let origin = egui::pos2(
+            anchor.x.min(rect.right() - size.x - 4.0),
+            anchor.y.min(rect.bottom() - size.y - 4.0),
+        );
+        painter.rect_filled(
+            egui::Rect::from_min_size(origin, size).expand(4.0),
+            3.0,
+            egui::Color32::from_black_alpha(160),
+        );
+        painter.galley(origin, galley, egui::Color32::PLACEHOLDER);
+    }
+
     /// Camera keys: WASD to move, QE to rise and fall, arrows to orbit.
     ///
     /// Reads the keyboard and hands the result to [`Nav::apply`], which is
@@ -328,7 +389,7 @@ impl App {
             lift: axis(egui::Key::Q, egui::Key::E),
             // Shift hurries, Alt creeps — the range the mouse gets from moving
             // faster or slower, which a held key cannot express on its own.
-            clearance: self.camera_distance.get(),
+            clearance: self.cursor.clearance(),
             speed: ui.input(|i| {
                 if i.modifiers.shift {
                     3.0
@@ -373,10 +434,37 @@ impl App {
             self.interacting = delta != egui::Vec2::ZERO;
         }
 
+        // Where the pointer is, in the same normalised coordinates the shader
+        // builds rays from. The probe uses it to report what is under it.
+        if let Some(pos) = response.hover_pos() {
+            self.cursor_ndc = [
+                ((pos.x - rect.left()) / rect.width().max(1.0)) * 2.0 - 1.0,
+                1.0 - ((pos.y - rect.top()) / rect.height().max(1.0)) * 2.0,
+            ];
+        }
+
         if response.hovered() {
             let scroll = ui.input(|i| i.smooth_scroll_delta.y);
             if scroll != 0.0 {
-                self.camera.zoom((-scroll * 0.002).exp());
+                match self.cursor.target() {
+                    // Go where the pointer is aiming. Approaching a point the
+                    // user picked is the whole difference between inspecting
+                    // the scene and travelling through it.
+                    Some((point, _)) => {
+                        let notches = scroll * 0.01;
+                        let fraction = 1.0 - (1.0 - WHEEL_APPROACH).powf(notches.abs());
+                        if notches > 0.0 {
+                            self.camera.approach(point, fraction);
+                        } else {
+                            // Backing off along the same line, so the gesture
+                            // retraces its own path rather than drifting.
+                            self.camera.approach(point, -fraction);
+                        }
+                    }
+                    // Pointing at empty space: fall back to plain dollying, or
+                    // the wheel would do nothing at all off the silhouette.
+                    None => self.camera.zoom((-scroll * 0.002).exp()),
+                }
                 self.interacting = true;
             }
         }
@@ -386,6 +474,10 @@ impl App {
             return;
         }
 
+        if let Some(pos) = response.hover_pos() {
+            self.draw_crosshair(ui, rect, pos);
+        }
+
         let ppp = ui.ctx().pixels_per_point();
         let uniforms = Uniforms::build(
             &self.camera,
@@ -393,6 +485,7 @@ impl App {
             [rect.width() * ppp, rect.height() * ppp],
             self.elapsed,
             self.encode_srgb,
+            self.cursor_ndc,
         );
         ui.painter().add(callback(
             rect,

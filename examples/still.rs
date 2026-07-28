@@ -204,6 +204,7 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
             0.0,
             // The target is sRGB, so the hardware does the encoding for us.
             !format.is_srgb(),
+            [0.0, 0.0],
         ),
     );
 
@@ -285,9 +286,15 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
         }
         let eye = camera.position();
         let radius = (eye[0] * eye[0] + eye[1] * eye[1] + eye[2] * eye[2]).sqrt();
+        // The cursor sits at screen centre here, so its ray is the view axis
+        // and the two readings can be sanity-checked against each other.
+        let cursor = match pipeline.cursor.target() {
+            Some((p, d)) => format!("cursor hit ({:.3}, {:.3}, {:.3}) at {d:.3}", p[0], p[1], p[2]),
+            None => "cursor over empty space".to_owned(),
+        };
         println!(
-            "probe: camera {radius:.3} from origin, clear space ahead {:.3}",
-            pipeline.camera_distance.get()
+            "probe: camera {radius:.3} from origin, clear space ahead {:.3}, {cursor}",
+            pipeline.cursor.clearance()
         );
     }
 
