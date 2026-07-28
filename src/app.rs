@@ -49,6 +49,34 @@ const KEY_FLY_BLIND: f32 = 0.8;
 /// Screen heights of pan per second.
 const KEY_PAN: f32 = 0.9;
 
+/// How the fractal's render resolution is chosen.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum Resolution {
+    /// Full resolution when the camera is still, reduced only while it moves.
+    ///
+    /// Only while *moving* on purpose. An earlier version adapted on every
+    /// frame, which meant a pixel of mouse movement could repaint at a
+    /// different size and visibly change the whole surface.
+    #[default]
+    WhileMoving,
+    /// Always the window's own resolution, however long that takes.
+    Full,
+    /// A fixed fraction of it, chosen by the user.
+    Fixed,
+}
+
+impl Resolution {
+    pub const ALL: [Self; 3] = [Self::WhileMoving, Self::Full, Self::Fixed];
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::WhileMoving => "reduce while moving",
+            Self::Full => "always full",
+            Self::Fixed => "fixed",
+        }
+    }
+}
+
 /// Frame time the renderer aims for, in milliseconds. Above this the fractal is
 /// drawn at a smaller size and stretched; below it, the size creeps back up.
 ///
@@ -83,8 +111,11 @@ pub struct App {
     /// Smoothed frame time, for the readout in the top bar.
     frame_ms: f32,
     /// Linear scale the fractal is rendered at, relative to the viewport.
-    /// Driven by `frame_ms` toward [`TARGET_FRAME_MS`].
+    /// Driven by `frame_ms` toward [`TARGET_FRAME_MS`] while the camera moves.
     render_scale: f32,
+    resolution: Resolution,
+    /// The scale used in [`Resolution::Fixed`].
+    fixed_scale: f32,
     /// What the GPU last reported about the cursor ray and the space ahead.
     /// Drives both the zoom-toward-cursor gesture and the flight speed.
     cursor: CursorProbe,
@@ -133,6 +164,8 @@ impl App {
             elapsed: 0.0,
             frame_ms: 0.0,
             render_scale: 1.0,
+            resolution: Resolution::default(),
+            fixed_scale: 0.5,
             shader: (key, source.into()),
         })
     }
@@ -156,6 +189,8 @@ impl App {
             camera,
             adaptive_quality,
             formula_filter,
+            resolution,
+            fixed_scale,
             ..
         } = self;
         let mut reset_view = false;
@@ -216,7 +251,42 @@ impl App {
                     )
                     .on_hover_text("Hit threshold in pixels. Lower is sharper and slower.");
                     ui.add(egui::Slider::new(&mut m.max_dist, 2.0..=40.0).text("max distance"));
-                    ui.checkbox(adaptive_quality, "Fast preview while moving");
+                    ui.checkbox(adaptive_quality, "Fast preview while moving")
+                        .on_hover_text(
+                            "Drop the iteration and step counts while the camera \
+                             moves. Affects the shape of the estimate, so the \
+                             surface softens as well as the pixels.",
+                        );
+                    ui.horizontal(|ui| {
+                        ui.label("resolution");
+                        egui::ComboBox::from_id_salt("resolution")
+                            .selected_text(resolution.label())
+                            .width(150.0)
+                            .show_ui(ui, |ui| {
+                                for mode in Resolution::ALL {
+                                    if ui
+                                        .selectable_label(*resolution == mode, mode.label())
+                                        .clicked()
+                                    {
+                                        *resolution = mode;
+                                    }
+                                }
+                            });
+                    })
+                    .response
+                    .on_hover_text(
+                        "The fractal is drawn to an offscreen image and stretched \
+                         to the window. At a full-screen size this is twenty-odd \
+                         megapixels of raymarching, so drawing every one of them \
+                         on every frame is a choice rather than a default.",
+                    );
+                    if *resolution == Resolution::Fixed {
+                        ui.add(
+                            egui::Slider::new(fixed_scale, 0.2..=1.0)
+                                .text("scale")
+                                .step_by(0.05),
+                        );
+                    }
                 });
 
             egui::CollapsingHeader::new("Shading")
@@ -484,11 +554,21 @@ impl App {
             return;
         }
 
-        // Track the frame time toward the target. Easing rather than snapping,
-        // or the resolution oscillates visibly as the cost crosses the target.
         let ppp = ui.ctx().pixels_per_point();
-        let error = TARGET_FRAME_MS / self.frame_ms.max(1.0);
-        self.render_scale = (self.render_scale * error.clamp(0.9, 1.05)).clamp(0.2, 1.0);
+        self.render_scale = match self.resolution {
+            Resolution::Full => 1.0,
+            Resolution::Fixed => self.fixed_scale,
+            // Full resolution the moment the camera stops, so what you look at
+            // is always the real image; reduced only while it is moving, where
+            // the frame rate matters more than the detail. Easing rather than
+            // snapping, or the size visibly steps as the cost crosses the
+            // target.
+            Resolution::WhileMoving if self.interacting => {
+                let error = TARGET_FRAME_MS / self.frame_ms.max(1.0);
+                (self.render_scale * error.clamp(0.9, 1.05)).clamp(0.2, 1.0)
+            }
+            Resolution::WhileMoving => 1.0,
+        };
 
         let physical = [rect.width() * ppp, rect.height() * ppp];
         let render_size = [
