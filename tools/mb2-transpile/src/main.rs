@@ -5,6 +5,7 @@
 //!
 //! Mandelbulber2 is GPL-3.0, which is why 3DM is too. See the project README.
 
+mod defaults;
 mod translate;
 mod types;
 mod validate;
@@ -39,6 +40,13 @@ fn main() {
     let header_src = std::fs::read_to_string(&header)
         .unwrap_or_else(|e| panic!("cannot read {}: {e}", header.display()));
     let type_map = TypeMap::parse(&header_src);
+
+    // Defaults come from the C++ sources, joined across two files.
+    let read = |rel: &str| std::fs::read_to_string(root.join(rel)).unwrap_or_default();
+    let defaults = defaults::Defaults::parse(
+        &read("mandelbulber2/src/fractal.cpp"),
+        &read("mandelbulber2/src/initparameters.cpp"),
+    );
     validate::set_enumerators(&types::parse_enumerators(&header_src));
 
     let mut files: Vec<_> = std::fs::read_dir(&formula_dir)
@@ -116,6 +124,35 @@ fn main() {
     }
 
     if !ok.is_empty() {
+        // A parameter with no default renders as zero, which for most formulas
+        // means an empty image — so this coverage matters as much as the
+        // formula count itself.
+        let (mut have, mut missing) = (0usize, 0usize);
+        let mut missing_names: BTreeMap<String, usize> = BTreeMap::new();
+        for f in &ok {
+            for p in &f.params {
+                // Rotation matrices are computed from Euler angles rather than
+                // stored, so identity is their correct neutral default.
+                if defaults.get(&p.path).is_some()
+                    || p.ty == types::ParamType::Matrix33
+                {
+                    have += 1;
+                } else {
+                    missing += 1;
+                    *missing_names.entry(p.path.clone()).or_default() += 1;
+                }
+            }
+        }
+        println!(
+            "\nparameter defaults: {have} resolved, {missing} missing ({} known paths)",
+            defaults.len()
+        );
+        let mut v: Vec<_> = missing_names.iter().collect();
+        v.sort_by_key(|(_, n)| std::cmp::Reverse(**n));
+        for (path, n) in v.iter().take(10) {
+            println!("  {n:>4}  {path}");
+        }
+
         let params: Vec<usize> = ok.iter().map(|f| f.param_floats).collect();
         let max = params.iter().copied().max().unwrap_or(0);
         let mean = params.iter().sum::<usize>() as f32 / params.len() as f32;
