@@ -355,3 +355,18 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
     }
     return vec4<f32>(color, 1.0);
 }
+
+// ---------------------------------------------------------------------------
+// Distance probe
+// ---------------------------------------------------------------------------
+
+// Evaluates the estimator once, at the camera, into a 1x1 target the CPU reads
+// back. That single number is how far the camera can move before it touches
+// anything, which is what lets forward flight approach a surface asymptotically
+// instead of sailing through it. Nothing else in the frame needs it, so it is
+// its own tiny pass rather than a channel stolen from the main one.
+@fragment
+fn fs_probe(in: VsOut) -> @location(0) vec4<f32> {
+    let field = fractal_de(dm3_u.cam_pos.xyz);
+    return vec4<f32>(field.dist, 0.0, 0.0, 1.0);
+}

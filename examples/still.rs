@@ -272,6 +272,25 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
     drop(mapped);
     readback.unmap();
 
+    // DM3_PROBE checks the distance probe end to end: the number it reads back
+    // is what stops forward flight crossing the surface, and a probe that
+    // silently returns nothing would fail open — the camera would fly straight
+    // through exactly as it did before.
+    if std::env::var("DM3_PROBE").is_ok() {
+        for _ in 0..8 {
+            let mut encoder = device.create_command_encoder(&Default::default());
+            pipeline.step_probe(&device, &mut encoder, key);
+            queue.submit([encoder.finish()]);
+            device.poll(wgpu::PollType::wait_indefinitely()).ok();
+        }
+        let eye = camera.position();
+        let radius = (eye[0] * eye[0] + eye[1] * eye[1] + eye[2] * eye[2]).sqrt();
+        println!(
+            "probe: camera {radius:.3} from origin, clear space ahead {:.3}",
+            pipeline.camera_distance.get()
+        );
+    }
+
     image::save_buffer(
         path,
         &pixels,

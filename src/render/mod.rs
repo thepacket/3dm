@@ -12,6 +12,7 @@ pub mod codegen;
 
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU32, AtomicU8, Ordering};
 
 // Use eframe's re-export so we are guaranteed to be on the same wgpu version
 // egui-wgpu was built against.
@@ -25,6 +26,10 @@ use crate::params::SceneParams;
 /// `vec4`s of parameter pool in the uniform block. Must match the array
 /// length declared in `fractal.wgsl`.
 pub const POOL_VEC4S: usize = MAX_SLOTS * POOL_VEC4S_PER_SLOT;
+
+/// A single float per probe reading. `r32float` is renderable without any
+/// optional feature, which matters because this has to work on the web too.
+const PROBE_FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::R32Float;
 
 /// GPU-side scene description. Laid out as `vec4`s so that WGSL's `uniform`
 /// address space alignment rules are satisfied without any padding fields.
@@ -136,6 +141,47 @@ impl Uniforms {
     }
 }
 
+/// Where the distance probe is in its copy/map cycle.
+///
+/// A buffer cannot be mapped while a copy into it is still in flight, so the
+/// probe alternates: encode a copy one frame, ask for the mapping the next,
+/// take the value when it lands. Three frames per reading at worst, which for
+/// steering a camera is far more often than anyone can react.
+mod probe_state {
+    pub const IDLE: u8 = 0;
+    pub const COPIED: u8 = 1;
+    pub const MAPPING: u8 = 2;
+}
+
+/// The distance estimate at the camera, read back from the GPU.
+///
+/// Forward flight needs to know how much empty space is ahead — without it the
+/// camera crosses the surface and ends up inside the solid, which just looks
+/// like the screen going black. The estimator already computes exactly this
+/// number; it only ever ran on the GPU.
+#[derive(Clone)]
+pub struct CameraDistance {
+    bits: Arc<AtomicU32>,
+    state: Arc<AtomicU8>,
+}
+
+impl CameraDistance {
+    fn new() -> Self {
+        Self {
+            // Starts effectively unbounded: until a reading lands, nothing
+            // should be restricted by it.
+            bits: Arc::new(AtomicU32::new(f32::INFINITY.to_bits())),
+            state: Arc::new(AtomicU8::new(probe_state::IDLE)),
+        }
+    }
+
+    /// Metres of clear space ahead of the camera, or infinity before the first
+    /// reading arrives.
+    pub fn get(&self) -> f32 {
+        f32::from_bits(self.bits.load(Ordering::Relaxed))
+    }
+}
+
 /// Long-lived GPU objects, stashed in egui's `callback_resources` so they are
 /// created once rather than per frame.
 pub struct FractalPipeline {
@@ -145,6 +191,12 @@ pub struct FractalPipeline {
     target_format: wgpu::TextureFormat,
     /// One compiled pipeline per formula-stack signature.
     pipelines: HashMap<u64, wgpu::RenderPipeline>,
+    /// The 1x1 probe pipeline for each of those, sharing the shader module.
+    probes: HashMap<u64, wgpu::RenderPipeline>,
+    probe_target: wgpu::Texture,
+    probe_view: wgpu::TextureView,
+    probe_readback: wgpu::Buffer,
+    pub camera_distance: CameraDistance,
     /// True when the surface format is linear and we must apply the sRGB
     /// transfer function in the shader ourselves.
     pub encode_srgb: bool,
@@ -182,12 +234,40 @@ impl FractalPipeline {
             }],
         });
 
+        // One float, but a copy destination has to be 256-byte aligned.
+        let probe_target = device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("3dm.probe.target"),
+            size: wgpu::Extent3d {
+                width: 1,
+                height: 1,
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: PROBE_FORMAT,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,
+            view_formats: &[],
+        });
+        let probe_view = probe_target.create_view(&wgpu::TextureViewDescriptor::default());
+        let probe_readback = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("3dm.probe.readback"),
+            size: wgpu::COPY_BYTES_PER_ROW_ALIGNMENT as u64,
+            usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
+            mapped_at_creation: false,
+        });
+
         Self {
             bind_group_layout,
             bind_group,
             uniform_buffer,
             target_format,
             pipelines: HashMap::new(),
+            probes: HashMap::new(),
+            probe_target,
+            probe_view,
+            probe_readback,
+            camera_distance: CameraDistance::new(),
             encode_srgb: !target_format.is_srgb(),
         }
     }
@@ -240,7 +320,119 @@ impl FractalPipeline {
             cache: None,
         });
 
+        let probe = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+            label: Some("3dm.probe.pipeline"),
+            layout: Some(&layout),
+            vertex: wgpu::VertexState {
+                module: &shader,
+                entry_point: Some("vs_main"),
+                buffers: &[],
+                compilation_options: Default::default(),
+            },
+            fragment: Some(wgpu::FragmentState {
+                module: &shader,
+                entry_point: Some("fs_probe"),
+                targets: &[Some(wgpu::ColorTargetState {
+                    format: PROBE_FORMAT,
+                    blend: None,
+                    write_mask: wgpu::ColorWrites::RED,
+                })],
+                compilation_options: Default::default(),
+            }),
+            primitive: wgpu::PrimitiveState {
+                topology: wgpu::PrimitiveTopology::TriangleList,
+                cull_mode: None,
+                ..Default::default()
+            },
+            depth_stencil: None,
+            multisample: wgpu::MultisampleState::default(),
+            multiview_mask: None,
+            cache: None,
+        });
+
         self.pipelines.insert(key, pipeline);
+        self.probes.insert(key, probe);
+    }
+
+    /// Advances the probe one step through its copy/map cycle.
+    ///
+    /// Encoded into egui's own command encoder, so the copy is submitted with
+    /// the frame; the mapping is requested a frame later, once that submission
+    /// has certainly happened.
+    pub fn step_probe(&self, device: &wgpu::Device, encoder: &mut wgpu::CommandEncoder, key: u64) {
+        let distance = &self.camera_distance;
+        match distance.state.load(Ordering::Acquire) {
+            probe_state::IDLE => {
+                let Some(pipeline) = self.probes.get(&key) else {
+                    return;
+                };
+                {
+                    let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                        label: Some("3dm.probe.pass"),
+                        color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                            view: &self.probe_view,
+                            depth_slice: None,
+                            resolve_target: None,
+                            ops: wgpu::Operations {
+                                load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
+                                store: wgpu::StoreOp::Store,
+                            },
+                        })],
+                        depth_stencil_attachment: None,
+                        timestamp_writes: None,
+                        occlusion_query_set: None,
+                        multiview_mask: None,
+                    });
+                    pass.set_pipeline(pipeline);
+                    pass.set_bind_group(0, &self.bind_group, &[]);
+                    pass.draw(0..3, 0..1);
+                }
+                encoder.copy_texture_to_buffer(
+                    self.probe_target.as_image_copy(),
+                    wgpu::TexelCopyBufferInfo {
+                        buffer: &self.probe_readback,
+                        layout: wgpu::TexelCopyBufferLayout {
+                            offset: 0,
+                            bytes_per_row: Some(wgpu::COPY_BYTES_PER_ROW_ALIGNMENT),
+                            rows_per_image: Some(1),
+                        },
+                    },
+                    wgpu::Extent3d {
+                        width: 1,
+                        height: 1,
+                        depth_or_array_layers: 1,
+                    },
+                );
+                distance.state.store(probe_state::COPIED, Ordering::Release);
+            }
+            probe_state::COPIED => {
+                distance.state.store(probe_state::MAPPING, Ordering::Release);
+                let bits = Arc::clone(&distance.bits);
+                let state = Arc::clone(&distance.state);
+                let buffer = self.probe_readback.clone();
+                self.probe_readback.slice(..).map_async(
+                    wgpu::MapMode::Read,
+                    move |result| {
+                        if result.is_ok() {
+                            let raw = buffer.slice(..).get_mapped_range();
+                            let value = f32::from_le_bytes([raw[0], raw[1], raw[2], raw[3]]);
+                            drop(raw);
+                            buffer.unmap();
+                            // A miss reports a huge number; keep it finite so
+                            // arithmetic downstream stays well behaved.
+                            if value.is_finite() && value >= 0.0 {
+                                bits.store(value.to_bits(), Ordering::Relaxed);
+                            }
+                        }
+                        state.store(probe_state::IDLE, Ordering::Release);
+                    },
+                );
+                // Nudge the driver so the callback is not left waiting for the
+                // next natural poll.
+                let _ = device.poll(wgpu::PollType::Poll);
+            }
+            _ => {}
+        }
     }
 
     /// Push a new scene to the GPU. Cheap enough to do every frame.
@@ -281,12 +473,13 @@ impl CallbackTrait for FractalCallback {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         _screen_descriptor: &ScreenDescriptor,
-        _encoder: &mut wgpu::CommandEncoder,
+        encoder: &mut wgpu::CommandEncoder,
         resources: &mut CallbackResources,
     ) -> Vec<wgpu::CommandBuffer> {
         if let Some(res) = resources.get_mut::<FractalPipeline>() {
             res.ensure(device, self.shader_key, &self.shader_source);
             res.upload(queue, &self.uniforms);
+            res.step_probe(device, encoder, self.shader_key);
         }
         Vec::new()
     }

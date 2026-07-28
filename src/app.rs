@@ -6,7 +6,7 @@ use std::time::Duration;
 use crate::camera::Camera;
 use crate::formulas::{Builtin, DeMode, FormulaKind, FormulaSlot, generated::GENERATED};
 use crate::params::{DebugView, SceneParams};
-use crate::render::{FractalPipeline, Uniforms, callback};
+use crate::render::{CameraDistance, FractalPipeline, Uniforms, callback};
 
 /// Radians of orbit per point of mouse travel.
 const ORBIT_SENSITIVITY: f32 = 0.007;
@@ -19,13 +19,19 @@ const KEY_ORBIT: f32 = 1.6;
 /// so this descends into the fractal rather than converging on its centre — see
 /// [`Camera::advance`].
 ///
-/// Deliberately unhurried. From the framed view the surface is about two thirds
-/// of an orbit radius ahead, so at 0.9 a single second of holding the key flew
-/// straight through the fractal and left the camera inside it, which reads as
-/// the screen going black. Flying into a wall is still flying into a wall —
-/// nothing here knows where the surface is — but at this rate there is time to
-/// stop, and shift is there when the gap is large.
-const KEY_FLY: f32 = 0.25;
+/// Brisk, because it no longer governs the approach: the probe does. Far from
+/// the fractal this is the speed; near it, [`FLY_CLEARANCE`] takes over and the
+/// camera decelerates on its own.
+const KEY_FLY: f32 = 0.8;
+
+/// Fraction of the measured clear space a single frame may consume.
+///
+/// Not a half, because the reading is up to three frames old — the probe copies
+/// on one frame, maps on the next, and lands on the one after. Three stale
+/// steps at a quarter each still leave a quarter of the gap, so the surface
+/// cannot be crossed even if the camera moves the whole time without a fresh
+/// reading.
+const FLY_CLEARANCE: f32 = 0.25;
 /// Screen heights of pan per second.
 const KEY_PAN: f32 = 0.9;
 
@@ -46,6 +52,9 @@ pub struct App {
     elapsed: f32,
     /// Smoothed frame time, for the readout in the top bar.
     frame_ms: f32,
+    /// How much clear space is in front of the camera, read back from the GPU.
+    /// Forward flight is capped by it, so the surface cannot be crossed.
+    camera_distance: CameraDistance,
     /// Generated WGSL for the current stack, together with the signature it was
     /// generated from. Regenerated only when the stack's structure changes, so
     /// dragging a parameter never rebuilds a shader.
@@ -59,6 +68,7 @@ impl App {
 
         let pipeline = FractalPipeline::new(&render_state.device, render_state.target_format);
         let encode_srgb = pipeline.encode_srgb;
+        let camera_distance = pipeline.camera_distance.clone();
 
         // egui hands these resources back to us inside the paint callback.
         render_state
@@ -80,6 +90,7 @@ impl App {
             camera: Camera::default(),
             params,
             formula_filter: String::new(),
+            camera_distance,
             encode_srgb,
             adaptive_quality: true,
             interacting: false,
@@ -303,6 +314,7 @@ impl App {
             lift: axis(egui::Key::Q, egui::Key::E),
             // Shift hurries, Alt creeps — the range the mouse gets from moving
             // faster or slower, which a held key cannot express on its own.
+            clearance: self.camera_distance.get(),
             speed: ui.input(|i| {
                 if i.modifiers.shift {
                     3.0
@@ -442,6 +454,9 @@ struct Nav {
     lift: f32,
     /// Modifier multiplier: 3 with shift, 0.3 with alt, 1 otherwise.
     speed: f32,
+    /// Clear space ahead of the camera, from the GPU probe. Infinite until the
+    /// first reading lands.
+    clearance: f32,
 }
 
 impl Nav {
@@ -460,7 +475,17 @@ impl Nav {
         // dragging right does, so the two controls never disagree.
         camera.orbit(-self.yaw * KEY_ORBIT * step, -self.pitch * KEY_ORBIT * step);
         if self.forward != 0.0 {
-            camera.advance(self.forward * KEY_FLY * step);
+            let wanted = self.forward * KEY_FLY * step * camera.distance;
+            // Never commit more than a fraction of the measured clear space.
+            // As the surface nears, the estimate shrinks and so does the step,
+            // so approach is asymptotic and the camera cannot cross. Moving
+            // away is unconstrained — there is nothing to hit behind you.
+            let travel = if wanted > 0.0 {
+                wanted.min(self.clearance * FLY_CLEARANCE)
+            } else {
+                wanted
+            };
+            camera.advance(travel / camera.distance);
         }
         if self.strafe != 0.0 || self.lift != 0.0 {
             camera.pan(-self.strafe * KEY_PAN * step, self.lift * KEY_PAN * step);
@@ -686,6 +711,7 @@ mod nav_tests {
     fn nav() -> Nav {
         Nav {
             speed: 1.0,
+            clearance: f32::INFINITY,
             ..Default::default()
         }
     }
@@ -796,6 +822,61 @@ mod nav_tests {
             travel(Nav { yaw: 1.0, ..nav() }, 2),
         );
         assert!((one.yaw - two.yaw).abs() < 1e-5, "{one:?} {two:?}");
+    }
+
+    #[test]
+    fn flying_never_crosses_the_measured_surface() {
+        // The whole point of the probe. With a wall 0.4 units ahead, no amount
+        // of holding W may put the camera through it — each step takes at most
+        // half the remaining gap, so the approach is asymptotic.
+        let mut camera = Camera::default();
+        let (_, _, forward) = camera.basis();
+        let start = camera.target;
+        let mut clearance: f32 = 0.4;
+
+        for _ in 0..400 {
+            Nav { forward: 1.0, clearance, ..nav() }.apply(&mut camera, 0.05);
+            let travelled: f32 = (0..3)
+                .map(|i| (camera.target[i] - start[i]) * forward[i])
+                .sum();
+            clearance = 0.4 - travelled;
+            // Never negative is the guarantee. The gap does eventually reach
+            // exactly zero, because halving a f32 four hundred times runs out
+            // of exponent — that is underflow, not a crossing.
+            assert!(clearance >= 0.0, "flew through the surface: {travelled}");
+        }
+
+        // And it really did close on the wall rather than stalling short.
+        assert!(clearance < 1e-6, "should have converged onto the surface");
+    }
+
+    #[test]
+    fn backing_away_is_not_capped_by_the_clearance() {
+        // Clearance measures what is in front. Reversing has nothing to hit,
+        // so a near-zero reading must not pin the camera in place.
+        let mut camera = Camera::default();
+        let (_, _, forward) = camera.basis();
+        let start = camera.target;
+
+        Nav { forward: -1.0, clearance: 0.0, ..nav() }.apply(&mut camera, 0.1);
+
+        let travelled: f32 = (0..3)
+            .map(|i| (camera.target[i] - start[i]) * forward[i])
+            .sum();
+        assert!(travelled < 0.0, "S should still reverse when boxed in");
+    }
+
+    #[test]
+    fn an_unmeasured_clearance_does_not_restrict_anything() {
+        // Before the first readback lands the estimate is infinite, and flight
+        // must behave exactly as though there were no probe at all.
+        let mut open = Camera::default();
+        Nav { forward: 1.0, ..nav() }.apply(&mut open, 0.1);
+
+        let mut probed = Camera::default();
+        Nav { forward: 1.0, clearance: 1e9, ..nav() }.apply(&mut probed, 0.1);
+
+        assert_eq!(open.target, probed.target);
     }
 
     #[test]
