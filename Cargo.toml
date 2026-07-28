@@ -3,6 +3,11 @@ name = "three_dm"
 version = "0.1.0"
 edition = "2024"
 description = "3DM — a modern, GPU-raymarched Mandelbulb explorer for the web"
+license = "GPL-3.0-or-later"
+repository = "https://github.com/thepacket/3dm"
+
+[workspace]
+members = [".", "tools/mb2-transpile"]
 
 [[bin]]
 name = "3dm"

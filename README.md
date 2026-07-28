@@ -162,3 +162,19 @@ curve itself only when the surface format is linear (`encode_srgb`), since a
   hashed it would break sub-resource integrity.
 - Do not set `strip = true` in the release profile: the resulting wasm fails
   binaryen's validator.
+
+## Licence
+
+3DM is licensed under the **GNU General Public License v3.0 or later** — see
+[LICENSE](LICENSE).
+
+The fractal formulas are derived from
+[Mandelbulber2](https://github.com/buddhi1980/mandelbulber2) (© Mandelbulber
+Team, GPL-3.0), whose OpenCL formula sources are translated to WGSL by
+[`tools/mb2-transpile`](tools/mb2-transpile). That makes 3DM a derivative work,
+which is why it carries the same licence.
+
+Practical consequence: the web build ships a `.wasm` to every visitor, and that
+counts as distribution. If you deploy 3DM publicly you must offer the
+corresponding source to your users. Keeping the repository public, and linked
+from the app, satisfies this.
