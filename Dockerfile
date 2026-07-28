@@ -37,13 +37,19 @@ WORKDIR /app
 
 # Warm the dependency cache: wgpu and egui are a large tree and rebuild far more
 # often than they change. The dummy sources are replaced by the real COPY below.
+# Every workspace member's manifest has to be present or cargo cannot load the
+# workspace at all, even to build one binary from the root package — and every
+# package needs at least one target to exist, hence the stub sources. The
+# transpiler is never compiled here; it is a developer tool that does not ship.
 COPY Cargo.toml Cargo.lock ./
-RUN mkdir -p src examples \
+COPY tools/mb2-transpile/Cargo.toml tools/mb2-transpile/
+RUN mkdir -p src examples tools/mb2-transpile/src \
  && echo 'fn main() {}' > src/main.rs \
  && echo '' > src/lib.rs \
  && echo 'fn main() {}' > examples/still.rs \
+ && echo 'fn main() {}' > tools/mb2-transpile/src/main.rs \
  && cargo build --release --target wasm32-unknown-unknown --bin 3dm \
- && rm -rf src examples
+ && rm -rf src examples tools/mb2-transpile/src
 
 COPY . .
 # Trunk fingerprints its output, so cargo must not reuse the dummy build's
