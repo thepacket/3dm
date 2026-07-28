@@ -103,6 +103,16 @@ is a no-op by design rather than a bug. `--rotate` additionally dials every
 Euler rotation to 45 degrees, since rotation angles default to zero in
 Mandelbulber too and a rotation transform is therefore *correctly* inert out of
 the box — proving the matrix derivation works needs a non-zero angle.
+`--stagger` runs the base over the first three iterations and the added formula
+over the rest, which is how MB3D hybrids are usually built. It discriminates
+*worse* than the overlapping default (148 reshape rather than 286), because a
+formula applied only late in the loop often cannot move a shape the early
+iterations already decided.
+
+The 32 formulas that erase the base are not a fault: 24 of them are escape-time
+formulas that add their own `c`, and two divergent maps applied on every
+iteration send the orbit past the bailout immediately. That combination is
+meaningless, not broken.
 
 ## Gotcha
 

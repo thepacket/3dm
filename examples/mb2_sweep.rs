@@ -72,8 +72,13 @@ fn main() {
     // transform is *correctly* inert out of the box. Dialling one in is the
     // only way to show that the matrix derivation actually works.
     let rotate = args.iter().any(|a| a == "--rotate");
+    // Two escape-time formulas both applied on every iteration make the orbit
+    // diverge at once, which is a property of that combination and not a fault
+    // in either. A real hybrid interleaves them over different parts of the
+    // loop, the way MB3D always did.
+    let stagger = args.iter().any(|a| a == "--stagger");
     let out_dir = args.into_iter().find(|a| !a.starts_with("--"));
-    pollster::block_on(run(out_dir.as_deref(), hybrid, rotate));
+    pollster::block_on(run(out_dir.as_deref(), hybrid, rotate, stagger));
 }
 
 /// The scene for one sweep entry.
@@ -90,7 +95,13 @@ fn main() {
 /// reported the entire `TransfDIFS*` family as doing nothing. Instead each
 /// hybrid is compared against the base rendered under that same estimator, so
 /// the comparison stays honest without discarding what the formula does.
-fn scene(index: Option<usize>, hybrid: bool, force: Option<DeMode>, rotate: bool) -> SceneParams {
+fn scene(
+    index: Option<usize>,
+    hybrid: bool,
+    force: Option<DeMode>,
+    rotate: bool,
+    stagger: bool,
+) -> SceneParams {
     let base = if hybrid {
         vec![FormulaSlot::builtin(Builtin::Mandelbulb)]
     } else {
@@ -107,10 +118,19 @@ fn scene(index: Option<usize>, hybrid: bool, force: Option<DeMode>, rotate: bool
 
     if hybrid {
         params.retune_for_stack();
+        // The base is truncated for the reference too, or the comparison is
+        // between a three-iteration bulb and a full one and every result
+        // "changed" for the wrong reason.
+        if stagger {
+            params.stack.slots[0].end_iter = 3;
+        }
         if let Some(i) = index {
             let mut slot = FormulaSlot::new(FormulaKind::Generated(i));
             if rotate {
                 set_rotations(&mut slot, 45.0);
+            }
+            if stagger {
+                slot.start_iter = 3;
             }
             params.stack.slots.push(slot);
         }
@@ -167,7 +187,7 @@ fn difference(a: &[u8], b: &[u8]) -> f32 {
     differing as f32 / (W * H) as f32
 }
 
-async fn run(out_dir: Option<&str>, hybrid: bool, rotate: bool) {
+async fn run(out_dir: Option<&str>, hybrid: bool, rotate: bool, stagger: bool) {
     if let Some(d) = out_dir {
         std::fs::create_dir_all(d).expect("cannot create output directory");
     }
@@ -226,7 +246,7 @@ async fn run(out_dir: Option<&str>, hybrid: bool, rotate: bool) {
     let mut references: Vec<(DeMode, Vec<u8>)> = Vec::new();
     if hybrid {
         for mode in DeMode::ALL {
-            let params = scene(None, true, Some(mode), false);
+            let params = scene(None, true, Some(mode), false, stagger);
             let mut camera = Camera::default();
             camera.frame(params.fractal.bounding_radius);
             let (key, source) = params.shader();
@@ -254,7 +274,7 @@ async fn run(out_dir: Option<&str>, hybrid: bool, rotate: bool) {
     let mut inert = Vec::new();
 
     for (index, f) in GENERATED.iter().enumerate() {
-        let params = scene(Some(index), hybrid, None, rotate);
+        let params = scene(Some(index), hybrid, None, rotate, stagger);
 
         let mut camera = Camera::default();
         camera.frame(params.fractal.bounding_radius);

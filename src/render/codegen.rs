@@ -82,6 +82,21 @@ pub fn generate(stack: &FormulaStack) -> String {
         dispatch.push_str("        // empty stack — nothing to iterate\n");
     }
 
+    // Mandelbulber treats a stack of formulas differently from a single one,
+    // and the difference is the sign of the derivative. A fold can legitimately
+    // drive `de` negative; alone that means the point is inside and the
+    // distance is zero, but in a stack the magnitude is still the right scale
+    // to march by, so the hybrid branch takes the absolute value. 3DM did
+    // neither — it clamped `de` up to a tiny positive number, turning a
+    // negative derivative into an enormous step that flew straight past the
+    // surface.
+    let hybrid = stack.active().count() > 1;
+    let divisor = if hybrid {
+        "max(abs(aux.de), 1e-9)"
+    } else {
+        "max(aux.de, 1e-9)"
+    };
+
     // Ported from Mandelbulber's `compute_fractal.cl`, including the parts that
     // are easy to leave out and wrong to: the logarithmic form is zero inside
     // the unit sphere rather than negative, the IFS form carries a −2 offset,
@@ -91,6 +106,14 @@ pub fn generate(stack: &FormulaStack) -> String {
         DeMode::Linear => "safe_r / de",
         DeMode::Ifs => "(safe_r - 2.0) / de",
         DeMode::Custom => "aux.dist",
+    };
+
+    // A single formula with a non-positive derivative is inside the surface,
+    // which Mandelbulber reports as a distance of zero rather than as a miss.
+    let guard = if hybrid {
+        format!("max({distance}, 0.0)")
+    } else {
+        format!("select(0.0, max({distance}, 0.0), aux.de > 0.0)")
     };
 
     let de = format!(
@@ -150,11 +173,11 @@ pub fn generate(stack: &FormulaStack) -> String {
 
     var out: Field;
     let safe_r = max(r, 1e-9);
-    let de = max(aux.de, 1e-9);
+    let de = {divisor};
     // Mandelbulber clamps the finished estimate at zero. Without it the
     // logarithmic form reports negative distances inside the unit sphere and
     // the marcher walks backwards through the surface.
-    out.dist = max({distance}, 0.0);
+    out.dist = {guard};
     out.trap = trap;
     out.escape = f32(i) / max(f32(max_iter), 1.0);
     return out;
