@@ -88,8 +88,17 @@ you. Currently 276 render with detail, 29 as smooth blobs, 37 empty, 19 fail to
 build.
 
 Of those 37 empties, 26 are `Transf*` formulas — transforms meant to be composed
-into a hybrid, which genuinely draw nothing on their own. They need a multi-slot
-stack before they can be judged at all.
+into a hybrid, which genuinely draw nothing on their own:
+
+```bash
+cargo run --release --example mb2_sweep -- /tmp/hybrid --hybrid
+```
+
+stacks each formula onto a known-good Mandelbulb and asks whether the picture
+changed, which is the only automatic way to judge a transform. Currently 283
+reshape the bulb, 33 erase it, 26 have no effect and 19 fail to build — and the
+report says *why* each inert one is inert, since an offset whose default is zero
+is a no-op by design rather than a bug.
 
 ## Gotcha
 

@@ -6,13 +6,23 @@
 //! formula that compiles into an empty screen, or into a solid block, is
 //! counted as the failure it is.
 //!
-//!     cargo run --release --example mb2_sweep [-- <out-dir>]
+//!     cargo run --release --example mb2_sweep [-- <out-dir>] [--hybrid]
 //!
 //! With an output directory it also writes a PNG per formula that rendered,
 //! which is the only way to judge whether the shape is actually *right*.
+//!
+//! `--hybrid` answers a question the solo sweep cannot. Much of Mandelbulber's
+//! corpus is transforms — folds, rotations, inversions — that draw nothing on
+//! their own and are meant to be composed with a base formula. Rendering one
+//! alone proves only that it is a transform. So this mode stacks each formula
+//! on top of a known-good Mandelbulb and asks whether the picture changed: a
+//! transform that leaves the bulb untouched is broken, one that reshapes it is
+//! working, and neither conclusion needs anyone to look at a contact sheet.
 
 use eframe::wgpu;
-use three_dm::formulas::{FormulaKind, FormulaSlot, FormulaStack, generated::GENERATED};
+use three_dm::formulas::{
+    Builtin, DeMode, FormulaKind, FormulaSlot, FormulaStack, ParamKind, generated::GENERATED,
+};
 use three_dm::{
     Camera, SceneParams,
     render::{FractalPipeline, Uniforms},
@@ -39,12 +49,89 @@ enum Verdict {
     Rendered,
 }
 
-fn main() {
-    let out_dir = std::env::args().nth(1);
-    pollster::block_on(run(out_dir.as_deref()));
+/// What a formula did when stacked on top of the base fractal.
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
+enum Hybrid {
+    ShaderError,
+    /// The picture is indistinguishable from the base alone, so whatever the
+    /// formula does, it does not reach the geometry.
+    Inert,
+    /// The base fractal disappeared entirely.
+    Erased,
+    /// The frame filled — usually the estimate collapsing to zero.
+    Flooded,
+    /// The shape changed. The formula is doing something.
+    Reshaped,
 }
 
-async fn run(out_dir: Option<&str>) {
+fn main() {
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    let hybrid = args.iter().any(|a| a == "--hybrid");
+    let out_dir = args.into_iter().find(|a| !a.starts_with("--"));
+    pollster::block_on(run(out_dir.as_deref(), hybrid));
+}
+
+/// The scene for one sweep entry.
+///
+/// In hybrid mode the base fractal's framing and iteration budget are pinned so
+/// that only the extra slot varies — letting `retune_for_stack` run again would
+/// move the camera and change the picture without any geometry moving.
+///
+/// The estimator is deliberately *not* pinned. An earlier version forced it to
+/// logarithmic, reasoning that a formula which merely flips the stack's
+/// estimator would otherwise look like it had reshaped the fractal. That
+/// reasoning is wrong for the custom-DE formulas, where writing `aux.dist` *is*
+/// the whole mechanism: pinning the estimator threw their output away and
+/// reported the entire `TransfDIFS*` family as doing nothing. Instead each
+/// hybrid is compared against the base rendered under that same estimator, so
+/// the comparison stays honest without discarding what the formula does.
+fn scene(index: Option<usize>, hybrid: bool, force: Option<DeMode>) -> SceneParams {
+    let base = if hybrid {
+        vec![FormulaSlot::builtin(Builtin::Mandelbulb)]
+    } else {
+        vec![]
+    };
+
+    let mut params = SceneParams {
+        stack: FormulaStack {
+            slots: base,
+            de_mode_override: None,
+        },
+        ..Default::default()
+    };
+
+    if hybrid {
+        params.retune_for_stack();
+        if let Some(i) = index {
+            params.stack.slots.push(FormulaSlot::new(FormulaKind::Generated(i)));
+        }
+        params.stack.de_mode_override = force;
+    } else {
+        params
+            .stack
+            .slots
+            .push(FormulaSlot::new(FormulaKind::Generated(index.unwrap())));
+        params.retune_for_stack();
+    }
+
+    // A sweep is about coverage, not beauty; a small budget keeps 361
+    // pipelines to a sane runtime.
+    params.fractal.iterations = 10;
+    params.march.max_steps = 96;
+    params
+}
+
+/// Fraction of pixels that differ appreciably between two frames.
+fn difference(a: &[u8], b: &[u8]) -> f32 {
+    let differing = a
+        .chunks_exact(4)
+        .zip(b.chunks_exact(4))
+        .filter(|(p, q)| (0..3).any(|i| (p[i] as i32 - q[i] as i32).abs() > 6))
+        .count();
+    differing as f32 / (W * H) as f32
+}
+
+async fn run(out_dir: Option<&str>, hybrid: bool) {
     if let Some(d) = out_dir {
         std::fs::create_dir_all(d).expect("cannot create output directory");
     }
@@ -98,19 +185,40 @@ async fn run(out_dir: Option<&str>) {
     // the latency the user actually feels.
     let mut build_ms: Vec<(f32, &str)> = Vec::new();
 
+    // The base fractal alone under each estimator, so a hybrid is always
+    // compared against a base drawn the same way it was.
+    let mut references: Vec<(DeMode, Vec<u8>)> = Vec::new();
+    if hybrid {
+        for mode in DeMode::ALL {
+            let params = scene(None, true, Some(mode));
+            let mut camera = Camera::default();
+            camera.frame(params.fractal.bounding_radius);
+            let (key, source) = params.shader();
+            pipeline.ensure(&device, key, &source);
+            pipeline.upload(
+                &queue,
+                &Uniforms::build(&camera, &params, [W as f32, H as f32], 0.0, !format.is_srgb()),
+            );
+            let pixels =
+                draw(&device, &queue, &view, &target, &readback, &mut pipeline, key).await;
+            if let Some(dir) = out_dir {
+                image::save_buffer(
+                    format!("{dir}/_base-{}.png", mode.label().replace(' ', "-")),
+                    &pixels,
+                    W,
+                    H,
+                    image::ExtendedColorType::Rgba8,
+                )
+                .ok();
+            }
+            references.push((mode, pixels));
+        }
+    }
+    let mut hybrid_tally = [0usize; 5];
+    let mut inert = Vec::new();
+
     for (index, f) in GENERATED.iter().enumerate() {
-        let mut params = SceneParams {
-            stack: FormulaStack {
-                slots: vec![FormulaSlot::new(FormulaKind::Generated(index))],
-                de_mode_override: None,
-            },
-            ..Default::default()
-        };
-        params.retune_for_stack();
-        // A sweep is about coverage, not beauty; a small budget keeps 361
-        // pipelines to a sane runtime.
-        params.fractal.iterations = 10;
-        params.march.max_steps = 96;
+        let params = scene(Some(index), hybrid, None);
 
         let mut camera = Camera::default();
         camera.frame(params.fractal.bounding_radius);
@@ -125,25 +233,116 @@ async fn run(out_dir: Option<&str>) {
         let built = scope.pop().await.is_none();
         build_ms.push((started.elapsed().as_secs_f32() * 1000.0, f.name));
 
-        let verdict = if !built {
-            Verdict::ShaderError
-        } else {
+        let pixels = if built {
             pipeline.upload(
                 &queue,
                 &Uniforms::build(&camera, &params, [W as f32, H as f32], 0.0, !format.is_srgb()),
             );
-            let pixels = draw(&device, &queue, &view, &target, &readback, &mut pipeline, key).await;
-            let verdict = classify(&pixels, out_dir, f.name);
-            if verdict == Verdict::Rendered {
-                sheet.push((f.name, pixels));
+            Some(draw(&device, &queue, &view, &target, &readback, &mut pipeline, key).await)
+        } else {
+            None
+        };
+
+        if hybrid {
+            let verdict = match &pixels {
+                None => Hybrid::ShaderError,
+                Some(p) => {
+                    // Compare against the base drawn under this stack's own
+                    // estimator, not a fixed one.
+                    let mode = params.stack.de_mode();
+                    let reference = references
+                        .iter()
+                        .find(|(m, _)| *m == mode)
+                        .map(|(_, r)| r.as_slice())
+                        .unwrap_or(&[]);
+                    let changed = difference(p, reference);
+                    let coverage = lit_fraction(p);
+                    if coverage < 0.002 {
+                        Hybrid::Erased
+                    } else if coverage > 0.98 {
+                        Hybrid::Flooded
+                    } else if changed < 0.005 {
+                        Hybrid::Inert
+                    } else {
+                        Hybrid::Reshaped
+                    }
+                }
+            };
+            hybrid_tally[verdict as usize] += 1;
+            if verdict == Hybrid::Inert {
+                inert.push(f.name);
             }
-            verdict
+            if let (Some(p), Some(dir)) = (&pixels, out_dir) {
+                image::save_buffer(
+                    format!("{dir}/{verdict:?}-{}.png", f.name),
+                    p,
+                    W,
+                    H,
+                    image::ExtendedColorType::Rgba8,
+                )
+                .ok();
+            }
+            if verdict == Hybrid::Reshaped && let Some(p) = pixels {
+                sheet.push((f.name, p));
+            }
+            continue;
+        }
+
+        let verdict = match pixels {
+            None => Verdict::ShaderError,
+            Some(p) => {
+                let verdict = classify(&p, out_dir, f.name);
+                if verdict == Verdict::Rendered {
+                    sheet.push((f.name, p));
+                }
+                verdict
+            }
         };
 
         tally[verdict as usize] += 1;
         if verdict != Verdict::Rendered {
             failures.push((f.name, verdict));
         }
+    }
+
+    if hybrid {
+        println!(
+            "\nstacked {} transpiled formulas onto a Mandelbulb at {W}x{H}",
+            GENERATED.len()
+        );
+        println!("  reshaped it   {}", hybrid_tally[Hybrid::Reshaped as usize]);
+        println!("  no effect     {}", hybrid_tally[Hybrid::Inert as usize]);
+        println!("  erased it     {}", hybrid_tally[Hybrid::Erased as usize]);
+        println!("  flooded frame {}", hybrid_tally[Hybrid::Flooded as usize]);
+        println!(
+            "  shader error  {}",
+            hybrid_tally[Hybrid::ShaderError as usize]
+        );
+        if !inert.is_empty() {
+            // A transform that does nothing is not automatically broken. Most
+            // of these are offsets whose recovered default is zero, so adding
+            // them is a no-op until the user moves a slider — that is correct
+            // behaviour. The rest are the interesting ones.
+            println!("\nno effect on the base fractal:");
+            for name in &inert {
+                let f = GENERATED.iter().find(|g| &g.name == name).unwrap();
+                let neutral = FormulaKind::find(name)
+                    .map(|k| k.defaults().iter().all(|v| *v == 0.0))
+                    .unwrap_or(false);
+                let why = if neutral {
+                    "every default is zero, so it is a no-op until edited"
+                } else if f.params.iter().any(|p| p.kind == ParamKind::Matrix33) {
+                    "rotation matrix defaults to identity — see the Euler-angle gap"
+                } else {
+                    "no obvious reason — worth a look"
+                };
+                println!("  {name:32} {why}");
+            }
+        }
+        if let Some(dir) = out_dir {
+            contact_sheet(&sheet, dir);
+        }
+        return;
     }
 
     println!("\nswept {} transpiled formulas at {W}x{H}", GENERATED.len());
@@ -208,23 +407,27 @@ fn contact_sheet(tiles: &[(&str, Vec<u8>)], dir: &str) {
     println!("\nwrote {path} ({cols}x{rows} tiles)");
 }
 
-/// Fraction of the frame that is not background, and whether it looks like a
-/// picture rather than a blank or a fill.
-fn classify(pixels: &[u8], out_dir: Option<&str>, name: &str) -> Verdict {
-    let total = (W * H) as usize;
-    // The top-left pixel is background by construction — the fractal is framed
-    // centred and never reaches the corner. Measuring against it rather than
-    // against a fixed threshold is what makes this independent of the
-    // background colour and of the sRGB encoding, which is subtle enough to
-    // have made an earlier version of this call every correct render "solid".
+/// Fraction of the frame that is not background.
+///
+/// The top-left pixel is background by construction — the fractal is framed
+/// centred and never reaches the corner. Measuring against it rather than
+/// against a fixed threshold is what makes this independent of the background
+/// colour and of the sRGB encoding, which is subtle enough to have made an
+/// earlier version of this call every correct render "solid".
+fn lit_fraction(pixels: &[u8]) -> f32 {
     let bg = &pixels[..3];
     let lit = pixels
         .chunks_exact(4)
-        .filter(|p| {
-            (0..3).any(|i| (p[i] as i32 - bg[i] as i32).abs() > 6)
-        })
+        .filter(|p| (0..3).any(|i| (p[i] as i32 - bg[i] as i32).abs() > 6))
         .count();
-    let coverage = lit as f32 / total as f32;
+    lit as f32 / (W * H) as f32
+}
+
+/// Whether a solo render looks like a picture rather than a blank or a fill.
+fn classify(pixels: &[u8], out_dir: Option<&str>, name: &str) -> Verdict {
+    let bg = &pixels[..3];
+    let lit = (lit_fraction(pixels) * (W * H) as f32) as usize;
+    let coverage = lit_fraction(pixels);
 
     // Fractal detail shows up as high-frequency variation across the surface.
     // A sphere shaded by a smooth lighting model has almost none, so comparing
