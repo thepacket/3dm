@@ -35,7 +35,9 @@ pub enum DeFunction {
     Delta,
     /// Delta DE with the linear closed form.
     DeltaLinear,
-    /// Needs `aux.pseudoKleinianDE` / extra parameters 3DM does not carry.
+    /// `max(rxy − auxDE, |rxy·z.z|/r) / DE`, where `rxy` is the radius in xy.
+    PseudoKleinian,
+    /// Needs parameters 3DM does not carry, such as the Jos-Kleinian tweaks.
     Unsupported,
 }
 
@@ -50,6 +52,7 @@ impl DeFunction {
             Self::None => "None",
             Self::Delta => "Delta",
             Self::DeltaLinear => "DeltaLinear",
+            Self::PseudoKleinian => "PseudoKleinian",
             Self::Unsupported => "Unsupported",
         }
     }
@@ -148,6 +151,7 @@ fn parse_one(src: &str) -> Option<(String, Meta)> {
             Some("analyticFunctionLinear") => DeFunction::Linear,
             Some("analyticFunctionIFS") => DeFunction::Ifs,
             Some("analyticFunctionCustomDE") => DeFunction::Custom,
+            Some("analyticFunctionPseudoKleinian") => DeFunction::PseudoKleinian,
             Some("analyticFunctionNone") => DeFunction::None,
             _ => DeFunction::Unsupported,
         },

@@ -42,7 +42,6 @@ const UNSUPPORTED: &[(&str, &str)] = &[
     ("__constant REAL *", "pointer into constant memory"),
     ("while (", "while loop"),
     ("goto ", "goto"),
-    ("aux->pseudoKleinianDE", "pseudo-Kleinian DE state"),
 ];
 
 pub fn translate(
@@ -237,6 +236,7 @@ fn rewrite_tokens(body: &str) -> String {
 
     // Aux state maps onto 3DM's running iteration state.
     for (from, to) in [
+        ("aux->pseudoKleinianDE", "(*aux).pseudo_kleinian_de"),
         ("aux->DE0", "(*aux).de0"),
         ("aux->DE", "(*aux).de"),
         ("aux->color", "(*aux).color"),

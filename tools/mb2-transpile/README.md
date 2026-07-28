@@ -93,7 +93,7 @@ cargo run --example mb2_audit -- --errors
 ```
 
 Parses *and* validates every emitted formula — going through `codegen`, so it
-is the same shader wgpu gets. Currently 414 of 414.
+is the same shader wgpu gets. Currently 425 of 425.
 
 ```bash
 cargo run --release --example mb2_sweep -- /tmp/sweep
@@ -102,7 +102,7 @@ cargo run --release --example mb2_sweep -- /tmp/sweep
 Builds a real wgpu pipeline per formula, renders it, and classifies the result
 as fractal detail / smooth blob / empty / shader error — then writes a contact
 sheet, because whether a shape is *right* is not something a number can tell
-you. Currently 346 render with detail, 38 as smooth blobs, 30 empty, and none
+you. Currently 357 render with detail, 38 as smooth blobs, 30 empty, and none
 fail to build.
 
 Of those 37 empties, 26 are `Transf*` formulas — transforms meant to be composed

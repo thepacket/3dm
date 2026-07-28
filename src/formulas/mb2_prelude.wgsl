@@ -29,6 +29,9 @@ struct Aux {
     temp1000: f32,
     color_hybrid: f32,
     r_dz: f32,
+    // Carried by the pseudo-Kleinian formulas, which fold it as they go and
+    // whose distance estimate then subtracts it from the xy radius.
+    pseudo_kleinian_de: f32,
     old_r: f32,
     last_z: vec4<f32>,
 };

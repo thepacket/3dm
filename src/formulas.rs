@@ -79,7 +79,9 @@ pub enum DeFunction {
     Delta,
     /// Delta DE with the linear closed form.
     DeltaLinear,
-    /// Needs state 3DM's `Aux` does not carry, such as `pseudoKleinianDE`.
+    /// `max(rxy − auxDE, |rxy·z.z|/r) / de`, where `rxy` is the radius in xy.
+    PseudoKleinian,
+    /// Needs parameters 3DM does not carry, such as the Jos-Kleinian tweaks.
     Unsupported,
 }
 
@@ -191,14 +193,18 @@ pub enum DeMode {
     Delta,
     /// Delta DE with the linear closed form.
     DeltaLinear,
+    /// The pseudo-Kleinian form, which measures against a folded radius the
+    /// formula carries in `aux.pseudo_kleinian_de`.
+    PseudoKleinian,
 }
 
 impl DeMode {
-    pub const ALL: [Self; 6] = [
+    pub const ALL: [Self; 7] = [
         Self::Log,
         Self::Linear,
         Self::Ifs,
         Self::Custom,
+        Self::PseudoKleinian,
         Self::Delta,
         Self::DeltaLinear,
     ];
@@ -216,6 +222,7 @@ impl DeMode {
             Self::Custom => "formula's own",
             Self::Delta => "delta (measured)",
             Self::DeltaLinear => "delta, linear",
+            Self::PseudoKleinian => "pseudo-Kleinian",
         }
     }
 
@@ -229,9 +236,10 @@ impl DeMode {
             Self::Linear => 1,
             Self::Ifs => 2,
             Self::Custom => 3,
+            Self::PseudoKleinian => 4,
             // A formula with no analytic derivative makes every other estimator
             // meaningless, because nothing in the stack is maintaining `de`.
-            Self::Delta | Self::DeltaLinear => 4,
+            Self::Delta | Self::DeltaLinear => 5,
         }
     }
 }
@@ -713,6 +721,7 @@ impl FormulaStack {
                 DeFunction::Custom => Some(DeMode::Custom),
                 DeFunction::Delta => Some(DeMode::Delta),
                 DeFunction::DeltaLinear => Some(DeMode::DeltaLinear),
+                DeFunction::PseudoKleinian => Some(DeMode::PseudoKleinian),
                 // Neither constrains the choice: an isometry because it leaves
                 // `de` alone, and a delta-DE formula because no closed form we
                 // have is right for it anyway.

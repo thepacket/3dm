@@ -104,6 +104,12 @@ pub fn generate(stack: &FormulaStack) -> String {
         DeMode::Linear => "safe_r / de",
         DeMode::Ifs => "(safe_r - 2.0) / de",
         DeMode::Custom => "it.dist",
+        // `rxy` is the radius in the xy plane; the formula folds a reference
+        // radius into `pseudo_kleinian_de` as it iterates.
+        DeMode::PseudoKleinian => {
+            "max(length(it.z.xy) - it.pseudo_kleinian_de, \
+             abs(length(it.z.xy) * it.z.z) / safe_r) / de"
+        }
         // Handled by its own body below.
         DeMode::Delta | DeMode::DeltaLinear => "0.0",
     };
@@ -183,6 +189,7 @@ struct Iter {{
     dist: f32,
     trap: f32,
     n: i32,
+    pseudo_kleinian_de: f32,
 }};
 
 fn dm3_iterate(pos: vec3<f32>, max_n: i32, bail: bool) -> Iter {{
@@ -223,6 +230,7 @@ fn dm3_iterate(pos: vec3<f32>, max_n: i32, bail: bool) -> Iter {{
     aux.last_z = z;
     aux.r_dz = 1.0;
     aux.old_r = 0.0;
+    aux.pseudo_kleinian_de = 1.0;
 
     loop {{
         if (i >= max_n) {{ break; }}
@@ -245,6 +253,7 @@ fn dm3_iterate(pos: vec3<f32>, max_n: i32, bail: bool) -> Iter {{
     out.dist = aux.dist;
     out.trap = trap;
     out.n = i;
+    out.pseudo_kleinian_de = aux.pseudo_kleinian_de;
     return out;
 }}
 
