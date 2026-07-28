@@ -1845,6 +1845,79 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 "####,
     },
     GeneratedFormula {
+        name: "AboxModKali",
+        source: "abox_mod_kali.cl",
+        param_floats: 25,
+        de_function: DeFunction::Linear,
+        add_c: true,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "mandelbox.mainRotationEnabled", kind: ParamKind::Int, offset: 0, default: &[0.0] },
+            GeneratedParam { path: "mandelbox.rotationMain", kind: ParamKind::Float3, offset: 1, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 5, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 6, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterations", kind: ParamKind::Int, offset: 7, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 8, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.additionConstant0555", kind: ParamKind::Float4, offset: 12, default: &[0.5, 0.5, 0.5, 0.0] },
+            GeneratedParam { path: "transformCommon.minR06", kind: ParamKind::Float, offset: 16, default: &[0.6] },
+            GeneratedParam { path: "transformCommon.scale015", kind: ParamKind::Float, offset: 17, default: &[1.5] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 18, default: &[0.0] },
+            GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 19, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 20, default: &[250.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 21, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+        ],
+        wgsl: r####"
+	
+	if ((__MB2P0__ != 0))
+	{
+		var tempVC: vec4<f32> = vec4<f32>(__MB2P1__.x, __MB2P1__.y,
+			__MB2P1__.z, 0.0); 
+		if ((__MB2P5__ != 0))
+		{
+			if ((*aux).i >= __MB2P6__
+					&& (*aux).i < __MB2P7__
+					&& (__MB2P7__ - __MB2P6__
+							!= 0))
+			{
+				var iterationRange: f32 =
+					__MB2P7__ - __MB2P6__;
+				var currentIteration: f32 = ((*aux).i - __MB2P6__);
+				tempVC += __MB2P8__ * currentIteration / iterationRange;
+			}
+
+			if ((*aux).i >= __MB2P7__)
+			{
+				tempVC += tempVC + __MB2P8__;
+			}
+		}
+
+		tempVC *= M_PI_180_F;
+
+		if (tempVC.x != 0.0) { z = RotateAroundVectorByAngle4(z, vec3<f32>(1.0, 0.0, 0.0), tempVC.x); }
+		if (tempVC.y != 0.0) { z = RotateAroundVectorByAngle4(z, vec3<f32>(0.0, 1.0, 0.0), tempVC.y); }
+		if (tempVC.z != 0.0) { z = RotateAroundVectorByAngle4(z, vec3<f32>(0.0, 0.0, 1.0), tempVC.z); }
+	}
+
+	z = __MB2P12__ - abs(z);
+	var rr: f32 = dot(z, z);
+	var MinR: f32 = __MB2P16__;
+	var dividend: f32 =select(min(rr, 1.0), MinR, rr < MinR);
+	var m: f32 = __MB2P17__ / dividend;
+	z = z * m;
+	(*aux).de = (*aux).de * abs(m) + 1.0;
+
+	
+	if ((__MB2P18__ != 0) && (*aux).i >= __MB2P19__
+			&& (*aux).i < __MB2P20__)
+	{
+		(*aux).color += __MB2P21__.x * dividend;
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
         name: "AboxModKaliEiffie",
         source: "abox_mod_kali_eiffie.cl",
         param_floats: 48,
@@ -4934,6 +5007,280 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 "####,
     },
     GeneratedFormula {
+        name: "BoxFold4dBulbPow2",
+        source: "box_fold4d_bulb_pow2.cl",
+        param_floats: 68,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "Cpara.enabledParabFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
+            GeneratedParam { path: "Cpara.parabScale", kind: ParamKind::Float, offset: 1, default: &[0.0] },
+            GeneratedParam { path: "Cpara.parabOffset0", kind: ParamKind::Float, offset: 2, default: &[0.0] },
+            GeneratedParam { path: "Cpara.parabSlope", kind: ParamKind::Float, offset: 3, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset0", kind: ParamKind::Float, offset: 5, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleA1", kind: ParamKind::Float, offset: 6, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.scaleC1", kind: ParamKind::Float, offset: 7, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsB", kind: ParamKind::Int, offset: 8, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsB", kind: ParamKind::Int, offset: 9, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offset1111", kind: ParamKind::Float4, offset: 10, default: &[1.0, 1.0, 1.0, 1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsS", kind: ParamKind::Int, offset: 14, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsS", kind: ParamKind::Int, offset: 15, default: &[250.0] },
+            GeneratedParam { path: "mandelboxVary4D.rPower", kind: ParamKind::Float, offset: 16, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset0000", kind: ParamKind::Float4, offset: 17, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.minR2p25", kind: ParamKind::Float, offset: 21, default: &[0.25] },
+            GeneratedParam { path: "transformCommon.maxMinR2factor", kind: ParamKind::Float, offset: 22, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.maxR2d1", kind: ParamKind::Float, offset: 23, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 24, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsC", kind: ParamKind::Int, offset: 25, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scale", kind: ParamKind::Float, offset: 26, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledSFalse", kind: ParamKind::Int, offset: 27, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsX", kind: ParamKind::Int, offset: 28, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsX", kind: ParamKind::Int, offset: 29, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scaleVary0", kind: ParamKind::Float, offset: 30, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleB1", kind: ParamKind::Float, offset: 31, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledMFalse", kind: ParamKind::Int, offset: 32, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledRFalse", kind: ParamKind::Int, offset: 33, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 34, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 35, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotation44a", kind: ParamKind::Float3, offset: 36, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation44b", kind: ParamKind::Float3, offset: 40, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.additionConstant0000", kind: ParamKind::Float4, offset: 44, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 48, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsA", kind: ParamKind::Int, offset: 49, default: &[250.0] },
+            GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 50, default: &[1.0] },
+            GeneratedParam { path: "foldingIntPow.zFactor", kind: ParamKind::Float, offset: 51, default: &[5.0] },
+            GeneratedParam { path: "analyticDE.offset2", kind: ParamKind::Float, offset: 52, default: &[1.0] },
+            GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 53, default: &[1.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 54, default: &[0.0] },
+            GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 55, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 56, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 57, default: &[0.0] },
+            GeneratedParam { path: "mandelbox.color.factor", kind: ParamKind::Float3, offset: 58, default: &[0.03, 0.05, 0.07, 0.0] },
+            GeneratedParam { path: "mandelbox.color.factor4D", kind: ParamKind::Float4, offset: 62, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "mandelbox.color.factorSp1", kind: ParamKind::Float, offset: 66, default: &[0.2] },
+            GeneratedParam { path: "mandelbox.color.factorSp2", kind: ParamKind::Float, offset: 67, default: &[0.2] },
+        ],
+        derivations: &[
+            Derivation { target: 22, op: DeriveOp::Ratio, sources: &[23, 21] },
+        ],
+        wgsl: r####"
+	var colorAdd: f32 = 0.0;
+	var rrCol: f32 = 0.0;
+	var zCol: vec4<f32> = z;
+	var oldZ: vec4<f32> = z;
+
+	
+	var paraAddP0: f32 = 0.0;
+	if ((__MB2P0__ != 0))
+	{
+		var parabScale: f32 = 0.0;
+		if (__MB2P1__ != 0.0)
+			{ parabScale = (*aux).i * (*aux).i * 0.001 * __MB2P1__; }
+		paraAddP0 = __MB2P2__ + ((*aux).i * __MB2P3__) + (parabScale);
+		z.w += paraAddP0;
+	}
+
+	
+	var sinAdd: f32 = 0.0;
+	if ((__MB2P4__ != 0))
+	{
+		sinAdd =
+			sin(((*aux).i + __MB2P5__) / __MB2P6__)
+			* __MB2P7__;
+		z.w += sinAdd;
+	}
+
+	if ((*aux).i >= __MB2P8__
+			&& (*aux).i < __MB2P9__)
+	{
+		oldZ = z;
+		z.x = abs(z.x + __MB2P10__.x)
+					- abs(z.x - __MB2P10__.x) - z.x;
+		z.y = abs(z.y + __MB2P10__.y)
+					- abs(z.y - __MB2P10__.y) - z.y;
+		z.z = abs(z.z + __MB2P10__.z)
+					- abs(z.z - __MB2P10__.z) - z.z;
+		z.w = abs(z.w + __MB2P10__.w)
+					- abs(z.w - __MB2P10__.w) - z.w;
+		zCol = z;
+	}
+
+	
+	if ((*aux).i >= __MB2P14__
+			&& (*aux).i < __MB2P15__)
+	{
+		var rr: f32 = dot(z, z);
+
+		
+		if (__MB2P16__ != 1.0) { rr = pow(rr, __MB2P16__); }
+		rrCol = rr;
+		
+		z += __MB2P17__;
+		if (rr < __MB2P21__)
+		{
+			z *= __MB2P22__;
+			(*aux).de *= __MB2P22__;
+		}
+		else if (rr < __MB2P23__)
+		{
+			z *= __MB2P23__ / rr;
+			(*aux).de *= __MB2P23__ / rr;
+		}
+
+		z -= __MB2P17__;
+	}
+
+	
+	var useScale: f32 = 1.0;
+	if ((*aux).i >= __MB2P24__
+			&& (*aux).i < __MB2P25__)
+	{
+
+		useScale = (*aux).actual_scale_a + __MB2P26__;
+
+		z *= useScale;
+		(*aux).de = (*aux).de * abs(useScale);
+
+		if ((__MB2P27__ != 0)
+				&& (*aux).i >= __MB2P28__
+				&& (*aux).i < __MB2P29__)
+		{
+			
+			var vary: f32 = __MB2P30__
+									* (abs((*aux).actual_scale_a) - __MB2P31__);
+			if ((__MB2P32__ != 0))
+				{ (*aux).actual_scale_a = -vary; }
+			else
+				{ (*aux).actual_scale_a = (*aux).actual_scale_a - vary; }
+		}
+	}
+
+	
+	if ((__MB2P33__ != 0)
+			&& (*aux).i >= __MB2P34__
+			&& (*aux).i < __MB2P35__)
+	{
+		var tp: vec4<f32>;
+		if (__MB2P36__.x != 0)
+		{
+			tp = z;
+			var alpha: f32 = __MB2P36__.x * M_PI_180_F;
+			z.x = tp.x * cos(alpha) + tp.y * sin(alpha);
+			z.y = tp.x * -sin(alpha) + tp.y * cos(alpha);
+		}
+		if (__MB2P36__.y != 0)
+		{
+			tp = z;
+			var beta: f32 = __MB2P36__.y * M_PI_180_F;
+			z.y = tp.y * cos(beta) + tp.z * sin(beta);
+			z.z = tp.y * -sin(beta) + tp.z * cos(beta);
+		}
+		if (__MB2P36__.z != 0)
+		{
+			tp = z;
+			var gamma: f32 = __MB2P36__.z * M_PI_180_F;
+			z.x = tp.x * cos(gamma) + tp.z * sin(gamma);
+			z.z = tp.x * -sin(gamma) + tp.z * cos(gamma);
+		}
+		if (__MB2P40__.x != 0)
+		{
+			tp = z;
+			var delta: f32 = __MB2P40__.x * M_PI_180_F;
+			z.x = tp.x * cos(delta) + tp.w * sin(delta);
+			z.w = tp.x * -sin(delta) + tp.w * cos(delta);
+		}
+		if (__MB2P40__.y != 0)
+		{
+			tp = z;
+			var epsilon: f32 = __MB2P40__.y * M_PI_180_F;
+			z.y = tp.y * cos(epsilon) + tp.w * sin(epsilon);
+			z.w = tp.y * -sin(epsilon) + tp.w * cos(epsilon);
+		}
+		if (__MB2P40__.z != 0)
+		{
+			tp = z;
+			var zeta: f32 = __MB2P40__.z * M_PI_180_F;
+			z.z = tp.z * cos(zeta) + tp.w * sin(zeta);
+			z.w = tp.z * -sin(zeta) + tp.w * cos(zeta);
+		}
+	}
+	
+	z += __MB2P44__;
+
+	
+	if ((*aux).i >= __MB2P48__
+			&& (*aux).i < __MB2P49__)
+	{
+		(*aux).r = length(z);
+		(*aux).de = (*aux).r * (*aux).de * 16.0 * __MB2P50__
+								* sqrt(__MB2P51__ * __MB2P51__ + 2.0
+															+ __MB2P52__)
+								/ SQRT_3_F
+							+ __MB2P53__;
+
+		z = z * 2.0;
+		var x2: f32 = z.x * z.x;
+		var y2: f32 = z.y * z.y;
+		var z2: f32 = z.z * z.z;
+		var temp: f32 = 1.0 - z2 / (x2 + y2);
+		var zTemp: vec4<f32>;
+		zTemp.x = (x2 - y2) * temp;
+		zTemp.y = 2.0 * z.x * z.y * temp;
+		zTemp.z = -2.0 * z.z * sqrt(x2 + y2);
+		zTemp.w = z.w;
+		z = zTemp;
+		z.z *= __MB2P51__;
+	}
+
+	
+	if ((__MB2P54__ != 0) && (*aux).i >= __MB2P55__
+			&& (*aux).i < __MB2P56__)
+	{
+		if ((__MB2P57__ != 0))
+		{
+			if (zCol.x != oldZ.x)
+				{ colorAdd +=
+					__MB2P58__.x * (abs(zCol.x) - __MB2P62__.x); }
+			if (zCol.y != oldZ.y)
+				{ colorAdd +=
+					__MB2P58__.y * (abs(zCol.y) - __MB2P62__.y); }
+			if (zCol.z != oldZ.z)
+				{ colorAdd +=
+					__MB2P58__.z * (abs(zCol.z) - __MB2P62__.z); }
+			if (zCol.w != oldZ.w)
+				{ colorAdd +=
+					__MB2P58__.z * (abs(zCol.w) - __MB2P62__.w); }
+			if (rrCol < __MB2P23__)
+			{
+				if (rrCol < __MB2P21__)
+					{ colorAdd +=
+						__MB2P66__ * (__MB2P21__ - rrCol)
+						+ __MB2P67__
+								* (__MB2P23__ - __MB2P21__); }
+				else
+					{ colorAdd +=
+						__MB2P67__ * (__MB2P23__ - rrCol); }
+			}
+		}
+		else
+		{
+			if (zCol.x != oldZ.x) { colorAdd += __MB2P62__.x; }
+			if (zCol.y != oldZ.y) { colorAdd += __MB2P62__.y; }
+			if (zCol.z != oldZ.z) { colorAdd += __MB2P62__.z; }
+			if (zCol.w != oldZ.w) { colorAdd += __MB2P62__.w; }
+			if (rrCol < __MB2P21__)
+				{ colorAdd += __MB2P66__; }
+			else if (rrCol < __MB2P23__)
+				{ colorAdd += __MB2P67__; }
+		}
+		(*aux).color += colorAdd;
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
         name: "BoxFoldBulbMenger",
         source: "box_fold_bulb_menger.cl",
         param_floats: 91,
@@ -6406,6 +6753,1484 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 "####,
     },
     GeneratedFormula {
+        name: "DIFSBoxDiagonalV1",
+        source: "difs_box_diagonal_v1.cl",
+        param_floats: 78,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.additionConstantA111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsCx", kind: ParamKind::Int, offset: 4, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsCx", kind: ParamKind::Int, offset: 5, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.startIterationsX", kind: ParamKind::Int, offset: 6, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsX", kind: ParamKind::Int, offset: 7, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.startIterationsY", kind: ParamKind::Int, offset: 8, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsY", kind: ParamKind::Int, offset: 9, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 10, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsA", kind: ParamKind::Int, offset: 11, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 12, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 13, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsC", kind: ParamKind::Int, offset: 14, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetC0", kind: ParamKind::Float, offset: 15, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 16, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 17, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsD", kind: ParamKind::Int, offset: 18, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetD0", kind: ParamKind::Float, offset: 19, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsE", kind: ParamKind::Int, offset: 20, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsE", kind: ParamKind::Int, offset: 21, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetE0", kind: ParamKind::Float, offset: 22, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsF", kind: ParamKind::Int, offset: 23, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsF", kind: ParamKind::Int, offset: 24, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetF0", kind: ParamKind::Float, offset: 25, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsS", kind: ParamKind::Int, offset: 26, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsS", kind: ParamKind::Int, offset: 27, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scale2", kind: ParamKind::Float, offset: 28, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledKFalse", kind: ParamKind::Int, offset: 29, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsK", kind: ParamKind::Int, offset: 30, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsK", kind: ParamKind::Int, offset: 31, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scaleVary0", kind: ParamKind::Float, offset: 32, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleC1", kind: ParamKind::Float, offset: 33, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset001", kind: ParamKind::Float4, offset: 34, default: &[0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledRFalse", kind: ParamKind::Int, offset: 38, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 39, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 40, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 41, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledYFalse", kind: ParamKind::Int, offset: 53, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 54, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterations", kind: ParamKind::Int, offset: 55, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.additionConstant111", kind: ParamKind::Float4, offset: 56, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledTFalse", kind: ParamKind::Int, offset: 60, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsT", kind: ParamKind::Int, offset: 61, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsT", kind: ParamKind::Int, offset: 62, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scale0", kind: ParamKind::Float, offset: 63, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledMFalse", kind: ParamKind::Int, offset: 64, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsM", kind: ParamKind::Int, offset: 65, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsM", kind: ParamKind::Int, offset: 66, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scaleA0", kind: ParamKind::Float, offset: 67, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabled", kind: ParamKind::Int, offset: 68, default: &[1.0] },
+            GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 69, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 70, default: &[250.0] },
+            GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 71, default: &[0.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 72, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 76, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledA", kind: ParamKind::Int, offset: 77, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 78, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 41, op: DeriveOp::Rotation2, sources: &[78] },
+        ],
+        wgsl: r####"
+	var colorAdd: f32 = 0.0;
+	var oldZ: vec4<f32> = z;
+	var boxFold: vec4<f32> = __MB2P0__;
+
+	
+	if ((*aux).i >= __MB2P4__
+			&& (*aux).i < __MB2P5__)
+		{ if (z.x > z.y)
+		{
+			var temp: f32 = z.x;
+			z.x = z.y;
+			z.y = temp;
+		} }
+
+	
+	if ((*aux).i >= __MB2P6__
+			&& (*aux).i < __MB2P7__)
+		{ z.x = abs(z.x); }
+	if ((*aux).i >= __MB2P8__
+			&& (*aux).i < __MB2P9__)
+		{ z.y = abs(z.y); }
+
+	if ((*aux).i >= __MB2P10__
+			&& (*aux).i < __MB2P11__)
+	{
+		z.x -= boxFold.x;
+		z.y -= boxFold.y;
+	}
+
+	
+	if ((__MB2P12__ != 0)
+			&& (*aux).i >= __MB2P13__
+			&& (*aux).i < __MB2P14__)
+	{
+		var xOffset: f32 = __MB2P15__;
+		if (z.x < xOffset) { z.x = abs(z.x - xOffset) + xOffset; }
+	}
+	if ((__MB2P16__ != 0)
+			&& (*aux).i >= __MB2P17__
+			&& (*aux).i < __MB2P18__)
+	{
+		var yOffset: f32 = __MB2P19__;
+		if (z.y < yOffset) { z.y = abs(z.y - yOffset) + yOffset; }
+	}
+
+	
+	if ((*aux).i >= __MB2P20__
+			&& (*aux).i < __MB2P21__)
+		{ z.x -= __MB2P22__; }
+
+	if ((*aux).i >= __MB2P23__
+			&& (*aux).i < __MB2P24__)
+		{ z.y -= __MB2P25__; }
+
+	
+	var useScale: f32 = 1.0;
+	if ((*aux).i >= __MB2P26__
+			&& (*aux).i < __MB2P27__)
+	{
+		useScale = (*aux).actual_scale_a + __MB2P28__;
+		z *= useScale;
+		(*aux).de = (*aux).de * abs(useScale) + 1.0;
+
+		if ((__MB2P29__ != 0)
+				&& (*aux).i >= __MB2P30__
+				&& (*aux).i < __MB2P31__)
+		{
+			
+			var vary: f32 = __MB2P32__
+									* (abs((*aux).actual_scale_a) - __MB2P33__);
+			(*aux).actual_scale_a -= vary;
+		}
+	}
+
+	
+	if ((*aux).i >= __MB2P20__
+			&& (*aux).i < __MB2P21__)
+		{ z.x += __MB2P22__; }
+
+	if ((*aux).i >= __MB2P23__
+			&& (*aux).i < __MB2P24__)
+		{ z.y += __MB2P25__; }
+
+	
+	z += __MB2P34__;
+
+	
+	if ((__MB2P38__ != 0)
+			&& (*aux).i >= __MB2P39__
+			&& (*aux).i < __MB2P40__)
+	{
+		z = mb2_mat_mul(__MB2P41__, z);
+	}
+	var colorDist: f32 = (*aux).dist;
+	var zc: vec4<f32> = z;
+	if ((__MB2P53__ != 0)) { zc = oldZ; }
+	
+	if ((*aux).i >= __MB2P54__
+			&& (*aux).i < __MB2P55__)
+	{
+		var boxSize: vec4<f32> = __MB2P56__;
+		
+		if ((__MB2P60__ != 0)
+				&& (*aux).i >= __MB2P61__
+				&& (*aux).i < __MB2P62__)
+		{
+			var absZ: f32 = abs(z.z);
+			absZ *= absZ;
+			boxSize.x += __MB2P63__ * absZ;
+			boxSize.y += __MB2P63__ * absZ;
+		}
+		
+		if ((__MB2P64__ != 0)
+				&& (*aux).i >= __MB2P65__
+				&& (*aux).i < __MB2P66__)
+		{
+			boxSize.x -= __MB2P67__ * zc.z;
+			boxSize.y -= __MB2P67__ * zc.z;
+		}
+		zc = abs(zc) - boxSize;
+		zc.x = max(zc.x, 0.0);
+		zc.y = max(zc.y, 0.0);
+		zc.z = max(zc.z, 0.0);
+		var zcd: f32 = length(zc);
+
+		(*aux).dist = min((*aux).dist, zcd / (*aux).de);
+	}
+
+	
+	if ((__MB2P68__ != 0) && colorDist != (*aux).dist
+			&& (*aux).i >= __MB2P69__
+			&& (*aux).i < __MB2P70__)
+	{
+		colorAdd += (*aux).i * __MB2P71__ + __MB2P72__.w;
+
+		if ((__MB2P76__ != 0))
+		{
+			zc = abs(zc);
+			colorAdd += __MB2P72__.x * zc.x * zc.y;
+			colorAdd += __MB2P72__.y * max(zc.x, zc.y);
+		}
+
+		if ((__MB2P77__ != 0))
+		{
+			(*aux).color = colorAdd;
+		}
+		else
+		{
+			(*aux).color += colorAdd;
+		}
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "DIFSBoxDiagonalV3",
+        source: "difs_box_diagonal_v3.cl",
+        param_floats: 109,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 1, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsA", kind: ParamKind::Int, offset: 2, default: &[250.0] },
+            GeneratedParam { path: "surfBox.offset1A111", kind: ParamKind::Float4, offset: 3, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 7, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsX", kind: ParamKind::Int, offset: 8, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsX", kind: ParamKind::Int, offset: 9, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAy", kind: ParamKind::Int, offset: 10, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsY", kind: ParamKind::Int, offset: 11, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsY", kind: ParamKind::Int, offset: 12, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAzFalse", kind: ParamKind::Int, offset: 13, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsZ", kind: ParamKind::Int, offset: 14, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsZ", kind: ParamKind::Int, offset: 15, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 16, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 17, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsP", kind: ParamKind::Int, offset: 18, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.int6", kind: ParamKind::Int, offset: 19, default: &[6.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 20, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsCx", kind: ParamKind::Int, offset: 21, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsCx", kind: ParamKind::Int, offset: 22, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBFalse", kind: ParamKind::Int, offset: 23, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsB", kind: ParamKind::Int, offset: 24, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsB", kind: ParamKind::Int, offset: 25, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.additionConstantA111", kind: ParamKind::Float4, offset: 26, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledIFalse", kind: ParamKind::Int, offset: 30, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsI", kind: ParamKind::Int, offset: 31, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsI", kind: ParamKind::Int, offset: 32, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetA000", kind: ParamKind::Float4, offset: 33, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 37, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 38, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsC", kind: ParamKind::Int, offset: 39, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetC0", kind: ParamKind::Float, offset: 40, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 41, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 42, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsD", kind: ParamKind::Int, offset: 43, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetD0", kind: ParamKind::Float, offset: 44, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsE", kind: ParamKind::Int, offset: 45, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsE", kind: ParamKind::Int, offset: 46, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetE0", kind: ParamKind::Float, offset: 47, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsF", kind: ParamKind::Int, offset: 48, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsF", kind: ParamKind::Int, offset: 49, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetF0", kind: ParamKind::Float, offset: 50, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCyFalse", kind: ParamKind::Int, offset: 51, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsCy", kind: ParamKind::Int, offset: 52, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsCy", kind: ParamKind::Int, offset: 53, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.startIterationsS", kind: ParamKind::Int, offset: 54, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsS", kind: ParamKind::Int, offset: 55, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scale2", kind: ParamKind::Float, offset: 56, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledKFalse", kind: ParamKind::Int, offset: 57, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsK", kind: ParamKind::Int, offset: 58, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsK", kind: ParamKind::Int, offset: 59, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scaleVary0", kind: ParamKind::Float, offset: 60, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleC1", kind: ParamKind::Float, offset: 61, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsH", kind: ParamKind::Int, offset: 62, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsH", kind: ParamKind::Int, offset: 63, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offset001", kind: ParamKind::Float4, offset: 64, default: &[0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledRFalse", kind: ParamKind::Int, offset: 68, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 69, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 70, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 71, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledYFalse", kind: ParamKind::Int, offset: 83, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 84, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterations", kind: ParamKind::Int, offset: 85, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.additionConstant111", kind: ParamKind::Float4, offset: 86, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledTFalse", kind: ParamKind::Int, offset: 90, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsT", kind: ParamKind::Int, offset: 91, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsT", kind: ParamKind::Int, offset: 92, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scale0", kind: ParamKind::Float, offset: 93, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledMFalse", kind: ParamKind::Int, offset: 94, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsM", kind: ParamKind::Int, offset: 95, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsM", kind: ParamKind::Int, offset: 96, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scaleA0", kind: ParamKind::Float, offset: 97, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledJFalse", kind: ParamKind::Int, offset: 98, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabled", kind: ParamKind::Int, offset: 99, default: &[1.0] },
+            GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 100, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 101, default: &[250.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 102, default: &[0.0] },
+            GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 103, default: &[0.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 104, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledA", kind: ParamKind::Int, offset: 108, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 109, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 71, op: DeriveOp::Rotation2, sources: &[109] },
+        ],
+        wgsl: r####"
+	var colorAdd: f32 = 0.0;
+	var oldZ: vec4<f32> = z;
+	if ((__MB2P0__ != 0)
+			&& (*aux).i >= __MB2P1__
+			&& (*aux).i < __MB2P2__)
+	{
+		z -= __MB2P3__;
+	}
+
+	
+	if ((__MB2P7__ != 0)
+			&& (*aux).i >= __MB2P8__
+			&& (*aux).i < __MB2P9__)
+		{ z.x = abs(z.x); }
+	if ((__MB2P10__ != 0)
+			&& (*aux).i >= __MB2P11__
+			&& (*aux).i < __MB2P12__)
+		{ z.y = abs(z.y); }
+	if ((__MB2P13__ != 0)
+			&& (*aux).i >= __MB2P14__
+			&& (*aux).i < __MB2P15__)
+		{ z.z = abs(z.z); }
+
+	
+	if ((__MB2P16__ != 0)
+			&& (*aux).i >= __MB2P17__
+			&& (*aux).i < __MB2P18__)
+	{
+		z.x = abs(z.x);
+		var psi: f32 = M_PI_F / __MB2P19__;
+		psi = abs(fmod(atan2(z.y, z.x) + psi, 2.0 * psi) - psi);
+		var len: f32 = sqrt(z.x * z.x + z.y * z.y);
+		z.x = cos(psi) * len;
+		z.y = sin(psi) * len;
+	}
+
+	if ((__MB2P20__ != 0)
+			&& (*aux).i >= __MB2P21__
+			&& (*aux).i < __MB2P22__)
+		{ if (z.y > z.x)
+		{
+			var temp: f32 = z.x;
+			z.x = z.y;
+			z.y = temp;
+		} }
+
+	if ((__MB2P23__ != 0)
+			&& (*aux).i >= __MB2P24__
+			&& (*aux).i < __MB2P25__)
+	{
+		z -= __MB2P26__;
+	}
+	if ((__MB2P30__ != 0)
+			&& (*aux).i >= __MB2P31__
+			&& (*aux).i < __MB2P32__)
+	{
+		z = abs(z + __MB2P33__)
+				- abs(z - __MB2P33__) - z;
+	}
+
+	
+	if ((__MB2P37__ != 0)
+			&& (*aux).i >= __MB2P38__
+			&& (*aux).i < __MB2P39__)
+	{
+		var xOffset: f32 = __MB2P40__;
+		if (z.x < xOffset) { z.x = abs(z.x - xOffset) + xOffset; }
+	}
+	if ((__MB2P41__ != 0)
+			&& (*aux).i >= __MB2P42__
+			&& (*aux).i < __MB2P43__)
+	{
+		var yOffset: f32 = __MB2P44__;
+		if (z.y < yOffset) { z.y = abs(z.y - yOffset) + yOffset; }
+	}
+
+	
+	if ((*aux).i >= __MB2P45__
+			&& (*aux).i < __MB2P46__)
+		{ z.x -= __MB2P47__; }
+
+	if ((*aux).i >= __MB2P48__
+			&& (*aux).i < __MB2P49__)
+		{ z.y -= __MB2P50__; }
+
+	
+	if ((__MB2P51__ != 0)
+			&& (*aux).i >= __MB2P52__
+			&& (*aux).i < __MB2P53__)
+		{ if (z.y > z.x)
+		{
+			var temp: f32 = z.x;
+			z.x = z.y;
+			z.y = temp;
+		} }
+
+	
+	var useScale: f32 = 1.0;
+	if ((*aux).i >= __MB2P54__
+			&& (*aux).i < __MB2P55__)
+	{
+		useScale = (*aux).actual_scale_a + __MB2P56__;
+		z *= useScale;
+		(*aux).de = (*aux).de * abs(useScale) + 1.0;
+		
+		if ((__MB2P57__ != 0)
+				&& (*aux).i >= __MB2P58__
+				&& (*aux).i < __MB2P59__)
+		{
+			
+			var vary: f32 = __MB2P60__
+									* (abs((*aux).actual_scale_a) - __MB2P61__);
+			(*aux).actual_scale_a -= vary;
+		}
+	}
+
+	
+	if ((*aux).i >= __MB2P45__
+			&& (*aux).i < __MB2P46__)
+		{ z.x += __MB2P47__; }
+
+	if ((*aux).i >= __MB2P48__
+			&& (*aux).i < __MB2P49__)
+		{ z.y += __MB2P50__; }
+
+	if ((*aux).i >= __MB2P62__
+			&& (*aux).i < __MB2P63__)
+		{ z += __MB2P64__; }
+
+	
+	if ((__MB2P68__ != 0)
+			&& (*aux).i >= __MB2P69__
+			&& (*aux).i < __MB2P70__)
+	{
+		z = mb2_mat_mul(__MB2P71__, z);
+	}
+	var colorDist: f32 = (*aux).dist;
+	var zc: vec4<f32> = z;
+	if ((__MB2P83__ != 0)) { zc = oldZ; }
+	
+	if ((*aux).i >= __MB2P84__
+			&& (*aux).i < __MB2P85__)
+	{
+		var boxSize: vec4<f32> = __MB2P86__;
+		
+		if ((__MB2P90__ != 0)
+				&& (*aux).i >= __MB2P91__
+				&& (*aux).i < __MB2P92__)
+		{
+			var absZ: f32 = abs(z.z);
+			absZ *= absZ;
+			boxSize.x += __MB2P93__ * absZ;
+			boxSize.y += __MB2P93__ * absZ;
+		}
+		
+		if ((__MB2P94__ != 0)
+				&& (*aux).i >= __MB2P95__
+				&& (*aux).i < __MB2P96__)
+		{
+			boxSize.x -= __MB2P97__ * zc.z;
+			boxSize.y -= __MB2P97__ * zc.z;
+		}
+		var bxV: vec4<f32> = zc;
+		var bxD: f32 = 0.0;
+		bxV = abs(bxV) - boxSize;
+
+		if ((__MB2P98__ != 0) && bxD < 0.0)
+		{
+			bxD = max(bxV.x, max(bxV.y, bxV.z));
+		}
+		else
+		{
+			bxV.x = max(bxV.x, 0.0);
+			bxV.y = max(bxV.y, 0.0);
+			bxV.z = max(bxV.z, 0.0);
+			bxD = length(bxV);
+		}
+		(*aux).dist = min((*aux).dist, bxD / (*aux).de);
+	}
+
+	
+	if ((__MB2P99__ != 0) && colorDist != (*aux).dist
+			&& (*aux).i >= __MB2P100__
+			&& (*aux).i < __MB2P101__)
+	{
+		if ((__MB2P102__ != 0))
+		{
+			colorAdd += (*aux).i * __MB2P103__ + __MB2P104__.w;
+
+			zc = abs(zc);
+			colorAdd += __MB2P104__.x * zc.x * zc.y;
+			colorAdd += __MB2P104__.y * max(zc.x, zc.y);
+		}
+
+		if ((__MB2P108__ != 0))
+		{
+			(*aux).color = colorAdd;
+		}
+		else
+		{
+			(*aux).color += colorAdd;
+		}
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "DIFSBoxV1",
+        source: "difs_box_v1.cl",
+        param_floats: 97,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.additionConstantA111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsX", kind: ParamKind::Int, offset: 5, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsX", kind: ParamKind::Int, offset: 6, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAyFalse", kind: ParamKind::Int, offset: 7, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsY", kind: ParamKind::Int, offset: 8, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsY", kind: ParamKind::Int, offset: 9, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAzFalse", kind: ParamKind::Int, offset: 10, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsZ", kind: ParamKind::Int, offset: 11, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsZ", kind: ParamKind::Int, offset: 12, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCx", kind: ParamKind::Int, offset: 13, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 14, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsA", kind: ParamKind::Int, offset: 15, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBFalse", kind: ParamKind::Int, offset: 16, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsB", kind: ParamKind::Int, offset: 17, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsB", kind: ParamKind::Int, offset: 18, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 19, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 20, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsP", kind: ParamKind::Int, offset: 21, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.int6", kind: ParamKind::Int, offset: 22, default: &[6.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 23, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsCx", kind: ParamKind::Int, offset: 24, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsCx", kind: ParamKind::Int, offset: 25, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 26, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 27, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsC", kind: ParamKind::Int, offset: 28, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetC0", kind: ParamKind::Float, offset: 29, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 30, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 31, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsD", kind: ParamKind::Int, offset: 32, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetD0", kind: ParamKind::Float, offset: 33, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCyFalse", kind: ParamKind::Int, offset: 34, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsCy", kind: ParamKind::Int, offset: 35, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsCy", kind: ParamKind::Int, offset: 36, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.startIterationsE", kind: ParamKind::Int, offset: 37, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsE", kind: ParamKind::Int, offset: 38, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetE0", kind: ParamKind::Float, offset: 39, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsF", kind: ParamKind::Int, offset: 40, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsF", kind: ParamKind::Int, offset: 41, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetF0", kind: ParamKind::Float, offset: 42, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsS", kind: ParamKind::Int, offset: 43, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsS", kind: ParamKind::Int, offset: 44, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scale2", kind: ParamKind::Float, offset: 45, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledKFalse", kind: ParamKind::Int, offset: 46, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsK", kind: ParamKind::Int, offset: 47, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsK", kind: ParamKind::Int, offset: 48, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scaleVary0", kind: ParamKind::Float, offset: 49, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleC1", kind: ParamKind::Float, offset: 50, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset001", kind: ParamKind::Float4, offset: 51, default: &[0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledRFalse", kind: ParamKind::Int, offset: 55, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 56, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 57, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 58, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledYFalse", kind: ParamKind::Int, offset: 70, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 71, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterations", kind: ParamKind::Int, offset: 72, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.additionConstant111", kind: ParamKind::Float4, offset: 73, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledTFalse", kind: ParamKind::Int, offset: 77, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsT", kind: ParamKind::Int, offset: 78, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsT", kind: ParamKind::Int, offset: 79, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scale0", kind: ParamKind::Float, offset: 80, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledMFalse", kind: ParamKind::Int, offset: 81, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsM", kind: ParamKind::Int, offset: 82, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsM", kind: ParamKind::Int, offset: 83, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scaleA0", kind: ParamKind::Float, offset: 84, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledEFalse", kind: ParamKind::Int, offset: 85, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetB0", kind: ParamKind::Float, offset: 86, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabled", kind: ParamKind::Int, offset: 87, default: &[1.0] },
+            GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 88, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 89, default: &[250.0] },
+            GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 90, default: &[0.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 91, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 95, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledA", kind: ParamKind::Int, offset: 96, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 97, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 58, op: DeriveOp::Rotation2, sources: &[97] },
+        ],
+        wgsl: r####"
+	var colorAdd: f32 = 0.0;
+	var oldZ: vec4<f32> = z;
+	var boxFold: vec4<f32> = __MB2P0__;
+
+	
+	if ((__MB2P4__ != 0)
+			&& (*aux).i >= __MB2P5__
+			&& (*aux).i < __MB2P6__)
+		{ z.x = abs(z.x); }
+
+	if ((__MB2P7__ != 0)
+			&& (*aux).i >= __MB2P8__
+			&& (*aux).i < __MB2P9__)
+		{ z.y = abs(z.y); }
+
+	if ((__MB2P10__ != 0)
+			&& (*aux).i >= __MB2P11__
+			&& (*aux).i < __MB2P12__)
+		{ z.z = abs(z.z); }
+	
+	if ((__MB2P13__ != 0)
+			&& (*aux).i >= __MB2P14__
+			&& (*aux).i < __MB2P15__)
+	{
+		z.x = abs(z.x + boxFold.x) - abs(z.x - boxFold.x) - z.x;
+		z.y = abs(z.y + boxFold.y) - abs(z.y - boxFold.y) - z.y;
+	}
+	
+	if ((__MB2P16__ != 0)
+			&& (*aux).i >= __MB2P17__
+			&& (*aux).i < __MB2P18__)
+		{ z -= boxFold; }
+	
+	if ((__MB2P19__ != 0)
+			&& (*aux).i >= __MB2P20__
+			&& (*aux).i < __MB2P21__)
+	{
+		z.x = abs(z.x);
+		var psi: f32 = M_PI_F / __MB2P22__;
+		psi = abs(fmod(atan2(z.y, z.x) + psi, 2.0 * psi) - psi);
+		var len: f32 = sqrt(z.x * z.x + z.y * z.y);
+		z.x = cos(psi) * len;
+		z.y = sin(psi) * len;
+	}
+
+	
+	if ((__MB2P23__ != 0)
+			&& (*aux).i >= __MB2P24__
+			&& (*aux).i < __MB2P25__)
+		{ if (z.x > z.y)
+		{
+			var temp: f32 = z.x;
+			z.x = z.y;
+			z.y = temp;
+		} }
+
+	
+	if ((__MB2P26__ != 0)
+			&& (*aux).i >= __MB2P27__
+			&& (*aux).i < __MB2P28__)
+	{
+		var xOffset: f32 = __MB2P29__;
+		if (z.x < xOffset) { z.x = abs(z.x - xOffset) + xOffset; }
+	}
+	if ((__MB2P30__ != 0)
+			&& (*aux).i >= __MB2P31__
+			&& (*aux).i < __MB2P32__)
+	{
+		var yOffset: f32 = __MB2P33__;
+		if (z.y < yOffset) { z.y = abs(z.y - yOffset) + yOffset; }
+	}
+
+	
+	if ((__MB2P34__ != 0)
+			&& (*aux).i >= __MB2P35__
+			&& (*aux).i < __MB2P36__)
+		{ if (z.x > z.y)
+		{
+			var temp: f32 = z.x;
+			z.x = z.y;
+			z.y = temp;
+		} }
+
+	
+	if ((*aux).i >= __MB2P37__
+			&& (*aux).i < __MB2P38__)
+		{ z.x -= __MB2P39__; }
+
+	if ((*aux).i >= __MB2P40__
+			&& (*aux).i < __MB2P41__)
+		{ z.y -= __MB2P42__; }
+
+	
+	var useScale: f32 = 1.0;
+	if ((*aux).i >= __MB2P43__
+			&& (*aux).i < __MB2P44__)
+	{
+		useScale = (*aux).actual_scale_a + __MB2P45__;
+		z *= useScale;
+		(*aux).de = (*aux).de * abs(useScale) + 1.0;
+
+		if ((__MB2P46__ != 0)
+				&& (*aux).i >= __MB2P47__
+				&& (*aux).i < __MB2P48__)
+		{
+			
+			var vary: f32 = __MB2P49__
+									* (abs((*aux).actual_scale_a) - __MB2P50__);
+			(*aux).actual_scale_a -= vary;
+		}
+	}
+
+	
+	if ((*aux).i >= __MB2P37__
+			&& (*aux).i < __MB2P38__)
+		{ z.x += __MB2P39__; }
+
+	if ((*aux).i >= __MB2P40__
+			&& (*aux).i < __MB2P41__)
+		{ z.y += __MB2P42__; }
+
+	
+	z += __MB2P51__;
+
+	
+	if ((__MB2P55__ != 0)
+			&& (*aux).i >= __MB2P56__
+			&& (*aux).i < __MB2P57__)
+	{
+		z = mb2_mat_mul(__MB2P58__, z);
+	}
+	var colorDist: f32 = (*aux).dist;
+	
+	var zc: vec4<f32> = z;
+	if ((__MB2P70__ != 0)) { zc = oldZ; }
+
+	
+	if ((*aux).i >= __MB2P71__
+			&& (*aux).i < __MB2P72__)
+	{
+		var boxSize: vec4<f32> = __MB2P73__;
+		
+		if ((__MB2P77__ != 0)
+				&& (*aux).i >= __MB2P78__
+				&& (*aux).i < __MB2P79__)
+		{
+			var absZZ: f32 = zc.z * zc.z * __MB2P80__;
+			boxSize.x += absZZ;
+			boxSize.y += absZZ;
+		}
+
+		
+		if ((__MB2P81__ != 0)
+				&& (*aux).i >= __MB2P82__
+				&& (*aux).i < __MB2P83__)
+		{
+			var subZ: f32 = __MB2P84__ * zc.z;
+			boxSize.x -= subZ;
+			boxSize.y -= subZ;
+		}
+
+		zc = abs(zc) - boxSize;
+		zc.x = max(zc.x, 0.0);
+		zc.y = max(zc.y, 0.0);
+		zc.z = max(zc.z, 0.0);
+		var zcd: f32 = length(zc);
+
+		(*aux).dist = min((*aux).dist, zcd / (*aux).de);
+
+		if (!(__MB2P85__ != 0))
+			{ (*aux).dist = min((*aux).dist, zcd / (*aux).de); }
+		else
+			{ (*aux).dist = min((*aux).dist, zcd / (*aux).de) - __MB2P86__; }
+	}
+
+	
+	if ((__MB2P87__ != 0) && colorDist != (*aux).dist
+			&& (*aux).i >= __MB2P88__
+			&& (*aux).i < __MB2P89__)
+	{
+		colorAdd += (*aux).i * __MB2P90__ + __MB2P91__.w;
+
+		if ((__MB2P95__ != 0))
+		{
+			zc = abs(zc);
+			colorAdd += __MB2P91__.x * zc.x * zc.y;
+			colorAdd += __MB2P91__.y * max(zc.x, zc.y);
+		}
+
+		if ((__MB2P96__ != 0))
+		{
+			(*aux).color = colorAdd;
+		}
+		else
+		{
+			(*aux).color += colorAdd;
+		}
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "DIFSCylinder",
+        source: "difs_cylinder.cl",
+        param_floats: 107,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.additionConstant111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 4, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsX", kind: ParamKind::Int, offset: 5, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsX", kind: ParamKind::Int, offset: 6, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAy", kind: ParamKind::Int, offset: 7, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsY", kind: ParamKind::Int, offset: 8, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsY", kind: ParamKind::Int, offset: 9, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAzFalse", kind: ParamKind::Int, offset: 10, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsZ", kind: ParamKind::Int, offset: 11, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsZ", kind: ParamKind::Int, offset: 12, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 13, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBxFalse", kind: ParamKind::Int, offset: 14, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 15, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsA", kind: ParamKind::Int, offset: 16, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledByFalse", kind: ParamKind::Int, offset: 17, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsB", kind: ParamKind::Int, offset: 18, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsB", kind: ParamKind::Int, offset: 19, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 20, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 21, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsP", kind: ParamKind::Int, offset: 22, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.int6", kind: ParamKind::Int, offset: 23, default: &[6.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 24, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsCx", kind: ParamKind::Int, offset: 25, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsCx", kind: ParamKind::Int, offset: 26, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCyFalse", kind: ParamKind::Int, offset: 27, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsCy", kind: ParamKind::Int, offset: 28, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsCy", kind: ParamKind::Int, offset: 29, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 30, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 31, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsC", kind: ParamKind::Int, offset: 32, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetC0", kind: ParamKind::Float, offset: 33, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 34, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 35, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsD", kind: ParamKind::Int, offset: 36, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetD0", kind: ParamKind::Float, offset: 37, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsE", kind: ParamKind::Int, offset: 38, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsE", kind: ParamKind::Int, offset: 39, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetE2", kind: ParamKind::Float, offset: 40, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.startIterationsF", kind: ParamKind::Int, offset: 41, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsF", kind: ParamKind::Int, offset: 42, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetF2", kind: ParamKind::Float, offset: 43, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.startIterationsS", kind: ParamKind::Int, offset: 44, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsS", kind: ParamKind::Int, offset: 45, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scale2", kind: ParamKind::Float, offset: 46, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledKFalse", kind: ParamKind::Int, offset: 47, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsK", kind: ParamKind::Int, offset: 48, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsK", kind: ParamKind::Int, offset: 49, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scaleVary0", kind: ParamKind::Float, offset: 50, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleC1", kind: ParamKind::Float, offset: 51, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset001", kind: ParamKind::Float4, offset: 52, default: &[0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledRFalse", kind: ParamKind::Int, offset: 56, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 57, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 58, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 59, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 71, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterations", kind: ParamKind::Int, offset: 72, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledSwFalse", kind: ParamKind::Int, offset: 73, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetA1", kind: ParamKind::Float, offset: 74, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledMFalse", kind: ParamKind::Int, offset: 75, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsM", kind: ParamKind::Int, offset: 76, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsM", kind: ParamKind::Int, offset: 77, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledTFalse", kind: ParamKind::Int, offset: 78, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsT", kind: ParamKind::Int, offset: 79, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsT", kind: ParamKind::Int, offset: 80, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.radius1", kind: ParamKind::Float, offset: 81, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.scale0", kind: ParamKind::Float, offset: 82, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledNFalse", kind: ParamKind::Int, offset: 83, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsN", kind: ParamKind::Int, offset: 84, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsN", kind: ParamKind::Int, offset: 85, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledOFalse", kind: ParamKind::Int, offset: 86, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsO", kind: ParamKind::Int, offset: 87, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsO", kind: ParamKind::Int, offset: 88, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetR0", kind: ParamKind::Float, offset: 89, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledIFalse", kind: ParamKind::Int, offset: 90, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsI", kind: ParamKind::Int, offset: 91, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsI", kind: ParamKind::Int, offset: 92, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledJFalse", kind: ParamKind::Int, offset: 93, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetT1", kind: ParamKind::Float, offset: 94, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset05", kind: ParamKind::Float, offset: 95, default: &[0.5] },
+            GeneratedParam { path: "foldColor.auxColorEnabled", kind: ParamKind::Int, offset: 96, default: &[1.0] },
+            GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 97, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 98, default: &[250.0] },
+            GeneratedParam { path: "foldColor.difs1", kind: ParamKind::Float, offset: 99, default: &[1.0] },
+            GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 100, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 101, default: &[0.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 102, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledA", kind: ParamKind::Int, offset: 106, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 107, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 59, op: DeriveOp::Rotation2, sources: &[107] },
+        ],
+        wgsl: r####"
+	var colorAdd: f32 = 0.0;
+	var oldZ: vec4<f32> = z;
+	var boxSize: vec4<f32> = __MB2P0__;
+
+	
+	if ((__MB2P4__ != 0)
+			&& (*aux).i >= __MB2P5__
+			&& (*aux).i < __MB2P6__)
+		{ z.x = abs(z.x); }
+
+	if ((__MB2P7__ != 0)
+			&& (*aux).i >= __MB2P8__
+			&& (*aux).i < __MB2P9__)
+		{ z.y = abs(z.y); }
+
+	if ((__MB2P10__ != 0)
+			&& (*aux).i >= __MB2P11__
+			&& (*aux).i < __MB2P12__)
+		{ z.z = abs(z.z); }
+
+	if ((__MB2P13__ != 0))
+	{
+		
+		if ((__MB2P14__ != 0)
+				&& (*aux).i >= __MB2P15__
+				&& (*aux).i < __MB2P16__)
+		{
+			z.x -= boxSize.x;
+			z.y -= boxSize.y;
+		}
+		
+		if ((__MB2P17__ != 0)
+				&& (*aux).i >= __MB2P18__
+				&& (*aux).i < __MB2P19__)
+			{ z -= boxSize; }
+
+		
+		if ((__MB2P20__ != 0)
+				&& (*aux).i >= __MB2P21__
+				&& (*aux).i < __MB2P22__)
+		{
+			z.x = abs(z.x);
+			var psi: f32 = M_PI_F / __MB2P23__;
+			psi = abs(fmod(atan2(z.y, z.x) + psi, 2.0 * psi) - psi);
+			var len: f32 = sqrt(z.x * z.x + z.y * z.y);
+			z.x = cos(psi) * len;
+			z.y = sin(psi) * len;
+		}
+
+		
+		if ((__MB2P24__ != 0)
+				&& (*aux).i >= __MB2P25__
+				&& (*aux).i < __MB2P26__)
+			{ if (z.x > z.y)
+			{
+				var temp: f32 = z.x;
+				z.x = z.y;
+				z.y = temp;
+			} }
+		if ((__MB2P27__ != 0)
+				&& (*aux).i >= __MB2P28__
+				&& (*aux).i < __MB2P29__)
+			{ if (z.x > z.z)
+			{
+				var temp: f32 = z.x;
+				z.x = z.z;
+				z.z = temp;
+			} }
+
+		
+		if ((__MB2P30__ != 0)
+				&& (*aux).i >= __MB2P31__
+				&& (*aux).i < __MB2P32__)
+		{
+			var xOffset: f32 = __MB2P33__;
+			if (z.x < xOffset) { z.x = abs(z.x - xOffset) + xOffset; }
+		}
+		if ((__MB2P34__ != 0)
+				&& (*aux).i >= __MB2P35__
+				&& (*aux).i < __MB2P36__)
+		{
+			var yOffset: f32 = __MB2P37__;
+			if (z.y < yOffset) { z.y = abs(z.y - yOffset) + yOffset; }
+		}
+	}
+
+	
+	if ((*aux).i >= __MB2P38__
+			&& (*aux).i < __MB2P39__)
+		{ z.x -= __MB2P40__; }
+
+	if ((*aux).i >= __MB2P41__
+			&& (*aux).i < __MB2P42__)
+		{ z.y -= __MB2P43__; }
+
+	
+	var useScale: f32 = 1.0;
+	if ((*aux).i >= __MB2P44__
+			&& (*aux).i < __MB2P45__)
+	{
+		useScale = (*aux).actual_scale_a + __MB2P46__;
+		z *= useScale;
+		(*aux).de = (*aux).de * abs(useScale) + 1.0;
+		
+		if ((__MB2P47__ != 0)
+				&& (*aux).i >= __MB2P48__
+				&& (*aux).i < __MB2P49__)
+		{
+			
+			var vary: f32 = __MB2P50__
+									* (abs((*aux).actual_scale_a) - __MB2P51__);
+			(*aux).actual_scale_a -= vary;
+		}
+	}
+
+	
+	if ((*aux).i >= __MB2P38__
+			&& (*aux).i < __MB2P39__)
+		{ z.x += __MB2P40__; }
+
+	if ((*aux).i >= __MB2P41__
+			&& (*aux).i < __MB2P42__)
+		{ z.y += __MB2P43__; }
+
+	
+	z += __MB2P52__;
+
+	
+	if ((__MB2P56__ != 0)
+			&& (*aux).i >= __MB2P57__
+			&& (*aux).i < __MB2P58__)
+	{
+		z = mb2_mat_mul(__MB2P59__, z);
+	}
+
+	
+	var colorDist: f32 = (*aux).dist;
+	var zc: vec4<f32> = oldZ;
+
+	
+	if ((*aux).i >= __MB2P71__
+			&& (*aux).i < __MB2P72__)
+	{
+		var cylR: f32;
+		var lengthCyl: f32;
+		var absH: f32;
+		var temp: f32;
+
+		
+		if ((__MB2P73__ != 0))
+		{
+			var temp: f32 = zc.x;
+			zc.x = zc.z;
+			zc.z = temp;
+		}
+
+		cylR = zc.x * zc.x;
+		absH = abs(zc.z);
+		lengthCyl = zc.z;
+
+		cylR = sqrt(cylR + zc.y * zc.y);
+		var cylH: f32 = absH - __MB2P74__;
+
+		
+		if ((__MB2P75__ != 0)
+				&& (*aux).i >= __MB2P76__
+				&& (*aux).i < __MB2P77__)
+		{
+			absH = lengthCyl;
+		}
+
+		
+		if ((__MB2P78__ != 0)
+				&& (*aux).i >= __MB2P79__
+				&& (*aux).i < __MB2P80__)
+		{
+			absH *= absH;
+		}
+
+		var cylRm: f32 = cylR - __MB2P81__;
+		cylRm += __MB2P82__ * absH;
+
+		
+		if ((__MB2P83__ != 0)
+				&& (*aux).i >= __MB2P84__
+				&& (*aux).i < __MB2P85__)
+		{
+			temp = cylR;
+		}
+		else
+		{
+			temp = cylRm;
+		}
+		temp = max(temp, 0.0);
+		var cylHm: f32 = max(cylH, 0.0);
+		var cylD: f32 = sqrt(temp * temp + cylHm * cylHm);
+
+		
+		if ((__MB2P86__ != 0)
+				&& (*aux).i >= __MB2P87__
+				&& (*aux).i < __MB2P88__)
+		{
+			cylD = sqrt(cylRm * cylRm + cylH * cylH);
+		}
+		cylD = min(max(cylRm, cylH) - __MB2P89__, 0.0) + cylD;
+
+		(*aux).dist = min((*aux).dist, cylD / (*aux).de);
+	}
+
+	
+	if ((__MB2P90__ != 0)
+			&& (*aux).i >= __MB2P91__
+			&& (*aux).i < __MB2P92__)
+	{
+		var torD: f32;
+		
+		if ((__MB2P93__ != 0))
+		{
+			var temp: f32 = zc.x;
+			zc.x = zc.z;
+			zc.z = temp;
+		}
+
+		var T1: f32 = sqrt(zc.y * zc.y + zc.x * zc.x) - __MB2P94__;
+		torD = sqrt(T1 * T1 + zc.z * zc.z) - __MB2P95__;
+
+		(*aux).dist = min((*aux).dist, torD / (*aux).de);
+	}
+
+	
+	if ((__MB2P96__ != 0) && colorDist != (*aux).dist
+			&& (*aux).i >= __MB2P97__
+			&& (*aux).i < __MB2P98__)
+	{
+		colorAdd += ((*aux).i * __MB2P99__ + __MB2P100__);
+
+		if ((__MB2P101__ != 0))
+		{
+			zc = abs(zc);
+			colorAdd += __MB2P102__.x * zc.x * zc.y;
+			colorAdd += __MB2P102__.y * max(zc.x, zc.y);
+		}
+
+		if ((__MB2P106__ != 0))
+		{
+			(*aux).color = colorAdd;
+		}
+		else
+		{
+			(*aux).color += colorAdd;
+		}
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "DIFSEllipsoid",
+        source: "difs_ellipsoid.cl",
+        param_floats: 104,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.additionConstantA111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 4, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsX", kind: ParamKind::Int, offset: 5, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsX", kind: ParamKind::Int, offset: 6, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAy", kind: ParamKind::Int, offset: 7, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsY", kind: ParamKind::Int, offset: 8, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsY", kind: ParamKind::Int, offset: 9, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAzFalse", kind: ParamKind::Int, offset: 10, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsZ", kind: ParamKind::Int, offset: 11, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsZ", kind: ParamKind::Int, offset: 12, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 13, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBxFalse", kind: ParamKind::Int, offset: 14, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 15, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsA", kind: ParamKind::Int, offset: 16, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledByFalse", kind: ParamKind::Int, offset: 17, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsB", kind: ParamKind::Int, offset: 18, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsB", kind: ParamKind::Int, offset: 19, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 20, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 21, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsP", kind: ParamKind::Int, offset: 22, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.int6", kind: ParamKind::Int, offset: 23, default: &[6.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 24, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsCx", kind: ParamKind::Int, offset: 25, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsCx", kind: ParamKind::Int, offset: 26, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 27, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 28, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsC", kind: ParamKind::Int, offset: 29, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetC0", kind: ParamKind::Float, offset: 30, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 31, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 32, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsD", kind: ParamKind::Int, offset: 33, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetD0", kind: ParamKind::Float, offset: 34, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCyFalse", kind: ParamKind::Int, offset: 35, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsCy", kind: ParamKind::Int, offset: 36, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsCy", kind: ParamKind::Int, offset: 37, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.startIterationsE", kind: ParamKind::Int, offset: 38, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsE", kind: ParamKind::Int, offset: 39, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetE2", kind: ParamKind::Float, offset: 40, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.startIterationsF", kind: ParamKind::Int, offset: 41, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsF", kind: ParamKind::Int, offset: 42, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetF2", kind: ParamKind::Float, offset: 43, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.startIterationsS", kind: ParamKind::Int, offset: 44, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsS", kind: ParamKind::Int, offset: 45, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scale2", kind: ParamKind::Float, offset: 46, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledKFalse", kind: ParamKind::Int, offset: 47, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsK", kind: ParamKind::Int, offset: 48, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsK", kind: ParamKind::Int, offset: 49, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scaleVary0", kind: ParamKind::Float, offset: 50, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleC1", kind: ParamKind::Float, offset: 51, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset001", kind: ParamKind::Float4, offset: 52, default: &[0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledRFalse", kind: ParamKind::Int, offset: 56, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 57, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 58, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 59, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 71, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterations", kind: ParamKind::Int, offset: 72, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.additionConstant111", kind: ParamKind::Float4, offset: 73, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledJFalse", kind: ParamKind::Int, offset: 77, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledNFalse", kind: ParamKind::Int, offset: 78, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsN", kind: ParamKind::Int, offset: 79, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsN", kind: ParamKind::Int, offset: 80, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scale0", kind: ParamKind::Float, offset: 81, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledOFalse", kind: ParamKind::Int, offset: 82, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsO", kind: ParamKind::Int, offset: 83, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsO", kind: ParamKind::Int, offset: 84, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scaleA0", kind: ParamKind::Float, offset: 85, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledTFalse", kind: ParamKind::Int, offset: 86, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsT", kind: ParamKind::Int, offset: 87, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsT", kind: ParamKind::Int, offset: 88, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledMFalse", kind: ParamKind::Int, offset: 89, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsM", kind: ParamKind::Int, offset: 90, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsM", kind: ParamKind::Int, offset: 91, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetR1", kind: ParamKind::Float, offset: 92, default: &[1.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabled", kind: ParamKind::Int, offset: 93, default: &[1.0] },
+            GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 94, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 95, default: &[250.0] },
+            GeneratedParam { path: "foldColor.difs1", kind: ParamKind::Float, offset: 96, default: &[1.0] },
+            GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 97, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 98, default: &[0.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 99, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledA", kind: ParamKind::Int, offset: 103, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 104, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 59, op: DeriveOp::Rotation2, sources: &[104] },
+        ],
+        wgsl: r####"
+	var colorAdd: f32 = 0.0;
+	var oldZ: vec4<f32> = z;
+	var boxFold: vec4<f32> = __MB2P0__;
+
+	
+	if ((__MB2P4__ != 0)
+			&& (*aux).i >= __MB2P5__
+			&& (*aux).i < __MB2P6__)
+		{ z.x = abs(z.x); }
+	if ((__MB2P7__ != 0)
+			&& (*aux).i >= __MB2P8__
+			&& (*aux).i < __MB2P9__)
+		{ z.y = abs(z.y); }
+	if ((__MB2P10__ != 0)
+			&& (*aux).i >= __MB2P11__
+			&& (*aux).i < __MB2P12__)
+		{ z.z = abs(z.z); }
+	
+	if ((__MB2P13__ != 0))
+	{
+		
+		if ((__MB2P14__ != 0)
+				&& (*aux).i >= __MB2P15__
+				&& (*aux).i < __MB2P16__)
+		{
+			z.x -= boxFold.x;
+			z.y -= boxFold.y;
+		}
+		
+		if ((__MB2P17__ != 0)
+				&& (*aux).i >= __MB2P18__
+				&& (*aux).i < __MB2P19__)
+			{ z -= boxFold; }
+		
+		if ((__MB2P20__ != 0)
+				&& (*aux).i >= __MB2P21__
+				&& (*aux).i < __MB2P22__)
+		{
+			z.x = abs(z.x);
+			var psi: f32 = M_PI_F / __MB2P23__;
+			psi = abs(fmod(atan2(z.y, z.x) + psi, 2.0 * psi) - psi);
+			var len: f32 = sqrt(z.x * z.x + z.y * z.y);
+			z.x = cos(psi) * len;
+			z.y = sin(psi) * len;
+		}
+		
+		if ((__MB2P24__ != 0)
+				&& (*aux).i >= __MB2P25__
+				&& (*aux).i < __MB2P26__)
+			{ if (z.x > z.y)
+			{
+				var temp: f32 = z.x;
+				z.x = z.y;
+				z.y = temp;
+			} }
+		
+		if ((__MB2P27__ != 0)
+				&& (*aux).i >= __MB2P28__
+				&& (*aux).i < __MB2P29__)
+		{
+			var xOffset: f32 = __MB2P30__;
+			if (z.x < xOffset) { z.x = abs(z.x - xOffset) + xOffset; }
+		}
+		if ((__MB2P31__ != 0)
+				&& (*aux).i >= __MB2P32__
+				&& (*aux).i < __MB2P33__)
+		{
+			var yOffset: f32 = __MB2P34__;
+			if (z.y < yOffset) { z.y = abs(z.y - yOffset) + yOffset; }
+		}
+		
+		if ((__MB2P35__ != 0)
+				&& (*aux).i >= __MB2P36__
+				&& (*aux).i < __MB2P37__)
+			{ if (z.x > z.y)
+			{
+				var temp: f32 = z.x;
+				z.x = z.y;
+				z.y = temp;
+			} }
+	}
+
+	
+	if ((*aux).i >= __MB2P38__
+			&& (*aux).i < __MB2P39__)
+		{ z.x -= __MB2P40__; }
+
+	if ((*aux).i >= __MB2P41__
+			&& (*aux).i < __MB2P42__)
+		{ z.y -= __MB2P43__; }
+
+	
+	var useScale: f32 = 1.0;
+	if ((*aux).i >= __MB2P44__
+			&& (*aux).i < __MB2P45__)
+	{
+		useScale = (*aux).actual_scale_a + __MB2P46__;
+		z *= useScale;
+		(*aux).de = (*aux).de * abs(useScale) + 1.0;
+		
+		if ((__MB2P47__ != 0)
+				&& (*aux).i >= __MB2P48__
+				&& (*aux).i < __MB2P49__)
+		{
+			
+			var vary: f32 = __MB2P50__
+									* (abs((*aux).actual_scale_a) - __MB2P51__);
+			(*aux).actual_scale_a -= vary;
+		}
+	}
+
+	
+	if ((*aux).i >= __MB2P38__
+			&& (*aux).i < __MB2P39__)
+		{ z.x += __MB2P40__; }
+
+	if ((*aux).i >= __MB2P41__
+			&& (*aux).i < __MB2P42__)
+		{ z.y += __MB2P43__; }
+
+	
+	z += __MB2P52__;
+
+	
+	if ((__MB2P56__ != 0)
+			&& (*aux).i >= __MB2P57__
+			&& (*aux).i < __MB2P58__)
+	{
+		z = mb2_mat_mul(__MB2P59__, z);
+	}
+
+	
+	var colorDist: f32 = (*aux).dist;
+	var zc: vec4<f32> = oldZ;
+
+	
+	if ((*aux).i >= __MB2P71__
+			&& (*aux).i < __MB2P72__)
+	{
+		var rads4: vec4<f32> = __MB2P73__;
+		var rads3: vec3<f32> = vec3<f32>(rads4.x, rads4.y, rads4.z);
+		var tempX: f32 = zc.x;
+		var tempY: f32 = zc.y;
+		var tempZ: f32 = zc.z;
+		var absZ: f32 = abs(zc.z);
+
+		if ((__MB2P77__ != 0)) { absZ = zc.z; }
+
+		if ((__MB2P78__ != 0)
+				&& (*aux).i >= __MB2P79__
+				&& (*aux).i < __MB2P80__)
+		{
+			tempX = zc.x + absZ * __MB2P81__;
+		}
+		if ((__MB2P82__ != 0)
+				&& (*aux).i >= __MB2P83__
+				&& (*aux).i < __MB2P84__)
+		{
+			tempY = zc.y + absZ * __MB2P85__;
+		}
+
+		
+		if ((__MB2P86__ != 0)
+				&& (*aux).i >= __MB2P87__
+				&& (*aux).i < __MB2P88__)
+		{
+			tempZ = zc.z * zc.z;
+		}
+
+		var rV: vec3<f32> = vec3<f32>(tempX, tempY, tempZ);
+		rV /= rads3;
+
+		var rrV: vec3<f32> = rV;
+		rrV /= rads3;
+
+		var rd: f32 = length(rV);
+		var rrd: f32 = length(rrV);
+		var ellD: f32 = rd * (rd - 1.0) / rrd;
+		(*aux).dist = min((*aux).dist, ellD / (*aux).de);
+	}
+	
+	if ((__MB2P89__ != 0)
+			&& (*aux).i >= __MB2P90__
+			&& (*aux).i < __MB2P91__)
+	{
+		var spD: f32 = length(zc) - __MB2P92__;
+		(*aux).dist = min((*aux).dist, spD / (*aux).de);
+	}
+
+	
+	if ((__MB2P93__ != 0) && colorDist != (*aux).dist
+			&& (*aux).i >= __MB2P94__
+			&& (*aux).i < __MB2P95__)
+	{
+		colorAdd += ((*aux).i * __MB2P96__ + __MB2P97__);
+
+		if ((__MB2P98__ != 0))
+		{
+			zc = abs(zc);
+			colorAdd += __MB2P99__.x * zc.x * zc.y;
+			colorAdd += __MB2P99__.y * max(zc.x, zc.y);
+		}
+
+		if ((__MB2P103__ != 0))
+		{
+			(*aux).color = colorAdd;
+		}
+		else
+		{
+			(*aux).color += colorAdd;
+		}
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
         name: "DIFSGreekIfs",
         source: "difs_greek_ifs.cl",
         param_floats: 75,
@@ -6834,6 +8659,1486 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 "####,
     },
     GeneratedFormula {
+        name: "DIFSMultiV1",
+        source: "difs_multi_v1.cl",
+        param_floats: 118,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.additionConstantA111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 4, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsX", kind: ParamKind::Int, offset: 5, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsX", kind: ParamKind::Int, offset: 6, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAy", kind: ParamKind::Int, offset: 7, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsY", kind: ParamKind::Int, offset: 8, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsY", kind: ParamKind::Int, offset: 9, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAzFalse", kind: ParamKind::Int, offset: 10, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsZ", kind: ParamKind::Int, offset: 11, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsZ", kind: ParamKind::Int, offset: 12, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 13, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 14, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 15, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsA", kind: ParamKind::Int, offset: 16, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBFalse", kind: ParamKind::Int, offset: 17, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsB", kind: ParamKind::Int, offset: 18, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsB", kind: ParamKind::Int, offset: 19, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 20, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 21, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsP", kind: ParamKind::Int, offset: 22, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.int6", kind: ParamKind::Int, offset: 23, default: &[6.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 24, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsCx", kind: ParamKind::Int, offset: 25, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsCx", kind: ParamKind::Int, offset: 26, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 27, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 28, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsC", kind: ParamKind::Int, offset: 29, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetC0", kind: ParamKind::Float, offset: 30, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 31, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 32, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsD", kind: ParamKind::Int, offset: 33, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetD0", kind: ParamKind::Float, offset: 34, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCyFalse", kind: ParamKind::Int, offset: 35, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsCy", kind: ParamKind::Int, offset: 36, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsCy", kind: ParamKind::Int, offset: 37, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.startIterationsE", kind: ParamKind::Int, offset: 38, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsE", kind: ParamKind::Int, offset: 39, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetE2", kind: ParamKind::Float, offset: 40, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.startIterationsF", kind: ParamKind::Int, offset: 41, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsF", kind: ParamKind::Int, offset: 42, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetF2", kind: ParamKind::Float, offset: 43, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.startIterationsS", kind: ParamKind::Int, offset: 44, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsS", kind: ParamKind::Int, offset: 45, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scale2", kind: ParamKind::Float, offset: 46, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledKFalse", kind: ParamKind::Int, offset: 47, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsK", kind: ParamKind::Int, offset: 48, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsK", kind: ParamKind::Int, offset: 49, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scaleVary0", kind: ParamKind::Float, offset: 50, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleC1", kind: ParamKind::Float, offset: 51, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset001", kind: ParamKind::Float4, offset: 52, default: &[0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledRFalse", kind: ParamKind::Int, offset: 56, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 57, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 58, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 59, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFFalse", kind: ParamKind::Int, offset: 71, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledM", kind: ParamKind::Int, offset: 72, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 73, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterations", kind: ParamKind::Int, offset: 74, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.additionConstant111", kind: ParamKind::Float4, offset: 75, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledMFalse", kind: ParamKind::Int, offset: 79, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsM", kind: ParamKind::Int, offset: 80, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsM", kind: ParamKind::Int, offset: 81, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetR1", kind: ParamKind::Float, offset: 82, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledOFalse", kind: ParamKind::Int, offset: 83, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsO", kind: ParamKind::Int, offset: 84, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsO", kind: ParamKind::Int, offset: 85, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledSwFalse", kind: ParamKind::Int, offset: 86, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetA1", kind: ParamKind::Float, offset: 87, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.radius1", kind: ParamKind::Float, offset: 88, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledXFalse", kind: ParamKind::Int, offset: 89, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledzFalse", kind: ParamKind::Int, offset: 90, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetR0", kind: ParamKind::Float, offset: 91, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledTFalse", kind: ParamKind::Int, offset: 92, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsT", kind: ParamKind::Int, offset: 93, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsT", kind: ParamKind::Int, offset: 94, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledJFalse", kind: ParamKind::Int, offset: 95, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetT1", kind: ParamKind::Float, offset: 96, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset05", kind: ParamKind::Float, offset: 97, default: &[0.5] },
+            GeneratedParam { path: "transformCommon.functionEnabledNFalse", kind: ParamKind::Int, offset: 98, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsN", kind: ParamKind::Int, offset: 99, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsN", kind: ParamKind::Int, offset: 100, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledEFalse", kind: ParamKind::Int, offset: 101, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset2", kind: ParamKind::Float, offset: 102, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.offsetA05", kind: ParamKind::Float, offset: 103, default: &[0.5] },
+            GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 104, default: &[0.0] },
+            GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 105, default: &[1.0] },
+            GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 106, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabled", kind: ParamKind::Int, offset: 107, default: &[1.0] },
+            GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 108, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 109, default: &[250.0] },
+            GeneratedParam { path: "foldColor.difs1", kind: ParamKind::Float, offset: 110, default: &[1.0] },
+            GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 111, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 112, default: &[0.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 113, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledA", kind: ParamKind::Int, offset: 117, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 118, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 59, op: DeriveOp::Rotation2, sources: &[118] },
+        ],
+        wgsl: r####"
+	var colorAdd: f32 = 0.0;
+	var oldZ: vec4<f32> = z;
+	var boxFold: vec4<f32> = __MB2P0__;
+
+	
+	if ((__MB2P4__ != 0)
+			&& (*aux).i >= __MB2P5__
+			&& (*aux).i < __MB2P6__)
+		{ z.x = abs(z.x); }
+
+	if ((__MB2P7__ != 0)
+			&& (*aux).i >= __MB2P8__
+			&& (*aux).i < __MB2P9__)
+		{ z.y = abs(z.y); }
+
+	if ((__MB2P10__ != 0)
+			&& (*aux).i >= __MB2P11__
+			&& (*aux).i < __MB2P12__)
+		{ z.z = abs(z.z); }
+	if ((__MB2P13__ != 0))
+	{
+		
+		if ((__MB2P14__ != 0)
+				&& (*aux).i >= __MB2P15__
+				&& (*aux).i < __MB2P16__)
+		{
+			z.x -= boxFold.x;
+			z.y -= boxFold.y;
+		}
+		
+		if ((__MB2P17__ != 0)
+				&& (*aux).i >= __MB2P18__
+				&& (*aux).i < __MB2P19__)
+			{ z -= boxFold; }
+
+		
+		if ((__MB2P20__ != 0)
+				&& (*aux).i >= __MB2P21__
+				&& (*aux).i < __MB2P22__)
+		{
+			z.x = abs(z.x);
+			var psi: f32 = M_PI_F / __MB2P23__;
+			psi = abs(fmod(atan2(z.y, z.x) + psi, 2.0 * psi) - psi);
+			var len: f32 = sqrt(z.x * z.x + z.y * z.y);
+			z.x = cos(psi) * len;
+			z.y = sin(psi) * len;
+		}
+
+		
+		if ((__MB2P24__ != 0)
+				&& (*aux).i >= __MB2P25__
+				&& (*aux).i < __MB2P26__)
+			{ if (z.y > z.x)
+			{
+				var temp: f32 = z.x;
+				z.x = z.y;
+				z.y = temp;
+			} }
+
+		
+		if ((__MB2P27__ != 0)
+				&& (*aux).i >= __MB2P28__
+				&& (*aux).i < __MB2P29__)
+		{
+			var xOffset: f32 = __MB2P30__;
+			if (z.x < xOffset) { z.x = abs(z.x - xOffset) + xOffset; }
+		}
+		if ((__MB2P31__ != 0)
+				&& (*aux).i >= __MB2P32__
+				&& (*aux).i < __MB2P33__)
+		{
+			var yOffset: f32 = __MB2P34__;
+			if (z.y < yOffset) { z.y = abs(z.y - yOffset) + yOffset; }
+		}
+
+		
+		if ((__MB2P35__ != 0)
+				&& (*aux).i >= __MB2P36__
+				&& (*aux).i < __MB2P37__)
+			{ if (z.y > z.x)
+			{
+				var temp: f32 = z.x;
+				z.x = z.y;
+				z.y = temp;
+			} }
+	}
+
+	
+	if ((*aux).i >= __MB2P38__
+			&& (*aux).i < __MB2P39__)
+		{ z.x -= __MB2P40__; }
+
+	if ((*aux).i >= __MB2P41__
+			&& (*aux).i < __MB2P42__)
+		{ z.y -= __MB2P43__; }
+
+	
+	var useScale: f32 = 1.0;
+	if ((*aux).i >= __MB2P44__
+			&& (*aux).i < __MB2P45__)
+	{
+		useScale = (*aux).actual_scale_a + __MB2P46__;
+		z *= useScale;
+		(*aux).de = (*aux).de * abs(useScale) + 1.0;
+		
+
+		if ((__MB2P47__ != 0)
+				&& (*aux).i >= __MB2P48__
+				&& (*aux).i < __MB2P49__)
+		{
+			
+			var vary: f32 = __MB2P50__
+									* (abs((*aux).actual_scale_a) - __MB2P51__);
+			(*aux).actual_scale_a -= vary;
+		}
+	}
+
+	
+	if ((*aux).i >= __MB2P38__
+			&& (*aux).i < __MB2P39__)
+		{ z.x += __MB2P40__; }
+
+	if ((*aux).i >= __MB2P41__
+			&& (*aux).i < __MB2P42__)
+		{ z.y += __MB2P43__; }
+
+	
+	z += __MB2P52__;
+
+	
+	if ((__MB2P56__ != 0)
+			&& (*aux).i >= __MB2P57__
+			&& (*aux).i < __MB2P58__)
+	{
+		z = mb2_mat_mul(__MB2P59__, z);
+	}
+
+	
+	var colorDist: f32 = (*aux).dist;
+	var zc: vec4<f32> = oldZ;
+
+	if ((__MB2P71__ != 0)) { zc = z; }
+
+	
+	if ((__MB2P72__ != 0)
+			&& (*aux).i >= __MB2P73__
+			&& (*aux).i < __MB2P74__)
+	{
+		var boxSize: vec4<f32> = __MB2P75__;
+		var bxV: vec4<f32> = zc;
+		var bxD: f32 = 0.0;
+		bxV = abs(bxV) - boxSize;
+		bxD = max(bxV.x, max(bxV.y, bxV.z)); 
+		if (bxD > 0.0)
+		{
+			bxV.x = max(bxV.x, 0.0);
+			bxV.y = max(bxV.y, 0.0);
+			bxV.z = max(bxV.z, 0.0);
+			(*aux).de0 = length(bxV);
+		}
+		(*aux).dist = min((*aux).dist, (*aux).de0 / (*aux).de);
+	}
+	
+	if ((__MB2P79__ != 0)
+			&& (*aux).i >= __MB2P80__
+			&& (*aux).i < __MB2P81__)
+	{
+		(*aux).de0 = length(zc) - __MB2P82__;
+		(*aux).dist = min((*aux).dist, (*aux).de0 / (*aux).de);
+	}
+	
+	if ((__MB2P83__ != 0)
+			&& (*aux).i >= __MB2P84__
+			&& (*aux).i < __MB2P85__)
+	{
+		var cylD: f32 = 0.0;
+		
+
+		if ((__MB2P86__ != 0))
+		{
+			var temp: f32 = zc.x;
+			zc.x = zc.z;
+			zc.z = temp;
+		}
+
+		var cylR: f32 = sqrt(zc.x * zc.x + zc.y * zc.y);
+		var cylH: f32 = abs(zc.z) - __MB2P87__;
+
+		var cylRm: f32 = cylR - __MB2P88__;
+
+		if (!(__MB2P89__ != 0))
+		{
+			if (!(__MB2P90__ != 0)) { cylR = cylRm; }
+			cylR = max(cylR, 0.0);
+			var cylHm: f32 = max(cylH, 0.0);
+			cylD = sqrt(cylR * cylR + cylHm * cylHm);
+		}
+		else
+			{ cylD = sqrt(cylRm * cylRm + cylH * cylH); }
+
+		(*aux).de0 = min(max(cylRm, cylH) - __MB2P91__, 0.0) + cylD;
+		(*aux).dist = min((*aux).dist, (*aux).de0 / (*aux).de);
+	}
+
+	
+	if ((__MB2P92__ != 0)
+			&& (*aux).i >= __MB2P93__
+			&& (*aux).i < __MB2P94__)
+	{
+		
+		if ((__MB2P95__ != 0))
+		{
+			var temp: f32 = zc.x;
+			zc.x = zc.z;
+			zc.z = temp;
+		}
+
+		var T1: f32 = sqrt(zc.y * zc.y + zc.x * zc.x) - __MB2P96__;
+		(*aux).de0 = sqrt(T1 * T1 + zc.z * zc.z) - __MB2P97__;
+		(*aux).dist = min((*aux).dist, (*aux).de0 / (*aux).de);
+	}
+
+	
+	if ((__MB2P98__ != 0)
+			&& (*aux).i >= __MB2P99__
+			&& (*aux).i < __MB2P100__)
+	{
+		
+		if ((__MB2P101__ != 0))
+		{
+			var temp: f32 = zc.x;
+			zc.x = zc.z;
+			zc.z = temp;
+		}
+
+		(*aux).de0 = max(abs(zc.x) - __MB2P102__,
+			max(abs(zc.y) * SQRT_3_4_F + zc.z * 0.5, -zc.z) - __MB2P103__);
+
+		(*aux).dist = min((*aux).dist, (*aux).de0 / (*aux).de);
+	}
+
+	
+	if ((__MB2P104__ != 0))
+		{ (*aux).dist = (*aux).dist * __MB2P105__ + __MB2P106__; }
+
+	
+	
+
+	
+	if ((__MB2P107__ != 0) && colorDist != (*aux).dist
+			&& (*aux).i >= __MB2P108__
+			&& (*aux).i < __MB2P109__)
+	{
+		colorAdd += (*aux).i * __MB2P110__ + __MB2P111__;
+
+		if ((__MB2P112__ != 0))
+		{
+			zc = abs(zc);
+			colorAdd += __MB2P113__.x * zc.x * zc.y;
+			colorAdd += __MB2P113__.y * max(zc.x, zc.y);
+			colorAdd += __MB2P113__.z * (z.x * z.x + z.y * z.y);
+			
+		}
+
+		if ((__MB2P117__ != 0))
+		{
+			(*aux).color = colorAdd;
+		}
+		else
+		{
+			(*aux).color += colorAdd;
+		}
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "DIFSPrism",
+        source: "difs_prism.cl",
+        param_floats: 102,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.additionConstantA111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 4, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsX", kind: ParamKind::Int, offset: 5, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsX", kind: ParamKind::Int, offset: 6, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAy", kind: ParamKind::Int, offset: 7, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsY", kind: ParamKind::Int, offset: 8, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsY", kind: ParamKind::Int, offset: 9, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAzFalse", kind: ParamKind::Int, offset: 10, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsZ", kind: ParamKind::Int, offset: 11, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsZ", kind: ParamKind::Int, offset: 12, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 13, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 14, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 15, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsA", kind: ParamKind::Int, offset: 16, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBFalse", kind: ParamKind::Int, offset: 17, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsB", kind: ParamKind::Int, offset: 18, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsB", kind: ParamKind::Int, offset: 19, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 20, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 21, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsP", kind: ParamKind::Int, offset: 22, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.int6", kind: ParamKind::Int, offset: 23, default: &[6.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 24, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsCx", kind: ParamKind::Int, offset: 25, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsCx", kind: ParamKind::Int, offset: 26, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 27, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 28, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsC", kind: ParamKind::Int, offset: 29, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetC0", kind: ParamKind::Float, offset: 30, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 31, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 32, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsD", kind: ParamKind::Int, offset: 33, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetD0", kind: ParamKind::Float, offset: 34, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCyFalse", kind: ParamKind::Int, offset: 35, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsCy", kind: ParamKind::Int, offset: 36, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsCy", kind: ParamKind::Int, offset: 37, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.startIterationsE", kind: ParamKind::Int, offset: 38, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsE", kind: ParamKind::Int, offset: 39, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetE2", kind: ParamKind::Float, offset: 40, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.startIterationsF", kind: ParamKind::Int, offset: 41, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsF", kind: ParamKind::Int, offset: 42, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetF2", kind: ParamKind::Float, offset: 43, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.startIterationsS", kind: ParamKind::Int, offset: 44, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsS", kind: ParamKind::Int, offset: 45, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scale2", kind: ParamKind::Float, offset: 46, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledKFalse", kind: ParamKind::Int, offset: 47, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsK", kind: ParamKind::Int, offset: 48, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsK", kind: ParamKind::Int, offset: 49, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scaleVary0", kind: ParamKind::Float, offset: 50, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleC1", kind: ParamKind::Float, offset: 51, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset001", kind: ParamKind::Float4, offset: 52, default: &[0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledRFalse", kind: ParamKind::Int, offset: 56, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 57, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 58, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 59, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 71, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterations", kind: ParamKind::Int, offset: 72, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offset1", kind: ParamKind::Float, offset: 73, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset05", kind: ParamKind::Float, offset: 74, default: &[0.5] },
+            GeneratedParam { path: "transformCommon.functionEnabledSwFalse", kind: ParamKind::Int, offset: 75, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledMFalse", kind: ParamKind::Int, offset: 76, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsM", kind: ParamKind::Int, offset: 77, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsM", kind: ParamKind::Int, offset: 78, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBxFalse", kind: ParamKind::Int, offset: 79, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scale0", kind: ParamKind::Float, offset: 80, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledNFalse", kind: ParamKind::Int, offset: 81, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsN", kind: ParamKind::Int, offset: 82, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsN", kind: ParamKind::Int, offset: 83, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledByFalse", kind: ParamKind::Int, offset: 84, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleA0", kind: ParamKind::Float, offset: 85, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledOFalse", kind: ParamKind::Int, offset: 86, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsO", kind: ParamKind::Int, offset: 87, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsO", kind: ParamKind::Int, offset: 88, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBzFalse", kind: ParamKind::Int, offset: 89, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleB0", kind: ParamKind::Float, offset: 90, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabled", kind: ParamKind::Int, offset: 91, default: &[1.0] },
+            GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 92, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 93, default: &[250.0] },
+            GeneratedParam { path: "foldColor.difs1", kind: ParamKind::Float, offset: 94, default: &[1.0] },
+            GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 95, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 96, default: &[0.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 97, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledA", kind: ParamKind::Int, offset: 101, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 102, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 59, op: DeriveOp::Rotation2, sources: &[102] },
+        ],
+        wgsl: r####"
+	var colorAdd: f32 = 0.0;
+	var oldZ: vec4<f32> = z;
+	var boxFold: vec4<f32> = __MB2P0__;
+
+	
+	if ((__MB2P4__ != 0)
+			&& (*aux).i >= __MB2P5__
+			&& (*aux).i < __MB2P6__)
+		{ z.x = abs(z.x); }
+	if ((__MB2P7__ != 0)
+			&& (*aux).i >= __MB2P8__
+			&& (*aux).i < __MB2P9__)
+		{ z.y = abs(z.y); }
+	if ((__MB2P10__ != 0)
+			&& (*aux).i >= __MB2P11__
+			&& (*aux).i < __MB2P12__)
+		{ z.z = abs(z.z); }
+	
+	if ((__MB2P13__ != 0))
+	{
+		
+		if ((__MB2P14__ != 0)
+				&& (*aux).i >= __MB2P15__
+				&& (*aux).i < __MB2P16__)
+		{
+			z.x -= boxFold.x;
+			z.y -= boxFold.y;
+		}
+		
+		if ((__MB2P17__ != 0)
+				&& (*aux).i >= __MB2P18__
+				&& (*aux).i < __MB2P19__)
+			{ z -= boxFold; }
+		
+		if ((__MB2P20__ != 0)
+				&& (*aux).i >= __MB2P21__
+				&& (*aux).i < __MB2P22__)
+		{
+			z.x = abs(z.x);
+			var psi: f32 = M_PI_F / __MB2P23__;
+			psi = abs(fmod(atan2(z.y, z.x) + psi, 2.0 * psi) - psi);
+			var len: f32 = sqrt(z.x * z.x + z.y * z.y);
+			z.x = cos(psi) * len;
+			z.y = sin(psi) * len;
+		}
+		
+		if ((__MB2P24__ != 0)
+				&& (*aux).i >= __MB2P25__
+				&& (*aux).i < __MB2P26__)
+			{ if (z.x > z.y)
+			{
+				var temp: f32 = z.x;
+				z.x = z.y;
+				z.y = temp;
+			} }
+		
+		if ((__MB2P27__ != 0)
+				&& (*aux).i >= __MB2P28__
+				&& (*aux).i < __MB2P29__)
+		{
+			var xOffset: f32 = __MB2P30__;
+			if (z.x < xOffset) { z.x = abs(z.x - xOffset) + xOffset; }
+		}
+		if ((__MB2P31__ != 0)
+				&& (*aux).i >= __MB2P32__
+				&& (*aux).i < __MB2P33__)
+		{
+			var yOffset: f32 = __MB2P34__;
+			if (z.y < yOffset) { z.y = abs(z.y - yOffset) + yOffset; }
+		}
+		
+		if ((__MB2P35__ != 0)
+				&& (*aux).i >= __MB2P36__
+				&& (*aux).i < __MB2P37__)
+			{ if (z.x > z.y)
+			{
+				var temp: f32 = z.x;
+				z.x = z.y;
+				z.y = temp;
+			} }
+	}
+
+	
+	if ((*aux).i >= __MB2P38__
+			&& (*aux).i < __MB2P39__)
+		{ z.x -= __MB2P40__; }
+
+	if ((*aux).i >= __MB2P41__
+			&& (*aux).i < __MB2P42__)
+		{ z.y -= __MB2P43__; }
+
+	
+	var useScale: f32 = 1.0;
+	if ((*aux).i >= __MB2P44__
+			&& (*aux).i < __MB2P45__)
+	{
+		useScale = (*aux).actual_scale_a + __MB2P46__;
+		z *= useScale;
+		(*aux).de = (*aux).de * abs(useScale) + 1.0;
+		
+		if ((__MB2P47__ != 0)
+				&& (*aux).i >= __MB2P48__
+				&& (*aux).i < __MB2P49__)
+		{
+			
+			var vary: f32 = __MB2P50__
+									* (abs((*aux).actual_scale_a) - __MB2P51__);
+			(*aux).actual_scale_a -= vary;
+		}
+	}
+
+	
+	if ((*aux).i >= __MB2P38__
+			&& (*aux).i < __MB2P39__)
+		{ z.x += __MB2P40__; }
+
+	if ((*aux).i >= __MB2P41__
+			&& (*aux).i < __MB2P42__)
+		{ z.y += __MB2P43__; }
+
+	
+	z += __MB2P52__;
+
+	
+	if ((__MB2P56__ != 0)
+			&& (*aux).i >= __MB2P57__
+			&& (*aux).i < __MB2P58__)
+	{
+		z = mb2_mat_mul(__MB2P59__, z);
+	}
+
+	
+	var colorDist: f32 = (*aux).dist;
+	var zc: vec4<f32> = oldZ;
+
+	if ((*aux).i >= __MB2P71__
+			&& (*aux).i < __MB2P72__)
+	{
+		var tp: f32;
+		var len: f32 = __MB2P73__;
+		var face: f32 = __MB2P74__;
+
+		
+		if ((__MB2P75__ != 0))
+		{
+			var temp: f32 = zc.x;
+			zc.x = zc.z;
+			zc.z = temp;
+		}
+
+		var absZ: vec4<f32> = abs(zc);
+
+		if ((__MB2P76__ != 0)
+				&& (*aux).i >= __MB2P77__
+				&& (*aux).i < __MB2P78__)
+		{
+			tp = absZ.z;
+			if ((__MB2P79__ != 0)) { tp *= tp; }
+
+			zc.y += tp * __MB2P80__;
+		}
+
+		if ((__MB2P81__ != 0)
+				&& (*aux).i >= __MB2P82__
+				&& (*aux).i < __MB2P83__)
+		{
+			tp = absZ.z;
+			if ((__MB2P84__ != 0)) { tp *= tp; }
+			len += tp * __MB2P85__;
+		}
+
+		if ((__MB2P86__ != 0)
+				&& (*aux).i >= __MB2P87__
+				&& (*aux).i < __MB2P88__)
+		{
+			tp = absZ.z;
+			if ((__MB2P89__ != 0)) { tp *= tp; }
+			face += tp * __MB2P90__;
+		}
+
+		var priD: f32 = max(abs(zc.x) - len, max(abs(zc.y) * SQRT_3_4_F + zc.z * 0.5, -zc.z) - face);
+
+		(*aux).dist = min((*aux).dist, priD / (*aux).de);
+	}
+
+	
+	if ((__MB2P91__ != 0) && colorDist != (*aux).dist
+			&& (*aux).i >= __MB2P92__
+			&& (*aux).i < __MB2P93__)
+	{
+		colorAdd += ((*aux).i * __MB2P94__ + __MB2P95__);
+		if ((__MB2P96__ != 0))
+		{
+			zc = abs(zc);
+			colorAdd += __MB2P97__.x * zc.x * zc.y;
+			colorAdd += __MB2P97__.y * max(zc.x, zc.y);
+		}
+
+		if ((__MB2P101__ != 0))
+		{
+			(*aux).color = colorAdd;
+		}
+		else
+		{
+			(*aux).color += colorAdd;
+		}
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "DIFSSphere",
+        source: "difs_sphere.cl",
+        param_floats: 92,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 0, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterations", kind: ParamKind::Int, offset: 1, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabled4dFalse", kind: ParamKind::Int, offset: 2, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetR1", kind: ParamKind::Float, offset: 3, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledTFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsT", kind: ParamKind::Int, offset: 5, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsT", kind: ParamKind::Int, offset: 6, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledSwFalse", kind: ParamKind::Int, offset: 7, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetT1", kind: ParamKind::Float, offset: 8, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset05", kind: ParamKind::Float, offset: 9, default: &[0.5] },
+            GeneratedParam { path: "foldColor.auxColorEnabled", kind: ParamKind::Int, offset: 10, default: &[1.0] },
+            GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 11, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 12, default: &[250.0] },
+            GeneratedParam { path: "foldColor.difs1", kind: ParamKind::Float, offset: 13, default: &[1.0] },
+            GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 14, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 15, default: &[0.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 16, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledA", kind: ParamKind::Int, offset: 20, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.additionConstantA111", kind: ParamKind::Float4, offset: 21, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 25, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsX", kind: ParamKind::Int, offset: 26, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsX", kind: ParamKind::Int, offset: 27, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAy", kind: ParamKind::Int, offset: 28, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsY", kind: ParamKind::Int, offset: 29, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsY", kind: ParamKind::Int, offset: 30, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAzFalse", kind: ParamKind::Int, offset: 31, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsZ", kind: ParamKind::Int, offset: 32, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsZ", kind: ParamKind::Int, offset: 33, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 34, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 35, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 36, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsA", kind: ParamKind::Int, offset: 37, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBFalse", kind: ParamKind::Int, offset: 38, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsB", kind: ParamKind::Int, offset: 39, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsB", kind: ParamKind::Int, offset: 40, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 41, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 42, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsP", kind: ParamKind::Int, offset: 43, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.int6", kind: ParamKind::Int, offset: 44, default: &[6.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 45, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsCx", kind: ParamKind::Int, offset: 46, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsCx", kind: ParamKind::Int, offset: 47, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 48, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 49, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsC", kind: ParamKind::Int, offset: 50, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetC0", kind: ParamKind::Float, offset: 51, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 52, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 53, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsD", kind: ParamKind::Int, offset: 54, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetD0", kind: ParamKind::Float, offset: 55, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCyFalse", kind: ParamKind::Int, offset: 56, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsCy", kind: ParamKind::Int, offset: 57, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsCy", kind: ParamKind::Int, offset: 58, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.startIterationsE", kind: ParamKind::Int, offset: 59, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsE", kind: ParamKind::Int, offset: 60, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetE2", kind: ParamKind::Float, offset: 61, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.startIterationsF", kind: ParamKind::Int, offset: 62, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsF", kind: ParamKind::Int, offset: 63, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetF2", kind: ParamKind::Float, offset: 64, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.startIterationsS", kind: ParamKind::Int, offset: 65, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsS", kind: ParamKind::Int, offset: 66, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scale2", kind: ParamKind::Float, offset: 67, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledKFalse", kind: ParamKind::Int, offset: 68, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsK", kind: ParamKind::Int, offset: 69, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsK", kind: ParamKind::Int, offset: 70, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scaleVary0", kind: ParamKind::Float, offset: 71, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleC1", kind: ParamKind::Float, offset: 72, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset001", kind: ParamKind::Float4, offset: 73, default: &[0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledRFalse", kind: ParamKind::Int, offset: 77, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 78, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 79, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 80, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 92, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 80, op: DeriveOp::Rotation2, sources: &[92] },
+        ],
+        wgsl: r####"
+	var colorAdd: f32 = 0.0;
+
+	
+	var colorDist: f32 = (*aux).dist;
+	var zc: vec4<f32> = z;
+	
+	if ((*aux).i >= __MB2P0__
+			&& (*aux).i < __MB2P1__)
+	{
+		var vecLen: f32;
+		if (!(__MB2P2__ != 0))
+		{
+			var vec3: vec3<f32> = vec3<f32>(zc.x, zc.y, zc.z);
+			vecLen = length(vec3);
+		}
+		else
+			{ vecLen = length(zc); }
+
+		var spD: f32 = vecLen - __MB2P3__;
+		(*aux).dist = min((*aux).dist, spD / (*aux).de);
+	}
+
+	
+	if ((__MB2P4__ != 0)
+			&& (*aux).i >= __MB2P5__
+			&& (*aux).i < __MB2P6__)
+	{
+		var torD: f32;
+
+		
+		if ((__MB2P7__ != 0))
+		{
+			var temp: f32 = zc.x;
+			zc.x = zc.z;
+			zc.z = temp;
+		}
+
+		var T1: f32 = sqrt(zc.y * zc.y + zc.x * zc.x) - __MB2P8__;
+		torD = sqrt(T1 * T1 + zc.z * zc.z) - __MB2P9__;
+
+		(*aux).dist = min((*aux).dist, torD / (*aux).de);
+	}
+
+	
+	if ((__MB2P10__ != 0) && colorDist != (*aux).dist
+			&& (*aux).i >= __MB2P11__
+			&& (*aux).i < __MB2P12__)
+	{
+		colorAdd += ((*aux).i * __MB2P13__ + __MB2P14__);
+
+		if ((__MB2P15__ != 0))
+		{
+			zc = abs(zc);
+			colorAdd += __MB2P16__.x * zc.x * zc.y;
+			colorAdd += __MB2P16__.y * max(zc.x, zc.y);
+		}
+
+		if ((__MB2P20__ != 0))
+		{
+			(*aux).color = colorAdd;
+		}
+		else
+		{
+			(*aux).color += colorAdd;
+		}
+	}
+
+	
+	var boxFold: vec4<f32> = __MB2P21__;
+	
+	if ((__MB2P25__ != 0)
+			&& (*aux).i >= __MB2P26__
+			&& (*aux).i < __MB2P27__)
+		{ z.x = abs(z.x); }
+
+	if ((__MB2P28__ != 0)
+			&& (*aux).i >= __MB2P29__
+			&& (*aux).i < __MB2P30__)
+		{ z.y = abs(z.y); }
+
+	if ((__MB2P31__ != 0)
+			&& (*aux).i >= __MB2P32__
+			&& (*aux).i < __MB2P33__)
+		{ z.z = abs(z.z); }
+
+	if ((__MB2P34__ != 0))
+	{
+		
+		if ((__MB2P35__ != 0)
+				&& (*aux).i >= __MB2P36__
+				&& (*aux).i < __MB2P37__)
+		{
+			z.x -= boxFold.x;
+			z.y -= boxFold.y;
+		}
+		
+		if ((__MB2P38__ != 0)
+				&& (*aux).i >= __MB2P39__
+				&& (*aux).i < __MB2P40__)
+			{ z -= boxFold; }
+
+		
+		if ((__MB2P41__ != 0)
+				&& (*aux).i >= __MB2P42__
+				&& (*aux).i < __MB2P43__)
+		{
+			z.x = abs(z.x);
+			var psi: f32 = M_PI_F / __MB2P44__;
+			psi = abs(fmod(atan2(z.y, z.x) + psi, 2.0 * psi) - psi);
+			var len: f32 = sqrt(z.x * z.x + z.y * z.y);
+			z.x = cos(psi) * len;
+			z.y = sin(psi) * len;
+		}
+		
+		if ((__MB2P45__ != 0)
+				&& (*aux).i >= __MB2P46__
+				&& (*aux).i < __MB2P47__)
+			{ if (z.x > z.y)
+			{
+				var temp: f32 = z.x;
+				z.x = z.y;
+				z.y = temp;
+			} }
+		
+		if ((__MB2P48__ != 0)
+				&& (*aux).i >= __MB2P49__
+				&& (*aux).i < __MB2P50__)
+		{
+			var xOffset: f32 = __MB2P51__;
+			if (z.x < xOffset) { z.x = abs(z.x - xOffset) + xOffset; }
+		}
+		if ((__MB2P52__ != 0)
+				&& (*aux).i >= __MB2P53__
+				&& (*aux).i < __MB2P54__)
+		{
+			var yOffset: f32 = __MB2P55__;
+			if (z.y < yOffset) { z.y = abs(z.y - yOffset) + yOffset; }
+		}
+		
+		if ((__MB2P56__ != 0)
+				&& (*aux).i >= __MB2P57__
+				&& (*aux).i < __MB2P58__)
+			{ if (z.x > z.y)
+			{
+				var temp: f32 = z.x;
+				z.x = z.y;
+				z.y = temp;
+			} }
+	}
+
+	
+	if ((*aux).i >= __MB2P59__
+			&& (*aux).i < __MB2P60__)
+		{ z.x -= __MB2P61__; }
+
+	if ((*aux).i >= __MB2P62__
+			&& (*aux).i < __MB2P63__)
+		{ z.y -= __MB2P64__; }
+
+	
+	var useScale: f32 = 1.0;
+	if ((*aux).i >= __MB2P65__
+			&& (*aux).i < __MB2P66__)
+	{
+		useScale = (*aux).actual_scale_a + __MB2P67__;
+		z *= useScale;
+		(*aux).de = (*aux).de * abs(useScale) + 1.0;
+		
+		if ((__MB2P68__ != 0)
+				&& (*aux).i >= __MB2P69__
+				&& (*aux).i < __MB2P70__)
+		{
+			
+			var vary: f32 = __MB2P71__
+									* (abs((*aux).actual_scale_a) - __MB2P72__);
+			(*aux).actual_scale_a -= vary;
+		}
+	}
+
+	
+	if ((*aux).i >= __MB2P59__
+			&& (*aux).i < __MB2P60__)
+		{ z.x += __MB2P61__; }
+
+	if ((*aux).i >= __MB2P62__
+			&& (*aux).i < __MB2P63__)
+		{ z.y += __MB2P64__; }
+
+	
+	z += __MB2P73__;
+
+	
+	if ((__MB2P77__ != 0)
+			&& (*aux).i >= __MB2P78__
+			&& (*aux).i < __MB2P79__)
+	{
+		z = mb2_mat_mul(__MB2P80__, z);
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "DIFSTorus",
+        source: "difs_torus.cl",
+        param_floats: 102,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.additionConstantA111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 4, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsX", kind: ParamKind::Int, offset: 5, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsX", kind: ParamKind::Int, offset: 6, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAy", kind: ParamKind::Int, offset: 7, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsY", kind: ParamKind::Int, offset: 8, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsY", kind: ParamKind::Int, offset: 9, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAzFalse", kind: ParamKind::Int, offset: 10, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsZ", kind: ParamKind::Int, offset: 11, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsZ", kind: ParamKind::Int, offset: 12, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 13, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 14, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 15, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsA", kind: ParamKind::Int, offset: 16, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBFalse", kind: ParamKind::Int, offset: 17, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsB", kind: ParamKind::Int, offset: 18, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsB", kind: ParamKind::Int, offset: 19, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 20, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 21, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsP", kind: ParamKind::Int, offset: 22, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.int6", kind: ParamKind::Int, offset: 23, default: &[6.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 24, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsCx", kind: ParamKind::Int, offset: 25, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsCx", kind: ParamKind::Int, offset: 26, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 27, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 28, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsC", kind: ParamKind::Int, offset: 29, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetC0", kind: ParamKind::Float, offset: 30, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 31, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 32, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsD", kind: ParamKind::Int, offset: 33, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetD0", kind: ParamKind::Float, offset: 34, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCyFalse", kind: ParamKind::Int, offset: 35, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsCy", kind: ParamKind::Int, offset: 36, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsCy", kind: ParamKind::Int, offset: 37, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.startIterationsE", kind: ParamKind::Int, offset: 38, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsE", kind: ParamKind::Int, offset: 39, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetE2", kind: ParamKind::Float, offset: 40, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.startIterationsF", kind: ParamKind::Int, offset: 41, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsF", kind: ParamKind::Int, offset: 42, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetF2", kind: ParamKind::Float, offset: 43, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.startIterationsS", kind: ParamKind::Int, offset: 44, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsS", kind: ParamKind::Int, offset: 45, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scale2", kind: ParamKind::Float, offset: 46, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledKFalse", kind: ParamKind::Int, offset: 47, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsK", kind: ParamKind::Int, offset: 48, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsK", kind: ParamKind::Int, offset: 49, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scaleVary0", kind: ParamKind::Float, offset: 50, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleC1", kind: ParamKind::Float, offset: 51, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset001", kind: ParamKind::Float4, offset: 52, default: &[0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledRFalse", kind: ParamKind::Int, offset: 56, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 57, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 58, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 59, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledM", kind: ParamKind::Int, offset: 71, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 72, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterations", kind: ParamKind::Int, offset: 73, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledSwFalse", kind: ParamKind::Int, offset: 74, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetT1", kind: ParamKind::Float, offset: 75, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset05", kind: ParamKind::Float, offset: 76, default: &[0.5] },
+            GeneratedParam { path: "transformCommon.functionEnabledMFalse", kind: ParamKind::Int, offset: 77, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsM", kind: ParamKind::Int, offset: 78, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsM", kind: ParamKind::Int, offset: 79, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offset1", kind: ParamKind::Float, offset: 80, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offsetA0", kind: ParamKind::Float, offset: 81, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledNFalse", kind: ParamKind::Int, offset: 82, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsN", kind: ParamKind::Int, offset: 83, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsN", kind: ParamKind::Int, offset: 84, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scale0", kind: ParamKind::Float, offset: 85, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledOFalse", kind: ParamKind::Int, offset: 86, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsO", kind: ParamKind::Int, offset: 87, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsO", kind: ParamKind::Int, offset: 88, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scaleA0", kind: ParamKind::Float, offset: 89, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetR1", kind: ParamKind::Float, offset: 90, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offsetA05", kind: ParamKind::Float, offset: 91, default: &[0.5] },
+            GeneratedParam { path: "foldColor.auxColorEnabled", kind: ParamKind::Int, offset: 92, default: &[1.0] },
+            GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 93, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 94, default: &[250.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 95, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 99, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 100, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledA", kind: ParamKind::Int, offset: 101, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 102, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 59, op: DeriveOp::Rotation2, sources: &[102] },
+        ],
+        wgsl: r####"
+	var oldZ: vec4<f32> = z;
+	var boxFold: vec4<f32> = __MB2P0__;
+
+	
+	if ((__MB2P4__ != 0)
+			&& (*aux).i >= __MB2P5__
+			&& (*aux).i < __MB2P6__)
+		{ z.x = abs(z.x); }
+	if ((__MB2P7__ != 0)
+			&& (*aux).i >= __MB2P8__
+			&& (*aux).i < __MB2P9__)
+		{ z.y = abs(z.y); }
+	if ((__MB2P10__ != 0)
+			&& (*aux).i >= __MB2P11__
+			&& (*aux).i < __MB2P12__)
+		{ z.z = abs(z.z); }
+	
+	if ((__MB2P13__ != 0))
+	{
+		
+		if ((__MB2P14__ != 0)
+				&& (*aux).i >= __MB2P15__
+				&& (*aux).i < __MB2P16__)
+		{
+			z.x -= boxFold.x;
+			z.y -= boxFold.y;
+		}
+		
+		if ((__MB2P17__ != 0)
+				&& (*aux).i >= __MB2P18__
+				&& (*aux).i < __MB2P19__)
+			{ z -= boxFold; }
+		
+		if ((__MB2P20__ != 0)
+				&& (*aux).i >= __MB2P21__
+				&& (*aux).i < __MB2P22__)
+		{
+			z.x = abs(z.x);
+			var psi: f32 = M_PI_F / __MB2P23__;
+			psi = abs(fmod(atan2(z.y, z.x) + psi, 2.0 * psi) - psi);
+			var len: f32 = sqrt(z.x * z.x + z.y * z.y);
+			z.x = cos(psi) * len;
+			z.y = sin(psi) * len;
+		}
+		
+		if ((__MB2P24__ != 0)
+				&& (*aux).i >= __MB2P25__
+				&& (*aux).i < __MB2P26__)
+			{ if (z.x > z.y)
+			{
+				var temp: f32 = z.x;
+				z.x = z.y;
+				z.y = temp;
+			} }
+		
+		if ((__MB2P27__ != 0)
+				&& (*aux).i >= __MB2P28__
+				&& (*aux).i < __MB2P29__)
+		{
+			var xOffset: f32 = __MB2P30__;
+			if (z.x < xOffset) { z.x = abs(z.x - xOffset) + xOffset; }
+		}
+		if ((__MB2P31__ != 0)
+				&& (*aux).i >= __MB2P32__
+				&& (*aux).i < __MB2P33__)
+		{
+			var yOffset: f32 = __MB2P34__;
+			if (z.y < yOffset) { z.y = abs(z.y - yOffset) + yOffset; }
+		}
+		
+		if ((__MB2P35__ != 0)
+				&& (*aux).i >= __MB2P36__
+				&& (*aux).i < __MB2P37__)
+			{ if (z.x > z.y)
+			{
+				var temp: f32 = z.x;
+				z.x = z.y;
+				z.y = temp;
+			} }
+	}
+
+	
+	if ((*aux).i >= __MB2P38__
+			&& (*aux).i < __MB2P39__)
+		{ z.x -= __MB2P40__; }
+
+	if ((*aux).i >= __MB2P41__
+			&& (*aux).i < __MB2P42__)
+		{ z.y -= __MB2P43__; }
+
+	
+	var useScale: f32 = 1.0;
+	if ((*aux).i >= __MB2P44__
+			&& (*aux).i < __MB2P45__)
+	{
+		useScale = (*aux).actual_scale_a + __MB2P46__;
+		z *= useScale;
+		(*aux).de = (*aux).de * abs(useScale) + 1.0;
+		
+		if ((__MB2P47__ != 0)
+				&& (*aux).i >= __MB2P48__
+				&& (*aux).i < __MB2P49__)
+		{
+			
+			var vary: f32 = __MB2P50__
+									* (abs((*aux).actual_scale_a) - __MB2P51__);
+			(*aux).actual_scale_a -= vary;
+		}
+	}
+
+	
+	if ((*aux).i >= __MB2P38__
+			&& (*aux).i < __MB2P39__)
+		{ z.x += __MB2P40__; }
+
+	if ((*aux).i >= __MB2P41__
+			&& (*aux).i < __MB2P42__)
+		{ z.y += __MB2P43__; }
+
+	
+	z += __MB2P52__;
+
+	
+	if ((__MB2P56__ != 0)
+			&& (*aux).i >= __MB2P57__
+			&& (*aux).i < __MB2P58__)
+	{
+		z = mb2_mat_mul(__MB2P59__, z);
+	}
+
+	
+	var colorDist: f32 = (*aux).dist;
+	var zc: vec4<f32> = oldZ;
+
+	
+	if ((__MB2P71__ != 0)
+			&& (*aux).i >= __MB2P72__
+			&& (*aux).i < __MB2P73__)
+	{
+		var torD: f32;
+		
+		var tp: vec3<f32> = vec3<f32>(zc.x, zc.y, zc.z);
+		tp *= tp;
+		
+		if ((__MB2P74__ != 0))
+		{
+			var temp: f32 = tp.x;
+			tp.x = tp.z;
+			tp.z = temp;
+		}
+		var T1: f32 = sqrt(tp.y + tp.x) - __MB2P75__;
+		torD = sqrt(T1 * T1 + tp.z) - __MB2P76__;
+
+		(*aux).dist = min((*aux).dist, torD / (*aux).de);
+	}
+
+	
+	if ((__MB2P77__ != 0)
+			&& (*aux).i >= __MB2P78__
+			&& (*aux).i < __MB2P79__)
+	{
+		var lenX: f32 = __MB2P80__;
+		var lenY: f32 = __MB2P81__;
+		if ((__MB2P82__ != 0)
+				&& (*aux).i >= __MB2P83__
+				&& (*aux).i < __MB2P84__)
+		{
+			var absX: f32 = abs(zc.x);
+			lenX += absX * __MB2P85__;
+		}
+		if ((__MB2P86__ != 0)
+				&& (*aux).i >= __MB2P87__
+				&& (*aux).i < __MB2P88__)
+		{
+			var absY: f32 = abs(zc.y);
+			lenY += absY * __MB2P89__;
+		}
+		var q: vec3<f32> = vec3<f32>(max(abs(zc.y) - lenY, 0.0), max(abs(zc.x) - lenX, 0.0), zc.z);
+		var streD: f32 = sqrt(q.x * q.x + q.y * q.y) - __MB2P90__;
+		streD = sqrt(streD * streD + q.z * q.z) - __MB2P91__;
+		(*aux).dist = min((*aux).dist, streD / (*aux).de);
+	}
+
+	
+	if ((__MB2P92__ != 0) && colorDist != (*aux).dist
+			&& (*aux).i >= __MB2P93__
+			&& (*aux).i < __MB2P94__)
+	{
+		var colorAdd: f32 = __MB2P95__.w + (*aux).i * __MB2P99__;
+
+		if ((__MB2P100__ != 0))
+		{
+			zc = abs(zc);
+			colorAdd += __MB2P95__.x * zc.x * zc.y;
+			colorAdd += __MB2P95__.y * max(zc.x, zc.y);
+		}
+
+		if (!(__MB2P101__ != 0))
+		{
+			(*aux).color = colorAdd;
+		}
+		else
+		{
+			(*aux).color += colorAdd;
+		}
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "EiffieCar",
+        source: "eiffie_car.cl",
+        param_floats: 30,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.scale015", kind: ParamKind::Float, offset: 0, default: &[1.5] },
+            GeneratedParam { path: "transformCommon.scale05", kind: ParamKind::Float, offset: 1, default: &[0.5] },
+            GeneratedParam { path: "transformCommon.offset2", kind: ParamKind::Float, offset: 2, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.offset105", kind: ParamKind::Float, offset: 3, default: &[1.5] },
+            GeneratedParam { path: "transformCommon.offset01", kind: ParamKind::Float, offset: 4, default: &[0.1] },
+            GeneratedParam { path: "transformCommon.scale1p1", kind: ParamKind::Float, offset: 5, default: &[1.1] },
+            GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 6, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetD0", kind: ParamKind::Float, offset: 7, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.minR2p25", kind: ParamKind::Float, offset: 8, default: &[0.25] },
+            GeneratedParam { path: "transformCommon.minR06", kind: ParamKind::Float, offset: 9, default: &[0.6] },
+            GeneratedParam { path: "transformCommon.offsetR1", kind: ParamKind::Float, offset: 10, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.scale025", kind: ParamKind::Float, offset: 11, default: &[0.25] },
+            GeneratedParam { path: "transformCommon.offsetBp01", kind: ParamKind::Float, offset: 12, default: &[0.01] },
+            GeneratedParam { path: "transformCommon.functionEnabledEFalse", kind: ParamKind::Int, offset: 13, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scale8", kind: ParamKind::Float, offset: 14, default: &[8.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFFalse", kind: ParamKind::Int, offset: 15, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset100", kind: ParamKind::Float4, offset: 16, default: &[1.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.offsetB0", kind: ParamKind::Float, offset: 20, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset02", kind: ParamKind::Float, offset: 21, default: &[0.2] },
+            GeneratedParam { path: "transformCommon.offsetp05", kind: ParamKind::Float, offset: 22, default: &[0.05] },
+            GeneratedParam { path: "transformCommon.offsetp1", kind: ParamKind::Float, offset: 23, default: &[0.1] },
+            GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 24, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 25, default: &[0.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 26, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+        ],
+        wgsl: r####"
+	
+
+	var p0: vec4<f32> = (*aux).const_c;
+	var p: vec4<f32> = p0;
+
+	p.z = p0.z + __MB2P0__;
+
+	var r: f32 = sqrt(p.z * p.z + p.x * p.x);
+
+	var tp: vec4<f32> = p0;
+	tp.y = max(abs(p.y) - __MB2P1__, 0.0);
+	tp.z = max(r - __MB2P2__, 0.0);
+	tp.x = max(-p.z + __MB2P3__, 0.0);
+	var d: f32 = length(tp) - __MB2P4__;
+	d = max(d, p.x - __MB2P5__);		 
+	if ((__MB2P6__ != 0)) { d = 100.0; }
+
+	p.z = p0.z - __MB2P7__;					 
+	p.x = p0.x + __MB2P8__;					 
+	p.y = abs(abs(p.y) - __MB2P9__); 
+	p.x = abs(p.x) - __MB2P10__;		 
+	r = sqrt(p.z * p.z + p.x * p.x);
+	tp.x = max(r - __MB2P11__, 0.0); 
+	tp.y = max(p.y - __MB2P12__ - 0.05, 0.0);
+	tp.z = max(-p.z - 0.08, 0.0); 
+
+	
+	if (!(__MB2P13__ != 0))
+	{
+		d = -log(exp(-__MB2P14__ * d)
+						 + exp(-__MB2P14__ * (length(tp) - 0.04)))
+				/ __MB2P14__;
+	}
+	else
+	{
+
+		
+		
+		
+	}
+
+	d = max(d, -max(p.y - 0.165, r - 0.24)); 
+var zcd: f32 = 0.0;
+	if (!(__MB2P15__ != 0))
+	{
+		var q: vec4<f32> = abs(p0) - __MB2P16__;
+		var zc: vec4<f32> = q;
+
+		zc.x = max(zc.x, 0.0);
+
+		zc.y -=  __MB2P9__ + 2.0 * (__MB2P12__ - 0.05);
+		zc.y = max(zc.y, 0.0);
+		zc.z = max(zc.z, 0.0);
+		zcd = length(zc);
+
+		zcd -= __MB2P20__;
+		d = min(zcd, d);
+	}
+
+	
+	var zc: vec4<f32> = p;
+	var cylR: f32 = sqrt(zc.x * zc.x + zc.z * zc.z)
+							- __MB2P21__;									 
+	cylR = max(abs(cylR) - __MB2P22__, cylR); 
+	var cylH: f32 = abs(zc.y) - __MB2P23__;
+
+	cylR = max(cylR, 0.0);
+	cylH = max(cylH, 0.0);
+	var cylD: f32 = sqrt(cylR * cylR + cylH * cylH);
+	cylD = min(max(cylR, cylH), 0.0) + cylD;
+
+	var d2: f32 = cylD - 0.02;
+	if ((__MB2P24__ != 0)) { d2 = 100.; }
+	
+
+	d = min(d, d2);
+	(*aux).dist = d;
+
+	
+	if ((__MB2P25__ != 0))
+	{
+		if ((*aux).dist == d2)
+			{ (*aux).color = 3.0 + __MB2P26__.y; }
+		else
+			{ (*aux).color = 5.0 + __MB2P26__.x; }
+
+		if ((*aux).dist == zcd)
+			{ (*aux).color = 4.0 + __MB2P26__.z; }
+
+
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "EiffieMsltoe",
+        source: "eiffie_msltoe.cl",
+        param_floats: 18,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.scale", kind: ParamKind::Float, offset: 0, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.additionConstant000", kind: ParamKind::Float4, offset: 1, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.addCpixelEnabledFalse", kind: ParamKind::Int, offset: 5, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 6, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledy", kind: ParamKind::Int, offset: 7, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledz", kind: ParamKind::Int, offset: 8, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.constantMultiplier000", kind: ParamKind::Float4, offset: 9, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.offset", kind: ParamKind::Float, offset: 13, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 14, default: &[1.0] },
+            GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 15, default: &[0.0] },
+            GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 16, default: &[1.0] },
+            GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 17, default: &[1.0] },
+        ],
+        derivations: &[
+        ],
+        wgsl: r####"
+	var c: vec4<f32> = (*aux).const_c;
+	var psi: f32 = abs(fmod(atan2(z.z, z.y) + M_PI_F + M_PI_8_F, M_PI_4_F) - M_PI_8_F);
+	var lengthYZ: f32 = sqrt(z.y * z.y + z.z * z.z);
+
+	z.y = cos(psi) * lengthYZ;
+	z.z = sin(psi) * lengthYZ;
+	(*aux).de = (*aux).de * 2.0 * (*aux).r;
+
+	var z2: vec4<f32> = z * z;
+	var rr: f32 = z2.x + z2.y + z2.z;
+	var m: f32 = 1.0 - z2.z / rr;
+	var temp: vec4<f32>;
+	temp.x = (z2.x - z2.y) * m;
+	temp.y = 2.0 * z.x * z.y * m * __MB2P0__; 
+	temp.z = 2.0 * z.z * sqrt(z2.x + z2.y);
+	temp.w = z.w;
+	z = temp + __MB2P1__;
+
+	if ((__MB2P5__ != 0))
+	{
+		var tempFAB: vec4<f32> = c;
+		if ((__MB2P6__ != 0)) { tempFAB.x = abs(tempFAB.x); }
+		if ((__MB2P7__ != 0)) { tempFAB.y = abs(tempFAB.y); }
+		if ((__MB2P8__ != 0)) { tempFAB.z = abs(tempFAB.z); }
+
+		tempFAB *= __MB2P9__;
+		z.x += sign(z.x) * tempFAB.x;
+		z.y += sign(z.y) * tempFAB.y;
+		z.z += sign(z.z) * tempFAB.z;
+	}
+	var lengthTempZ: f32 = -length(z);
+	
+	z *= 1.0 + __MB2P13__ / lengthTempZ;
+	z *= __MB2P14__;
+	
+	if (!(__MB2P15__ != 0))
+		{ (*aux).de = (*aux).de * abs(__MB2P14__) + 1.0; }
+	else
+		{ (*aux).de = (*aux).de * abs(__MB2P14__) * __MB2P16__
+							+ __MB2P17__; }
+	return z;
+"####,
+    },
+    GeneratedFormula {
         name: "FoldBoxMod1",
         source: "fold_box_mod1.cl",
         param_floats: 60,
@@ -6994,6 +10299,180 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	{
 		(*aux).color += colorAdd;
 	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "FoldCutCube",
+        source: "fold_cut_cube.cl",
+        param_floats: 50,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterations1", kind: ParamKind::Int, offset: 1, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.scale015", kind: ParamKind::Float, offset: 2, default: &[1.5] },
+            GeneratedParam { path: "transformCommon.functionEnabledRFalse", kind: ParamKind::Int, offset: 3, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 4, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 5, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 6, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 18, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 19, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 20, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.int6", kind: ParamKind::Int, offset: 21, default: &[6.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledSFalse", kind: ParamKind::Int, offset: 22, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.minR0", kind: ParamKind::Float, offset: 23, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.maxMinR0factor", kind: ParamKind::Float, offset: 24, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.maxR2d1", kind: ParamKind::Float, offset: 25, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset111", kind: ParamKind::Float4, offset: 26, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.offset100", kind: ParamKind::Float4, offset: 30, default: &[1.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.offset05", kind: ParamKind::Float, offset: 34, default: &[0.5] },
+            GeneratedParam { path: "transformCommon.rotation2EnabledFalse", kind: ParamKind::Int, offset: 35, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix2", kind: ParamKind::Matrix33, offset: 36, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 48, default: &[0.0] },
+            GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 49, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 50, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 54, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 24, op: DeriveOp::Ratio, sources: &[25, 23] },
+            Derivation { target: 6, op: DeriveOp::Rotation2, sources: &[50] },
+            Derivation { target: 36, op: DeriveOp::Rotation2, sources: &[54] },
+        ],
+        wgsl: r####"
+	if (!(__MB2P0__ != 0)
+			&& (*aux).i < __MB2P1__)
+	{
+		var zc: vec4<f32> = abs(z);
+		if (zc.y > zc.x)
+		{
+			var temp: f32 = zc.x;
+			zc.x = zc.y;
+			zc.y = temp;
+		}
+		if (zc.z > zc.x)
+		{
+			var temp: f32 = zc.x;
+			zc.x = zc.z;
+			zc.z = temp;
+		}
+		if (zc.y > zc.x)
+		{
+			var temp: f32 = zc.x;
+			zc.x = zc.y;
+			zc.y = temp;
+		} 
+		(*aux).dist = 1.0 - zc.x;
+	}
+
+	z *= __MB2P2__;
+	(*aux).de *= __MB2P2__;
+	
+	if ((__MB2P3__ != 0)
+			&& (*aux).i >= __MB2P4__
+			&& (*aux).i < __MB2P5__)
+	{
+		z = mb2_mat_mul(__MB2P6__, z);
+	}
+	z = abs(z);
+
+	
+	if ((__MB2P18__ != 0))
+	{
+		
+		if ((__MB2P19__ != 0))
+			{ if (z.y > z.x)
+			{
+				var temp: f32 = z.x;
+				z.x = z.y;
+				z.y = temp;
+			} }
+		
+		if ((__MB2P20__ != 0))
+		{
+			z.x = abs(z.x);
+			var psi: f32 = M_PI_F / __MB2P21__;
+			psi = abs(fmod(atan2(z.y, z.x) + psi, 2.0 * psi) - psi);
+			var len: f32 = sqrt(z.x * z.x + z.y * z.y);
+			z.x = cos(psi) * len;
+			z.y = sin(psi) * len;
+		}
+		if ((__MB2P22__ != 0))
+		{
+			var rr: f32 = dot(z, z);
+			
+			if (rr < __MB2P23__)
+			{
+				
+				z *= __MB2P24__;
+				(*aux).de *= __MB2P24__;
+			}
+			else if (rr < __MB2P25__)
+			{
+				var tglad_factor2: f32 = __MB2P25__ / rr;
+				z *= tglad_factor2;
+				(*aux).de *= tglad_factor2;
+			}
+			
+		}
+	}
+
+	z -= __MB2P26__;
+	if (z.y > z.x)
+	{
+		var temp: f32 = z.x;
+		z.x = z.y;
+		z.y = temp;
+	}
+	if (z.z > z.x)
+	{
+		var temp: f32 = z.x;
+		z.x = z.z;
+		z.z = temp;
+	}
+	if (z.y > z.x)
+	{
+		var temp: f32 = z.x;
+		z.x = z.y;
+		z.y = temp;
+	}
+
+	z -= __MB2P30__;
+
+	if (z.y > z.x)
+	{
+		var temp: f32 = z.x;
+		z.x = z.y;
+		z.y = temp;
+	}
+	if (z.z > z.x)
+	{
+		var temp: f32 = z.x;
+		z.x = z.z;
+		z.z = temp;
+	}
+	if (z.y > z.x)
+	{
+		var temp: f32 = z.x;
+		z.x = z.y;
+		z.y = temp;
+	}
+
+	if (!(__MB2P0__ != 0))
+	{
+		var divT: f32 = 1.0 + (*aux).i;
+		divT = __MB2P34__ / divT;
+		(*aux).dist = abs(min(divT - (*aux).dist, z.x / (*aux).de));
+	}
+	else
+		{ (*aux).dist = min((*aux).dist, z.x / (*aux).de); }
+
+	if ((__MB2P35__ != 0))
+		{ z = mb2_mat_mul(__MB2P36__, z); }
+
+	
+	if ((__MB2P48__ != 0)) { (*aux).dist = (*aux).dist * __MB2P49__; }
 	return z;
 "####,
     },
@@ -7281,6 +10760,205 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	if ((__MB2P50__ != 0))
 		{ (*aux).de = (*aux).de * __MB2P51__ + __MB2P52__; }
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "IfsXY",
+        source: "ifs_xy.cl",
+        param_floats: 76,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.additionConstant0555", kind: ParamKind::Float4, offset: 0, default: &[0.5, 0.5, 0.5, 0.0] },
+            GeneratedParam { path: "transformCommon.offset0", kind: ParamKind::Float, offset: 4, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset05", kind: ParamKind::Float, offset: 5, default: &[0.5] },
+            GeneratedParam { path: "transformCommon.functionEnabledBxFalse", kind: ParamKind::Int, offset: 6, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsB", kind: ParamKind::Int, offset: 7, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsB", kind: ParamKind::Int, offset: 8, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 9, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsX", kind: ParamKind::Int, offset: 10, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsX", kind: ParamKind::Int, offset: 11, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAyFalse", kind: ParamKind::Int, offset: 12, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsY", kind: ParamKind::Int, offset: 13, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsY", kind: ParamKind::Int, offset: 14, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAzFalse", kind: ParamKind::Int, offset: 15, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsZ", kind: ParamKind::Int, offset: 16, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsZ", kind: ParamKind::Int, offset: 17, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 18, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsJ", kind: ParamKind::Int, offset: 19, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsJ", kind: ParamKind::Int, offset: 20, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.int3", kind: ParamKind::Int, offset: 21, default: &[3.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBy", kind: ParamKind::Int, offset: 22, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 23, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsD", kind: ParamKind::Int, offset: 24, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBx", kind: ParamKind::Int, offset: 25, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsI", kind: ParamKind::Int, offset: 26, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsI", kind: ParamKind::Int, offset: 27, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledxFalse", kind: ParamKind::Int, offset: 28, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 29, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsA", kind: ParamKind::Int, offset: 30, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledy", kind: ParamKind::Int, offset: 31, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 32, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsC", kind: ParamKind::Int, offset: 33, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.startIterationsE", kind: ParamKind::Int, offset: 34, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsE", kind: ParamKind::Int, offset: 35, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offset1", kind: ParamKind::Float, offset: 36, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsF", kind: ParamKind::Int, offset: 37, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsF", kind: ParamKind::Int, offset: 38, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetA1", kind: ParamKind::Float, offset: 39, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledByFalse", kind: ParamKind::Int, offset: 40, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsG", kind: ParamKind::Int, offset: 41, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsG", kind: ParamKind::Int, offset: 42, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.startIterationsS", kind: ParamKind::Int, offset: 43, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsS", kind: ParamKind::Int, offset: 44, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scale2", kind: ParamKind::Float, offset: 45, default: &[2.0] },
+            GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 46, default: &[0.0] },
+            GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 47, default: &[1.0] },
+            GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 48, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFFalse", kind: ParamKind::Int, offset: 49, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsK", kind: ParamKind::Int, offset: 50, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsK", kind: ParamKind::Int, offset: 51, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scaleVary0", kind: ParamKind::Float, offset: 52, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleC1", kind: ParamKind::Float, offset: 53, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledMFalse", kind: ParamKind::Int, offset: 54, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsH", kind: ParamKind::Int, offset: 55, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsH", kind: ParamKind::Int, offset: 56, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offset111", kind: ParamKind::Float4, offset: 57, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 61, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 62, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 63, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 75, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 76, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 63, op: DeriveOp::Rotation2, sources: &[76] },
+        ],
+        wgsl: r####"
+	
+	
+	var boxSize: vec4<f32> = __MB2P0__;
+
+	var xOffset: f32 = __MB2P4__;
+	var yOffset: f32 = __MB2P5__;
+
+	if ((__MB2P6__ != 0)
+			&& (*aux).i >= __MB2P7__
+			&& (*aux).i < __MB2P8__)
+		{ z -= boxSize; }
+
+	if ((__MB2P9__ != 0)
+			&& (*aux).i >= __MB2P10__
+			&& (*aux).i < __MB2P11__)
+		{ z.x = abs(z.x); }
+
+	if ((__MB2P12__ != 0)
+			&& (*aux).i >= __MB2P13__
+			&& (*aux).i < __MB2P14__)
+		{ z.y = abs(z.y); }
+
+	if ((__MB2P15__ != 0)
+			&& (*aux).i >= __MB2P16__
+			&& (*aux).i < __MB2P17__)
+		{ z.z = abs(z.z); }
+
+	if ((__MB2P18__ != 0)
+			&& (*aux).i >= __MB2P19__
+			&& (*aux).i < __MB2P20__)
+	{
+		z.x = abs(z.x);
+		var psi: f32 = M_PI_F / __MB2P21__;
+		psi = abs(fmod(atan(z.y / z.x) + psi, 2.0 * psi) - psi);
+		var len: f32 = sqrt(z.x * z.x + z.y * z.y);
+		z.x = cos(psi) * len;
+		z.y = sin(psi) * len;
+	}
+
+	if ((__MB2P22__ != 0)
+			&& (*aux).i >= __MB2P23__
+			&& (*aux).i < __MB2P24__)
+		{ if (z.y > z.x)
+		{
+			var temp: f32 = z.x;
+			z.x = z.y;
+			z.y = temp;
+		} }
+
+	if ((__MB2P25__ != 0)
+			&& (*aux).i >= __MB2P26__
+			&& (*aux).i < __MB2P27__)
+		{ z = z - boxSize; }
+
+	if ((__MB2P28__ != 0)
+			&& (*aux).i >= __MB2P29__
+			&& (*aux).i < __MB2P30__)
+		{ if (z.x < xOffset) { z.x = abs(z.x - xOffset) + xOffset; } }
+
+	if ((__MB2P31__ != 0)
+			&& (*aux).i >= __MB2P32__
+			&& (*aux).i < __MB2P33__)
+		{ if (z.y < yOffset) { z.y = abs(z.y - yOffset) + yOffset; } }
+
+	if ((*aux).i >= __MB2P34__
+			&& (*aux).i < __MB2P35__)
+		{ z.x -= __MB2P36__; }
+
+	if ((*aux).i >= __MB2P37__
+			&& (*aux).i < __MB2P38__)
+		{ z.y -= __MB2P39__; }
+
+	if ((__MB2P40__ != 0)
+			&& (*aux).i >= __MB2P41__
+			&& (*aux).i < __MB2P42__)
+		{ if (z.y > z.x)
+		{
+			var temp: f32 = z.x;
+			z.x = z.y;
+			z.y = temp;
+		} }
+
+	
+	var useScale: f32 = 1.0;
+	if ((*aux).i >= __MB2P43__
+			&& (*aux).i < __MB2P44__)
+	{
+		useScale = (*aux).actual_scale_a + __MB2P45__;
+
+		z *= useScale;
+
+		if (!(__MB2P46__ != 0))
+			{ (*aux).de = (*aux).de * abs(useScale) + 1.0; }
+		else
+			{ (*aux).de = (*aux).de * abs(useScale) * __MB2P47__ + __MB2P48__; }
+
+		if ((__MB2P49__ != 0)
+				&& (*aux).i >= __MB2P50__
+				&& (*aux).i < __MB2P51__)
+		{
+			
+			var vary: f32 = __MB2P52__
+									* (abs((*aux).actual_scale_a) - __MB2P53__);
+			if ((__MB2P54__ != 0))
+				{ (*aux).actual_scale_a = -vary; }
+			else
+				{ (*aux).actual_scale_a = (*aux).actual_scale_a - vary; }
+		}
+	}
+
+	if ((*aux).i >= __MB2P55__
+			&& (*aux).i < __MB2P56__)
+		{ z += __MB2P57__; }
+
+	
+	if ((*aux).i >= __MB2P61__
+			&& (*aux).i < __MB2P62__)
+	{
+		z = mb2_mat_mul(__MB2P63__, z);
+	}
+
+	if ((__MB2P46__ != 0))
+		{ (*aux).de = (*aux).de * __MB2P47__ + __MB2P75__; }
 	return z;
 "####,
     },
@@ -8002,10 +11680,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		if ((__MB2P26__ != 0))
 			{ if (z.x > z.y)
 			{
-				var temp: f32 = z.x; }
+				var temp: f32 = z.x;
 				z.x = z.y;
 				z.y = temp;
-			}
+			} }
 		
 		if ((__MB2P27__ != 0))
 		{
@@ -8140,6 +11818,489 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 			(*aux).color = colAdd;
 		}
 	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "KochV2",
+        source: "koch_v2.cl",
+        param_floats: 48,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAy", kind: ParamKind::Int, offset: 1, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAzFalse", kind: ParamKind::Int, offset: 2, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCx", kind: ParamKind::Int, offset: 3, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 5, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 6, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.int6", kind: ParamKind::Int, offset: 7, default: &[6.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 8, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetC0", kind: ParamKind::Float, offset: 9, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 10, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetD0", kind: ParamKind::Float, offset: 11, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledGFalse", kind: ParamKind::Int, offset: 12, default: &[0.0] },
+            GeneratedParam { path: "mandelbox.offset", kind: ParamKind::Float4, offset: 13, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.minR0", kind: ParamKind::Float, offset: 17, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.maxMinR0factor", kind: ParamKind::Float, offset: 18, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.maxR2d1", kind: ParamKind::Float, offset: 19, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 20, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset100", kind: ParamKind::Float4, offset: 21, default: &[1.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.scale3", kind: ParamKind::Float, offset: 25, default: &[3.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledRFalse", kind: ParamKind::Int, offset: 26, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 27, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 28, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 29, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 41, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFFalse", kind: ParamKind::Int, offset: 45, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset1", kind: ParamKind::Float, offset: 46, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledEFalse", kind: ParamKind::Int, offset: 47, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 48, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 18, op: DeriveOp::Ratio, sources: &[19, 17] },
+            Derivation { target: 29, op: DeriveOp::Rotation2, sources: &[48] },
+        ],
+        wgsl: r####"
+	if ((__MB2P0__ != 0)) { z.x = abs(z.x); }
+	if ((__MB2P1__ != 0)) { z.y = abs(z.y); }
+	if ((__MB2P2__ != 0)) { z.z = abs(z.z); }
+	if ((__MB2P3__ != 0))
+		{ if (z.y > z.x)
+		{
+			var temp: f32 = z.x;
+			z.x = z.y;
+			z.y = temp;
+		} }
+
+	
+	if ((__MB2P4__ != 0))
+	{
+		
+		if ((__MB2P5__ != 0))
+			{ if (z.x > z.y)
+			{
+				var temp: f32 = z.x;
+				z.x = z.y;
+				z.y = temp;
+			} }
+		
+		if ((__MB2P6__ != 0))
+		{
+			z.x = abs(z.x);
+			var psi: f32 = M_PI_F / __MB2P7__;
+			psi = abs(fmod(atan2(z.y, z.x) + psi, 2.0 * psi) - psi);
+			var len: f32 = sqrt(z.x * z.x + z.y * z.y);
+			z.x = cos(psi) * len;
+			z.y = sin(psi) * len;
+		}
+		
+		if ((__MB2P8__ != 0))
+		{
+			var xOffset: f32 = __MB2P9__;
+			if (z.x < xOffset) { z.x = abs(z.x - xOffset) + xOffset; }
+		}
+		if ((__MB2P10__ != 0))
+		{
+			var yOffset: f32 = __MB2P11__;
+			if (z.y < yOffset) { z.y = abs(z.y - yOffset) + yOffset; }
+		}
+
+		if ((__MB2P12__ != 0))
+		{
+			z += __MB2P13__;
+			var rr: f32 = dot(z, z);
+
+			if (rr < __MB2P17__)
+			{
+				
+				z *= __MB2P18__;
+				(*aux).de *= __MB2P18__;
+			}
+			else if (rr < __MB2P19__)
+			{
+				var tglad_factor2: f32 = __MB2P19__ / rr;
+				z *= tglad_factor2;
+				(*aux).de *= tglad_factor2;
+			}
+			z -= __MB2P13__;
+		}
+	}
+
+	var YOff: f32 = FRAC_1_3_F * __MB2P20__;
+	z.y = YOff - abs(z.y - YOff);
+
+	z.x += FRAC_1_3_F;
+	if (z.z > z.x)
+	{
+		var temp: f32 = z.x;
+		z.x = z.z;
+		z.z = temp;
+	}
+	z.x -= FRAC_1_3_F;
+
+	z.x -= FRAC_1_3_F;
+	if (z.z > z.x)
+	{
+		var temp: f32 = z.x;
+		z.x = z.z;
+		z.z = temp;
+	}
+	z.x += FRAC_1_3_F;
+
+	var Offset: vec4<f32> = __MB2P21__;
+	z = __MB2P25__ * (z - Offset) + Offset;
+	(*aux).de = (*aux).de * __MB2P25__;
+
+	
+	if ((__MB2P26__ != 0)
+			&& (*aux).i >= __MB2P27__
+			&& (*aux).i < __MB2P28__)
+	{
+		z = mb2_mat_mul(__MB2P29__, z);
+	}
+	z += __MB2P41__;
+
+	var d: f32;
+	if (!(__MB2P45__ != 0))
+	{
+		d = abs(length(z) - length(Offset));
+	}
+	else
+	{
+		var e: f32 = __MB2P46__;
+		var c: vec4<f32> = (*aux).const_c;
+		if (!(__MB2P47__ != 0))
+		{
+			var f: vec4<f32> = abs(c) - vec4<f32>(e, e, e, 0.0);
+			e = max(f.x, max(f.y, f.z));
+		}
+		else
+		{
+			e = clamp(length(c) - e, 0.0, 100.0); 
+		}
+		d = abs(z.z - Offset.z);
+		d = max(d, e);
+	}
+	(*aux).dist = d / (*aux).de;
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "KochV3",
+        source: "koch_v3.cl",
+        param_floats: 26,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.angle72", kind: ParamKind::Float, offset: 0, default: &[72.0] },
+            GeneratedParam { path: "transformCommon.scale4", kind: ParamKind::Float, offset: 1, default: &[4.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 2, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAy", kind: ParamKind::Int, offset: 3, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAz", kind: ParamKind::Int, offset: 4, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 5, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 6, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 7, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.int6", kind: ParamKind::Int, offset: 8, default: &[6.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 9, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetC0", kind: ParamKind::Float, offset: 10, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledRFalse", kind: ParamKind::Int, offset: 11, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 12, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 13, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 14, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 26, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 14, op: DeriveOp::Rotation2, sources: &[26] },
+        ],
+        wgsl: r####"
+	var beta: f32 = __MB2P0__ * M_PI_F / 360.0;
+	var tc: f32 = tan(beta);
+	var tsq: f32 = sqrt(3.0 * tc * tc - 1.0) * 0.25;
+
+	var fl1: vec4<f32> = (vec4<f32>(1.0, 0.0, -2.0 * tsq, 0.0));
+	fl1 = fl1 / sqrt(1.0 + 4.0 * tsq * tsq);
+	tc = cos(beta);
+
+	var BDscale: f32 = __MB2P1__ * tc * tc;
+
+	
+	if ((__MB2P2__ != 0)) { z.x = abs(z.x); }
+	if ((__MB2P3__ != 0)) { z.y = abs(z.y); }
+	if ((__MB2P4__ != 0)) { z.z = abs(z.z); }
+
+	
+	if ((__MB2P5__ != 0))
+	{
+		
+		if ((__MB2P6__ != 0))
+			{ if (z.y > z.x)
+			{
+				var temp: f32 = z.x;
+				z.x = z.y;
+				z.y = temp;
+			} }
+		
+		if ((__MB2P7__ != 0))
+		{
+			z.x = abs(z.x);
+			var psi: f32 = M_PI_F / __MB2P8__;
+			psi = abs(fmod(atan2(z.y, z.x) + psi, 2.0 * psi) - psi);
+			var len: f32 = sqrt(z.x * z.x + z.y * z.y);
+			z.x = cos(psi) * len;
+			z.y = sin(psi) * len;
+		}
+		
+		if ((__MB2P9__ != 0))
+		{
+			var xOffset: f32 = __MB2P10__;
+			if (z.x < xOffset) { z.x = abs(z.x + xOffset) - xOffset; }
+		}
+	}
+
+	
+	var CPid6: f32 = SQRT_3_4_F;
+	var SPid6: f32 = -0.5;
+	var t: f32 = 2.0 * min(0.0, z.x * CPid6 + z.y * SPid6);
+	z.x -= t * CPid6;
+	z.y -= t * SPid6;
+	z.y = abs(z.y);
+
+	
+	z.x -= 0.5;
+	z.z -= tsq;
+	t = 2.0 * min(0.0, dot(z, fl1));
+	z -= t * fl1;
+	z.x += 0.5;
+	z.z += tsq;
+	z.x -= 1.0;
+
+	
+	if ((__MB2P11__ != 0)
+			&& (*aux).i >= __MB2P12__
+			&& (*aux).i < __MB2P13__)
+	{
+		z = mb2_mat_mul(__MB2P14__, z);
+	}
+
+	
+	z *= BDscale;
+	(*aux).de *= BDscale;
+	z.x += 1.0;
+
+	(*aux).dist = (length(z) - 3.0) / (*aux).de;
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "KochV4",
+        source: "koch_v4.cl",
+        param_floats: 57,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAy", kind: ParamKind::Int, offset: 1, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAzFalse", kind: ParamKind::Int, offset: 2, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCx", kind: ParamKind::Int, offset: 3, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 5, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 6, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.int6", kind: ParamKind::Int, offset: 7, default: &[6.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 8, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetC0", kind: ParamKind::Float, offset: 9, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 10, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetD0", kind: ParamKind::Float, offset: 11, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 12, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset100", kind: ParamKind::Float4, offset: 13, default: &[1.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.scale3", kind: ParamKind::Float, offset: 17, default: &[3.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledKFalse", kind: ParamKind::Int, offset: 18, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleVary0", kind: ParamKind::Float, offset: 19, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleC1", kind: ParamKind::Float, offset: 20, default: &[1.0] },
+            GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 21, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledRFalse", kind: ParamKind::Int, offset: 22, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 23, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 24, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 25, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 37, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.offsetA0", kind: ParamKind::Float, offset: 41, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFFalse", kind: ParamKind::Int, offset: 42, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBFalse", kind: ParamKind::Int, offset: 43, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetR0", kind: ParamKind::Float, offset: 44, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetF0", kind: ParamKind::Float, offset: 45, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset2", kind: ParamKind::Float, offset: 46, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledEFalse", kind: ParamKind::Int, offset: 47, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledIFalse", kind: ParamKind::Int, offset: 48, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 49, default: &[0.0] },
+            GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 50, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 51, default: &[250.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 52, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledJFalse", kind: ParamKind::Int, offset: 56, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 57, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 25, op: DeriveOp::Rotation2, sources: &[57] },
+        ],
+        wgsl: r####"
+	var zc: vec4<f32> = z;
+
+	if ((__MB2P0__ != 0)) { zc.x = abs(zc.x); }
+	if ((__MB2P1__ != 0)) { zc.y = abs(zc.y); }
+	if ((__MB2P2__ != 0)) { zc.z = abs(zc.z); }
+	if ((__MB2P3__ != 0))
+		{ if (zc.y > zc.x)
+		{
+			var temp: f32 = zc.x;
+			zc.x = zc.y;
+			zc.y = temp;
+		} }
+
+	
+	if ((__MB2P4__ != 0))
+	{
+		
+		if ((__MB2P5__ != 0))
+			{ if (zc.x > zc.y)
+			{
+				var temp: f32 = zc.x;
+				zc.x = zc.y;
+				zc.y = temp;
+			} }
+		
+		if ((__MB2P6__ != 0))
+		{
+			zc.x = abs(zc.x);
+			var psi: f32 = M_PI_F / __MB2P7__;
+			psi = abs(fmod(atan2(zc.y, zc.x) + psi, 2.0 * psi) - psi);
+			var len: f32 = sqrt(zc.x * zc.x + zc.y * zc.y);
+			zc.x = cos(psi) * len;
+			zc.y = sin(psi) * len;
+		}
+		
+		if ((__MB2P8__ != 0))
+		{
+			var xOffset: f32 = __MB2P9__;
+			if (zc.x < xOffset) { zc.x = abs(zc.x - xOffset) + xOffset; }
+		}
+		if ((__MB2P10__ != 0))
+		{
+			var yOffset: f32 = __MB2P11__;
+			if (zc.y < yOffset) { zc.y = abs(zc.y - yOffset) + yOffset; }
+		}
+	}
+
+	var YOff: f32 = FRAC_1_3_F * __MB2P12__;
+	zc.y = YOff - abs(zc.y - YOff);
+
+	zc.x += FRAC_1_3_F;
+	if (zc.z > zc.x)
+	{
+		var temp: f32 = zc.x;
+		zc.x = zc.z;
+		zc.z = temp;
+	}
+	zc.x -= FRAC_1_3_F;
+
+	zc.x -= FRAC_1_3_F;
+	if (zc.z > zc.x)
+	{
+		var temp: f32 = zc.x;
+		zc.x = zc.z;
+		zc.z = temp;
+	}
+	zc.x += FRAC_1_3_F;
+
+	var Offset: vec4<f32> = __MB2P13__;
+	var useScale: f32 = 1.0;
+	useScale = ((*aux).actual_scale_a + __MB2P17__);
+	if ((__MB2P18__ != 0))
+	{
+		
+		var vary: f32 = __MB2P19__
+								* (abs((*aux).actual_scale_a) - __MB2P20__);
+		(*aux).actual_scale_a = -vary;
+	}
+	zc = useScale * (zc - Offset) + Offset;
+	(*aux).de = (*aux).de * abs(useScale) + __MB2P21__;
+
+	
+	if ((__MB2P22__ != 0)
+			&& (*aux).i >= __MB2P23__
+			&& (*aux).i < __MB2P24__)
+	{
+		zc = mb2_mat_mul(__MB2P25__, zc);
+	}
+	zc += __MB2P37__;
+
+	
+	var c: vec4<f32> = (*aux).const_c;
+	var d: f32;
+
+	var a: f32 = __MB2P41__;
+	if (!(__MB2P42__ != 0))
+	{
+		var b: vec4<f32> = abs(zc) - vec4<f32>(a, a, a, 0.0);
+		d = max(b.x, max(b.y, b.z));
+	}
+	else
+	{
+		d = abs(length(zc) - a);
+	}
+
+	if ((__MB2P43__ != 0)) { d -= length(Offset); }
+
+	
+	var g: f32 = abs(zc.z - __MB2P44__) - __MB2P45__;
+
+	g = min(g, d);
+
+	
+	var e: f32 = __MB2P46__;
+	if (!(__MB2P47__ != 0))
+	{
+		var f: vec4<f32> = abs(c) - vec4<f32>(e, e, e, 0.0);
+		if (!(__MB2P48__ != 0))
+			{ e = max(f.x, f.y); } 
+		else
+			{ e = max(f.x, max(f.y, f.z)); } 
+	}
+	else
+	{
+		if (!(__MB2P48__ != 0))
+			{ e = clamp(sqrt(c.x * c.x + c.y * c.y) - e, 0.0, 100.0); } 
+		else
+			{ e = clamp(length(c) - e, 0.0, 100.0); } 
+	}
+
+	d = max(g, e) / (*aux).de;
+
+	
+	(*aux).dist = min(d, (*aux).dist);
+
+	
+	if ((__MB2P49__ != 0) && (*aux).i >= __MB2P50__
+			&& (*aux).i < __MB2P51__)
+	{
+		var addColor: f32 = 0.0;
+		if ((*aux).dist == d)
+			{ (*aux).color = __MB2P52__.x; }
+
+		else
+		{
+			addColor = __MB2P52__.y * abs(zc.x)
+								 + __MB2P52__.z * abs(zc.z) + __MB2P52__.w * g;
+
+			if (!(__MB2P56__ != 0))
+				{ (*aux).color = addColor; }
+			else
+				{ (*aux).color += addColor; }
+		}
+	}
+	z = zc;
 	return z;
 "####,
     },
@@ -8292,10 +12453,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		if ((__MB2P26__ != 0))
 			{ if (z.x > z.y)
 			{
-				var temp: f32 = z.x; }
+				var temp: f32 = z.x;
 				z.x = z.y;
 				z.y = temp;
-			}
+			} }
 		
 		if ((__MB2P27__ != 0))
 		{
@@ -10353,6 +14514,281 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).de = pow((*aux).r, Pow - 1.0) * (*aux).de * Pow + 1.0;
 	z.z *= __MB2P6__;
 	z += __MB2P7__;
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "MandelbulbJuliabulb",
+        source: "mandelbulb_juliabulb.cl",
+        param_floats: 51,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.startIterationsM", kind: ParamKind::Int, offset: 0, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsM", kind: ParamKind::Int, offset: 1, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 2, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 3, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsX", kind: ParamKind::Int, offset: 4, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsX", kind: ParamKind::Int, offset: 5, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAyFalse", kind: ParamKind::Int, offset: 6, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsY", kind: ParamKind::Int, offset: 7, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsY", kind: ParamKind::Int, offset: 8, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAzFalse", kind: ParamKind::Int, offset: 9, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsZ", kind: ParamKind::Int, offset: 10, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsZ", kind: ParamKind::Int, offset: 11, default: &[250.0] },
+            GeneratedParam { path: "bulb.betaAngleOffset", kind: ParamKind::Float, offset: 12, default: &[0.0] },
+            GeneratedParam { path: "bulb.alphaAngleOffset", kind: ParamKind::Float, offset: 13, default: &[0.0] },
+            GeneratedParam { path: "sinTan2Trig.orderOfZYX", kind: ParamKind::Int, offset: 14, default: &[0.0] },
+            GeneratedParam { path: "sinTan2Trig.asinOrAcos", kind: ParamKind::Int, offset: 15, default: &[0.0] },
+            GeneratedParam { path: "sinTan2Trig.atan2OrAtan", kind: ParamKind::Int, offset: 16, default: &[0.0] },
+            GeneratedParam { path: "bulb.power", kind: ParamKind::Float, offset: 17, default: &[9.0] },
+            GeneratedParam { path: "transformCommon.scaleA1", kind: ParamKind::Float, offset: 18, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.scaleB1", kind: ParamKind::Float, offset: 19, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledxFalse", kind: ParamKind::Int, offset: 20, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledyFalse", kind: ParamKind::Int, offset: 21, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledzFalse", kind: ParamKind::Int, offset: 22, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabled", kind: ParamKind::Int, offset: 23, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 24, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsD", kind: ParamKind::Int, offset: 25, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scale3D111", kind: ParamKind::Float4, offset: 26, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.offsetF000", kind: ParamKind::Float4, offset: 30, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledEFalse", kind: ParamKind::Int, offset: 34, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsE", kind: ParamKind::Int, offset: 35, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsE", kind: ParamKind::Int, offset: 36, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scale", kind: ParamKind::Float, offset: 37, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.additionConstant000", kind: ParamKind::Float4, offset: 38, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.addCpixelEnabledFalse", kind: ParamKind::Int, offset: 42, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.alternateEnabledFalse", kind: ParamKind::Int, offset: 43, default: &[0.0] },
+            GeneratedParam { path: "mandelbulbMulti.orderOfXYZC", kind: ParamKind::Int, offset: 44, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.constantMultiplierC111", kind: ParamKind::Float4, offset: 45, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.offset", kind: ParamKind::Float, offset: 49, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 50, default: &[1.0] },
+        ],
+        derivations: &[
+        ],
+        wgsl: r####"
+	
+	if ((*aux).i >= __MB2P0__
+			&& (*aux).i < __MB2P1__)
+	{
+		(*aux).r = length(z);
+		if ((__MB2P2__ != 0))
+		{
+			if ((__MB2P3__ != 0)
+					&& (*aux).i >= __MB2P4__
+					&& (*aux).i < __MB2P5__)
+				{ z.x = abs(z.x); }
+			if ((__MB2P6__ != 0)
+					&& (*aux).i >= __MB2P7__
+					&& (*aux).i < __MB2P8__)
+				{ z.y = abs(z.y); }
+			if ((__MB2P9__ != 0)
+					&& (*aux).i >= __MB2P10__
+					&& (*aux).i < __MB2P11__)
+				{ z.z = abs(z.z); }
+		}
+
+		var th0: f32 = __MB2P12__;
+		var ph0: f32 = __MB2P13__;
+
+		var v: vec3<f32>;
+		switch __MB2P14__ {
+case multi_OrderOfZYXCl_zyx: {
+
+}
+default: {
+v = vec3<f32>(z.z, z.y, z.x); break;
+}
+case multi_OrderOfZYXCl_zxy: {
+v = vec3<f32>(z.z, z.x, z.y); break;
+}
+case multi_OrderOfZYXCl_yzx: {
+v = vec3<f32>(z.y, z.z, z.x); break;
+}
+case multi_OrderOfZYXCl_yxz: {
+v = vec3<f32>(z.y, z.x, z.z); break;
+}
+case multi_OrderOfZYXCl_xzy: {
+v = vec3<f32>(z.x, z.z, z.y); break;
+}
+case multi_OrderOfZYXCl_xyz: {
+v = vec3<f32>(z.x, z.y, z.z); break;
+		
+}
+}
+
+		if (__MB2P15__ == multi_asinOrAcosCl_asin)
+			{ th0 += asin(v.x / (*aux).r); }
+		else
+			{ th0 += acos(v.x / (*aux).r); }
+
+		if (__MB2P16__ == multi_atan2OrAtanCl_atan2)
+			{ ph0 += atan2(v.y, v.z); }
+		else
+			{ ph0 += atan(v.y / v.z); }
+
+		var rp: f32 = pow((*aux).r, __MB2P17__ - 1.0);
+		var th: f32 = th0 * __MB2P17__ * __MB2P18__;
+		var ph: f32 = ph0 * __MB2P17__ * __MB2P19__;
+
+		(*aux).de = rp * (*aux).de * __MB2P17__ + 1.0;
+		rp *= (*aux).r;
+
+		if ((__MB2P20__ != 0))
+		{ 
+			var sinth: f32 = th;
+			if ((__MB2P21__ != 0)) { sinth = th0; }
+			sinth = sin(sinth);
+			z = rp * vec4<f32>(sinth * sin(ph), cos(ph) * sinth, cos(th), 0.0);
+		}
+		else
+		{ 
+			var costh: f32 = th;
+			if ((__MB2P22__ != 0)) { costh = th0; }
+			costh = cos(costh);
+			z = rp * vec4<f32>(costh * cos(ph), sin(ph) * costh, sin(th), 0.0);
+		}
+	}
+
+	
+	if ((__MB2P23__ != 0)
+			&& (*aux).i >= __MB2P24__
+			&& (*aux).i < __MB2P25__)
+	{
+		(*aux).r = length(z);
+		(*aux).de = (*aux).de * 2.0 * (*aux).r;
+		var temp: vec4<f32> = z;
+		var tempL: f32 = length(temp);
+		
+		
+		z *= __MB2P26__;
+
+		(*aux).de *= length(z) / tempL;
+
+		if (abs(z.x) < abs(z.z))
+		{
+			var temp: f32 = z.x;
+			z.x = z.z;
+			z.z = temp;
+		}
+		if (abs(z.x) < abs(z.y))
+		{
+			var temp: f32 = z.x;
+			z.x = z.y;
+			z.y = temp;
+		}
+		if (abs(z.y) < abs(z.z))
+		{
+			var temp: f32 = z.y;
+			z.y = z.z;
+			z.z = temp;
+		}
+
+		if (z.x * z.z < 0.0) { z.z = -z.z; }
+		if (z.x * z.y < 0.0) { z.y = -z.y; }
+
+		temp.x = z.x * z.x - z.y * z.y - z.z * z.z;
+		temp.y = 2.0 * z.x * z.y;
+		temp.z = 2.0 * z.x * z.z;
+
+		z = temp + __MB2P30__;
+	}
+
+	
+	if ((__MB2P34__ != 0)
+			&& (*aux).i >= __MB2P35__
+			&& (*aux).i < __MB2P36__)
+	{
+		(*aux).r = length(z);
+		var psi: f32 = abs(fmod(atan2(z.z, z.y) + M_PI_F + M_PI_8_F, M_PI_4_F) - M_PI_8_F);
+		var lengthYZ: f32 = sqrt(z.y * z.y + z.z * z.z);
+
+		z.y = cos(psi) * lengthYZ;
+		z.z = sin(psi) * lengthYZ;
+		(*aux).de = (*aux).de * 2.0 * (*aux).r;
+
+		var z2: vec4<f32> = z * z;
+		var rr: f32 = z2.x + z2.y + z2.z;
+		var m: f32 = 1.0 - z2.z / rr;
+		var temp: vec4<f32>;
+		temp.x = (z2.x - z2.y) * m;
+		temp.y = 2.0 * z.x * z.y * m * __MB2P37__; 
+		temp.z = 2.0 * z.z * sqrt(z2.x + z2.y);
+		temp.w = z.w;
+		z = temp + __MB2P38__;
+	}
+
+	if ((__MB2P42__ != 0))
+	{
+		var c: vec4<f32> = (*aux).const_c;
+		var tempC: vec4<f32> = c;
+		if ((__MB2P43__ != 0)) 
+		{
+			tempC = (*aux).c;
+			switch __MB2P44__ {
+case multi_OrderOfXYZCl_xyz: {
+
+}
+default: {
+tempC = vec4<f32>(tempC.x, tempC.y, tempC.z, tempC.w); break;
+}
+case multi_OrderOfXYZCl_xzy: {
+tempC = vec4<f32>(tempC.x, tempC.z, tempC.y, tempC.w); break;
+}
+case multi_OrderOfXYZCl_yxz: {
+tempC = vec4<f32>(tempC.y, tempC.x, tempC.z, tempC.w); break;
+}
+case multi_OrderOfXYZCl_yzx: {
+tempC = vec4<f32>(tempC.y, tempC.z, tempC.x, tempC.w); break;
+}
+case multi_OrderOfXYZCl_zxy: {
+tempC = vec4<f32>(tempC.z, tempC.x, tempC.y, tempC.w); break;
+}
+case multi_OrderOfXYZCl_zyx: {
+tempC = vec4<f32>(tempC.z, tempC.y, tempC.x, tempC.w); break;
+			
+}
+}
+			(*aux).c = tempC;
+		}
+		else
+		{
+			switch __MB2P44__ {
+case multi_OrderOfXYZCl_xyz: {
+
+}
+default: {
+tempC = vec4<f32>(c.x, c.y, c.z, c.w); break;
+}
+case multi_OrderOfXYZCl_xzy: {
+tempC = vec4<f32>(c.x, c.z, c.y, c.w); break;
+}
+case multi_OrderOfXYZCl_yxz: {
+tempC = vec4<f32>(c.y, c.x, c.z, c.w); break;
+}
+case multi_OrderOfXYZCl_yzx: {
+tempC = vec4<f32>(c.y, c.z, c.x, c.w); break;
+}
+case multi_OrderOfXYZCl_zxy: {
+tempC = vec4<f32>(c.z, c.x, c.y, c.w); break;
+}
+case multi_OrderOfXYZCl_zyx: {
+tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
+			
+}
+}
+		}
+		z += tempC * __MB2P45__;
+	}
+	
+	var lengthTempZ: f32 = -length(z);
+	
+	
+	z *= 1.0 + __MB2P49__ / lengthTempZ;
+	
+	z *= __MB2P50__;
+	(*aux).de *= abs(__MB2P50__);
 	return z;
 "####,
     },
@@ -14078,6 +18514,55 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 		else
 			{ (*aux).dist = (*aux).de0; }
 	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "MandelbulbVaryPowerV1",
+        source: "mandelbulb_vary_power_v1.cl",
+        param_floats: 6,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
+        params: &[
+            GeneratedParam { path: "bulb.power", kind: ParamKind::Float, offset: 0, default: &[9.0] },
+            GeneratedParam { path: "transformCommon.startIterations250", kind: ParamKind::Int, offset: 1, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.stopIterations", kind: ParamKind::Int, offset: 2, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offset0", kind: ParamKind::Float, offset: 3, default: &[0.0] },
+            GeneratedParam { path: "bulb.betaAngleOffset", kind: ParamKind::Float, offset: 4, default: &[0.0] },
+            GeneratedParam { path: "bulb.alphaAngleOffset", kind: ParamKind::Float, offset: 5, default: &[0.0] },
+        ],
+        derivations: &[
+        ],
+        wgsl: r####"
+	var tempVC: f32 = __MB2P0__;
+
+	if ((*aux).i >= __MB2P1__
+			&& (*aux).i < __MB2P2__
+			&& (__MB2P2__ - __MB2P1__
+					!= 0))
+	{
+		var iterationRange: f32 =
+			__MB2P2__ - __MB2P1__;
+		var currentIteration: f32 = ((*aux).i - __MB2P1__);
+		tempVC += __MB2P3__ * (1.0 * currentIteration) / iterationRange;
+	}
+	if ((*aux).i >= __MB2P2__)
+	{
+		tempVC = (tempVC + __MB2P3__);
+	}
+
+	
+	
+	var th0: f32 = asin(z.z / (*aux).r) + __MB2P4__;
+	var ph0: f32 = atan2(z.y, z.x) + __MB2P5__;
+	var rp: f32 = pow((*aux).r, tempVC - 1.0);
+	var th: f32 = th0 * tempVC;
+	var ph: f32 = ph0 * tempVC;
+	var cth: f32 = cos(th);
+	(*aux).de = rp * (*aux).de * tempVC + 1.0;
+	rp *= (*aux).r;
+	z = vec4<f32>(cth * cos(ph), cth * sin(ph), sin(th), 0.0) * rp;
 	return z;
 "####,
     },
@@ -18091,6 +22576,141 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 "####,
     },
     GeneratedFormula {
+        name: "MengerV2",
+        source: "menger_v2.cl",
+        param_floats: 41,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAy", kind: ParamKind::Int, offset: 1, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAzFalse", kind: ParamKind::Int, offset: 2, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 3, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.int6", kind: ParamKind::Int, offset: 5, default: &[6.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 6, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetC0", kind: ParamKind::Float, offset: 7, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 8, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetD0", kind: ParamKind::Float, offset: 9, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 10, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 11, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterations1", kind: ParamKind::Int, offset: 12, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset3", kind: ParamKind::Float, offset: 13, default: &[3.0] },
+            GeneratedParam { path: "transformCommon.offsetA0", kind: ParamKind::Float, offset: 14, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.int8X", kind: ParamKind::Int, offset: 15, default: &[8.0] },
+            GeneratedParam { path: "transformCommon.offsetA000", kind: ParamKind::Float4, offset: 16, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledRFalse", kind: ParamKind::Int, offset: 20, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 21, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 22, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 23, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledEFalse", kind: ParamKind::Int, offset: 35, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset1", kind: ParamKind::Float, offset: 36, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.scale3", kind: ParamKind::Float, offset: 37, default: &[3.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 38, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBFalse", kind: ParamKind::Int, offset: 39, default: &[0.0] },
+            GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 40, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 41, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 23, op: DeriveOp::Rotation2, sources: &[41] },
+        ],
+        wgsl: r####"
+	
+	if ((__MB2P0__ != 0)) { z.x = abs(z.x); }
+	if ((__MB2P1__ != 0)) { z.y = abs(z.y); }
+	if ((__MB2P2__ != 0)) { z.z = abs(z.z); }
+	
+	if ((__MB2P3__ != 0))
+	{
+		
+		if ((__MB2P4__ != 0))
+		{
+			z.x = abs(z.x);
+			var psi: f32 = M_PI_F / __MB2P5__;
+			psi = abs(fmod(atan2(z.y, z.x) + psi, 2.0 * psi) - psi);
+			var len: f32 = sqrt(z.x * z.x + z.y * z.y);
+			z.x = cos(psi) * len;
+			z.y = sin(psi) * len;
+		}
+		
+		if ((__MB2P6__ != 0))
+		{
+			var xOffset: f32 = __MB2P7__;
+			if (z.x < xOffset) { z.x = abs(z.x - xOffset) + xOffset; }
+		}
+		if ((__MB2P8__ != 0))
+		{
+			var yOffset: f32 = __MB2P9__;
+			if (z.y < yOffset) { z.y = abs(z.y - yOffset) + yOffset; }
+		}
+	}
+
+	
+	z *= __MB2P10__;
+	(*aux).de *= abs(__MB2P10__);
+
+	
+	var zc: vec4<f32> = z;
+
+	if ((*aux).i >= __MB2P11__
+			&& (*aux).i < __MB2P12__)
+	{
+		var rr: f32 = 0.0;
+		var ptFive: vec4<f32> = vec4<f32>(0.5, 0.5, 0.5, 0.0);
+		var onePtFive: vec4<f32> = vec4<f32>(1.5, 1.5, 1.5, 0.0);
+		zc = zc * 0.5 + ptFive;
+		var pp: vec4<f32> = abs(zc - ptFive) - ptFive;
+		var modOff: f32 = __MB2P13__;
+		(*aux).de += __MB2P14__;
+		(*aux).de0 = max(pp.x, max(pp.y, pp.z));
+		var count: f32 = __MB2P15__;
+		for (var k: f32 = 0; k < count && rr < 10.0; k = k + 1)
+		{
+			var pax: f32 = fmod(modOff * zc.x * (*aux).de, modOff);
+			var pay: f32 = fmod(modOff * zc.y * (*aux).de, modOff);
+			var paz: f32 = fmod(modOff * zc.z * (*aux).de, modOff);
+			var pa: vec4<f32> = vec4<f32>(pax, pay, paz, 0.0);
+
+			pp = ptFive - abs(pa - onePtFive) + __MB2P16__;
+			rr = dot(pp, pp);
+			
+			if ((__MB2P20__ != 0)
+					&& k >= __MB2P21__
+					&& k < __MB2P22__)
+			{
+				pp = mb2_mat_mul(__MB2P23__, pp);
+			}
+			var d: f32;
+			d = min(max(pp.x, pp.z), min(max(pp.x, pp.y), max(pp.y, pp.z))) / (*aux).de;
+			(*aux).de0 = max(d, (*aux).de0);
+
+			if ((__MB2P35__ != 0))
+			{
+				d = max(d, (__MB2P36__ - length(pp))) / (*aux).de;
+				(*aux).de0 = max(d, (*aux).de0);
+			}
+			(*aux).de *= __MB2P37__;
+		}
+		if (!(__MB2P38__ != 0))
+			{ (*aux).dist = (*aux).de0; }
+		else
+		{
+			
+			var e: f32;
+			if (!(__MB2P39__ != 0))
+				{ e = length(z); }
+			else
+				{ e = length(zc); }
+			e = clamp(e - 1.0, 0.0, 100.0);
+			(*aux).dist = max((*aux).de0, e);
+		}
+		(*aux).dist *= __MB2P40__;
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
         name: "MengerV3",
         source: "menger_v3.cl",
         param_floats: 51,
@@ -18621,6 +23241,514 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 		(*aux).dist = min((*aux).dist, ((*aux).de0 - __MB2P86__) / (*aux).de);
 	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "MengerV6",
+        source: "menger_v6.cl",
+        param_floats: 73,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 1, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsA", kind: ParamKind::Int, offset: 2, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.additionConstant000", kind: ParamKind::Float4, offset: 3, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 7, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 8, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAy", kind: ParamKind::Int, offset: 12, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAz", kind: ParamKind::Int, offset: 13, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 14, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offsetA000", kind: ParamKind::Float4, offset: 15, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledy", kind: ParamKind::Int, offset: 19, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledz", kind: ParamKind::Int, offset: 20, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 21, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 22, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.int6", kind: ParamKind::Int, offset: 23, default: &[6.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 24, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetC0", kind: ParamKind::Float, offset: 25, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 26, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetD0", kind: ParamKind::Float, offset: 27, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 28, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterations1", kind: ParamKind::Int, offset: 29, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.scaleA1", kind: ParamKind::Float, offset: 30, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.int8X", kind: ParamKind::Int, offset: 31, default: &[8.0] },
+            GeneratedParam { path: "transformCommon.scale3", kind: ParamKind::Float, offset: 32, default: &[3.0] },
+            GeneratedParam { path: "transformCommon.offset222", kind: ParamKind::Float4, offset: 33, default: &[2.0, 2.0, 2.0, 0.0] },
+            GeneratedParam { path: "transformCommon.cosA", kind: ParamKind::Float, offset: 37, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.sinB", kind: ParamKind::Float, offset: 38, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.sinA", kind: ParamKind::Float, offset: 39, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.cosB", kind: ParamKind::Float, offset: 40, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.angle45", kind: ParamKind::Float, offset: 41, default: &[45.0] },
+            GeneratedParam { path: "transformCommon.sinC", kind: ParamKind::Float, offset: 42, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.cosC", kind: ParamKind::Float, offset: 43, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset2", kind: ParamKind::Float, offset: 44, default: &[2.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 45, default: &[0.0] },
+            GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 46, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 47, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledOFalse", kind: ParamKind::Int, offset: 48, default: &[0.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 49, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.scaleA3", kind: ParamKind::Float, offset: 53, default: &[3.0] },
+            GeneratedParam { path: "foldColor.difs1", kind: ParamKind::Float, offset: 54, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offsetA1", kind: ParamKind::Float, offset: 55, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offsetT1", kind: ParamKind::Float, offset: 56, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledRFalse", kind: ParamKind::Int, offset: 57, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 58, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 59, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix2", kind: ParamKind::Matrix33, offset: 60, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 72, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.angleDegA", kind: ParamKind::Float, offset: 73, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.angleDegB", kind: ParamKind::Float, offset: 74, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.angleDegC", kind: ParamKind::Float, offset: 75, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 76, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 37, op: DeriveOp::Cos, sources: &[73] },
+            Derivation { target: 40, op: DeriveOp::Cos, sources: &[74] },
+            Derivation { target: 43, op: DeriveOp::Cos, sources: &[75] },
+            Derivation { target: 39, op: DeriveOp::Sin, sources: &[73] },
+            Derivation { target: 38, op: DeriveOp::Sin, sources: &[74] },
+            Derivation { target: 42, op: DeriveOp::Sin, sources: &[75] },
+            Derivation { target: 60, op: DeriveOp::Rotation2, sources: &[76] },
+        ],
+        wgsl: r####"
+	var t: f32;
+
+	if ((__MB2P0__ != 0)
+			&& (*aux).i >= __MB2P1__
+			&& (*aux).i < __MB2P2__)
+	{
+		z += __MB2P3__;
+
+		if ((__MB2P7__ != 0))
+			{ z.x = abs(z.x) + __MB2P8__.x; }
+		if ((__MB2P12__ != 0))
+			{ z.y = abs(z.y) + __MB2P8__.y; }
+		if ((__MB2P13__ != 0))
+			{ z.z = abs(z.z) + __MB2P8__.z; }
+
+		if ((__MB2P14__ != 0))
+			{ z.x =
+				__MB2P15__.x - abs(__MB2P15__.x - z.x); }
+		if ((__MB2P19__ != 0))
+			{ z.y =
+				__MB2P15__.y - abs(__MB2P15__.y - z.y); }
+		if ((__MB2P20__ != 0))
+			{ z.z =
+				__MB2P15__.z - abs(__MB2P15__.z - z.z); }
+	}
+
+	
+	if ((__MB2P21__ != 0))
+	{
+		
+		if ((__MB2P22__ != 0))
+		{
+			z.y = abs(z.y);
+			var psi: f32 = M_PI_F / __MB2P23__;
+			psi = abs(fmod(atan2(z.y, z.x) + psi, 2.0 * psi) - psi);
+			t = sqrt(z.x * z.x + z.y * z.y);
+			z.x = cos(psi) * t;
+			z.y = sin(psi) * t;
+		}
+		
+		if ((__MB2P24__ != 0))
+		{
+			var xOffset: f32 = __MB2P25__;
+			if (z.x < xOffset) { z.x = abs(z.x - xOffset) + xOffset; }
+		}
+		if ((__MB2P26__ != 0))
+		{
+			var yOffset: f32 = __MB2P27__;
+			if (z.y < yOffset) { z.y = abs(z.y - yOffset) + yOffset; }
+		}
+	}
+
+	if ((*aux).i >= __MB2P28__
+			&& (*aux).i < __MB2P29__)
+	{
+		var n: vec4<f32>;
+		var col: f32 = 0.0;
+		z.y *= __MB2P30__;
+		z *= 0.5;
+
+		for (var k: f32 = 0; k < __MB2P31__; k = k + 1)
+		{
+			z *= __MB2P32__;
+			(*aux).de *= abs(__MB2P32__);
+			var Offset1: vec4<f32> = __MB2P33__;
+			z.y = z.y - (2.0 * max(z.y, 0.0)) + Offset1.y;
+			z.x = -(z.x - (2.0 * max(z.x, 0.0)) + Offset1.x);
+
+			t = __MB2P37__;
+			n = vec4<f32>(t * __MB2P38__, __MB2P39__,
+				t * __MB2P40__, 0.0);
+
+			t = length(n);
+			if (t == 0.0) { t = 1e-21; }
+			n /= t;
+			t = dot(z, n) * 2.0;
+			z -= max(t, 0.0) * n;
+
+			z.z += Offset1.z;
+			t = cos(__MB2P41__ * M_PI_180_F);
+			n = vec4<f32>(t * __MB2P42__,
+				sin(-__MB2P41__ * M_PI_180_F),
+				t * __MB2P43__, 0.0);
+			t = length(n);
+			if (t == 0.0) { t = 1e-21; }
+			n /= t;
+			t = dot(z, n) * 2.0;
+			z -= max(t, 0.0) * n;
+
+			t = max((z.x + z.y), 0.0);
+			z.y = z.y - t;
+			z.x = z.x - t + __MB2P44__;
+
+			if ((__MB2P45__ != 0) && k >= __MB2P46__
+					&& k < __MB2P47__)
+			{
+				if (!(__MB2P48__ != 0))
+				{
+					if (z.z > -1.0) { col += __MB2P49__.y; }
+				}
+				else
+				{
+					if (z.y < 1.0) { col += __MB2P49__.y; }
+				}
+
+				if (z.x > -__MB2P53__ && z.y > -__MB2P54__)
+					{ col += __MB2P49__.z; } 
+
+				if (z.x > -__MB2P53__ && z.z > -__MB2P54__)
+					{ col += __MB2P49__.w; } 
+
+				z.x = z.x - (2.0 * max(z.x, 0.0)) + __MB2P55__;
+				z.x = z.x - (2.0 * max(z.x, 0.0)) + __MB2P56__;
+
+				if (z.x + z.y < 0.0) { col += __MB2P49__.x; } 
+
+				(*aux).color = col;
+			}
+			else
+			{
+				z.x = z.x - (2.0 * max(z.x, 0.0)) + __MB2P55__;
+				z.x = z.x - (2.0 * max(z.x, 0.0)) + __MB2P56__;
+			}
+			t = max((z.x + z.y), 0.0);
+			z.x -= t;
+			z.y -= t;
+
+			if ((__MB2P57__ != 0)
+					&& k >= __MB2P58__
+					&& k < __MB2P59__)
+			{
+				z = mb2_mat_mul(__MB2P60__, z);
+			}
+		}
+
+		var edgeDist: vec4<f32> = abs(z) - vec4<f32>(1.0, 1.0, 1.0, 0.0);
+		edgeDist.x = max(edgeDist.x, 0.0);
+		edgeDist.y = max(edgeDist.y, 0.0);
+		edgeDist.z = max(edgeDist.z, 0.0);
+		t = length(edgeDist); 
+
+		t /= (*aux).de;
+
+		if (!(__MB2P72__ != 0))
+			{ (*aux).dist = t; }
+		else
+			{ (*aux).dist = min((*aux).dist, t); }
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "MengerV7",
+        source: "menger_v7.cl",
+        param_floats: 113,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.scale3", kind: ParamKind::Float, offset: 0, default: &[3.0] },
+            GeneratedParam { path: "transformCommon.scale015", kind: ParamKind::Float, offset: 1, default: &[1.5] },
+            GeneratedParam { path: "transformCommon.int8X", kind: ParamKind::Int, offset: 2, default: &[8.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 3, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 4, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsP1", kind: ParamKind::Int, offset: 5, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 6, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 10, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 11, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 12, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabled", kind: ParamKind::Int, offset: 24, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 25, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterations", kind: ParamKind::Int, offset: 26, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetA111", kind: ParamKind::Float4, offset: 27, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 31, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 32, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsA", kind: ParamKind::Int, offset: 33, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetA000", kind: ParamKind::Float4, offset: 34, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.offset101", kind: ParamKind::Float4, offset: 38, default: &[1.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledEFalse", kind: ParamKind::Int, offset: 42, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsE", kind: ParamKind::Int, offset: 43, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsE", kind: ParamKind::Int, offset: 44, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetA200", kind: ParamKind::Float4, offset: 45, default: &[2.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.offset110", kind: ParamKind::Float4, offset: 49, default: &[1.0, 1.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 53, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 54, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsD", kind: ParamKind::Int, offset: 55, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetF000", kind: ParamKind::Float4, offset: 56, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFFalse", kind: ParamKind::Int, offset: 60, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsF", kind: ParamKind::Int, offset: 61, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsF", kind: ParamKind::Int, offset: 62, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offset200", kind: ParamKind::Float4, offset: 63, default: &[2.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledIFalse", kind: ParamKind::Int, offset: 67, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsI", kind: ParamKind::Int, offset: 68, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsI", kind: ParamKind::Int, offset: 69, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledGFalse", kind: ParamKind::Int, offset: 70, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsG", kind: ParamKind::Int, offset: 71, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsG", kind: ParamKind::Int, offset: 72, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledJFalse", kind: ParamKind::Int, offset: 73, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsJ", kind: ParamKind::Int, offset: 74, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsJ", kind: ParamKind::Int, offset: 75, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.startIterationsT", kind: ParamKind::Int, offset: 76, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsT", kind: ParamKind::Int, offset: 77, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix2", kind: ParamKind::Matrix33, offset: 78, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 90, default: &[1.0] },
+            GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 91, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabled", kind: ParamKind::Int, offset: 92, default: &[1.0] },
+            GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 93, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 94, default: &[250.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 95, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledzFalse", kind: ParamKind::Int, offset: 99, default: &[0.0] },
+            GeneratedParam { path: "foldColor.difs1", kind: ParamKind::Float, offset: 100, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledOFalse", kind: ParamKind::Int, offset: 101, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledSwFalse", kind: ParamKind::Int, offset: 102, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset0", kind: ParamKind::Float, offset: 103, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetA0", kind: ParamKind::Float, offset: 104, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetB0", kind: ParamKind::Float, offset: 105, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scale0", kind: ParamKind::Float, offset: 106, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleB1", kind: ParamKind::Float, offset: 107, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledYFalse", kind: ParamKind::Int, offset: 108, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetR1", kind: ParamKind::Float, offset: 109, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledXFalse", kind: ParamKind::Int, offset: 110, default: &[0.0] },
+            GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 111, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 112, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 113, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 117, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 12, op: DeriveOp::Rotation2, sources: &[113] },
+            Derivation { target: 78, op: DeriveOp::Rotation2, sources: &[117] },
+        ],
+        wgsl: r####"
+	var t: f32 = 0.0;
+	var tV: vec4<f32> = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+	var oldZ: vec4<f32> = z;
+	var col: f32 = 0.0;
+	var d: f32;
+	var scale: f32 = __MB2P0__;
+	var ColV: vec4<f32> = tV;
+
+	z *= __MB2P1__; 
+	(*aux).de *= __MB2P1__;
+
+	var minDist: f32 = 100000.0;
+	for (var n: f32 = 0; n < __MB2P2__; n = n + 1)
+	{
+		z = abs(z);
+		if ((__MB2P3__ != 0)
+				&& n >= __MB2P4__
+				&& n < __MB2P5__)
+		{
+			z += __MB2P6__;
+		}
+		
+		if (n >= __MB2P10__
+				&& n < __MB2P11__)
+		{
+			z = mb2_mat_mul(__MB2P12__, z);
+		}
+
+		if (z.y > z.x)
+		{
+			t = z.x;
+			z.x = z.y;
+			z.y = t;
+		}
+
+		if (z.z > z.x)
+		{
+			t = z.x;
+			z.x = z.z;
+			z.z = t;
+		}
+
+		if ((__MB2P24__ != 0) && n >= __MB2P25__
+				&& n < __MB2P26__ && z.z > z.y)
+		{
+			t = z.y;
+			z.y = z.z;
+			z.z = t;
+		}
+
+		tV = __MB2P27__;
+		if ((__MB2P31__ != 0)
+				&& n >= __MB2P32__
+				&& n < __MB2P33__)
+		{
+			tV = __MB2P34__;
+		}
+		var p1: vec4<f32> = z - tV;
+
+		tV = __MB2P38__;
+		if ((__MB2P42__ != 0)
+				&& n >= __MB2P43__
+				&& n < __MB2P44__)
+		{
+			tV = __MB2P45__;
+		}
+		var p2: vec4<f32> = z - tV;
+
+		tV = __MB2P49__;
+		if ((__MB2P53__ != 0)
+				&& n >= __MB2P54__
+				&& n < __MB2P55__)
+		{
+			tV = __MB2P56__;
+		}
+		var p3: vec4<f32> = z - tV;
+
+		var p4: vec4<f32> = z;
+		if ((__MB2P60__ != 0)
+				&& n >= __MB2P61__
+				&& n < __MB2P62__)
+		{
+			p4 = z - __MB2P63__;
+		}
+
+		if ((__MB2P67__ != 0)
+				&& n >= __MB2P68__
+				&& n < __MB2P69__)
+		{
+			if (z.x <= 1.5)
+			{
+				
+				break;
+			}
+		}
+
+		var d1: f32;
+		var d2: f32;
+		var d3: f32;
+		var d4: f32;
+		d1 = dot(p1, p1);
+		d2 = dot(p2, p2);
+		d3 = dot(p3, p3);
+		d4 = dot(p4, p4);
+
+		if (d1 < d2 && d1 < d3 && d1 < d4)
+		{
+			z = p1;
+			ColV.x = 1.0;
+		}
+		else if (d2 < d1 && d2 < d3 && d2 < d4)
+		{
+			z = p2;
+			ColV.y = 1.0;
+		}
+		else if (d3 < d1 && d3 < d2 && d3 < d4)
+		{
+			z = p3;
+			ColV.z = 1.0;
+		}
+		else if ((__MB2P70__ != 0)
+						 && n >= __MB2P71__
+						 && n < __MB2P72__)
+		{
+			z = p4;
+			ColV.w = 1.0;
+		}
+		else if ((__MB2P73__ != 0)
+						 && n >= __MB2P74__
+						 && n < __MB2P75__)
+		{
+			z = p4;
+			ColV.w = 1.0;
+
+			z *= scale;
+			(*aux).de *= scale;
+			break;
+		}
+		
+		if (n >= __MB2P76__
+				&& n < __MB2P77__)
+		{
+			z = mb2_mat_mul(__MB2P78__, z);
+		}
+
+		z *= scale;
+		(*aux).de *= scale;
+		
+
+		
+		(*aux).de = (*aux).de * __MB2P90__ + __MB2P91__;
+
+		if ((__MB2P92__ != 0) && n >= __MB2P93__
+				&& n < __MB2P94__)
+		{
+			col += ColV.x * __MB2P95__.x + ColV.y * __MB2P95__.y
+						 + ColV.z * __MB2P95__.z + ColV.w * __MB2P95__.w;
+			if ((__MB2P99__ != 0))
+			{
+				var oT: f32 = max(abs(z.x), max(abs(z.y), abs(z.z)));
+				minDist = min(oT, minDist);
+				col += minDist * __MB2P100__;
+			}
+		}
+	}
+
+	if (!(__MB2P101__ != 0))
+	{
+		if (!(__MB2P102__ != 0))
+		{
+			d = max(abs(z.x), max(abs(z.y), abs(z.z))) - __MB2P103__;
+		}
+		else
+		{
+			d = length(z) - __MB2P103__;
+		}
+	}
+	else
+	{
+		var r: f32 = length(z) - __MB2P104__;
+		var m: f32 = (max(abs(z.x), max(abs(z.y), abs(z.z)))) - __MB2P105__;
+		d = r + (m - r) * __MB2P106__;
+	}
+
+	d = d * __MB2P107__ / (*aux).de;
+
+	if ((__MB2P108__ != 0))
+	{
+		var dst1: f32 = length((*aux).const_c) - __MB2P109__;
+		d = max(d, dst1);
+		d = abs(d);
+	}
+
+	if (!(__MB2P110__ != 0))
+		{ (*aux).dist = min((*aux).dist, d); }
+	else
+		{ (*aux).dist = d; }
+
+	if ((__MB2P111__ != 0)) { z = oldZ; }
+
+	if (!(__MB2P112__ != 0))
+		{ (*aux).color = col; }
+	else
+		{ (*aux).color += col; }
 	return z;
 "####,
     },
@@ -20505,6 +25633,97 @@ default: {}
 "####,
     },
     GeneratedFormula {
+        name: "Octahedron",
+        source: "octahedron.cl",
+        param_floats: 20,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 10.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 0, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsD1", kind: ParamKind::Int, offset: 1, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset0", kind: ParamKind::Float, offset: 2, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetA0", kind: ParamKind::Float, offset: 3, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.int3X", kind: ParamKind::Int, offset: 4, default: &[3.0] },
+            GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 5, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.scale05", kind: ParamKind::Float, offset: 6, default: &[0.5] },
+            GeneratedParam { path: "transformCommon.minR2p25", kind: ParamKind::Float, offset: 7, default: &[0.25] },
+            GeneratedParam { path: "transformCommon.int3Y", kind: ParamKind::Int, offset: 8, default: &[3.0] },
+            GeneratedParam { path: "transformCommon.scaleA1", kind: ParamKind::Float, offset: 9, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.minR05", kind: ParamKind::Float, offset: 10, default: &[0.5] },
+            GeneratedParam { path: "transformCommon.scaleC1", kind: ParamKind::Float, offset: 11, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 12, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleD1", kind: ParamKind::Float, offset: 13, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 14, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 15, default: &[0.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 16, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+        ],
+        wgsl: r####"
+	if ((*aux).i >= __MB2P0__
+			&& (*aux).i < __MB2P1__)
+	{
+		var a: vec4<f32>;
+		var colorAdd: f32 = 0.0;
+		var b: f32 = 1.0;
+		var d: f32;
+		var limitA: f32 = __MB2P2__;
+		var limitB: f32 = __MB2P3__;
+
+		for (var i: f32 = 0; i < __MB2P4__; i = i + 1)
+		{
+			var sizer1: f32 = __MB2P5__ * b;
+			a = abs(z);
+			z.x -= sign(z.x) * max(1.0 * sign(a.x - max(a.y, a.z)), limitA) * sizer1;
+			z.y -= sign(z.y) * max(1.0 * sign(a.y - max(a.z, a.x)), limitA) * sizer1;
+			z.z -= sign(z.z) * max(1.0 * sign(a.z - max(a.x, a.y)), limitA) * sizer1;
+			b *= __MB2P6__;
+		}
+
+		d = length(z) - __MB2P7__;
+		for (var i: f32 = 0; i < __MB2P8__; i = i + 1)
+		{
+			var sizer2: f32 = __MB2P9__ * b;
+			a = abs(z);
+			z.x -= sign(z.x) * max(1.0 * sign(a.x - min(a.y, a.z)), limitB) * sizer2;
+			z.y -= sign(z.y) * max(1.0 * sign(a.y - min(a.z, a.x)), limitB) * sizer2;
+			z.z -= sign(z.z) * max(1.0 * sign(a.z - min(a.x, a.y)), limitB) * sizer2;
+			b *= __MB2P10__;
+			colorAdd += dot(z, z);
+		}
+		z *= __MB2P11__;
+		(*aux).de *= __MB2P11__;
+		a = abs(z);
+
+		var d2: f32;
+
+		if (!(__MB2P12__ != 0))
+			{ d2 = max(a.x, max(a.y, a.z)) - b * __MB2P13__; }
+		else
+			{ d2 = length(a) - b * __MB2P13__; }
+
+		d2 = max(d2, -d) / abs((*aux).de);
+
+		if (!(__MB2P14__ != 0))
+			{ (*aux).dist = d2; }
+		else
+			{ (*aux).dist = min((*aux).dist, d2); }
+
+		
+		if ((__MB2P15__ != 0))
+		{
+			colorAdd = __MB2P16__.x * colorAdd;
+			colorAdd += __MB2P16__.y * max(a.x, max(a.y, a.z));
+			colorAdd += __MB2P16__.z * length(a);
+			colorAdd += __MB2P16__.w * d;
+			(*aux).color += colorAdd * 100.0;
+		}
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
         name: "PseudoKleinianMod3",
         source: "pseudo_kleinian_mod3.cl",
         param_floats: 82,
@@ -20676,6 +25895,264 @@ default: {}
 		colorAdd += __MB2P78__.z * abs(z.z);
 		colorAdd += __MB2P78__.w * k;
 
+		(*aux).color += colorAdd;
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "PseudoKleinianMod6",
+        source: "pseudo_kleinian_mod6.cl",
+        param_floats: 109,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.int32", kind: ParamKind::Int, offset: 0, default: &[32.0] },
+            GeneratedParam { path: "transformCommon.sphereInversionEnabledFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsX", kind: ParamKind::Int, offset: 2, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterations1", kind: ParamKind::Int, offset: 3, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 4, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.scaleG1", kind: ParamKind::Float, offset: 8, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.additionConstantP000", kind: ParamKind::Float4, offset: 9, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.scaleA1", kind: ParamKind::Float, offset: 13, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsM", kind: ParamKind::Int, offset: 14, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsM", kind: ParamKind::Int, offset: 15, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.constantMultiplier000", kind: ParamKind::Float4, offset: 16, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 20, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsC", kind: ParamKind::Int, offset: 21, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.additionConstant0777", kind: ParamKind::Float4, offset: 22, default: &[0.7, 0.7, 0.7, 0.0] },
+            GeneratedParam { path: "transformCommon.minR05", kind: ParamKind::Float, offset: 26, default: &[0.5] },
+            GeneratedParam { path: "transformCommon.additionConstant000", kind: ParamKind::Float4, offset: 27, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledGFalse", kind: ParamKind::Int, offset: 31, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsG", kind: ParamKind::Int, offset: 32, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsG", kind: ParamKind::Int, offset: 33, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.additionConstantA000", kind: ParamKind::Float4, offset: 34, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.scaleNeg1", kind: ParamKind::Float, offset: 38, default: &[-1.0] },
+            GeneratedParam { path: "transformCommon.addCpixelEnabledFalse", kind: ParamKind::Int, offset: 39, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsT", kind: ParamKind::Int, offset: 40, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsT1", kind: ParamKind::Int, offset: 41, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 42, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledy", kind: ParamKind::Int, offset: 43, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledz", kind: ParamKind::Int, offset: 44, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.scale3D000", kind: ParamKind::Float4, offset: 45, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotationEnabledFalse", kind: ParamKind::Int, offset: 49, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 50, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsR1", kind: ParamKind::Int, offset: 51, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 52, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledxFalse", kind: ParamKind::Int, offset: 64, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledyFalse", kind: ParamKind::Int, offset: 65, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 66, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAyFalse", kind: ParamKind::Int, offset: 67, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetD0", kind: ParamKind::Float, offset: 68, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset02", kind: ParamKind::Float, offset: 69, default: &[0.2] },
+            GeneratedParam { path: "transformCommon.functionEnabledAzFalse", kind: ParamKind::Int, offset: 70, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scale05", kind: ParamKind::Float, offset: 71, default: &[0.5] },
+            GeneratedParam { path: "transformCommon.offsetA0", kind: ParamKind::Float, offset: 72, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAwFalse", kind: ParamKind::Int, offset: 73, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 74, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleC1", kind: ParamKind::Float, offset: 75, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.scaleD1", kind: ParamKind::Float, offset: 76, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledNFalse", kind: ParamKind::Int, offset: 77, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetA1", kind: ParamKind::Float, offset: 78, default: &[1.0] },
+            GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 79, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFFalse", kind: ParamKind::Int, offset: 80, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.maxR2d1", kind: ParamKind::Float, offset: 81, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.minR2p25", kind: ParamKind::Float, offset: 82, default: &[0.25] },
+            GeneratedParam { path: "transformCommon.int16", kind: ParamKind::Int, offset: 83, default: &[16.0] },
+            GeneratedParam { path: "transformCommon.additionConstant0555", kind: ParamKind::Float4, offset: 84, default: &[0.5, 0.5, 0.5, 0.0] },
+            GeneratedParam { path: "transformCommon.scale015", kind: ParamKind::Float, offset: 88, default: &[1.5] },
+            GeneratedParam { path: "transformCommon.offsetF000", kind: ParamKind::Float4, offset: 89, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 93, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledTFalse", kind: ParamKind::Int, offset: 94, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledIFalse", kind: ParamKind::Int, offset: 95, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scale08", kind: ParamKind::Float, offset: 96, default: &[0.8] },
+            GeneratedParam { path: "transformCommon.scaleB1", kind: ParamKind::Float, offset: 97, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset0005", kind: ParamKind::Float, offset: 98, default: &[0.005] },
+            GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 99, default: &[0.0] },
+            GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 100, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 101, default: &[0.0] },
+            GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 102, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 103, default: &[250.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 104, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledAFalse", kind: ParamKind::Int, offset: 108, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 109, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 52, op: DeriveOp::Rotation2, sources: &[109] },
+        ],
+        wgsl: r####"
+	var k: f32 = 0.0;
+	var Dk: f32 = 1.0;
+
+	for (var h: f32 = 0; h < __MB2P0__; h = h + 1)
+	{
+		
+		if ((__MB2P1__ != 0)
+				&& h >= __MB2P2__
+				&& h < __MB2P3__)
+		{
+			z += __MB2P4__;
+			var rr: f32 = dot(z, z);
+			z *= __MB2P8__ / rr;
+			Dk *= (__MB2P8__ / rr);
+			z += __MB2P9__ - __MB2P4__;
+			z *= __MB2P13__;
+			Dk *= __MB2P13__;
+		}
+
+		
+		if (h >= __MB2P14__
+				&& h < __MB2P15__)
+		{
+			z.x -= __MB2P16__.x * sign(z.x);
+			z.y -= __MB2P16__.y * sign(z.y);
+			z.z -= __MB2P16__.z * sign(z.z);
+		}
+
+		
+		if (h >= __MB2P20__
+				&& h < __MB2P21__)
+		{
+			z = abs(z + __MB2P22__)
+					- abs(z - __MB2P22__) - z;
+			k = max(__MB2P26__ / dot(z, z), 1.0);
+			z *= k;
+			Dk *= k;
+		}
+
+		z += __MB2P27__;
+
+		if ((__MB2P31__ != 0)
+				&& h >= __MB2P32__
+				&& h < __MB2P33__)
+		{
+			z.x += (*aux).pos_neg * __MB2P34__.x;
+			z.y += (*aux).pos_neg * __MB2P34__.y;
+			z.z += (*aux).pos_neg * __MB2P34__.z;
+
+			(*aux).pos_neg *= __MB2P38__;
+		}
+
+		if ((__MB2P39__ != 0) 
+				&& h >= __MB2P40__
+				&& h < __MB2P41__)
+		{
+			var tempFAB: vec4<f32> = (*aux).const_c;
+			if ((__MB2P42__ != 0)) { tempFAB.x = abs(tempFAB.x); }
+			if ((__MB2P43__ != 0)) { tempFAB.y = abs(tempFAB.y); }
+			if ((__MB2P44__ != 0)) { tempFAB.z = abs(tempFAB.z); }
+
+			tempFAB *= __MB2P45__;
+			z.x -= sign(z.x) * tempFAB.x;
+			z.y -= sign(z.y) * tempFAB.y;
+			z.z -= sign(z.z) * tempFAB.z;
+		}
+
+		if ((__MB2P49__ != 0)
+				&& h >= __MB2P50__
+				&& h < __MB2P51__)
+		{
+			z = mb2_mat_mul(__MB2P52__, z);
+		}
+
+		if ((__MB2P64__ != 0)) { z.x = -z.x; }
+		if ((__MB2P65__ != 0)) { z.y = -z.y; }
+	}
+
+	var q: vec4<f32> = z;
+
+	var temp: f32 = q.x * q.x + q.y * q.y;
+	var rxy: f32 = sqrt(temp);
+
+	if ((__MB2P66__ != 0))
+	{
+		var d1: f32 = temp + q.z * q.z;
+		if (!(__MB2P67__ != 0)) { d1 = sqrt(d1); }
+
+		d1 = (abs(rxy * q.z) - __MB2P68__)
+				 / (d1 + __MB2P69__);
+		(*aux).de0 = d1;
+	}
+
+	if ((__MB2P70__ != 0))
+	{
+		var d3: f32 =
+			abs(__MB2P71__ * abs(q.z - __MB2P72__));
+
+		if (!(__MB2P73__ != 0))
+			{ (*aux).de0 = d3; }
+		else
+			{ (*aux).de0 = min((*aux).de0, d3); }
+	}
+
+	if ((__MB2P74__ != 0))
+	{
+		q.x = q.x * q.x * __MB2P75__;
+		q.y = q.y * q.y * __MB2P76__;
+		if ((__MB2P77__ != 0))
+		{
+			q.x *= q.x;
+			q.y *= q.y;
+		}
+		rxy = sqrt(q.x + q.y);
+		(*aux).de0 = max(rxy - __MB2P78__, (*aux).de0);
+	}
+	(*aux).de0 = abs((*aux).de0) / Dk - __MB2P79__;
+	k = (*aux).de0;
+
+	
+	if ((__MB2P80__ != 0))
+	{
+		var p: vec4<f32> = z;
+		var m: f32;
+		temp = __MB2P81__ / __MB2P82__;
+		var r2: f32 = 0.0;
+		var Dd: f32 = 1.0;
+		for (var n: f32 = 0; n < __MB2P83__ && r2 < 100.0; n = n + 1)
+		{
+			m = 1.0;
+			p = __MB2P84__ - abs(p);
+			r2 = dot(p, p);
+			if (r2 < __MB2P82__)
+				{ m *= temp; }
+			else if (r2 < __MB2P81__)
+				{ m *= __MB2P81__ / r2; }
+
+			m *= __MB2P88__;
+			p = p * m + __MB2P89__;
+			Dd = Dd * m + __MB2P93__;
+		}
+		var r: f32 = sqrt(r2);
+		if (!(__MB2P94__ != 0))
+			{ Dd = r / abs(Dd); }
+		else
+			{ Dd = 0.5 * r * log(r) / abs(Dd); }
+
+		if (!(__MB2P95__ != 0))
+			{ (*aux).de0 =
+				min(__MB2P96__ * Dd, __MB2P97__ * (*aux).de0); }
+		else
+			{ (*aux).de0 = max(__MB2P98__ * Dd, (*aux).de0); }
+	}
+
+	if ((__MB2P99__ != 0)) { (*aux).de0 = min((*aux).dist, (*aux).de0); }
+	if ((__MB2P100__ != 0)) { (*aux).de = Dk; }
+	(*aux).dist = (*aux).de0;
+
+	
+	if ((__MB2P101__ != 0) && (*aux).i >= __MB2P102__
+			&& (*aux).i < __MB2P103__)
+	{
+		var colorAdd: f32 = 0.0;
+		colorAdd += __MB2P104__.x * rxy;
+		colorAdd += __MB2P104__.y * k;
+		colorAdd += __MB2P104__.z * abs(q.z);
+
+		if ((__MB2P108__ != 0) && (*aux).de0 != k)
+		{
+			colorAdd = __MB2P104__.w;
+		}
 		(*aux).color += colorAdd;
 	}
 	return z;
@@ -23343,6 +28820,662 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 "####,
     },
     GeneratedFormula {
+        name: "Spheretree",
+        source: "spheretree.cl",
+        param_floats: 22,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.functionEnabledByFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.minR06", kind: ParamKind::Float, offset: 1, default: &[0.6] },
+            GeneratedParam { path: "transformCommon.int8X", kind: ParamKind::Int, offset: 2, default: &[8.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBxFalse", kind: ParamKind::Int, offset: 3, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleG1", kind: ParamKind::Float, offset: 4, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.scaleF1", kind: ParamKind::Float, offset: 5, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.scale6", kind: ParamKind::Float, offset: 6, default: &[6.0] },
+            GeneratedParam { path: "transformCommon.scaleE1", kind: ParamKind::Float, offset: 7, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.scaleA2", kind: ParamKind::Float, offset: 8, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.scaleD1", kind: ParamKind::Float, offset: 9, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 10, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 14, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledXFalse", kind: ParamKind::Int, offset: 15, default: &[0.0] },
+            GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 16, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabled", kind: ParamKind::Int, offset: 17, default: &[1.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 18, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+        ],
+        wgsl: r####"
+	var Dd: f32;
+	if (!(__MB2P0__ != 0))
+		{ Dd = 1.0; }
+	else
+		{ Dd = (*aux).de; }
+	var ColV: vec4<f32> = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+	var oldZ: vec4<f32> = z;
+	var t: f32 = __MB2P1__;
+	var t1: vec4<f32> = vec4<f32>(SQRT_3_4_F, -0.5, 0.0, 0.0);
+	var t2: vec4<f32> = vec4<f32>(-SQRT_3_4_F, -0.5, 0.0, 0.0);
+	var n1: vec4<f32> = vec4<f32>(-0.5, -SQRT_3_4_F, 0.0, 0.0);
+	var n2: vec4<f32> = vec4<f32>(-0.5, SQRT_3_4_F, 0.0, 0.0);
+	var innerScale: f32 = SQRT_3_F / (1.0 + SQRT_3_F);
+	var innerScaleB: f32 = innerScale * innerScale * 0.25;
+
+	
+	for (var n: f32 = 0; n < __MB2P2__; n = n + 1)
+	{
+		if (!(__MB2P3__ != 0))
+		{
+			var zB: vec4<f32> = z - vec4<f32>(0.0, 0.0, innerScale * 0.5, 0.0);
+			if (dot(zB, zB) < innerScaleB) { break; } 
+		}
+
+		var maxH: f32 = 0.4 * __MB2P4__;
+		if (n == 0) { maxH = -100.0; }
+
+		var zC: vec4<f32> = z - vec4<f32>(0.0, 0.0, t, 0.0);
+		if (z.z > maxH && dot(zC, zC) > t * t) { break; } 
+
+		var zD: vec4<f32> = z - vec4<f32>(0.0, 0.0, 0.5, 0.0);
+		var invSC: f32 = __MB2P5__ / dot(z, z);
+
+		if (z.z < maxH && dot(zD, zD) > 0.25)
+		{
+			
+			Dd *= invSC;
+			z *= invSC;
+			ColV.x += 1.0;
+		}
+		else
+		{
+			
+			ColV.y += 1.0;
+			Dd *= invSC;
+			z *= invSC;
+			z.z -= 1.0;
+			z.z *= -1.0;
+			z *= SQRT_3_F;
+			Dd *= SQRT_3_F;
+			z.z += 1.0;
+
+			
+			var a: f32 = M_PI_F / __MB2P6__;
+			var cosA: f32 = cos(a);
+			var sinA: f32 = sin(a);
+			var xx: f32 = z.x * cosA + z.y * sinA;
+			var yy: f32 = -z.x * sinA + z.y * cosA;
+			z.x = xx;
+			z.y = yy;
+		}
+
+		
+		var h: f32 = z.z * __MB2P7__;
+		var x: f32 = dot(z, -1.0 * n2) * __MB2P8__ / SQRT_3_F;
+		var y: f32 = dot(z, -1.0 * n1) * __MB2P8__ / SQRT_3_F;
+		x = x - floor(x);
+		y = y - floor(y);
+
+		if (x + y > 1.0)
+		{
+			x = 1.0 - x;
+			y = 1.0 - y;
+			ColV.z += 1.0;
+		}
+
+		z = x * t1 - y * t2;
+		
+		var l0: f32 = dot(z, z);
+		var zt1: vec4<f32> = z - t1;
+		var zt2: vec4<f32> = z + t2;
+		var l1: f32 = dot(zt1, zt1);
+		var l2: f32 = dot(zt2, zt2);
+
+		if (l1 < l0 && l1 < l2)
+		{
+			z -= t1 * (2.0 * dot(z, t1) - 1.0);
+		}
+		else if (l2 < l0 && l2 < l1)
+		{
+			z -= t2 * (2.0 * dot(z, t2) + 1.0);
+		}
+		z.z = h;
+		z *= __MB2P9__;
+		Dd *= __MB2P9__;
+		z += __MB2P10__;
+	}
+	
+	(*aux).de = Dd;
+	var len: vec4<f32> = z - vec4<f32>(0.0, 0.0, 0.5, 0.0);
+	var d: f32 = (length(len) - 0.5);
+	
+	ColV.w = d;
+	d /= __MB2P14__ * 2.22 * (*aux).de;
+
+	if (!(__MB2P15__ != 0))
+		{ (*aux).dist = min((*aux).dist, d); }
+	else
+		{ (*aux).dist = d; }
+
+	if ((__MB2P16__ != 0)) { z = oldZ; }
+
+	
+	if ((__MB2P17__ != 0))
+	{
+		(*aux).color += ColV.x * __MB2P18__.x + ColV.y * __MB2P18__.y
+									+ ColV.z * __MB2P18__.z + ColV.w * __MB2P18__.w;
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "SpheretreeV2",
+        source: "spheretree_v2.cl",
+        param_floats: 41,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 1, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsC", kind: ParamKind::Int, offset: 2, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetA000", kind: ParamKind::Float4, offset: 3, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.invert0", kind: ParamKind::Float, offset: 7, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.inv0", kind: ParamKind::Float, offset: 8, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.invert1", kind: ParamKind::Float, offset: 9, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.inv1", kind: ParamKind::Float, offset: 10, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.additionConstant000", kind: ParamKind::Float4, offset: 11, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledByFalse", kind: ParamKind::Int, offset: 15, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.minR06", kind: ParamKind::Float, offset: 16, default: &[0.6] },
+            GeneratedParam { path: "transformCommon.functionEnabledwFalse", kind: ParamKind::Int, offset: 17, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleA1", kind: ParamKind::Float, offset: 18, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.int8X", kind: ParamKind::Int, offset: 19, default: &[8.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBxFalse", kind: ParamKind::Int, offset: 20, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleG1", kind: ParamKind::Float, offset: 21, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.scaleF1", kind: ParamKind::Float, offset: 22, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.scale6", kind: ParamKind::Float, offset: 23, default: &[6.0] },
+            GeneratedParam { path: "transformCommon.scaleE1", kind: ParamKind::Float, offset: 24, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.scaleC1", kind: ParamKind::Float, offset: 25, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.scaleA2", kind: ParamKind::Float, offset: 26, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.scaleD1", kind: ParamKind::Float, offset: 27, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 28, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 32, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledXFalse", kind: ParamKind::Int, offset: 33, default: &[0.0] },
+            GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 34, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabled", kind: ParamKind::Int, offset: 35, default: &[1.0] },
+            GeneratedParam { path: "foldColor.difs1", kind: ParamKind::Float, offset: 36, default: &[1.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 37, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 8, op: DeriveOp::Reciprocal, sources: &[7] },
+            Derivation { target: 10, op: DeriveOp::Reciprocal, sources: &[9] },
+        ],
+        wgsl: r####"
+	if ((__MB2P0__ != 0)
+			&& (*aux).i >= __MB2P1__
+			&& (*aux).i < __MB2P2__)
+	{
+		var signs: vec4<f32> = z;
+		signs.x = sign(z.x);
+		signs.y = sign(z.y);
+		signs.z = sign(z.z);
+		signs.w = sign(z.w);
+
+		z = abs(z);
+		var tt: vec4<f32> = __MB2P3__;
+		z -= tt;
+
+		var m: f32 = 1.0;
+		var rr: f32 = dot(z, z);
+		if (rr < __MB2P7__)
+			{ m = __MB2P8__; }
+		else if (rr < __MB2P9__)
+			{ m = 1.0 / rr; }
+		else
+			{ m = __MB2P10__; }
+
+		z += tt;
+		z *= m;
+		(*aux).de *= m;
+
+		z *= signs;
+		z += __MB2P11__ * signs;
+	}
+
+	var Dd: f32;
+	if (!(__MB2P15__ != 0))
+		{ Dd = 1.0; }
+	else
+		{ Dd = (*aux).de; }
+
+	var oldZ: vec4<f32> = z;
+	var ColV: vec4<f32> = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+
+	var t: f32 = __MB2P16__;
+	var t1: vec4<f32> = vec4<f32>(SQRT_3_4_F, -0.5, 0.0, 0.0);
+	var t2: vec4<f32> = vec4<f32>(-SQRT_3_4_F, -0.5, 0.0, 0.0);
+
+	var n1: vec4<f32> = vec4<f32>(-0.5, -SQRT_3_4_F, 0.0, 0.0);
+	var n2: vec4<f32> = vec4<f32>(-0.5, SQRT_3_4_F, 0.0, 0.0);
+
+	var scl: f32 =select(1.0, SQRT_3_F, __MB2P17__);
+	var k: f32 = __MB2P18__;
+	var kk: f32 = k * k;
+	var innerScale: f32 = k * scl / (kk + scl);
+	var innerScaleB: f32 = innerScale * innerScale * 0.25;
+	var shift: f32 = (kk + scl) / (k * (1.0 + scl));
+	
+	var mid: f32 = 0.25 * (k + 1.0);
+	
+	var bufferRad: f32 = t * k;
+
+	for (var n: f32 = 0; n < __MB2P19__; n = n + 1)
+	{
+		if (!(__MB2P20__ != 0))
+		{
+			var zB: vec4<f32> = z - vec4<f32>(0.0, 0.0, innerScale * 0.5, 0.0);
+			if (dot(zB, zB) < innerScaleB) { break; } 
+		}
+
+		var maxH: f32 = 0.4 * __MB2P21__;
+		if (n == 0) { maxH = -100.0; }
+
+		var zC: vec4<f32> = z - vec4<f32>(0.0, 0.0, bufferRad, 0.0);
+		if (z.z > maxH && dot(zC, zC) > bufferRad * bufferRad) { break; } 
+
+		var zD: vec4<f32> = z - vec4<f32>(0.0, 0.0, mid, 0.0);
+		var invSC: f32 = __MB2P22__ / dot(z, z);
+		
+		if (z.z < maxH && dot(zD, zD) > mid * mid)
+		{
+			
+			Dd *= invSC;
+			z *= invSC;
+			ColV.x += 1.0;
+		}
+		else
+		{
+			
+			ColV.y += 1.0;
+			Dd *= invSC;
+			z *= invSC;
+			z.z -= shift;
+			z.z *= -1.0;
+			z *= scl;
+			Dd *= scl;
+			z.z += shift;
+
+			
+			if ((__MB2P17__ != 0))
+			{
+				var a: f32 = M_PI_F / __MB2P23__;
+				var cosA: f32 = cos(a);
+				var sinA: f32 = sin(a);
+				var xx: f32 = z.x * cosA + z.y * sinA;
+				var yy: f32 = -z.x * sinA + z.y * cosA;
+				z.x = xx;
+				z.y = yy;
+			}
+		}
+
+		
+		var h: f32 = z.z * __MB2P24__;
+		z *= __MB2P25__;
+		Dd *= __MB2P25__;
+
+		var x: f32 = dot(z, -1.0 * n2) * __MB2P26__ / SQRT_3_F;
+		var y: f32 = dot(z, -1.0 * n1) * __MB2P26__ / SQRT_3_F;
+		x = x - floor(x);
+		y = y - floor(y);
+
+		if (x + y > 1.0)
+		{
+			x = 1.0 - x;
+			y = 1.0 - y;
+			ColV.z += 1.0;
+		}
+
+		z = x * t1 - y * t2;
+		
+		var l0: f32 = dot(z, z);
+		var zt1: vec4<f32> = z - t1;
+		var zt2: vec4<f32> = z + t2;
+		var l1: f32 = dot(zt1, zt1);
+		var l2: f32 = dot(zt2, zt2);
+
+		if (l1 < l0 && l1 < l2)
+		{
+			z -= t1 * (2.0 * dot(z, t1) - 1.0);
+		}
+
+		else if (l2 < l0 && l2 < l1)
+		{
+			z -= t2 * (2.0 * dot(z, t2) + 1.0);
+		}
+		z.z = h;
+		z *= __MB2P27__;
+		Dd *= __MB2P27__;
+		z += __MB2P28__;
+
+		(*aux).temp1000 = min((*aux).temp1000, dot(z, z));
+	}
+	
+	(*aux).de = Dd;
+
+	var len: vec4<f32> = z - vec4<f32>(0.0, 0.0, 0.5 * k, 0.0);
+	var d: f32 = (length(len) - 0.5 * k);
+	ColV.w = d;
+	d /= __MB2P32__ * 2.0 * (*aux).de;
+
+	if (!(__MB2P33__ != 0))
+		{ (*aux).dist = min((*aux).dist, d); }
+	else
+		{ (*aux).dist = d; }
+
+	if ((__MB2P34__ != 0)) { z = oldZ; }
+
+	
+	if ((__MB2P35__ != 0))
+	{
+		var colorAdd: f32 = 0.0;
+		colorAdd += colorAdd * __MB2P36__;
+		colorAdd += ColV.x * __MB2P37__.x;
+		colorAdd += ColV.y * __MB2P37__.y;
+		colorAdd += (*aux).temp1000 * __MB2P37__.z;
+		colorAdd += ColV.w * __MB2P37__.w;
+
+		(*aux).color += colorAdd;
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "Testing4d",
+        source: "testing4d.cl",
+        param_floats: 66,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "Cpara.enabledParabFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
+            GeneratedParam { path: "Cpara.parabScale", kind: ParamKind::Float, offset: 1, default: &[0.0] },
+            GeneratedParam { path: "Cpara.parabOffset0", kind: ParamKind::Float, offset: 2, default: &[0.0] },
+            GeneratedParam { path: "Cpara.parabSlope", kind: ParamKind::Float, offset: 3, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset0", kind: ParamKind::Float, offset: 5, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleA1", kind: ParamKind::Float, offset: 6, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.scaleC1", kind: ParamKind::Float, offset: 7, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsB", kind: ParamKind::Int, offset: 8, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsB", kind: ParamKind::Int, offset: 9, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offset1111", kind: ParamKind::Float4, offset: 10, default: &[1.0, 1.0, 1.0, 1.0] },
+            GeneratedParam { path: "transformCommon.offset0000", kind: ParamKind::Float4, offset: 14, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 18, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsS", kind: ParamKind::Int, offset: 19, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsS", kind: ParamKind::Int, offset: 20, default: &[250.0] },
+            GeneratedParam { path: "mandelboxVary4D.rPower", kind: ParamKind::Float, offset: 21, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.minR2p25", kind: ParamKind::Float, offset: 22, default: &[0.25] },
+            GeneratedParam { path: "transformCommon.maxMinR2factor", kind: ParamKind::Float, offset: 23, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.maxR2d1", kind: ParamKind::Float, offset: 24, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 25, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsC", kind: ParamKind::Int, offset: 26, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scale", kind: ParamKind::Float, offset: 27, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsX", kind: ParamKind::Int, offset: 28, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsX", kind: ParamKind::Int, offset: 29, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scaleVary0", kind: ParamKind::Float, offset: 30, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleB1", kind: ParamKind::Float, offset: 31, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledMFalse", kind: ParamKind::Int, offset: 32, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledRFalse", kind: ParamKind::Int, offset: 33, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 34, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 35, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotation44a", kind: ParamKind::Float3, offset: 36, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation44b", kind: ParamKind::Float3, offset: 40, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.additionConstant0000", kind: ParamKind::Float4, offset: 44, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 48, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsA", kind: ParamKind::Int, offset: 49, default: &[250.0] },
+            GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 50, default: &[1.0] },
+            GeneratedParam { path: "foldingIntPow.zFactor", kind: ParamKind::Float, offset: 51, default: &[5.0] },
+            GeneratedParam { path: "analyticDE.offset2", kind: ParamKind::Float, offset: 52, default: &[1.0] },
+            GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 53, default: &[1.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 54, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 55, default: &[0.0] },
+            GeneratedParam { path: "mandelbox.color.factor", kind: ParamKind::Float3, offset: 56, default: &[0.03, 0.05, 0.07, 0.0] },
+            GeneratedParam { path: "mandelbox.color.factor4D", kind: ParamKind::Float4, offset: 60, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "mandelbox.color.factorSp1", kind: ParamKind::Float, offset: 64, default: &[0.2] },
+            GeneratedParam { path: "mandelbox.color.factorSp2", kind: ParamKind::Float, offset: 65, default: &[0.2] },
+        ],
+        derivations: &[
+            Derivation { target: 23, op: DeriveOp::Ratio, sources: &[24, 22] },
+        ],
+        wgsl: r####"
+	var colorAdd: f32 = 0.0;
+	var rrCol: f32 = 0.0;
+	var zCol: vec4<f32> = z;
+	var oldZ: vec4<f32> = z;
+
+	
+	var paraAddP0: f32 = 0.0;
+	if ((__MB2P0__ != 0))
+	{
+		var parabScale: f32 = 0.0;
+		if (__MB2P1__ != 0.0)
+			{ parabScale = (*aux).i * (*aux).i * 0.001 * __MB2P1__; }
+		paraAddP0 = __MB2P2__ + ((*aux).i * __MB2P3__) + (parabScale);
+		z.w += paraAddP0;
+	}
+
+	
+	var sinAdd: f32 = 0.0;
+	if ((__MB2P4__ != 0))
+	{
+		sinAdd =
+			sin(((*aux).i + __MB2P5__) / __MB2P6__)
+			* __MB2P7__;
+		z.w += sinAdd;
+	}
+
+	
+
+	if ((*aux).i >= __MB2P8__
+			&& (*aux).i < __MB2P9__)
+	{
+		oldZ = z;
+		z.x = abs(z.x + __MB2P10__.x)
+					- abs(z.x - __MB2P10__.x) - z.x;
+		z.y = abs(z.y + __MB2P10__.y)
+					- abs(z.y - __MB2P10__.y) - z.y;
+		z.z = abs(z.z + __MB2P10__.z)
+					- abs(z.z - __MB2P10__.z) - z.z;
+		z.w = abs(z.w + __MB2P10__.w)
+					- abs(z.w - __MB2P10__.w) - z.w;
+		zCol = z;
+	}
+	var temp: vec4<f32> = __MB2P14__;
+	var temp2: vec4<f32> = temp * temp;
+	
+	if (z.w < 1e-21 && z.w > -1e-21) { z.w =select(-1e-21, 1e-21, (z.w > 0)); }
+	z.x += ((8.0 * temp.x * temp2.x) / ((z.x * z.x) + (4.0 * temp2.x)) - 2.0 * temp.x) * sign(z.x)
+				 * __MB2P18__;
+	z.y += ((8.0 * temp.y * temp2.y) / ((z.y * z.y) + (4.0 * temp2.y)) - 2.0 * temp.y) * sign(z.y)
+				 * __MB2P18__;
+	z.z += ((8.0 * temp.z * temp2.z) / ((z.z * z.z) + (4.0 * temp2.z)) - 2.0 * temp.z) * sign(z.z)
+				 * __MB2P18__;
+	z.w += ((8.0 * temp.w * temp2.w) / ((z.w * z.w) + (4.0 * temp2.w)) - 2.0 * temp.w) * sign(z.w)
+				 * __MB2P18__;
+
+	
+	if ((*aux).i >= __MB2P19__
+			&& (*aux).i < __MB2P20__)
+	{
+		var rr: f32 = dot(z, z);
+		rrCol = rr;
+		if (__MB2P21__ != 1.0) { rr = pow(rr, __MB2P21__); }
+
+		
+		
+		if (rr < __MB2P22__)
+		{
+			z *= __MB2P23__;
+			(*aux).de *= __MB2P23__;
+			
+		}
+		else if (rr < __MB2P24__)
+		{
+			z *= __MB2P24__ / rr;
+			(*aux).de *= __MB2P24__ / rr;
+			
+		}
+		
+
+		
+	}
+
+	
+	var useScale: f32 = 1.0;
+	if ((*aux).i >= __MB2P25__
+			&& (*aux).i < __MB2P26__)
+	{
+
+		useScale = (*aux).actual_scale_a + __MB2P27__;
+
+		z *= useScale;
+		(*aux).de = (*aux).de * abs(useScale);
+
+		if ((*aux).i >= __MB2P28__
+				&& (*aux).i < __MB2P29__)
+		{
+			
+			var vary: f32 = __MB2P30__
+									* (abs((*aux).actual_scale_a) - __MB2P31__);
+			if ((__MB2P32__ != 0))
+				{ (*aux).actual_scale_a = -vary; }
+			else
+				{ (*aux).actual_scale_a = (*aux).actual_scale_a - vary; }
+		}
+	}
+
+	
+	if ((__MB2P33__ != 0)
+			&& (*aux).i >= __MB2P34__
+			&& (*aux).i < __MB2P35__)
+	{
+		var tp: vec4<f32>;
+		if (__MB2P36__.x != 0)
+		{
+			tp = z;
+			var alpha: f32 = __MB2P36__.x * M_PI_180_F;
+			z.x = tp.x * cos(alpha) + tp.y * sin(alpha);
+			z.y = tp.x * -sin(alpha) + tp.y * cos(alpha);
+		}
+		if (__MB2P36__.y != 0)
+		{
+			tp = z;
+			var beta: f32 = __MB2P36__.y * M_PI_180_F;
+			z.y = tp.y * cos(beta) + tp.z * sin(beta);
+			z.z = tp.y * -sin(beta) + tp.z * cos(beta);
+		}
+		if (__MB2P36__.z != 0)
+		{
+			tp = z;
+			var gamma: f32 = __MB2P36__.z * M_PI_180_F;
+			z.x = tp.x * cos(gamma) + tp.z * sin(gamma);
+			z.z = tp.x * -sin(gamma) + tp.z * cos(gamma);
+		}
+		if (__MB2P40__.x != 0)
+		{
+			tp = z;
+			var delta: f32 = __MB2P40__.x * M_PI_180_F;
+			z.x = tp.x * cos(delta) + tp.w * sin(delta);
+			z.w = tp.x * -sin(delta) + tp.w * cos(delta);
+		}
+		if (__MB2P40__.y != 0)
+		{
+			tp = z;
+			var epsilon: f32 = __MB2P40__.y * M_PI_180_F;
+			z.y = tp.y * cos(epsilon) + tp.w * sin(epsilon);
+			z.w = tp.y * -sin(epsilon) + tp.w * cos(epsilon);
+		}
+		if (__MB2P40__.z != 0)
+		{
+			tp = z;
+			var zeta: f32 = __MB2P40__.z * M_PI_180_F;
+			z.z = tp.z * cos(zeta) + tp.w * sin(zeta);
+			z.w = tp.z * -sin(zeta) + tp.w * cos(zeta);
+		}
+	}
+	z += __MB2P44__;
+
+	
+
+	if ((*aux).i >= __MB2P48__
+			&& (*aux).i < __MB2P49__)
+	{
+		(*aux).r = length(z);
+		(*aux).de = (*aux).r * (*aux).de * 16.0 * __MB2P50__
+								* sqrt(__MB2P51__ * __MB2P51__ + 2.0
+															+ __MB2P52__)
+								/ SQRT_3_F
+							+ __MB2P53__;
+
+		z = z * 2.0;
+		var x2: f32 = z.x * z.x;
+		var y2: f32 = z.y * z.y;
+		var z2: f32 = z.z * z.z;
+		var temp: f32 = 1.0 - z2 / (x2 + y2);
+		var zTemp: vec4<f32>;
+		zTemp.x = (x2 - y2) * temp;
+		zTemp.y = 2.0 * z.x * z.y * temp;
+		zTemp.z = -2.0 * z.z * sqrt(x2 + y2);
+		zTemp.w = z.w;
+		z = zTemp;
+		z.z *= __MB2P51__;
+	}
+
+	
+	if ((__MB2P54__ != 0))
+	{
+		if ((__MB2P55__ != 0))
+		{
+			if (zCol.x != oldZ.x)
+				{ colorAdd +=
+					__MB2P56__.x * (abs(zCol.x) - __MB2P60__.x); }
+			if (zCol.y != oldZ.y)
+				{ colorAdd +=
+					__MB2P56__.y * (abs(zCol.y) - __MB2P60__.y); }
+			if (zCol.z != oldZ.z)
+				{ colorAdd +=
+					__MB2P56__.z * (abs(zCol.z) - __MB2P60__.z); }
+			if (zCol.w != oldZ.w)
+				{ colorAdd +=
+					__MB2P56__.z * (abs(zCol.w) - __MB2P60__.w); }
+			if (rrCol < __MB2P24__)
+			{
+				if (rrCol < __MB2P22__)
+					{ colorAdd +=
+						__MB2P64__ * (__MB2P22__ - rrCol)
+						+ __MB2P65__
+								* (__MB2P24__ - __MB2P22__); }
+				else
+					{ colorAdd +=
+						__MB2P65__ * (__MB2P24__ - rrCol); }
+			}
+		}
+		else
+		{
+			if (zCol.x != oldZ.x) { colorAdd += __MB2P60__.x; }
+			if (zCol.y != oldZ.y) { colorAdd += __MB2P60__.y; }
+			if (zCol.z != oldZ.z) { colorAdd += __MB2P60__.z; }
+			if (zCol.w != oldZ.w) { colorAdd += __MB2P60__.w; }
+			if (rrCol < __MB2P22__)
+				{ colorAdd += __MB2P64__; }
+			else if (rrCol < __MB2P24__)
+				{ colorAdd += __MB2P65__; }
+		}
+		(*aux).color += colorAdd;
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
         name: "TestingLog",
         source: "testing_log.cl",
         param_floats: 23,
@@ -24747,6 +30880,45 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 "####,
     },
     GeneratedFormula {
+        name: "TransfAddConstantVaryV1",
+        source: "transf_add_constant_vary_v1.cl",
+        param_floats: 10,
+        de_function: DeFunction::None,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.additionConstant000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.startIterations250", kind: ParamKind::Int, offset: 4, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.stopIterations", kind: ParamKind::Int, offset: 5, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 6, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+        ],
+        wgsl: r####"
+	var tempVC: vec4<f32> = __MB2P0__;
+	if ((*aux).i < __MB2P4__)
+	{
+		;
+	}
+	if ((*aux).i >= __MB2P4__
+			&& (*aux).i < __MB2P5__
+			&& (__MB2P5__ - __MB2P4__
+					!= 0))
+	{
+		var iterationRange: f32 =
+			__MB2P5__ - __MB2P4__;
+		var currentIteration: f32 = ((*aux).i - __MB2P4__);
+		tempVC += __MB2P6__ * (1.0 * currentIteration) / iterationRange;
+	}
+	if ((*aux).i >= __MB2P5__)
+	{
+		tempVC = (tempVC + __MB2P6__);
+	}
+	z += tempVC;
+	return z;
+"####,
+    },
+    GeneratedFormula {
         name: "TransfAddCpixel",
         source: "transf_add_cpixel.cl",
         param_floats: 4,
@@ -25486,6 +31658,46 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		(*aux).color += abs(cv.x * cv.y) * __MB2P26__.x;
 		(*aux).color += (cv.x * cv.x + cv.y * cv.y) * __MB2P26__.y;
 	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "TransfAddCpixelVaryV1",
+        source: "transf_add_cpixel_vary_v1.cl",
+        param_floats: 10,
+        de_function: DeFunction::None,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.constantMultiplier111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.startIterations250", kind: ParamKind::Int, offset: 4, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.stopIterations", kind: ParamKind::Int, offset: 5, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 6, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+        ],
+        wgsl: r####"
+	var tempVC: vec4<f32> = __MB2P0__;
+	if ((*aux).i < __MB2P4__)
+	{
+		;
+	}
+	if ((*aux).i >= __MB2P4__
+			&& (*aux).i < __MB2P5__
+			&& (__MB2P5__ - __MB2P4__
+					!= 0))
+	{
+
+		var iterationRange: f32 =
+			__MB2P5__ - __MB2P4__;
+		var currentIteration: f32 = ((*aux).i - __MB2P4__);
+		tempVC += __MB2P6__ * (1.0 * currentIteration) / iterationRange;
+	}
+	if ((*aux).i >= __MB2P5__)
+	{
+		tempVC = (tempVC + __MB2P6__);
+	}
+	z += (*aux).const_c * tempVC;
 	return z;
 "####,
     },
@@ -26715,6 +32927,86 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 			if (z.w != oldZ.w) { (*aux).color += __MB2P23__.w * (abs(z.w) - limit.w); }
 		}
 	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "TransfBoxFoldVaryV1",
+        source: "transf_box_fold_vary_v1.cl",
+        param_floats: 12,
+        de_function: DeFunction::None,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "mandelbox.foldingLimit", kind: ParamKind::Float, offset: 0, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterations250", kind: ParamKind::Int, offset: 1, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.stopIterations", kind: ParamKind::Int, offset: 2, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offset", kind: ParamKind::Float, offset: 3, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scale2", kind: ParamKind::Float, offset: 4, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 5, default: &[1.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 6, default: &[0.0] },
+            GeneratedParam { path: "mandelbox.color.factor", kind: ParamKind::Float3, offset: 7, default: &[0.03, 0.05, 0.07, 0.0] },
+            GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 11, default: &[1.0] },
+        ],
+        derivations: &[
+        ],
+        wgsl: r####"
+	var oldZ: vec4<f32> = z;
+	var limit: f32 = __MB2P0__;
+	var tempVC: f32 = limit;
+
+	if ((*aux).i >= __MB2P1__
+			&& (*aux).i < __MB2P2__
+			&& (__MB2P2__ - __MB2P1__
+					!= 0))
+	{
+		var iterationRange: f32 =
+			__MB2P2__ - __MB2P1__;
+		var currentIteration: f32 = ((*aux).i - __MB2P1__);
+		tempVC += __MB2P3__ * (1.0 * currentIteration) / iterationRange;
+	}
+	if ((*aux).i >= __MB2P2__)
+	{
+		tempVC = (tempVC + __MB2P3__);
+	}
+
+	limit = tempVC;
+	var value: f32 = __MB2P4__ * limit;
+
+	if (z.x > limit)
+	{
+		z.x = value - z.x;
+	}
+	else if (z.x < -limit)
+	{
+		z.x = -value - z.x;
+	}
+	if (z.y > limit)
+	{
+		z.y = value - z.y;
+		;
+	}
+	else if (z.y < -limit)
+	{
+		z.y = -value - z.y;
+	}
+	var zLimit: f32 = limit * __MB2P5__;
+	var zValue: f32 = value * __MB2P5__;
+	if (z.z > zLimit)
+	{
+		z.z = zValue - z.z;
+	}
+	else if (z.z < -zLimit)
+	{
+		z.z = -zValue - z.z;
+	}
+	if ((__MB2P6__ != 0))
+	{
+		if (z.x != oldZ.x) { (*aux).color += __MB2P7__.x; }
+		if (z.y != oldZ.y) { (*aux).color += __MB2P7__.y; }
+		if (z.z != oldZ.z) { (*aux).color += __MB2P7__.z; }
+	}
+	(*aux).de *= __MB2P11__;
 	return z;
 "####,
     },
@@ -28010,6 +34302,149 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 "####,
     },
     GeneratedFormula {
+        name: "TransfDIFSBoxV3",
+        source: "transf_difs_box_v3.cl",
+        param_floats: 46,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCyFalse", kind: ParamKind::Int, offset: 5, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCzFalse", kind: ParamKind::Int, offset: 6, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.additionConstant111", kind: ParamKind::Float4, offset: 7, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledTFalse", kind: ParamKind::Int, offset: 11, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsT", kind: ParamKind::Int, offset: 12, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsT", kind: ParamKind::Int, offset: 13, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.constantMultiplier000", kind: ParamKind::Float4, offset: 14, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledMFalse", kind: ParamKind::Int, offset: 18, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsM", kind: ParamKind::Int, offset: 19, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsM", kind: ParamKind::Int, offset: 20, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scale3D000", kind: ParamKind::Float4, offset: 21, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledNFalse", kind: ParamKind::Int, offset: 25, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsN", kind: ParamKind::Int, offset: 26, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsN", kind: ParamKind::Int, offset: 27, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.angle0", kind: ParamKind::Float, offset: 28, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 29, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset1", kind: ParamKind::Float, offset: 30, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledOFalse", kind: ParamKind::Int, offset: 31, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAzFalse", kind: ParamKind::Int, offset: 32, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledEFalse", kind: ParamKind::Int, offset: 33, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetB0", kind: ParamKind::Float, offset: 34, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 35, default: &[0.0] },
+            GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 36, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 37, default: &[250.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 38, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 42, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledAFalse", kind: ParamKind::Int, offset: 43, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset0", kind: ParamKind::Float, offset: 44, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 45, default: &[0.0] },
+        ],
+        derivations: &[
+        ],
+        wgsl: r####"
+	z += __MB2P0__;
+
+	if ((__MB2P4__ != 0)) { z.x = -abs(z.x); }
+	if ((__MB2P5__ != 0)) { z.y = -abs(z.y); }
+	if ((__MB2P6__ != 0)) { z.z = -abs(z.z); }
+
+	var zc: vec4<f32> = z;
+	var boxSize: vec4<f32> = __MB2P7__;
+
+	
+	if ((__MB2P11__ != 0)
+			&& (*aux).i >= __MB2P12__
+			&& (*aux).i < __MB2P13__)
+	{
+		var Zxx: f32 = zc.x * zc.x;
+		var Zzz: f32 = zc.z * zc.z;
+		boxSize.x += Zzz * __MB2P14__.x;
+		boxSize.y += Zzz * __MB2P14__.y;
+		boxSize.z += Zxx * __MB2P14__.z;
+	}
+
+	
+	if ((__MB2P18__ != 0)
+			&& (*aux).i >= __MB2P19__
+			&& (*aux).i < __MB2P20__)
+	{
+		var subZ: vec4<f32> = vec4<f32>(z.y, z.z, z.x, z.w) * __MB2P21__;
+		boxSize -= subZ;
+	}
+
+	if ((__MB2P25__ != 0)
+			&& (*aux).i >= __MB2P26__
+			&& (*aux).i < __MB2P27__)
+	{
+		var k: f32 = __MB2P28__;
+
+		if ((__MB2P29__ != 0))
+			{ k *= (*aux).i + __MB2P30__; }
+
+		var swap: f32;
+		if (!(__MB2P31__ != 0))
+			{ swap = zc.x; }
+		else
+			{ swap = zc.z; }
+
+		if ((__MB2P32__ != 0)) { swap = abs(swap); }
+
+		var c: f32 = cos(k * zc.y);
+		var s: f32 = sin(k * zc.y);
+		if (!(__MB2P31__ != 0))
+			{ zc.x = c * swap + -s * zc.y; }
+		else
+			{ zc.z = c * swap + -s * zc.y; }
+		zc.y = s * swap + c * zc.y;
+	}
+
+	var q: vec4<f32> = abs(zc) - boxSize;
+	zc = q;
+	zc.x = max(zc.x, 0.0);
+	zc.y = max(zc.y, 0.0);
+	zc.z = max(zc.z, 0.0);
+	var zcd: f32 = length(zc);
+
+	var colDist: f32 = (*aux).dist;
+	if (!(__MB2P33__ != 0))
+		{ (*aux).dist = min((*aux).dist, zcd / ((*aux).de + 1.0)); }
+	else
+		{ (*aux).dist = min((*aux).dist, zcd / ((*aux).de + 1.0) - __MB2P34__); }
+
+	if ((__MB2P35__ != 0) && colDist != (*aux).dist
+			&& (*aux).i >= __MB2P36__
+			&& (*aux).i < __MB2P37__)
+	{
+		var addCol: f32 = __MB2P38__.x + (*aux).i * __MB2P42__;
+
+		if ((__MB2P43__ != 0))
+		{
+			if (zc.x > max(zc.y, zc.z)) { addCol += __MB2P38__.y; }
+			if (zc.y > max(zc.x, zc.z)) { addCol += __MB2P38__.z; }
+			if (zc.z > max(zc.y, zc.x)) { addCol += __MB2P38__.w; }
+
+			if (__MB2P44__ != 0.0)
+			{
+				var t: f32 = z.x * z.y;
+				if ((t > 0.0 && z.z > 0.0) || (t < 0.0 && z.z < 0.0))
+					{ addCol += __MB2P44__; }
+			}
+		}
+		if (!(__MB2P45__ != 0))
+		{
+			(*aux).color = addCol;
+		}
+		else
+		{
+			(*aux).color += addCol; 
+		}
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
         name: "TransfDIFSChessboard",
         source: "transf_difs_chessboard.cl",
         param_floats: 20,
@@ -29182,6 +35617,410 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 "####,
     },
     GeneratedFormula {
+        name: "TransfDIFSGridV2",
+        source: "transf_difs_grid_v2.cl",
+        param_floats: 39,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 0, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.scaleF1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledMFalse", kind: ParamKind::Int, offset: 2, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsM", kind: ParamKind::Int, offset: 3, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsM", kind: ParamKind::Int, offset: 4, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scaleA0", kind: ParamKind::Float, offset: 5, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scaleB0", kind: ParamKind::Float, offset: 6, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledNFalse", kind: ParamKind::Int, offset: 7, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsN", kind: ParamKind::Int, offset: 8, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsN", kind: ParamKind::Int, offset: 9, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.angle0", kind: ParamKind::Float, offset: 10, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 11, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset1", kind: ParamKind::Float, offset: 12, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledOFalse", kind: ParamKind::Int, offset: 13, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAzFalse", kind: ParamKind::Int, offset: 14, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotationEnabled", kind: ParamKind::Int, offset: 15, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 16, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledJFalse", kind: ParamKind::Int, offset: 28, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset0005", kind: ParamKind::Float, offset: 29, default: &[0.005] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 30, default: &[0.0] },
+            GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 31, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 32, default: &[250.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 33, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 37, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 38, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 39, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 16, op: DeriveOp::Rotation2, sources: &[39] },
+        ],
+        wgsl: r####"
+	var zc: vec4<f32> = z;
+
+	var size: f32 = __MB2P0__;
+	var grid: f32 = 0.0;
+
+	zc.z /= __MB2P1__;
+
+	if ((__MB2P2__ != 0)
+			&& (*aux).i >= __MB2P3__
+			&& (*aux).i < __MB2P4__)
+	{
+		var temp: f32 = zc.x;
+		zc.x = zc.x + sin(zc.y) * __MB2P5__;
+		zc.y = zc.y + sin(temp) * __MB2P6__;
+	}
+
+	if ((__MB2P7__ != 0)
+			&& (*aux).i >= __MB2P8__
+			&& (*aux).i < __MB2P9__)
+	{
+		var k: f32 = __MB2P10__;
+
+		if ((__MB2P11__ != 0))
+			{ k *= (*aux).i + __MB2P12__; }
+
+		var swap: f32;
+		if (!(__MB2P13__ != 0))
+			{ swap = zc.x; }
+		else
+			{ swap = zc.z; }
+
+		if ((__MB2P14__ != 0)) { swap = abs(swap); }
+		var c: f32 = cos(k * zc.y);
+		var s: f32 = sin(k * zc.y);
+		if (!(__MB2P13__ != 0))
+		{
+			zc.x = c * swap + -s * zc.y;
+		}
+		else
+		{
+			zc.z = c * swap + -s * zc.y;
+		}
+		zc.y = s * swap + c * zc.y;
+	}
+
+	if ((__MB2P15__ != 0))
+	{
+		zc = mb2_mat_mul(__MB2P16__, zc);
+	}
+
+	var xFloor: f32 = abs(zc.x - size * floor(zc.x / size + 0.5));
+	var yFloor: f32 = abs(zc.y - size * floor(zc.y / size + 0.5));
+	var gridXY: f32 = min(xFloor, yFloor);
+
+	if (!(__MB2P28__ != 0))
+		{ grid = sqrt(gridXY * gridXY + zc.z * zc.z); }
+	else
+		{ grid = max(abs(gridXY), abs(zc.z)); }
+
+	var colDist: f32 = (*aux).dist;
+	(*aux).dist = min((*aux).dist, (grid - __MB2P29__) / ((*aux).de + 1.0));
+
+	if ((__MB2P30__ != 0) && colDist != (*aux).dist
+			&& (*aux).i >= __MB2P31__
+			&& (*aux).i < __MB2P32__)
+	{
+		var addCol: f32 = __MB2P33__.x + (*aux).i * __MB2P37__;
+
+		if (gridXY != xFloor) { addCol += __MB2P33__.y; }
+
+		if (!(__MB2P38__ != 0))
+		{
+			(*aux).color = addCol;
+		}
+		else
+		{
+			(*aux).color += addCol;
+		}
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "TransfDIFSGridV3",
+        source: "transf_difs_grid_v3.cl",
+        param_floats: 86,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.functionEnabledyFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetR0", kind: ParamKind::Float, offset: 1, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledTFalse", kind: ParamKind::Int, offset: 2, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset2", kind: ParamKind::Float, offset: 3, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.offsetA2", kind: ParamKind::Float, offset: 4, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledRFalse", kind: ParamKind::Int, offset: 5, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.int8Y", kind: ParamKind::Int, offset: 6, default: &[8.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledSwFalse", kind: ParamKind::Int, offset: 7, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsN", kind: ParamKind::Int, offset: 8, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsN", kind: ParamKind::Int, offset: 9, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offset0", kind: ParamKind::Float, offset: 10, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetC0", kind: ParamKind::Float, offset: 11, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 12, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsO", kind: ParamKind::Int, offset: 13, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsO", kind: ParamKind::Int, offset: 14, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCx", kind: ParamKind::Int, offset: 15, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 16, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsP", kind: ParamKind::Int, offset: 17, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offset1", kind: ParamKind::Float, offset: 18, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offsetA1", kind: ParamKind::Float, offset: 19, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCy", kind: ParamKind::Int, offset: 20, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 21, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 22, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCyFalse", kind: ParamKind::Int, offset: 23, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsRV", kind: ParamKind::Int, offset: 24, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsRV", kind: ParamKind::Int, offset: 25, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 26, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.int8X", kind: ParamKind::Int, offset: 27, default: &[8.0] },
+            GeneratedParam { path: "transformCommon.offset111", kind: ParamKind::Float4, offset: 28, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 32, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 33, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsA", kind: ParamKind::Int, offset: 34, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAy", kind: ParamKind::Int, offset: 35, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsB", kind: ParamKind::Int, offset: 36, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsB", kind: ParamKind::Int, offset: 37, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAzFalse", kind: ParamKind::Int, offset: 38, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 39, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsC", kind: ParamKind::Int, offset: 40, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledIFalse", kind: ParamKind::Int, offset: 41, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetA000", kind: ParamKind::Float4, offset: 42, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledMFalse", kind: ParamKind::Int, offset: 46, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledNFalse", kind: ParamKind::Int, offset: 47, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 48, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetD0", kind: ParamKind::Float, offset: 49, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBFalse", kind: ParamKind::Int, offset: 50, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetE0", kind: ParamKind::Float, offset: 51, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scale3D111", kind: ParamKind::Float4, offset: 52, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFFalse", kind: ParamKind::Int, offset: 56, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scale3D000", kind: ParamKind::Float4, offset: 57, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledGFalse", kind: ParamKind::Int, offset: 61, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBx", kind: ParamKind::Int, offset: 62, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledOFalse", kind: ParamKind::Int, offset: 63, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledKFalse", kind: ParamKind::Int, offset: 64, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetA0", kind: ParamKind::Float, offset: 65, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 66, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetB0", kind: ParamKind::Float, offset: 67, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetp05", kind: ParamKind::Float, offset: 68, default: &[0.05] },
+            GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 69, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetF0", kind: ParamKind::Float, offset: 70, default: &[0.0] },
+            GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 71, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 72, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset4", kind: ParamKind::Float, offset: 73, default: &[4.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledSFalse", kind: ParamKind::Int, offset: 74, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledzFalse", kind: ParamKind::Int, offset: 75, default: &[0.0] },
+            GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 76, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabled", kind: ParamKind::Int, offset: 77, default: &[1.0] },
+            GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 78, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 79, default: &[250.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 80, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 84, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 85, default: &[0.0] },
+        ],
+        derivations: &[
+        ],
+        wgsl: r####"
+	var c: vec4<f32> = (*aux).const_c;
+	var zc: vec4<f32> = z;
+	if ((__MB2P0__ != 0)) { zc = c; }
+
+	zc.z += __MB2P1__;
+
+	if ((__MB2P2__ != 0))
+	{
+		zc.x -= round(zc.x / __MB2P3__) * __MB2P3__;
+		zc.y -= round(zc.y / __MB2P4__) * __MB2P4__;
+	}
+
+	if ((__MB2P5__ != 0))
+	{
+		for (var m: f32 = 0; m < __MB2P6__; m = m + 1)
+		{
+			var t: f32;
+			zc.x = abs(zc.x);
+			zc.y = abs(zc.y);
+			if ((__MB2P7__ != 0)
+					&& m >= __MB2P8__
+					&& m < __MB2P9__)
+			{
+				t = zc.x;
+				zc.x = zc.y;
+				zc.y = t;
+			}
+			t = zc.x;
+			zc.x = zc.x + zc.y - __MB2P10__;
+			zc.y = t - zc.y - __MB2P11__;
+			if ((__MB2P12__ != 0)
+					&& m >= __MB2P13__
+					&& m < __MB2P14__)
+				{ zc.x = -abs(zc.x); }
+			if ((__MB2P15__ != 0)
+					&& m >= __MB2P16__
+					&& m < __MB2P17__)
+				{ zc.y = -abs(zc.y); }
+
+			var foldX: f32 = __MB2P18__;
+			var foldY: f32 = __MB2P19__;
+
+			t = zc.x;
+			zc.x = (zc.x + zc.y) * 0.5;
+			zc.y = (t - zc.y) * 0.5;
+			if ((__MB2P20__ != 0)
+					&& m >= __MB2P21__
+					&& m < __MB2P22__)
+				{ zc.x = foldX - abs(zc.x + foldX); }
+			if ((__MB2P23__ != 0)
+					&& m >= __MB2P24__
+					&& m < __MB2P25__)
+				{ zc.y = foldY - abs(zc.y + foldY); }
+		}
+	}
+
+	if ((__MB2P26__ != 0))
+	{
+		for (var n: f32 = 0; n < __MB2P27__; n = n + 1)
+		{
+			var limit: vec4<f32> = __MB2P28__;
+
+			if ((__MB2P32__ != 0)
+					&& n >= __MB2P33__
+					&& n < __MB2P34__)
+				{ zc.x = abs(zc.x + limit.x) - abs(zc.x - limit.x) - zc.x; }
+
+			if ((__MB2P35__ != 0)
+					&& n >= __MB2P36__
+					&& n < __MB2P37__)
+				{ zc.y = abs(zc.y + limit.y) - abs(zc.y - limit.y) - zc.y; }
+
+			if ((__MB2P38__ != 0)
+					&& n >= __MB2P39__
+					&& n < __MB2P40__)
+				{ zc.z = abs(zc.z + limit.z) - abs(zc.z - limit.z) - zc.z; }
+		}
+	}
+
+	if ((__MB2P41__ != 0))
+	{
+		var sinan: f32 = sin(__MB2P42__.z);
+		var cosan: f32 = cos(__MB2P42__.z);
+		var temp: f32 = zc.x;
+		zc.x = zc.x * cosan - zc.y * sinan;
+		zc.y = temp * sinan + zc.y * cosan;
+	}
+
+	
+	if ((__MB2P46__ != 0))
+	{
+		zc.x += __MB2P42__.x;
+		zc.x = abs(z.x) - __MB2P42__.x;
+	}
+	
+	if ((__MB2P47__ != 0))
+	{
+		zc.y += __MB2P42__.y;
+		zc.y = abs(z.y) - __MB2P42__.y;
+	}
+	
+	if ((__MB2P48__ != 0))
+		{ zc.x = zc.x + sign(zc.y) * 0.5 * __MB2P49__; }
+	if ((__MB2P50__ != 0))
+		{ zc.y = zc.y + sign(zc.x) * 0.5 * __MB2P51__; }
+
+	
+	zc.x *= __MB2P52__.x;
+	zc.y *= __MB2P52__.y;
+
+	if ((__MB2P56__ != 0))
+		{ zc.x = zc.x + sin(zc.y) * __MB2P57__.x; }
+	if ((__MB2P61__ != 0))
+		{ zc.y = zc.y + sin(zc.x) * __MB2P57__.y; }
+
+	
+	if ((__MB2P62__ != 0)) { zc.x = max(abs(zc.x), abs(zc.y)); }
+	
+	if ((__MB2P63__ != 0))
+		{ zc.x = sqrt((zc.x * zc.x) + (zc.y * zc.y)); }
+
+	if ((__MB2P64__ != 0))
+		{ zc.x = zc.x + sin(zc.y) * __MB2P57__.z; }
+
+	
+	var tD: f32 = zc.x - round(zc.x);
+
+	zc.z /= __MB2P52__.z;
+
+	tD = abs(tD) - __MB2P65__;
+
+	if (!(__MB2P66__ != 0)) 
+	{
+		tD = sqrt(tD * tD + zc.z * zc.z);
+		tD = max(tD, abs(zc.z) + __MB2P67__);
+	}
+	else 
+	{
+		tD = max(abs(tD), abs(zc.z) - __MB2P67__);
+	}
+	tD -= __MB2P68__;
+
+	
+	var plD: f32 = 1000.0;
+	if ((__MB2P69__ != 0))
+		{ plD = abs(c.z - __MB2P70__); }
+
+	var d: f32 = min(plD, tD / ((*aux).de + __MB2P71__));
+
+	
+	if ((__MB2P72__ != 0))
+	{
+		var e: f32 = __MB2P73__;
+		if (!(__MB2P74__ != 0))
+		{
+			var f: vec4<f32> = abs(c);
+			f -= vec4<f32>(e, e, e, 0.0);
+			e = max(f.x, max(f.y, f.z));
+		}
+		else
+		{
+			e = clamp(sqrt(c.x * c.x + c.y * c.y) - e, 0.0, 100.0); 
+		}
+		d = max(d, e);
+	}
+
+	if ((__MB2P75__ != 0)) { z = zc; }
+	var colDist: f32 = (*aux).dist;
+	if (!(__MB2P76__ != 0))
+		{ (*aux).dist = d; }
+	else
+		{ (*aux).dist = min((*aux).dist, d); }
+
+	
+	if ((__MB2P77__ != 0) && colDist != (*aux).dist
+			&& (*aux).i >= __MB2P78__
+			&& (*aux).i < __MB2P79__)
+	{
+		var addCol: f32 = __MB2P80__.y;
+		if (d == plD)
+			{ addCol += __MB2P80__.x; }
+		else
+		{
+			addCol += __MB2P80__.z * zc.z + __MB2P80__.w * zc.z * zc.z;
+		}
+
+		addCol += (*aux).i * __MB2P84__;
+
+		if (!(__MB2P85__ != 0))
+		{
+			(*aux).color = addCol;
+		}
+		else
+		{
+			(*aux).color += addCol;
+		}
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
         name: "TransfDIFSHeart",
         source: "transf_difs_heart.cl",
         param_floats: 58,
@@ -29497,6 +36336,262 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 			{ (*aux).color = colAdd; }
 		else
 			{ (*aux).color += colAdd; }
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "TransfDIFSHelixMenger",
+        source: "transf_difs_helix_menger.cl",
+        param_floats: 71,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.scale2", kind: ParamKind::Float, offset: 0, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.scaleMain2", kind: ParamKind::Float, offset: 1, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 2, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset4", kind: ParamKind::Float, offset: 3, default: &[4.0] },
+            GeneratedParam { path: "transformCommon.int1", kind: ParamKind::Int, offset: 4, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAy", kind: ParamKind::Int, offset: 5, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAyFalse", kind: ParamKind::Int, offset: 6, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scale16", kind: ParamKind::Float, offset: 7, default: &[16.0] },
+            GeneratedParam { path: "transformCommon.offset1", kind: ParamKind::Float, offset: 8, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.scaleG1", kind: ParamKind::Float, offset: 9, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAz", kind: ParamKind::Int, offset: 10, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.int2", kind: ParamKind::Int, offset: 11, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledKFalse", kind: ParamKind::Int, offset: 12, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledSwFalse", kind: ParamKind::Int, offset: 13, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 14, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledEFalse", kind: ParamKind::Int, offset: 15, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 16, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 17, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.int16", kind: ParamKind::Int, offset: 21, default: &[16.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 22, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 34, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 38, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 39, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scale3", kind: ParamKind::Float, offset: 40, default: &[3.0] },
+            GeneratedParam { path: "transformCommon.offsetA111", kind: ParamKind::Float4, offset: 41, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.offsetA0", kind: ParamKind::Float, offset: 45, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetB0", kind: ParamKind::Float, offset: 46, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetA1", kind: ParamKind::Float, offset: 47, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset01", kind: ParamKind::Float, offset: 48, default: &[0.1] },
+            GeneratedParam { path: "transformCommon.offsetp1", kind: ParamKind::Float, offset: 49, default: &[0.1] },
+            GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 50, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledTFalse", kind: ParamKind::Int, offset: 51, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBFalse", kind: ParamKind::Int, offset: 52, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset0", kind: ParamKind::Float, offset: 53, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledMFalse", kind: ParamKind::Int, offset: 54, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledSFalse", kind: ParamKind::Int, offset: 55, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset0005", kind: ParamKind::Float, offset: 56, default: &[0.005] },
+            GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 57, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledJFalse", kind: ParamKind::Int, offset: 58, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetE0", kind: ParamKind::Float, offset: 59, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset2", kind: ParamKind::Float, offset: 60, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledZcFalse", kind: ParamKind::Int, offset: 61, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsZc", kind: ParamKind::Int, offset: 62, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsZc", kind: ParamKind::Int, offset: 63, default: &[250.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabled", kind: ParamKind::Int, offset: 64, default: &[1.0] },
+            GeneratedParam { path: "foldColor.startIterationsB", kind: ParamKind::Int, offset: 65, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsB", kind: ParamKind::Int, offset: 66, default: &[250.0] },
+            GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 67, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledGFalse", kind: ParamKind::Int, offset: 68, default: &[0.0] },
+            GeneratedParam { path: "foldColor.difs1", kind: ParamKind::Float, offset: 69, default: &[1.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 70, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 71, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 22, op: DeriveOp::Rotation2, sources: &[71] },
+        ],
+        wgsl: r####"
+	var temp: f32;
+	var zc: vec4<f32> = z;
+	var addCol: f32 = 0.0;
+
+	zc *= __MB2P0__;
+	(*aux).de *= __MB2P0__;
+	
+	var ang: f32 = atan2(zc.y, zc.x) * M_PI_2x_INV_F;
+
+	zc.y = sqrt(zc.x * zc.x + zc.y * zc.y) - __MB2P1__;
+
+	
+	if ((__MB2P2__ != 0))
+	{
+		var Voff: f32 = __MB2P3__;
+		temp = zc.z - Voff * ang * __MB2P4__ + Voff * 0.5;
+		zc.z = temp - Voff * floor(temp / Voff) - Voff * 0.5;
+	}
+	
+	if ((__MB2P5__ != 0))
+	{
+		if (!(__MB2P6__ != 0))
+		{
+			temp = __MB2P7__ * ang + __MB2P8__;
+			zc.x = temp - 2.0 * floor(temp * 0.5) - 1.0;
+		}
+		else
+			{ zc.x = __MB2P8__; }
+	}
+	zc.x *= __MB2P9__;
+	
+	if ((__MB2P10__ != 0))
+	{
+		ang *= M_PI_F * __MB2P11__;
+		var cosA: f32 = cos(ang);
+		var sinB: f32 = sin(ang);
+		var a: f32;
+		var b: f32;
+		if (!(__MB2P12__ != 0))
+		{
+			if (!(__MB2P13__ != 0))
+			{
+				a = zc.y;
+				b = zc.z;
+			}
+			else
+			{
+				a = zc.z;
+				b = zc.y;
+			}
+			zc.y = b * cosA + a * sinB;
+			zc.z = a * cosA - b * sinB;
+		}
+		else
+		{
+			if (!(__MB2P13__ != 0))
+			{
+				a = zc.x;
+				b = zc.z;
+			}
+			else
+			{
+				a = zc.z;
+				b = zc.x;
+			}
+			zc.x = b * cosA + a * sinB;
+			zc.z = a * cosA - b * sinB;
+		}
+		if ((__MB2P14__ != 0)) { zc.x = zc.z; }
+		if ((__MB2P15__ != 0)) { zc.x = zc.y; }
+	}
+
+	if ((__MB2P16__ != 0))
+	{
+		zc = __MB2P17__ - abs(zc);
+	}
+
+	
+	var Iterations: f32 = __MB2P21__;
+
+	for (var n: f32 = 0; n < Iterations; n = n + 1)
+	{
+		zc = abs(zc);
+		zc = mb2_mat_mul(__MB2P22__, zc);
+		var col: f32 = 0.0;
+		if (zc.x < zc.y)
+		{
+			temp = zc.y;
+			zc.y = zc.x;
+			zc.x = temp;
+			col += __MB2P34__.x;
+		}
+		if (zc.x < zc.z)
+		{
+			temp = zc.z;
+			zc.z = zc.x;
+			zc.x = temp;
+			col += __MB2P34__.y;
+		}
+		if (zc.y < zc.z)
+		{
+			temp = zc.z;
+			zc.z = zc.y;
+			zc.y = temp;
+		}
+		if (n >= __MB2P38__ && n < __MB2P39__)
+		{
+			addCol += col;
+		}
+
+		temp = __MB2P40__ - 1.0;
+		var bz: f32 = temp * __MB2P41__.z + __MB2P45__;
+		zc = __MB2P40__ * zc - temp * __MB2P41__;
+		(*aux).de = __MB2P40__ * ((*aux).de + __MB2P46__);
+		if (zc.z < -0.5 * bz) { zc.z += bz; }
+	}
+
+	var d: vec4<f32> = abs(zc);
+	d.x = max(d.x - __MB2P47__, 0.0);
+	d.y = max(d.y - __MB2P48__, 0.0);
+	d.z = max(d.z - __MB2P49__, 0.0);
+
+	var rDE: f32;
+	if (!(__MB2P50__ != 0))
+	{
+		if (!(__MB2P51__ != 0))
+		{
+			rDE = max(d.x, max(d.y, d.z));
+		}
+		else
+		{
+			rDE = length(d);
+		}
+	}
+	else
+	{
+		if (!(__MB2P52__ != 0))
+			{ temp = d.x * d.x + d.y * d.y; }
+		else
+			{ temp = d.x + d.y; }
+		rDE = sqrt(temp) - __MB2P53__;
+
+		if ((__MB2P54__ != 0)) { rDE = max(abs(rDE), abs(d.z)); }
+		if ((__MB2P55__ != 0)) { rDE = sqrt(rDE * rDE + d.z * d.z); }
+	}
+
+	rDE -= __MB2P56__;
+	rDE = rDE / ((*aux).de + __MB2P57__);
+	if ((__MB2P58__ != 0)) 
+	{
+		rDE = max(
+			abs((*aux).const_c.z - __MB2P59__) - __MB2P60__,
+			rDE);
+	}
+
+	var colDist: f32 = (*aux).dist;
+	(*aux).dist = min((*aux).dist, rDE);
+
+	if ((__MB2P61__ != 0)
+			&& (*aux).i >= __MB2P62__
+			&& (*aux).i < __MB2P63__)
+		{ z = zc; }
+
+	if ((__MB2P64__ != 0) && colDist != (*aux).dist
+			&& (*aux).i >= __MB2P65__
+			&& (*aux).i < __MB2P66__)
+	{
+		addCol += (*aux).i * __MB2P67__;
+
+		if (!(__MB2P68__ != 0))
+		{
+			ang =
+				(M_PI_F - 2.0 * abs(atan(__MB2P69__ * zc.y / zc.z))) * 4.0 * M_PI_2x_INV_F;
+			if (fmod(ang, 2.0) < 1.0)
+				{ addCol += __MB2P34__.z; }
+			else
+				{ addCol += __MB2P34__.w; }
+		}
+		else
+		{
+			addCol += __MB2P34__.z * (zc.z * zc.z);
+			addCol += __MB2P34__.w * (zc.y * zc.y);
+		}
+		if (!(__MB2P70__ != 0))
+			{ (*aux).color = addCol; }
+		else
+			{ (*aux).color += addCol; }
 	}
 	return z;
 "####,
@@ -30561,6 +37656,310 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 			&& (*aux).i >= __MB2P61__
 			&& (*aux).i < __MB2P62__)
 		{ z = zc; }
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "TransfDIFSPolyhedra",
+        source: "transf_difs_polyhedra.cl",
+        param_floats: 24,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.int3", kind: ParamKind::Int, offset: 0, default: &[3.0] },
+            GeneratedParam { path: "transformCommon.constantMultiplier100", kind: ParamKind::Float4, offset: 1, default: &[1.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.offset01", kind: ParamKind::Float, offset: 5, default: &[0.1] },
+            GeneratedParam { path: "transformCommon.offsetp05", kind: ParamKind::Float, offset: 6, default: &[0.05] },
+            GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 7, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBxFalse", kind: ParamKind::Int, offset: 8, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledByFalse", kind: ParamKind::Int, offset: 9, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBzFalse", kind: ParamKind::Int, offset: 10, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 11, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledzFalse", kind: ParamKind::Int, offset: 12, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabled", kind: ParamKind::Int, offset: 13, default: &[1.0] },
+            GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 14, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 15, default: &[250.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 16, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 20, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 21, default: &[0.0] },
+            GeneratedParam { path: "foldColor.difs1", kind: ParamKind::Float, offset: 22, default: &[1.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 23, default: &[0.0] },
+        ],
+        derivations: &[
+        ],
+        wgsl: r####"
+	var Type: f32 = __MB2P0__;
+	
+	var U: f32 = __MB2P1__.x;
+	var V: f32 = __MB2P1__.y;
+	var W: f32 = __MB2P1__.z;
+	
+	var VRadius: f32 = __MB2P5__;
+	
+	var SRadius: f32 = __MB2P6__;
+
+	var temp: f32;
+	
+	var cospin: f32 = M_PI_F / f32(Type);
+	cospin = cos(cospin);
+	var scospin: f32 = sqrt(0.75 - cospin * cospin);
+	var nc: vec4<f32> = vec4<f32>(-0.5, -cospin, scospin, 0.0);
+	var pab: vec4<f32> = vec4<f32>(0.0, 0.0, 1.0, 0.0);
+	var pbc: vec4<f32> = vec4<f32>(scospin, 0.0, 0.5, 0.0);
+	temp = length(pbc);
+	pbc = pbc / temp;
+	var pca: vec4<f32> = vec4<f32>(0.0, scospin, cospin, 0.0);
+	temp = length(pca);
+	pca = pca / temp;
+
+	var p: vec4<f32> = (U * pab + V * pbc + W * pca);
+	temp = length(p);
+	p = p / temp;
+
+	var d: f32 = 10000.0;
+	var colVec: vec4<f32> = vec4<f32>(1000.0, 1000.0, 1000.0, 1000.0);
+	var zc: vec4<f32> = z * __MB2P7__;
+	(*aux).de = (*aux).de * __MB2P7__;
+
+	for (var n: f32 = 0; n < Type; n = n + 1)
+	{
+		zc.x = abs(zc.x);
+		zc.y = abs(zc.y);
+		var t: f32 = -2.0 * min(0.0, dot(zc, nc));
+		zc += t * nc;
+	}
+	var zcv: vec4<f32> = zc;
+	if (!(__MB2P8__ != 0))
+	{ 
+		var d0: f32 = dot(zc, pab) - dot(p, pab);
+		var d1: f32 = dot(zc, pbc) - dot(p, pbc);
+		var d2: f32 = dot(zc, pca) - dot(p, pca);
+		var df: f32 = max(max(d0, d1), d2);
+		colVec.x = df;
+		d = min(d, df);
+	}
+
+	if (!(__MB2P9__ != 0))
+	{ 
+		zc -= p;
+		var temp4: vec4<f32> = zc - min(0.0, zc.x) * vec4<f32>(1.0, 0.0, 0.0, 0.0);
+		var dla: f32 = length(temp4);
+		temp4 = zc - min(0.0, zc.y) * vec4<f32>(0.0, 1.0, 0.0, 0.0);
+		var dlb: f32 = length(temp4);
+		temp4 = zc - min(0.0, dot(zc, nc)) * nc;
+		var dlc: f32 = length(temp4);
+		var ds: f32 = min(min(dla, dlb), dlc) - SRadius;
+		colVec.y = ds;
+		d = min(d, ds);
+	}
+
+	if (!(__MB2P10__ != 0))
+	{ 
+		var dv: f32;
+		if (!(__MB2P11__ != 0))
+		{
+			var temp4: vec4<f32> = zcv - p;
+			dv = length(temp4) - VRadius;
+		}
+		else
+		{
+			var ff: vec4<f32> = abs(zcv - p);
+			dv = max(max(ff.x, ff.y), ff.z) - VRadius;
+		}
+		colVec.z = dv;
+		d = min(d, dv);
+	}
+
+	var colDist: f32 = (*aux).dist;
+	(*aux).dist = min((*aux).dist, d / (*aux).de);
+	if ((__MB2P12__ != 0)) { z = zc; }
+
+	if ((__MB2P13__ != 0) && (*aux).i >= __MB2P14__
+			&& (*aux).i < __MB2P15__ && colDist != (*aux).dist)
+	{
+		colVec.x *= __MB2P16__.x;
+		colVec.y *= __MB2P16__.y;
+		colVec.z *= __MB2P16__.z;
+
+		var colAdd: f32 = __MB2P16__.w + (*aux).i * __MB2P20__;
+
+		if (!(__MB2P21__ != 0))
+		{
+			colAdd += colVec.x;
+			colAdd += colVec.y;
+			colAdd += colVec.z;
+
+			colAdd = colAdd * 256.0;
+		}
+		else
+		{
+			colAdd += min(min(colVec.x, colVec.y), colVec.z) * __MB2P22__ * 1024.0;
+		}
+		if (!(__MB2P23__ != 0))
+			{ (*aux).color = colAdd; }
+		else
+			{ (*aux).color += colAdd; }
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "TransfDIFSPolyhedraV2",
+        source: "transf_difs_polyhedra_v2.cl",
+        param_floats: 26,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.int3", kind: ParamKind::Int, offset: 0, default: &[3.0] },
+            GeneratedParam { path: "transformCommon.constantMultiplier100", kind: ParamKind::Float4, offset: 1, default: &[1.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.offset01", kind: ParamKind::Float, offset: 5, default: &[0.1] },
+            GeneratedParam { path: "transformCommon.offsetp05", kind: ParamKind::Float, offset: 6, default: &[0.05] },
+            GeneratedParam { path: "transformCommon.int6", kind: ParamKind::Int, offset: 7, default: &[6.0] },
+            GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 8, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBxFalse", kind: ParamKind::Int, offset: 9, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledByFalse", kind: ParamKind::Int, offset: 10, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetB0", kind: ParamKind::Float, offset: 11, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBzFalse", kind: ParamKind::Int, offset: 12, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 13, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledzFalse", kind: ParamKind::Int, offset: 14, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabled", kind: ParamKind::Int, offset: 15, default: &[1.0] },
+            GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 16, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 17, default: &[250.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 18, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 22, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 23, default: &[0.0] },
+            GeneratedParam { path: "foldColor.difs1", kind: ParamKind::Float, offset: 24, default: &[1.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 25, default: &[0.0] },
+        ],
+        derivations: &[
+        ],
+        wgsl: r####"
+	var Type: f32 = __MB2P0__;
+	
+	var U: f32 = __MB2P1__.x;
+	var V: f32 = __MB2P1__.y;
+	var W: f32 = __MB2P1__.z;
+	
+	var VRadius: f32 = __MB2P5__;
+	
+	var SRadius: f32 = __MB2P6__;
+
+	var temp: f32;
+	
+	var cospin: f32 = M_PI_F / f32(Type);
+	cospin = cos(cospin);
+	var scospin: f32 = sqrt(0.75 - cospin * cospin);
+	var nc: vec4<f32> = vec4<f32>(-0.5, -cospin, scospin, 0.0);
+	var pab: vec4<f32> = vec4<f32>(0.0, 0.0, 1.0, 0.0);
+	var pbc: vec4<f32> = vec4<f32>(scospin, 0.0, 0.5, 0.0);
+	temp = length(pbc);
+	pbc = pbc / temp;
+	var pca: vec4<f32> = vec4<f32>(0.0, scospin, cospin, 0.0);
+	temp = length(pca);
+	pca = pca / temp;
+
+	var p: vec4<f32> = (U * pab + V * pbc + W * pca);
+	temp = length(p);
+	p = p / temp;
+
+	var d: f32 = 10000.0;
+	var colVec: vec4<f32> = vec4<f32>(1000.0, 1000.0, 1000.0, 1000.0);
+	var zc: vec4<f32> = z;
+	var zcv: vec4<f32> = zc;
+
+	for (var m: f32 = 0; m < __MB2P7__; m = m + 1)
+	{
+		var Scale: f32 = __MB2P8__;
+		var powp: f32 = 1.0;
+		powp = pow(Scale, f32(-m));
+
+		for (var n: f32 = 0; n < Type; n = n + 1)
+		{
+			zc.x = abs(zc.x);
+			zc.y = abs(zc.y);
+			var t: f32 = -2.0 * min(0.0, dot(zc, nc));
+			zc += t * nc;
+		}
+		zcv = zc;
+
+		if ((__MB2P9__ != 0))
+		{ 
+			var d0: f32 = dot(zc, pab) - dot(p, pab);
+			var d1: f32 = dot(zc, pbc) - dot(p, pbc);
+			var d2: f32 = dot(zc, pca) - dot(p, pca);
+
+			var df: f32 = max(max(d0, d1), d2);
+			colVec.x = df;
+			d = min(d, df * powp);
+		}
+
+		if (!(__MB2P10__ != 0))
+		{ 
+			zcv = zcv - p;
+			var minDL: f32 = __MB2P11__;
+			var dla: f32 = zcv.x - min(minDL, zcv.x);
+			var temp4: vec4<f32> = vec4<f32>(dla, zcv.y, zcv.z, zcv.w);
+			dla = length(temp4);
+			temp4 = zcv - dot(zcv, nc) * nc;
+			var dlc: f32 = length(temp4);
+			var ds: f32 = min(dla, dlc) - SRadius;
+			colVec.y = ds;
+			d = min(d, ds * powp);
+		}
+
+		if (!(__MB2P12__ != 0))
+		{ 
+			var dv: f32;
+			if (!(__MB2P13__ != 0))
+			{
+				var temp4: vec4<f32> = zcv - p;
+				dv = length(temp4) - VRadius;
+			}
+			else
+			{
+				var ff: vec4<f32> = abs(zc - p);
+				dv = max(max(ff.x, ff.y), ff.z) - VRadius;
+			}
+			colVec.z = dv;
+			d = min(d, dv * powp);
+		}
+		zc *= Scale;
+	}
+
+	var colDist: f32 = (*aux).dist;
+	(*aux).dist = min((*aux).dist, d / (*aux).de);
+
+	if ((__MB2P14__ != 0)) { z = zc; }
+
+	if ((__MB2P15__ != 0) && colDist != (*aux).dist
+			&& (*aux).i >= __MB2P16__
+			&& (*aux).i < __MB2P17__)
+	{
+		colVec.x *= __MB2P18__.x;
+		colVec.y *= __MB2P18__.y;
+		colVec.z *= __MB2P18__.z;
+
+		var colAdd: f32 = __MB2P18__.w + f32((*aux).i) * __MB2P22__;
+
+		if (!(__MB2P23__ != 0))
+		{
+			colAdd += colVec.x;
+			colAdd += colVec.y;
+			colAdd += colVec.z;
+
+			colAdd = colAdd * 256.0;
+		}
+		else
+		{
+			colAdd += min(min(colVec.x, colVec.y), colVec.z) * __MB2P24__ * 1024.0;
+		}
+		if (!(__MB2P25__ != 0))
+			{ (*aux).color = colAdd; }
+		else
+			{ (*aux).color += colAdd; }
+	}
 	return z;
 "####,
     },
@@ -31878,6 +39277,259 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 			{ (*aux).color = addCol; }
 		else
 			{ (*aux).color += addCol; }
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "TransfDIFSTorusMenger",
+        source: "transf_difs_torus_menger.cl",
+        param_floats: 73,
+        de_function: DeFunction::Custom,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.functionEnabledFFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBx", kind: ParamKind::Int, offset: 1, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledByFalse", kind: ParamKind::Int, offset: 2, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBzFalse", kind: ParamKind::Int, offset: 3, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetA000", kind: ParamKind::Float4, offset: 4, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.scale2", kind: ParamKind::Float, offset: 8, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.scaleMain2", kind: ParamKind::Float, offset: 9, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAy", kind: ParamKind::Int, offset: 10, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAyFalse", kind: ParamKind::Int, offset: 11, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scale16", kind: ParamKind::Float, offset: 12, default: &[16.0] },
+            GeneratedParam { path: "transformCommon.offset1", kind: ParamKind::Float, offset: 13, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.scaleG1", kind: ParamKind::Float, offset: 14, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledAzFalse", kind: ParamKind::Int, offset: 15, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.int2", kind: ParamKind::Int, offset: 16, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledKFalse", kind: ParamKind::Int, offset: 17, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledSwFalse", kind: ParamKind::Int, offset: 18, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 19, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 20, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 21, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.int8X", kind: ParamKind::Int, offset: 25, default: &[8.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 26, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 38, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 42, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 43, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.scale3", kind: ParamKind::Float, offset: 44, default: &[3.0] },
+            GeneratedParam { path: "transformCommon.offsetA111", kind: ParamKind::Float4, offset: 45, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.offsetA0", kind: ParamKind::Float, offset: 49, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetB0", kind: ParamKind::Float, offset: 50, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offsetA1", kind: ParamKind::Float, offset: 51, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.offset01", kind: ParamKind::Float, offset: 52, default: &[0.1] },
+            GeneratedParam { path: "transformCommon.offsetp1", kind: ParamKind::Float, offset: 53, default: &[0.1] },
+            GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 54, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledTFalse", kind: ParamKind::Int, offset: 55, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledBFalse", kind: ParamKind::Int, offset: 56, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset0", kind: ParamKind::Float, offset: 57, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledMFalse", kind: ParamKind::Int, offset: 58, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledSFalse", kind: ParamKind::Int, offset: 59, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.offset0005", kind: ParamKind::Float, offset: 60, default: &[0.005] },
+            GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 61, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledZcFalse", kind: ParamKind::Int, offset: 62, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsZc", kind: ParamKind::Int, offset: 63, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsZc", kind: ParamKind::Int, offset: 64, default: &[250.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabled", kind: ParamKind::Int, offset: 65, default: &[1.0] },
+            GeneratedParam { path: "foldColor.startIterationsB", kind: ParamKind::Int, offset: 66, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsB", kind: ParamKind::Int, offset: 67, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetC0", kind: ParamKind::Float, offset: 68, default: &[0.0] },
+            GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 69, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledGFalse", kind: ParamKind::Int, offset: 70, default: &[0.0] },
+            GeneratedParam { path: "foldColor.difs1", kind: ParamKind::Float, offset: 71, default: &[1.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 72, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 73, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 26, op: DeriveOp::Rotation2, sources: &[73] },
+        ],
+        wgsl: r####"
+	var temp: f32;
+	var zc: vec4<f32> = z;
+	var addCol: f32 = 0.0;
+	if ((__MB2P0__ != 0))
+	{
+		if ((__MB2P1__ != 0)) { zc.x = abs(zc.x); }
+		if ((__MB2P2__ != 0)) { zc.y = abs(zc.y); }
+		if ((__MB2P3__ != 0)) { zc.z = abs(zc.z); }
+		zc += __MB2P4__;
+	}
+
+	zc *= __MB2P8__;
+	(*aux).de *= __MB2P8__;
+
+	
+	var ang: f32 = atan2(zc.y, zc.x) * M_PI_2x_INV_F;
+
+	zc.y = sqrt(zc.x * zc.x + zc.y * zc.y) - __MB2P9__;
+
+	
+	if ((__MB2P10__ != 0))
+	{
+		if (!(__MB2P11__ != 0))
+		{
+			temp = __MB2P12__ * ang + __MB2P13__;
+			zc.x = temp - 2.0 * floor(temp * 0.5) - 1.0;
+		}
+		else
+			{ zc.x = __MB2P13__; }
+	}
+	zc.x *= __MB2P14__;
+
+	
+	if ((__MB2P15__ != 0))
+	{
+		ang *= M_PI_F * __MB2P16__;
+		var cosA: f32 = cos(ang);
+		var sinB: f32 = sin(ang);
+		var a: f32;
+		var b: f32;
+		if (!(__MB2P17__ != 0))
+		{
+			if (!(__MB2P18__ != 0))
+			{
+				a = zc.y;
+				b = zc.z;
+			}
+			else
+			{
+				a = zc.z;
+				b = zc.y;
+			}
+			zc.y = b * cosA + a * sinB;
+			zc.z = a * cosA - b * sinB;
+		}
+		else
+		{
+			if (!(__MB2P18__ != 0))
+			{
+				a = zc.x;
+				b = zc.z;
+			}
+			else
+			{
+				a = zc.z;
+				b = zc.x;
+			}
+			zc.x = b * cosA + a * sinB;
+			zc.z = a * cosA - b * sinB;
+		}
+		if ((__MB2P19__ != 0)) { zc.x = zc.z; }
+	}
+
+	if ((__MB2P20__ != 0))
+	{
+		zc = __MB2P21__ - abs(zc);
+	}
+
+	
+	var Iterations: f32 = __MB2P25__;
+
+	for (var n: f32 = 0; n < Iterations; n = n + 1)
+	{
+		zc = abs(zc);
+		zc = mb2_mat_mul(__MB2P26__, zc);
+		var col: f32 = 0.0;
+		if (zc.x < zc.y)
+		{
+			temp = zc.y;
+			zc.y = zc.x;
+			zc.x = temp;
+			col += __MB2P38__.x;
+		}
+		if (zc.x < zc.z)
+		{
+			temp = zc.z;
+			zc.z = zc.x;
+			zc.x = temp;
+			col += __MB2P38__.y;
+		}
+		if (zc.y < zc.z)
+		{
+			temp = zc.z;
+			zc.z = zc.y;
+			zc.y = temp;
+		}
+		if (n >= __MB2P42__ && n < __MB2P43__)
+		{
+			addCol += col;
+		}
+
+		temp = __MB2P44__ - 1.0;
+		var bz: f32 = temp * __MB2P45__.z + __MB2P49__;
+		zc = __MB2P44__ * zc - temp * __MB2P45__;
+		(*aux).de = __MB2P44__ * ((*aux).de + __MB2P50__);
+		if (zc.z < -0.5 * bz) { zc.z += bz; }
+	}
+
+	var d: vec4<f32> = abs(zc);
+	d.x = max(d.x - __MB2P51__, 0.0);
+	d.y = max(d.y - __MB2P52__, 0.0);
+	d.z = max(d.z - __MB2P53__, 0.0);
+
+	var rDE: f32;
+	if (!(__MB2P54__ != 0))
+	{
+		if (!(__MB2P55__ != 0))
+		{
+			rDE = max(d.x, max(d.y, d.z));
+		}
+		else
+		{
+			rDE = length(d);
+		}
+	}
+	else
+	{
+		if (!(__MB2P56__ != 0))
+			{ temp = d.x * d.x + d.y * d.y; }
+		else
+			{ temp = d.x + d.y; }
+		rDE = sqrt(temp) - __MB2P57__;
+
+		if ((__MB2P58__ != 0)) { rDE = max(abs(rDE), abs(d.z)); }
+		if ((__MB2P59__ != 0)) { rDE = sqrt(rDE * rDE + d.z * d.z); }
+	}
+
+	rDE -= __MB2P60__;
+	rDE = rDE / ((*aux).de + __MB2P61__);
+	var colDist: f32 = (*aux).dist;
+	(*aux).dist = min((*aux).dist, rDE);
+
+	if ((__MB2P62__ != 0)
+			&& (*aux).i >= __MB2P63__
+			&& (*aux).i < __MB2P64__)
+		{ z = zc; }
+
+	if ((__MB2P65__ != 0) && colDist != (*aux).dist
+			&& (*aux).i >= __MB2P66__
+			&& (*aux).i < __MB2P67__)
+	{
+		addCol += __MB2P68__ + (*aux).i * __MB2P69__;
+
+		if (!(__MB2P70__ != 0))
+		{
+			var ang: f32 =
+				(M_PI_F - 2.0 * abs(atan(__MB2P71__ * zc.y / zc.z))) * 4.0 * M_PI_2x_INV_F;
+			if (fmod(ang, 2.0) < 1.0)
+				{ addCol += __MB2P38__.z; }
+			else
+				{ addCol += __MB2P38__.w; }
+		}
+		else
+		{
+			addCol += __MB2P38__.z * (zc.z * zc.z);
+			addCol += __MB2P38__.w * (zc.y * zc.y);
+		}
+		if (!(__MB2P72__ != 0))
+		{
+			(*aux).color = addCol;
+		}
+		else
+		{
+			(*aux).color += addCol;
+		}
 	}
 	return z;
 "####,
@@ -33232,6 +40884,196 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	
 
 		(*aux).color += colorAdd;
+	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "TransfJuliaboxV2",
+        source: "transf_juliabox_v2.cl",
+        param_floats: 82,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.startIterationsB", kind: ParamKind::Int, offset: 0, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsB", kind: ParamKind::Int, offset: 1, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.additionConstant111", kind: ParamKind::Float4, offset: 2, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabled", kind: ParamKind::Int, offset: 6, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsM", kind: ParamKind::Int, offset: 7, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsM", kind: ParamKind::Int, offset: 8, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offsetA000", kind: ParamKind::Float4, offset: 9, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledSwFalse", kind: ParamKind::Int, offset: 13, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 14, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsA", kind: ParamKind::Int, offset: 15, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.startIterationsS", kind: ParamKind::Int, offset: 16, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsS", kind: ParamKind::Int, offset: 17, default: &[250.0] },
+            GeneratedParam { path: "mandelbox.offset", kind: ParamKind::Float4, offset: 18, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.minR0", kind: ParamKind::Float, offset: 22, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.maxMinR0factor", kind: ParamKind::Float, offset: 23, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.maxR2d1", kind: ParamKind::Float, offset: 24, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterationsE", kind: ParamKind::Int, offset: 25, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsE", kind: ParamKind::Int, offset: 26, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.functionEnabledKFalse", kind: ParamKind::Int, offset: 27, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 28, default: &[1.0] },
+            GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 29, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 30, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterations", kind: ParamKind::Int, offset: 31, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offset0", kind: ParamKind::Float, offset: 32, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 33, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 34, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix2", kind: ParamKind::Matrix33, offset: 35, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsF", kind: ParamKind::Int, offset: 47, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsF", kind: ParamKind::Int, offset: 48, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.additionConstantA000", kind: ParamKind::Float4, offset: 49, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2EnabledFalse", kind: ParamKind::Int, offset: 53, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 54, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsC", kind: ParamKind::Int, offset: 55, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 56, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 68, default: &[0.0] },
+            GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 69, default: &[0.0] },
+            GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 70, default: &[250.0] },
+            GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 71, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsK", kind: ParamKind::Int, offset: 75, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsK", kind: ParamKind::Int, offset: 76, default: &[250.0] },
+            GeneratedParam { path: "mandelbox.color.factorSp1", kind: ParamKind::Float, offset: 77, default: &[0.2] },
+            GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 78, default: &[0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledAFalse", kind: ParamKind::Int, offset: 79, default: &[0.0] },
+            GeneratedParam { path: "foldColor.int0", kind: ParamKind::Int, offset: 80, default: &[0.0] },
+            GeneratedParam { path: "foldColor.int2", kind: ParamKind::Int, offset: 81, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 82, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 86, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 23, op: DeriveOp::Ratio, sources: &[24, 22] },
+            Derivation { target: 56, op: DeriveOp::Rotation2, sources: &[82] },
+            Derivation { target: 35, op: DeriveOp::Rotation2, sources: &[86] },
+        ],
+        wgsl: r####"
+	var colorAdd: f32 = 0.0;
+
+	var oldZ: vec4<f32> = z;
+	if ((*aux).i >= __MB2P0__
+			&& (*aux).i < __MB2P1__)
+	{
+		z.x = abs(z.x + __MB2P2__.x)
+					- abs(z.x - __MB2P2__.x) - z.x;
+		z.y = abs(z.y + __MB2P2__.y)
+					- abs(z.y - __MB2P2__.y) - z.y;
+		if ((__MB2P6__ != 0))
+			{ z.z = abs(z.z + __MB2P2__.z)
+						- abs(z.z - __MB2P2__.z) - z.z; }
+	}
+	var zCol: vec4<f32> = z;
+
+	
+	if ((*aux).i >= __MB2P7__
+			&& (*aux).i < __MB2P8__)
+		{ z += __MB2P9__; }
+
+	
+	if ((__MB2P13__ != 0)
+			&& (*aux).i >= __MB2P14__
+			&& (*aux).i < __MB2P15__)
+	{
+		z = vec4<f32>(z.z, z.y, z.x, z.w);
+	}
+
+	
+	var rrCol: f32 = 0.0;
+	var m: f32 = 1.0;
+	if ((*aux).i >= __MB2P16__
+			&& (*aux).i < __MB2P17__)
+	{
+		var rr: f32 = dot(z, z);
+		z += __MB2P18__;
+		rrCol = rr;
+		if (rr < __MB2P22__)
+			{ m = __MB2P23__; }
+		else if (rr < __MB2P24__)
+			{ m = __MB2P24__ / rr; }
+		z *= m;
+		(*aux).de *= m;
+		z -= __MB2P18__;
+	}
+
+	
+	if ((*aux).i >= __MB2P25__
+			&& (*aux).i < __MB2P26__)
+	{
+		if (!(__MB2P27__ != 0))
+		{
+			z *= __MB2P28__;
+			(*aux).de = (*aux).de * abs(__MB2P28__) + __MB2P29__;
+		}
+		else
+		{
+			var tempVC: f32 = __MB2P28__;
+
+			if ((*aux).i >= __MB2P30__
+					&& (*aux).i < __MB2P31__
+					&& (__MB2P31__ - __MB2P30__
+							!= 0))
+			{
+				var iterationRange: f32 =
+					__MB2P31__ - __MB2P30__;
+				var currentIteration: f32 = ((*aux).i - __MB2P30__);
+				tempVC += __MB2P32__ * (1.0 * currentIteration) / iterationRange;
+			}
+			if ((*aux).i >= __MB2P31__)
+			{
+				tempVC = (tempVC + __MB2P32__);
+			}
+			z *= tempVC;
+			(*aux).de = (*aux).de * abs(tempVC) + __MB2P29__;
+		}
+	}
+
+	if ((*aux).i >= __MB2P33__
+			&& (*aux).i < __MB2P34__)
+		{ z = mb2_mat_mul(__MB2P35__, z); }
+
+	if ((*aux).i >= __MB2P47__
+			&& (*aux).i < __MB2P48__)
+		{ z += __MB2P49__; }
+
+	if ((__MB2P53__ != 0)
+			&& (*aux).i >= __MB2P54__
+			&& (*aux).i < __MB2P55__)
+	{
+		z = mb2_mat_mul(__MB2P56__, z);
+	}
+
+	if ((__MB2P68__ != 0))
+	{
+		if ((*aux).i >= __MB2P69__
+				&& (*aux).i < __MB2P70__)
+		{
+			zCol = abs(zCol - oldZ);
+			if (zCol.x > 0.0) { colorAdd += __MB2P71__.x * zCol.x; }
+			if (zCol.y > 0.0) { colorAdd += __MB2P71__.y * zCol.y; }
+			if (zCol.z > 0.0) { colorAdd += __MB2P71__.z * zCol.z; }
+		}
+
+		if ((*aux).i >= __MB2P75__
+				&& (*aux).i < __MB2P76__)
+		{
+			if (rrCol < __MB2P24__)
+				{ colorAdd += __MB2P71__.w * (__MB2P24__ - rrCol); }
+
+			colorAdd += __MB2P77__ * m;
+		}
+
+		colorAdd += __MB2P78__;
+		if (!(__MB2P79__ != 0))
+		{
+			(*aux).color += colorAdd;
+		}
+		else
+		{
+			if ((__MB2P80__ + (*aux).i) % __MB2P81__ == 0)
+				{ (*aux).color += colorAdd; }
+		}
 	}
 	return z;
 "####,
@@ -35866,6 +43708,44 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 "####,
     },
     GeneratedFormula {
+        name: "TransfScaleVaryV1",
+        source: "transf_scale_vary_v1.cl",
+        param_floats: 5,
+        de_function: DeFunction::None,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "transformCommon.scale", kind: ParamKind::Float, offset: 0, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.startIterations250", kind: ParamKind::Int, offset: 1, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.stopIterations", kind: ParamKind::Int, offset: 2, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offset0", kind: ParamKind::Float, offset: 3, default: &[0.0] },
+            GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 4, default: &[1.0] },
+        ],
+        derivations: &[
+        ],
+        wgsl: r####"
+	var tempVC: f32 = __MB2P0__;
+
+	if ((*aux).i >= __MB2P1__
+			&& (*aux).i < __MB2P2__
+			&& (__MB2P2__ - __MB2P1__
+					!= 0))
+	{
+		var iterationRange: f32 =
+			__MB2P2__ - __MB2P1__;
+		var currentIteration: f32 = ((*aux).i - __MB2P1__);
+		tempVC += __MB2P3__ * (1.0 * currentIteration) / iterationRange;
+	}
+	if ((*aux).i >= __MB2P2__)
+	{
+		tempVC = (tempVC + __MB2P3__);
+	}
+	z *= tempVC;
+	(*aux).de = (*aux).de * abs(tempVC) + __MB2P4__;
+	return z;
+"####,
+    },
+    GeneratedFormula {
         name: "TransfScaleVaryV212",
         source: "transf_scale_vary_v212.cl",
         param_floats: 10,
@@ -37878,6 +45758,88 @@ maxZ *= abs(oldZ); break;
 	{
 		(*aux).de = (*aux).de * __MB2P21__ + __MB2P22__;
 	}
+	return z;
+"####,
+    },
+    GeneratedFormula {
+        name: "TransfSphericalFoldVaryV1",
+        source: "transf_spherical_fold_vary_v1.cl",
+        param_floats: 15,
+        de_function: DeFunction::None,
+        add_c: false,
+        bailout: 100.0,
+        params: &[
+            GeneratedParam { path: "mandelbox.foldingSphericalFixed", kind: ParamKind::Float, offset: 0, default: &[1.0] },
+            GeneratedParam { path: "mandelbox.foldingSphericalMin", kind: ParamKind::Float, offset: 1, default: &[0.5] },
+            GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 2, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsA", kind: ParamKind::Int, offset: 3, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offset", kind: ParamKind::Float, offset: 4, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.startIterationsB", kind: ParamKind::Int, offset: 5, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.stopIterationsB", kind: ParamKind::Int, offset: 6, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.offset0", kind: ParamKind::Float, offset: 7, default: &[0.0] },
+            GeneratedParam { path: "mandelbox.offset", kind: ParamKind::Float4, offset: 8, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 12, default: &[0.0] },
+            GeneratedParam { path: "mandelbox.color.factorSp1", kind: ParamKind::Float, offset: 13, default: &[0.2] },
+            GeneratedParam { path: "mandelbox.color.factorSp2", kind: ParamKind::Float, offset: 14, default: &[0.2] },
+        ],
+        derivations: &[
+        ],
+        wgsl: r####"
+	var r2: f32 = dot(z, z);
+	var tempVCf: f32 = __MB2P0__;
+	var tempVCm: f32 = __MB2P1__;
+
+	if ((*aux).i >= __MB2P2__
+			&& (*aux).i < __MB2P3__)
+	{
+		var iterationRange: f32 =
+			__MB2P3__ - __MB2P2__;
+		var currentIteration: f32 = ((*aux).i - __MB2P2__);
+		tempVCf += __MB2P4__ * (1.0 * currentIteration) / iterationRange;
+	}
+	if ((*aux).i >= __MB2P3__)
+	{
+		tempVCf = (tempVCf + __MB2P4__);
+	}
+	if ((*aux).i >= __MB2P5__
+			&& (*aux).i < __MB2P6__)
+	{
+
+		var iterationRange: f32 =
+			__MB2P6__ - __MB2P5__;
+		var currentIteration: f32 = ((*aux).i - __MB2P5__);
+		tempVCm += __MB2P7__ * (1.0 * currentIteration) / iterationRange;
+	}
+	if ((*aux).i >= __MB2P6__)
+	{
+		tempVCm = tempVCm + __MB2P7__;
+	}
+
+	z += __MB2P8__;
+
+	tempVCm *= tempVCm;
+	tempVCf *= tempVCf;
+
+	if (r2 < tempVCm)
+	{
+		z *= tempVCf / tempVCm;
+		(*aux).de *= tempVCf / tempVCm;
+		if ((__MB2P12__ != 0))
+		{
+			(*aux).color += __MB2P13__;
+		}
+	}
+	else if (r2 < tempVCf)
+	{
+		var tglad_factor2: f32 = tempVCf / r2;
+		z *= tglad_factor2;
+		(*aux).de *= tglad_factor2;
+		if ((__MB2P12__ != 0))
+		{
+			(*aux).color += __MB2P14__;
+		}
+	}
+	z -= __MB2P8__;
 	return z;
 "####,
     },

@@ -85,10 +85,14 @@ fn main() {
 
         if dump.as_deref() == Some(name.as_str()) {
             match translate::translate(&name, &src, &type_map) {
-                Ok(f) => match validate::full_error(&f) {
-                    Some(e) => println!("{e}"),
-                    None => println!("{}", validate::shader_for(&f)),
-                },
+                // Print the shader either way: a diagnostic without the line
+                // it points at is not enough to fix a rewrite rule.
+                Ok(f) => {
+                    if let Some(e) = validate::full_error(&f) {
+                        println!("{e}");
+                    }
+                    println!("{}", validate::shader_for(&f));
+                }
                 Err(Rejected::Unsupported(w)) | Err(Rejected::Malformed(w)) => {
                     println!("// rejected before validation: {w}")
                 }

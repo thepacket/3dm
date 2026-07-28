@@ -61,6 +61,9 @@ pub fn translate(
     }
 
     let body = strip_comments(&body);
+    // `Q_UNUSED(x);` is a Qt macro that silences an unused-parameter warning.
+    // It carries no meaning into the shader.
+    let body = strip_call(&body, "Q_UNUSED");
     let mut params: Vec<Param> = Vec::new();
     let mut cursor = 0usize;
 
@@ -69,6 +72,7 @@ pub fn translate(
     let body = rewrite_vector_literals(&body);
     let body = rewrite_casts(&body);
     let body = rewrite_bool_context(&body, &params);
+    let body = rewrite_for_init(&body);
     let body = rewrite_declarations(&body);
     let body = brace_control_flow(&body);
     let body = rewrite_switch(&body);
@@ -669,14 +673,39 @@ fn next_braceless(s: &str) -> Option<(usize, usize)> {
             continue;
         }
 
-        // Body is a single statement: extend to its terminating semicolon.
+        // Body is a single statement — but "single statement" can be a nested
+        // `if` whose own body is a block, so the extent is not simply "up to
+        // the next semicolon". Stopping at the first one put the closing brace
+        // in the middle of the nested block, which split a declaration from its
+        // use and produced an undefined identifier several lines later.
         let mut depth = 0i32;
+        let mut braces = 0i32;
         let mut k = j;
         while k < s.len() {
             match bytes[k] {
                 b'(' => depth += 1,
                 b')' => depth -= 1,
-                b';' if depth <= 0 => {
+                b'{' => braces += 1,
+                b'}' => {
+                    braces -= 1;
+                    if braces < 0 {
+                        // Ran into the enclosing block's close: nothing to wrap.
+                        return None;
+                    }
+                    if braces == 0 {
+                        // A trailing `else` continues the same statement.
+                        let mut m = k + 1;
+                        while m < s.len() && (bytes[m] as char).is_whitespace() {
+                            m += 1;
+                        }
+                        if s[m..].starts_with("else") && word_boundary(s, m, 4) {
+                            k = m + 4;
+                            continue;
+                        }
+                        return Some((j, k + 1));
+                    }
+                }
+                b';' if depth <= 0 && braces == 0 => {
                     return Some((j, k + 1));
                 }
                 _ => {}
@@ -801,5 +830,66 @@ fn rewrite_declarations(body: &str) -> String {
         out.push_str(&rewritten.unwrap_or_else(|| raw.to_owned()));
         out.push('\n');
     }
+    out
+}
+
+/// Removes whole `name(...)` statements, including the trailing semicolon.
+fn strip_call(src: &str, name: &str) -> String {
+    let mut out = String::with_capacity(src.len());
+    let mut rest = src;
+    let needle = format!("{name}(");
+
+    while let Some(at) = rest.find(&needle) {
+        out.push_str(&rest[..at]);
+        let Some(close) = find_matching(rest, at + needle.len() - 1, '(', ')') else {
+            break;
+        };
+        // Swallow the statement's semicolon too, or an empty one is left behind.
+        let after = &rest[close + 1..];
+        rest = after.strip_prefix(';').unwrap_or(after);
+    }
+
+    out.push_str(rest);
+    out
+}
+
+/// Turns a C `for` initialiser's declaration into a WGSL one.
+///
+/// `for (int i = 0; …)` is a declaration in the init clause, which WGSL spells
+/// `var`. `rewrite_declarations` cannot see it because it only inspects
+/// statements that *begin* with a type keyword, and this one begins with `for`.
+/// The counter becomes an f32 for the same reason every other integer local
+/// does: it is compared against parameters, which live in an f32 pool.
+fn rewrite_for_init(src: &str) -> String {
+    let mut out = String::with_capacity(src.len());
+    let mut rest = src;
+
+    while let Some(at) = rest.find("for (") {
+        out.push_str(&rest[..at]);
+        out.push_str("for (");
+
+        let after = &rest[at + "for (".len()..];
+        // `int i = …` / `f32 x = …` — a type, a name, then an assignment. Only
+        // the header is consumed, so a body with several loops gets them all.
+        let rewritten = ["int ", "uint ", "f32 ", "i32 "].iter().find_map(|ty| {
+            let decl = after.strip_prefix(*ty)?;
+            let eq = decl.find('=')?;
+            let name = decl[..eq].trim();
+            let ok = !name.is_empty()
+                && name.chars().all(|c| c.is_alphanumeric() || c == '_')
+                && !name.chars().next()?.is_ascii_digit();
+            ok.then(|| (format!("var {name}: f32 ="), eq + 1 + (after.len() - decl.len())))
+        });
+
+        match rewritten {
+            Some((header, consumed)) => {
+                out.push_str(&header);
+                rest = &after[consumed..];
+            }
+            None => rest = after,
+        }
+    }
+
+    out.push_str(rest);
     out
 }

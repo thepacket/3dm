@@ -36,6 +36,8 @@ struct Aux {
 const M_PI_F: f32 = 3.14159265358979323846;
 const M_PI_2_F: f32 = 1.57079632679489661923;
 const M_PI_4_F: f32 = 0.78539816339744830962;
+// From Mandelbulber's defines_cl.h, verbatim.
+const M_PI_8_F: f32 = 0.3926990816987;
 const M_PI_180_F: f32 = 0.01745329251994329577;
 const M_PI_360_F: f32 = 0.00872664625997164788;
 const M_1_PI_F: f32 = 0.31830988618379067154;
