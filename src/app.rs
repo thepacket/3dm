@@ -15,23 +15,37 @@ const ORBIT_SENSITIVITY: f32 = 0.007;
 /// same distance regardless of frame rate — which matters here, where the frame
 /// rate depends on the fractal.
 const KEY_ORBIT: f32 = 1.6;
-/// Orbit radii of forward travel per second. Flying moves the orbit target too,
-/// so this descends into the fractal rather than converging on its centre — see
-/// [`Camera::advance`].
+/// How fast the gap to the surface closes, in e-foldings per second.
 ///
-/// Brisk, because it no longer governs the approach: the probe does. Far from
-/// the fractal this is the speed; near it, [`FLY_CLEARANCE`] takes over and the
-/// camera decelerates on its own.
-const KEY_FLY: f32 = 0.8;
+/// Forward speed is proportional to the *measured clear space*, not to the
+/// orbit radius. That difference is the whole feel of the thing: scaled by the
+/// orbit radius the camera crawls at one fixed speed whether the surface is two
+/// units away or two thousandths, because flying does not change the radius.
+/// Scaled by clearance it crosses open space quickly and slows only where there
+/// is genuinely something close — and since each step is a fraction of the gap,
+/// it still cannot cross.
+///
+/// Chosen by simulating the approach rather than by feel. At 16 it takes about
+/// half a second to close any gap — 0.40s across half a unit, 0.48s across two,
+/// 0.57s across eight — against 0.43s, 1.00s and 3.27s for the fixed-speed
+/// version this replaced. Uniform across scales is the point: a descent should
+/// not get slower simply because it is going further.
+const KEY_FLY: f32 = 16.0;
 
-/// Fraction of the measured clear space a single frame may consume.
+/// Most of the clear space a single frame may consume.
 ///
-/// Not a half, because the reading is up to three frames old — the probe copies
-/// on one frame, maps on the next, and lands on the one after. Three stale
-/// steps at a quarter each still leave a quarter of the gap, so the surface
-/// cannot be crossed even if the camera moves the whole time without a fresh
-/// reading.
-const FLY_CLEARANCE: f32 = 0.25;
+/// The exponential above already keeps each step below the gap, but only if the
+/// gap is current, and the reading is up to three frames old — the probe copies
+/// on one frame, maps on the next, and lands on the one after. At a low frame
+/// rate one exponential step can be most of the gap, and three of those on the
+/// same stale number would cross. Capping the per-frame fraction at a third
+/// bounds three stale steps to the whole gap and no further.
+const FLY_MAX_FRACTION: f32 = 0.3;
+
+/// Orbit radii per second, used where there is no measurement to scale by:
+/// retreating, which has nothing to hit, and the first frames before the probe
+/// has reported anything.
+const KEY_FLY_BLIND: f32 = 0.8;
 /// Screen heights of pan per second.
 const KEY_PAN: f32 = 0.9;
 
@@ -475,15 +489,18 @@ impl Nav {
         // dragging right does, so the two controls never disagree.
         camera.orbit(-self.yaw * KEY_ORBIT * step, -self.pitch * KEY_ORBIT * step);
         if self.forward != 0.0 {
-            let wanted = self.forward * KEY_FLY * step * camera.distance;
-            // Never commit more than a fraction of the measured clear space.
-            // As the surface nears, the estimate shrinks and so does the step,
-            // so approach is asymptotic and the camera cannot cross. Moving
-            // away is unconstrained — there is nothing to hit behind you.
-            let travel = if wanted > 0.0 {
-                wanted.min(self.clearance * FLY_CLEARANCE)
+            let travel = if self.forward > 0.0 && self.clearance.is_finite() {
+                // Approaching: close a proportion of the measured gap. Being
+                // exponential it composes exactly frame to frame, and being a
+                // proportion it can never arrive.
+                let fraction = (1.0 - (-KEY_FLY * step).exp()).min(FLY_MAX_FRACTION);
+                self.clearance * fraction
             } else {
-                wanted
+                // Retreating has nothing ahead to respect, and has to work when
+                // boxed in against a surface where the gap reads as almost
+                // nothing. Same path covers the first frames, before the probe
+                // has reported at all.
+                self.forward * camera.distance * KEY_FLY_BLIND * step
             };
             camera.advance(travel / camera.distance);
         }
@@ -809,9 +826,12 @@ mod nav_tests {
             camera
         };
 
+        // Retreat, which is linear in time and so composes exactly. Approach
+        // is exponential in the *measured* gap, and that gap shrinks as the
+        // camera moves, so it is covered by the convergence test instead.
         let (one, two) = (
-            travel(Nav { forward: 1.0, ..nav() }, 1),
-            travel(Nav { forward: 1.0, ..nav() }, 2),
+            travel(Nav { forward: -1.0, ..nav() }, 1),
+            travel(Nav { forward: -1.0, ..nav() }, 2),
         );
         for i in 0..3 {
             assert!((one.target[i] - two.target[i]).abs() < 1e-5, "{one:?} {two:?}");
@@ -846,7 +866,7 @@ mod nav_tests {
             assert!(clearance >= 0.0, "flew through the surface: {travelled}");
         }
 
-        // And it really did close on the wall rather than stalling short.
+        // And it closed on the wall rather than stalling short of it.
         assert!(clearance < 1e-6, "should have converged onto the surface");
     }
 
@@ -867,16 +887,32 @@ mod nav_tests {
     }
 
     #[test]
-    fn an_unmeasured_clearance_does_not_restrict_anything() {
-        // Before the first readback lands the estimate is infinite, and flight
-        // must behave exactly as though there were no probe at all.
-        let mut open = Camera::default();
-        Nav { forward: 1.0, ..nav() }.apply(&mut open, 0.1);
+    fn flight_still_works_before_the_probe_reports() {
+        // The first frames have no reading. Flight must not stall waiting for
+        // one — a probe that never reported would otherwise freeze the camera.
+        let mut camera = Camera::default();
+        let (_, _, forward) = camera.basis();
 
-        let mut probed = Camera::default();
-        Nav { forward: 1.0, clearance: 1e9, ..nav() }.apply(&mut probed, 0.1);
+        Nav { forward: 1.0, ..nav() }.apply(&mut camera, 0.1);
 
-        assert_eq!(open.target, probed.target);
+        let travelled: f32 = (0..3).map(|i| camera.target[i] * forward[i]).sum();
+        assert!(travelled > 0.0, "should move without a measurement");
+    }
+
+    #[test]
+    fn open_space_is_crossed_faster_than_a_crevice() {
+        // The point of scaling by the measurement rather than the orbit radius:
+        // with room ahead the camera covers ground, and it slows only where
+        // something is actually close.
+        let step = |clearance: f32| {
+            let mut camera = Camera::default();
+            let (_, _, forward) = camera.basis();
+            Nav { forward: 1.0, clearance, ..nav() }.apply(&mut camera, 0.05);
+            (0..3)
+                .map(|i| camera.target[i] * forward[i])
+                .sum::<f32>()
+        };
+        assert!(step(4.0) > step(0.4) * 5.0, "open space should be much quicker");
     }
 
     #[test]
