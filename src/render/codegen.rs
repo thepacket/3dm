@@ -86,26 +86,26 @@ pub fn generate(stack: &FormulaStack) -> String {
     // and the difference is the sign of the derivative. A fold can legitimately
     // drive `de` negative; alone that means the point is inside and the
     // distance is zero, but in a stack the magnitude is still the right scale
-    // to march by, so the hybrid branch takes the absolute value. 3DM did
-    // neither — it clamped `de` up to a tiny positive number, turning a
-    // negative derivative into an enormous step that flew straight past the
-    // surface.
+    // to march by, so the hybrid branch takes the absolute value.
     let hybrid = stack.active().count() > 1;
+    let mode = stack.de_mode();
     let divisor = if hybrid {
-        "max(abs(aux.de), 1e-9)"
+        "max(abs(it.de), 1e-9)"
     } else {
-        "max(aux.de, 1e-9)"
+        "max(it.de, 1e-9)"
     };
 
     // Ported from Mandelbulber's `compute_fractal.cl`, including the parts that
     // are easy to leave out and wrong to: the logarithmic form is zero inside
     // the unit sphere rather than negative, the IFS form carries a −2 offset,
     // and a formula that computed its own distance is simply believed.
-    let distance = match stack.de_mode() {
+    let distance = match mode {
         DeMode::Log => "select(0.0, 0.5 * safe_r * log(safe_r) / de, safe_r > 1.0)",
         DeMode::Linear => "safe_r / de",
         DeMode::Ifs => "(safe_r - 2.0) / de",
-        DeMode::Custom => "aux.dist",
+        DeMode::Custom => "it.dist",
+        // Handled by its own body below.
+        DeMode::Delta | DeMode::DeltaLinear => "0.0",
     };
 
     // A single formula with a non-positive derivative is inside the surface,
@@ -113,13 +113,79 @@ pub fn generate(stack: &FormulaStack) -> String {
     let guard = if hybrid {
         format!("max({distance}, 0.0)")
     } else {
-        format!("select(0.0, max({distance}, 0.0), aux.de > 0.0)")
+        format!("select(0.0, max({distance}, 0.0), it.de > 0.0)")
+    };
+
+    // Some formulas maintain no derivative at all, so there is nothing to
+    // divide by and the gradient has to be measured instead: iterate the point
+    // and six neighbours, and see how much faster the neighbours escape. The
+    // neighbours run for exactly the iteration count the centre used and
+    // without their own bailout — Mandelbulber's `deltaDEMaxN` — or they would
+    // be comparing orbits of different lengths.
+    let body = if mode.is_delta() {
+        let closed_form = if mode == DeMode::DeltaLinear {
+            "0.5 * r / d"
+        } else {
+            "select(0.0, 0.5 * r * log(r) / d, r > 1.0)"
+        };
+        format!(
+            r#"    let centre = dm3_iterate(pos, max_iter, true);
+    let r = length(centre.z);
+    let n = max(centre.n - 1, 1);
+
+    // Large enough to survive f32 cancellation, small enough to be local.
+    let delta = max(length(pos) * 1e-6, dm3_u.march.w * 1e-4);
+    let dx0 = length(dm3_iterate(pos + vec3<f32>(delta, 0.0, 0.0), n, false).z);
+    let dx1 = length(dm3_iterate(pos - vec3<f32>(delta, 0.0, 0.0), n, false).z);
+    let dy0 = length(dm3_iterate(pos + vec3<f32>(0.0, delta, 0.0), n, false).z);
+    let dy1 = length(dm3_iterate(pos - vec3<f32>(0.0, delta, 0.0), n, false).z);
+    let dz0 = length(dm3_iterate(pos + vec3<f32>(0.0, 0.0, delta), n, false).z);
+    let dz1 = length(dm3_iterate(pos - vec3<f32>(0.0, 0.0, delta), n, false).z);
+
+    // The nearer of each opposed pair: the one that did not step across a
+    // discontinuity in the orbit.
+    let dr = vec3<f32>(
+        min(abs(dx0 - r), abs(dx1 - r)),
+        min(abs(dy0 - r), abs(dy1 - r)),
+        min(abs(dz0 - r), abs(dz1 - r))) / delta;
+    let d = length(dr);
+
+    var out: Field;
+    out.dist = select(max({closed_form}, 0.0), 0.0, d == 0.0);
+    out.trap = centre.trap;
+    out.escape = f32(centre.n) / max(f32(max_iter), 1.0);
+    return out;"#
+        )
+    } else {
+        format!(
+            r#"    let it = dm3_iterate(pos, max_iter, true);
+
+    var out: Field;
+    let safe_r = max(length(it.z), 1e-9);
+    let de = {divisor};
+    // Mandelbulber clamps the finished estimate at zero. Without it the
+    // logarithmic form reports negative distances inside the unit sphere and
+    // the marcher walks backwards through the surface.
+    out.dist = {guard};
+    out.trap = it.trap;
+    out.escape = f32(it.n) / max(f32(max_iter), 1.0);
+    return out;"#
+        )
     };
 
     let de = format!(
         r#"{ENUMERATORS}
-{functions}fn fractal_de(pos: vec3<f32>) -> Field {{
-    let max_iter = i32(dm3_u.fractal.y);
+{functions}// One run of the escape-time loop. Split out of `fractal_de` because delta DE
+// needs seven of them per distance: the point and six neighbours.
+struct Iter {{
+    z: vec4<f32>,
+    de: f32,
+    dist: f32,
+    trap: f32,
+    n: i32,
+}};
+
+fn dm3_iterate(pos: vec3<f32>, max_n: i32, bail: bool) -> Iter {{
     let bailout = dm3_u.fractal.z;
 
     var z = vec4<f32>(pos, 0.0);
@@ -159,9 +225,11 @@ pub fn generate(stack: &FormulaStack) -> String {
     aux.old_r = 0.0;
 
     loop {{
-        if (i >= max_iter) {{ break; }}
+        if (i >= max_n) {{ break; }}
         r = length(z);
-        if (r > bailout) {{ break; }}
+        // A neighbour run is capped by iteration count alone, so that it
+        // measures the same orbit length as the centre.
+        if (bail && r > bailout) {{ break; }}
         trap = min(trap, r);
 
         aux.old_r = aux.r;
@@ -171,16 +239,18 @@ pub fn generate(stack: &FormulaStack) -> String {
         i = i + 1;
     }}
 
-    var out: Field;
-    let safe_r = max(r, 1e-9);
-    let de = {divisor};
-    // Mandelbulber clamps the finished estimate at zero. Without it the
-    // logarithmic form reports negative distances inside the unit sphere and
-    // the marcher walks backwards through the surface.
-    out.dist = {guard};
+    var out: Iter;
+    out.z = z;
+    out.de = aux.de;
+    out.dist = aux.dist;
     out.trap = trap;
-    out.escape = f32(i) / max(f32(max_iter), 1.0);
+    out.n = i;
     return out;
+}}
+
+fn fractal_de(pos: vec3<f32>) -> Field {{
+    let max_iter = i32(dm3_u.fractal.y);
+{body}
 }}
 "#
     );

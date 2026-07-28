@@ -3589,7 +3589,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "AexionOctopusMod",
         source: "aexion_octopus_mod.cl",
         param_floats: 35,
-        de_function: DeFunction::None,
+        de_function: DeFunction::Delta,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -10609,7 +10609,7 @@ var zcd: f32 = 0.0;
         name: "Ides",
         source: "ides.cl",
         param_floats: 8,
-        de_function: DeFunction::None,
+        de_function: DeFunction::Delta,
         add_c: true,
         bailout: 10.0,
         params: &[
@@ -10640,7 +10640,7 @@ var zcd: f32 = 0.0;
         name: "Ides2",
         source: "ides2.cl",
         param_floats: 8,
-        de_function: DeFunction::None,
+        de_function: DeFunction::Delta,
         add_c: true,
         bailout: 10.0,
         params: &[
@@ -18284,7 +18284,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         name: "MandelbulbTails",
         source: "mandelbulb_tails.cl",
         param_floats: 23,
-        de_function: DeFunction::None,
+        de_function: DeFunction::Delta,
         add_c: true,
         bailout: 10.0,
         params: &[
@@ -18383,7 +18383,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         name: "MandelbulbTailsV2",
         source: "mandelbulb_tails_v2.cl",
         param_floats: 29,
-        de_function: DeFunction::None,
+        de_function: DeFunction::Delta,
         add_c: true,
         bailout: 10.0,
         params: &[
@@ -23983,7 +23983,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MsltoeDonut",
         source: "msltoe_donut.cl",
         param_floats: 4,
-        de_function: DeFunction::None,
+        de_function: DeFunction::DeltaLinear,
         add_c: false,
         bailout: 4.0,
         params: &[
@@ -25535,7 +25535,7 @@ default: {}
         name: "NewtonPow3",
         source: "newton_pow3.cl",
         param_floats: 16,
-        de_function: DeFunction::None,
+        de_function: DeFunction::Delta,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -26933,7 +26933,7 @@ default: {}
         name: "RiemannBulbMsltoeMod2",
         source: "riemann_bulb_msltoe_mod2.cl",
         param_floats: 17,
-        de_function: DeFunction::None,
+        de_function: DeFunction::Delta,
         add_c: false,
         bailout: 1.5,
         params: &[
@@ -27347,7 +27347,7 @@ default: {}
         name: "RiemannSphereMsltoe",
         source: "riemann_sphere_msltoe.cl",
         param_floats: 20,
-        de_function: DeFunction::None,
+        de_function: DeFunction::Delta,
         add_c: false,
         bailout: 1.5,
         params: &[
@@ -27701,7 +27701,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "ScatorPower2Imaginary",
         source: "scator_power2_imaginary.cl",
         param_floats: 0,
-        de_function: DeFunction::None,
+        de_function: DeFunction::Delta,
         add_c: true,
         bailout: 10.0,
         params: &[
@@ -27730,7 +27730,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "ScatorPower2Real",
         source: "scator_power2_real.cl",
         param_floats: 0,
-        de_function: DeFunction::None,
+        de_function: DeFunction::Delta,
         add_c: true,
         bailout: 10.0,
         params: &[
@@ -27828,7 +27828,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "ScatorTest",
         source: "scator_test.cl",
         param_floats: 12,
-        de_function: DeFunction::None,
+        de_function: DeFunction::Delta,
         add_c: true,
         bailout: 10.0,
         params: &[

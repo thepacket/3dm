@@ -29,6 +29,13 @@ It reads exactly four things:
 | `mandelbulber2/src/fractal.cpp` (`RecalculateFractalParams`) | derived parameters |
 | `mandelbulber2/formula/definition/fractal_*.cpp` | estimator, bailout, `+ c` flag |
 
+`DEType` matters as much as the estimator: twelve formulas are `deltaDEType`,
+meaning they maintain no derivative at all and their distance has to be
+*measured* by iterating six neighbouring points. Do not confuse them with the
+158 formulas whose `DEFunctionType` is `withoutDEFunction` — those are analytic
+and simply contribute no estimator of their own, which for a transform is
+correct.
+
 The estimator comes from `DEAnalyticFunction`, which is what Mandelbulber's
 engine switches on — not the `DEFunctionType` two lines above it in the same
 constructor. They disagree for much of the corpus, and the constants are spelled
@@ -95,7 +102,7 @@ cargo run --release --example mb2_sweep -- /tmp/sweep
 Builds a real wgpu pipeline per formula, renders it, and classifies the result
 as fractal detail / smooth blob / empty / shader error — then writes a contact
 sheet, because whether a shape is *right* is not something a number can tell
-you. Currently 337 render with detail, 39 as smooth blobs, 38 empty, and none
+you. Currently 346 render with detail, 38 as smooth blobs, 30 empty, and none
 fail to build.
 
 Of those 37 empties, 26 are `Transf*` formulas — transforms meant to be composed

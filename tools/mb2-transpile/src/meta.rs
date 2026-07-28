@@ -27,9 +27,14 @@ pub enum DeFunction {
     Ifs,
     /// The formula wrote its own distance into `aux.dist`.
     Custom,
-    /// No analytic estimate. Mandelbulber renders these by delta DE, which
-    /// 3DM does not implement.
+    /// The formula contributes no estimator of its own. For a transform that
+    /// is correct — the base formula in the stack decides.
     None,
+    /// No analytic derivative at all: the distance has to be measured by
+    /// iterating neighbouring points. Logarithmic closed form.
+    Delta,
+    /// Delta DE with the linear closed form.
+    DeltaLinear,
     /// Needs `aux.pseudoKleinianDE` / extra parameters 3DM does not carry.
     Unsupported,
 }
@@ -43,6 +48,8 @@ impl DeFunction {
             Self::Ifs => "Ifs",
             Self::Custom => "Custom",
             Self::None => "None",
+            Self::Delta => "Delta",
+            Self::DeltaLinear => "DeltaLinear",
             Self::Unsupported => "Unsupported",
         }
     }
@@ -151,13 +158,19 @@ fn parse_one(src: &str) -> Option<(String, Meta)> {
             .unwrap_or(10.0),
     };
 
-    // A delta-DE formula has no analytic derivative for 3DM to divide by,
-    // whatever its analytic function says.
+    // `DEType` overrules the analytic function: a delta-DE formula has no
+    // analytic derivative to divide by at all, so its distance has to be
+    // measured by iterating neighbouring points. Which closed form that
+    // measurement feeds is the one place `DEFunctionType` is still the right
+    // field to read.
     let meta = if value_of("DEType").as_deref() == Some("analyticDEType") {
         meta
     } else {
         Meta {
-            de_function: DeFunction::None,
+            de_function: match value_of("DEFunctionType").as_deref() {
+                Some("linearDEFunction") => DeFunction::DeltaLinear,
+                _ => DeFunction::Delta,
+            },
             ..meta
         }
     };
