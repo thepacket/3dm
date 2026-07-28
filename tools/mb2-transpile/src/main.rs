@@ -24,6 +24,13 @@ fn main() {
     let rest: Vec<String> = args.collect();
     let report_only = rest.iter().any(|a| a == "--report-only");
     let show_errors = rest.iter().any(|a| a == "--errors");
+    // `--dump <file.cl>` prints the generated WGSL, which is the only sane way
+    // to debug a rewrite rule.
+    let dump = rest
+        .iter()
+        .position(|a| a == "--dump")
+        .and_then(|i| rest.get(i + 1))
+        .cloned();
 
     let root = Path::new(&root);
     let header = root.join("mandelbulber2/opencl/fractal_cl.h");
@@ -32,6 +39,7 @@ fn main() {
     let header_src = std::fs::read_to_string(&header)
         .unwrap_or_else(|e| panic!("cannot read {}: {e}", header.display()));
     let type_map = TypeMap::parse(&header_src);
+    validate::set_enumerators(&types::parse_enumerators(&header_src));
 
     let mut files: Vec<_> = std::fs::read_dir(&formula_dir)
         .unwrap_or_else(|e| panic!("cannot read {}: {e}", formula_dir.display()))
@@ -44,6 +52,7 @@ fn main() {
     let mut ok = Vec::new();
     let mut rejected: BTreeMap<String, Vec<String>> = BTreeMap::new();
     let mut samples: Vec<String> = Vec::new();
+    let mut undefined: BTreeMap<String, usize> = BTreeMap::new();
 
     for path in &files {
         let name = path.file_name().unwrap().to_string_lossy().to_string();
@@ -58,12 +67,28 @@ fn main() {
             }
         };
 
+        if dump.as_deref() == Some(name.as_str()) {
+            match translate::translate(&name, &src, &type_map) {
+                Ok(f) => match validate::full_error(&f) {
+                    Some(e) => println!("{e}"),
+                    None => println!("{}", validate::shader_for(&f)),
+                },
+                Err(Rejected::Unsupported(w)) | Err(Rejected::Malformed(w)) => {
+                    println!("// rejected before validation: {w}")
+                }
+            }
+            return;
+        }
+
         match translate::translate(&name, &src, &type_map) {
             // Translating is not the same as compiling: only formulas naga
             // accepts are counted, so the report reflects shippable coverage.
             Ok(f) => match validate::check(&f) {
                 Ok(()) => ok.push(f),
                 Err(e) => {
+                    if let Some(id) = undefined_ident(&e) {
+                        *undefined.entry(id).or_default() += 1;
+                    }
                     if show_errors && samples.len() < 12 {
                         samples.push(format!("{name}: {e}"));
                     }
@@ -71,7 +96,7 @@ fn main() {
                 }
             },
             Err(Rejected::Unsupported(why)) | Err(Rejected::Malformed(why)) => {
-                rejected.entry(why.to_owned()).or_default().push(name);
+                rejected.entry(why).or_default().push(name);
             }
         }
     }
@@ -97,6 +122,15 @@ fn main() {
         println!("\nparameter block (f32 slots): mean {mean:.1}, max {max}");
     }
 
+    if !undefined.is_empty() {
+        println!("\nmissing helper functions / constants:");
+        let mut v: Vec<_> = undefined.iter().collect();
+        v.sort_by_key(|(_, n)| std::cmp::Reverse(**n));
+        for (id, n) in v.iter().take(20) {
+            println!("  {n:>4}  {id}");
+        }
+    }
+
     if show_errors {
         println!("\nsample errors:");
         for s in &samples {
@@ -119,6 +153,14 @@ fn main() {
 /// Emits the generated formula table as Rust.
 /// Groups naga errors so the report shows what to fix next rather than 300
 /// individually-worded messages.
+/// Pulls the identifier out of naga's "no definition in scope" diagnostic.
+fn undefined_ident(err: &str) -> Option<String> {
+    let key = "identifier: `";
+    let start = err.find(key)? + key.len();
+    let end = err[start..].find('`')? + start;
+    Some(err[start..end].to_owned())
+}
+
 fn classify(err: &str) -> String {
     for (needle, label) in [
         ("no definition in scope", "wgsl: undefined name"),

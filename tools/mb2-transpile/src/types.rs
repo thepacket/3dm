@@ -28,6 +28,10 @@ impl ParamType {
         }
     }
 
+    /// WGSL spelling of this type. Used when the generated formulas are
+    /// emitted into 3DM; the validator substitutes typed accessor calls
+    /// instead, so this is currently unreferenced there.
+    #[allow(dead_code)]
     pub fn wgsl(self) -> &'static str {
         match self {
             Self::Float => "f32",
@@ -124,6 +128,52 @@ impl TypeMap {
     }
 }
 
+/// Collects every `typedef enum { NAME = N, … }` enumerator so the generated
+/// WGSL can compare against the same names the formulas use.
+pub fn parse_enumerators(header: &str) -> Vec<(String, i64)> {
+    let mut out = Vec::new();
+    let mut inside = false;
+    // C enumerators default to "previous + 1", starting at zero, and an
+    // explicit `= N` resets the run. Most of Mandelbulber's are implicit.
+    let mut next = 0i64;
+
+    for line in header.lines() {
+        let t = line.trim();
+        if t.starts_with("typedef enum") {
+            inside = true;
+            next = 0;
+            continue;
+        }
+        if !inside {
+            continue;
+        }
+        if t.starts_with('}') {
+            inside = false;
+            continue;
+        }
+
+        let t = t.split("//").next().unwrap_or(t).trim().trim_end_matches(',');
+        if t.is_empty() {
+            continue;
+        }
+
+        let (name, value) = match t.split_once('=') {
+            Some((n, v)) => match v.trim().parse::<i64>() {
+                Ok(v) => (n.trim(), v),
+                Err(_) => continue,
+            },
+            None => (t, next),
+        };
+
+        if name.is_empty() || !name.chars().all(|c| c.is_alphanumeric() || c == '_') {
+            continue;
+        }
+        out.push((name.to_owned(), value));
+        next = value + 1;
+    }
+    out
+}
+
 fn parse_field(line: &str) -> Option<(Field, String)> {
     let line = line.split("//").next()?.trim().trim_end_matches(';').trim();
     if line.is_empty() {
@@ -140,6 +190,10 @@ fn parse_field(line: &str) -> Option<(Field, String)> {
 
     if let Some(t) = ParamType::from_c(ty) {
         Some((Field::Leaf(t), name))
+    } else if ty.starts_with("enum") && ty.ends_with("Cl") {
+        // Mandelbulber declares mode selectors as enums; they are integers on
+        // the GPU and the formulas compare them against enumerator values.
+        Some((Field::Leaf(ParamType::Int), name))
     } else if ty.starts_with('s') && ty.ends_with("Cl") {
         Some((Field::Nested(ty.to_owned()), name))
     } else {

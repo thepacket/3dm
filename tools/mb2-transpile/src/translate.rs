@@ -30,8 +30,8 @@ pub struct Formula {
 
 pub enum Rejected {
     /// The construct is listed so the report says what to implement next.
-    Unsupported(&'static str),
-    Malformed(&'static str),
+    Unsupported(String),
+    Malformed(String),
 }
 
 /// Constructs that would silently mistranslate. Each is a genuine WGSL gap
@@ -51,12 +51,12 @@ pub fn translate(
     types: &TypeMap,
 ) -> Result<Formula, Rejected> {
     let Some((name, body)) = extract_function(source) else {
-        return Err(Rejected::Malformed("no `…Iteration` function found"));
+        return Err(Rejected::Malformed("no `…Iteration` function found".into()));
     };
 
     for (needle, why) in UNSUPPORTED {
         if body.contains(needle) {
-            return Err(Rejected::Unsupported(why));
+            return Err(Rejected::Unsupported((*why).to_owned()));
         }
     }
 
@@ -71,10 +71,13 @@ pub fn translate(
     let body = rewrite_bool_context(&body, &params);
     let body = rewrite_declarations(&body);
     let body = brace_control_flow(&body);
+    let body = rewrite_switch(&body);
 
+    let body = rewrite_ternaries(&body);
     if body.contains('?') {
-        // Ternaries need real expression parsing to become `select()`.
-        return Err(Rejected::Unsupported("ternary conditional"));
+        // Anything left is nested or spans a construct the scanner declines to
+        // guess at; better to reject than to emit subtly wrong arithmetic.
+        return Err(Rejected::Unsupported("ternary conditional".into()));
     }
 
     Ok(Formula {
@@ -160,7 +163,7 @@ fn rewrite_params(
         let (path, suffix) = split_swizzle(path);
 
         let Some(ty) = types.resolve("sFractalCl", path) else {
-            return Err(Rejected::Unsupported("unresolved parameter path"));
+            return Err(Rejected::Unsupported(format!("unresolved param: {path}")));
         };
 
         let existing = params.iter().find(|p| p.path == path);
@@ -178,7 +181,7 @@ fn rewrite_params(
             }
         };
 
-        out.push_str(&format!("P{offset}{suffix}"));
+        out.push_str(&format!("__MB2P{offset}__{suffix}"));
         rest = &after[end..];
     }
     out.push_str(rest);
@@ -222,6 +225,7 @@ fn rewrite_tokens(body: &str) -> String {
 
     // Aux state maps onto 3DM's running iteration state.
     for (from, to) in [
+        ("aux->DE0", "(*aux).de0"),
         ("aux->DE", "(*aux).de"),
         ("aux->color", "(*aux).color"),
         ("aux->const_c", "(*aux).const_c"),
@@ -231,6 +235,13 @@ fn rewrite_tokens(body: &str) -> String {
         ("aux->r", "(*aux).r"),
         ("aux->i", "(*aux).i"),
         ("aux->c", "(*aux).c"),
+        ("aux->dist", "(*aux).dist"),
+        ("aux->pos_neg", "(*aux).pos_neg"),
+        ("aux->temp1000", "(*aux).temp1000"),
+        ("aux->colorHybrid", "(*aux).color_hybrid"),
+        ("aux->r_dz", "(*aux).r_dz"),
+        ("aux->old_r", "(*aux).old_r"),
+        ("aux->lastZ", "(*aux).last_z"),
     ] {
         s = s.replace(from, to);
     }
@@ -316,6 +327,10 @@ fn rewrite_casts(src: &str) -> String {
 
 /// C treats any non-zero integer as true; WGSL has no such coercion, so an
 /// integer parameter used as a flag has to be compared explicitly.
+///
+/// The operator can be separated from the parameter by arbitrary whitespace —
+/// Mandelbulber wraps long conditions across lines — so this scans tokens
+/// rather than matching adjacent text.
 fn rewrite_bool_context(src: &str, params: &[Param]) -> String {
     let int_offsets: Vec<usize> = params
         .iter()
@@ -326,25 +341,233 @@ fn rewrite_bool_context(src: &str, params: &[Param]) -> String {
         return src.to_owned();
     }
 
-    let mut s = src.to_owned();
-    // Longest placeholder first so `P1` does not match inside `P12`.
-    let mut offsets = int_offsets;
-    offsets.sort_by_key(|o| std::cmp::Reverse(*o));
+    let mut out = String::with_capacity(src.len());
+    let bytes = src.as_bytes();
+    let mut i = 0;
 
-    for off in offsets {
-        let tok = format!("P{off}");
-        for (from, to) in [
-            (format!("if ({tok})"), format!("if ({tok} != 0)")),
-            (format!("{tok} &&"), format!("({tok} != 0) &&")),
-            (format!("&& {tok}"), format!("&& ({tok} != 0)")),
-            (format!("{tok} ||"), format!("({tok} != 0) ||")),
-            (format!("|| {tok}"), format!("|| ({tok} != 0)")),
-            (format!("!{tok}"), format!("({tok} == 0)")),
-        ] {
-            s = s.replace(&from, &to);
+    while i < src.len() {
+        if !src[i..].starts_with("__MB2P") {
+            out.push(src[i..].chars().next().unwrap());
+            i += src[i..].chars().next().unwrap().len_utf8();
+            continue;
         }
+
+        // Read the placeholder number, which runs to the closing delimiter.
+        let num_start = i + "__MB2P".len();
+        let mut j = num_start;
+        while j < src.len() && bytes[j].is_ascii_digit() {
+            j += 1;
+        }
+        let Ok(offset) = src[num_start..j].parse::<usize>() else {
+            out.push_str("__MB2P");
+            i = num_start;
+            continue;
+        };
+        j += "__".len();
+
+        if !int_offsets.contains(&offset) {
+            out.push_str(&src[i..j]);
+            i = j;
+            continue;
+        }
+
+        let after = src[j..].trim_start();
+        let before = out.trim_end();
+        let boolean_context = after.starts_with("&&")
+            || after.starts_with("||")
+            || before.ends_with("&&")
+            || before.ends_with("||")
+            || before.ends_with('!')
+            || (before.ends_with("if (") && after.starts_with(')'));
+
+        if boolean_context {
+            out.push_str(&format!("(__MB2P{offset}__ != 0)"));
+        } else {
+            out.push_str(&src[i..j]);
+        }
+        i = j;
+    }
+
+    out
+}
+
+/// C `switch` becomes WGSL `switch`: the condition loses its parentheses, each
+/// case body gains braces, and `break` disappears because WGSL cases do not
+/// fall through.
+fn rewrite_switch(src: &str) -> String {
+    let mut s = src.to_owned();
+    let mut from = 0usize;
+
+    while let Some(rel) = s[from..].find("switch") {
+        let kw = from + rel;
+        if !word_boundary(&s, kw, 6) {
+            from = kw + 6;
+            continue;
+        }
+        let Some(open_paren) = s[kw..].find('(').map(|i| i + kw) else {
+            break;
+        };
+        let Some(close_paren) = find_matching(&s, open_paren, '(', ')') else {
+            break;
+        };
+        let Some(open_brace) = s[close_paren..].find('{').map(|i| i + close_paren) else {
+            break;
+        };
+        let Some(close_brace) = find_matching(&s, open_brace, '{', '}') else {
+            break;
+        };
+
+        let cond = s[open_paren + 1..close_paren].trim().to_owned();
+        let inner = s[open_brace + 1..close_brace].to_owned();
+        let rebuilt = format!("switch {cond} {{\n{}\n}}", brace_cases(&inner));
+
+        s = format!("{}{rebuilt}{}", &s[..kw], &s[close_brace + 1..]);
+        from = kw + rebuilt.len();
     }
     s
+}
+
+/// Splits a switch body at its `case`/`default` labels and braces each arm.
+fn brace_cases(inner: &str) -> String {
+    let mut arms: Vec<(String, String)> = Vec::new();
+    let mut label = String::new();
+    let mut body = String::new();
+
+    for line in inner.lines() {
+        let t = line.trim();
+        let is_label = (t.starts_with("case ") || t.starts_with("default")) && t.contains(':');
+        if is_label {
+            if !label.is_empty() {
+                arms.push((label.clone(), body.clone()));
+            }
+            let (head, rest) = t.split_once(':').unwrap();
+            label = head.trim().to_owned();
+            body = rest.trim().to_owned();
+            body.push('\n');
+        } else {
+            body.push_str(line);
+            body.push('\n');
+        }
+    }
+    if !label.is_empty() {
+        arms.push((label, body));
+    }
+
+    arms.iter()
+        .map(|(label, body)| {
+            let cleaned: String = body
+                .lines()
+                .filter(|l| l.trim() != "break;")
+                .collect::<Vec<_>>()
+                .join("\n");
+            format!("{label}: {{\n{cleaned}\n}}")
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+/// `cond ? a : b` becomes `select(b, a, cond)`.
+///
+/// Innermost-first, so nested ternaries collapse from the inside out. The
+/// boundaries of each of the three expressions are found by scanning outward to
+/// the nearest delimiter at the same nesting depth; anything that does not
+/// resolve cleanly is left in place and the formula is rejected rather than
+/// mistranslated.
+fn rewrite_ternaries(src: &str) -> String {
+    let mut s = src.to_owned();
+    for _ in 0..64 {
+        let Some(q) = last_innermost_question(&s) else {
+            break;
+        };
+        let Some(colon) = matching_colon(&s, q) else {
+            break;
+        };
+        let Some(start) = expr_start(&s, q) else { break };
+        let Some(end) = expr_end(&s, colon) else { break };
+
+        let cond = s[start..q].trim().to_owned();
+        let then = s[q + 1..colon].trim().to_owned();
+        let els = s[colon + 1..end].trim().to_owned();
+        if cond.is_empty() || then.is_empty() || els.is_empty() {
+            break;
+        }
+
+        s = format!(
+            "{}select({els}, {then}, {cond}){}",
+            &s[..start],
+            &s[end..]
+        );
+    }
+    s
+}
+
+/// The last `?` in the string is necessarily innermost.
+fn last_innermost_question(s: &str) -> Option<usize> {
+    s.rfind('?')
+}
+
+/// The `:` matching this `?`, at the same parenthesis depth.
+fn matching_colon(s: &str, q: usize) -> Option<usize> {
+    let bytes = s.as_bytes();
+    let mut depth = 0i32;
+    for i in q + 1..s.len() {
+        match bytes[i] {
+            b'(' | b'[' => depth += 1,
+            b')' | b']' => {
+                if depth == 0 {
+                    return None;
+                }
+                depth -= 1;
+            }
+            b':' if depth == 0 => return Some(i),
+            b';' => return None,
+            _ => {}
+        }
+    }
+    None
+}
+
+/// Start of the condition: scan left to a delimiter at depth zero.
+fn expr_start(s: &str, q: usize) -> Option<usize> {
+    let bytes = s.as_bytes();
+    let mut depth = 0i32;
+    let mut i = q;
+    while i > 0 {
+        i -= 1;
+        match bytes[i] {
+            b')' | b']' => depth += 1,
+            b'(' | b'[' => {
+                if depth == 0 {
+                    return Some(i + 1);
+                }
+                depth -= 1;
+            }
+            b';' | b'{' | b'}' | b',' if depth == 0 => return Some(i + 1),
+            b'=' if depth == 0 && bytes.get(i + 1) != Some(&b'=') => return Some(i + 1),
+            _ => {}
+        }
+    }
+    Some(0)
+}
+
+/// End of the else-expression: scan right to a delimiter at depth zero.
+fn expr_end(s: &str, colon: usize) -> Option<usize> {
+    let bytes = s.as_bytes();
+    let mut depth = 0i32;
+    for i in colon + 1..s.len() {
+        match bytes[i] {
+            b'(' | b'[' => depth += 1,
+            b')' | b']' => {
+                if depth == 0 {
+                    return Some(i);
+                }
+                depth -= 1;
+            }
+            b';' | b',' if depth == 0 => return Some(i),
+            _ => {}
+        }
+    }
+    None
 }
 
 /// WGSL requires braces on `if` / `else` / `for` bodies; C does not.
@@ -390,6 +613,7 @@ fn next_braceless(s: &str) -> Option<(usize, usize)> {
             continue;
         };
 
+        let is_else = !needs_paren;
         let body_start = if needs_paren {
             let open = s[kw_end..].find('(')? + kw_end;
             find_matching(s, open, '(', ')')? + 1
@@ -404,8 +628,10 @@ fn next_braceless(s: &str) -> Option<(usize, usize)> {
         if j >= s.len() {
             return None;
         }
-        // Already braced, or an `else if` chain we will reach on its own.
-        if bytes[j] == b'{' || s[j..].starts_with("if") {
+        // Already braced, or an `else if` chain, which WGSL allows unbraced.
+        // An `if`/`for` body that happens to start with `if` still needs
+        // braces, so the exemption applies only to `else`.
+        if bytes[j] == b'{' || (is_else && s[j..].starts_with("if")) {
             i = j;
             continue;
         }
@@ -502,10 +728,27 @@ fn rewrite_declarations(body: &str) -> String {
             let decl = line[prefix.len()..].trim_end_matches(';').trim();
             let wgsl_ty = if ty == "int" { "i32" } else { ty };
 
+            // Mandelbulber wraps long initialisers across lines. Appending a
+            // `;` to the first line of such a declaration silently truncates
+            // the expression, so only complete statements are terminated here.
+            let complete = line.ends_with(';');
+
             rewritten = Some(if let Some((lhs, rhs)) = decl.split_once('=') {
-                // Multiple declarators with one initialiser are rare enough to
-                // reject rather than guess at.
-                format!("{indent}var {}: {wgsl_ty} = {};", lhs.trim(), rhs.trim())
+                if complete {
+                    format!("{indent}var {}: {wgsl_ty} = {};", lhs.trim(), rhs.trim())
+                } else {
+                    // Keep the continuation intact; its own line ends the
+                    // statement.
+                    let head = line[prefix.len()..].split_once('=').map(|(l, r)| {
+                        format!("{indent}var {}: {wgsl_ty} ={}", l.trim(), r)
+                    });
+                    match head {
+                        Some(h) => h,
+                        None => raw.to_owned(),
+                    }
+                }
+            } else if !complete {
+                raw.to_owned()
             } else {
                 decl.split(',')
                     .map(|n| format!("{indent}var {}: {wgsl_ty};", n.trim()))
