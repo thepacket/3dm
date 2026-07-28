@@ -15,10 +15,17 @@ const ORBIT_SENSITIVITY: f32 = 0.007;
 /// same distance regardless of frame rate — which matters here, where the frame
 /// rate depends on the fractal.
 const KEY_ORBIT: f32 = 1.6;
-/// Orbit radii of forward travel per second. Flying moves the orbit target
-/// too, so this descends into the fractal rather than converging on its centre
-/// — see [`Camera::advance`].
-const KEY_FLY: f32 = 0.9;
+/// Orbit radii of forward travel per second. Flying moves the orbit target too,
+/// so this descends into the fractal rather than converging on its centre — see
+/// [`Camera::advance`].
+///
+/// Deliberately unhurried. From the framed view the surface is about two thirds
+/// of an orbit radius ahead, so at 0.9 a single second of holding the key flew
+/// straight through the fractal and left the camera inside it, which reads as
+/// the screen going black. Flying into a wall is still flying into a wall —
+/// nothing here knows where the surface is — but at this rate there is time to
+/// stop, and shift is there when the gap is large.
+const KEY_FLY: f32 = 0.25;
 /// Screen heights of pan per second.
 const KEY_PAN: f32 = 0.9;
 
