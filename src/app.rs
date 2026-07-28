@@ -11,6 +11,16 @@ use crate::render::{FractalPipeline, Uniforms, callback};
 /// Radians of orbit per point of mouse travel.
 const ORBIT_SENSITIVITY: f32 = 0.007;
 
+/// Keyboard navigation rates, all per second so that holding a key moves the
+/// same distance regardless of frame rate — which matters here, where the frame
+/// rate depends on the fractal.
+const KEY_ORBIT: f32 = 1.6;
+/// E-foldings of distance per second: dollying is multiplicative for the same
+/// reason zooming is, so it feels the same close up and far out.
+const KEY_DOLLY: f32 = 1.4;
+/// Screen heights of pan per second.
+const KEY_PAN: f32 = 0.9;
+
 pub struct App {
     camera: Camera,
     params: SceneParams,
@@ -236,7 +246,8 @@ impl App {
             ui.add_space(8.0);
             ui.label(
                 egui::RichText::new(
-                    "drag to orbit · scroll to zoom · right-drag or shift-drag to pan",
+                    "drag to orbit · scroll to zoom · right-drag or shift-drag to pan\n\
+                         WASD to move · QE up/down · arrows to orbit · shift faster, alt slower",
                 )
                 .small()
                 .weak(),
@@ -251,12 +262,58 @@ impl App {
         }
     }
 
+    /// Camera keys: WASD to move, QE to rise and fall, arrows to orbit.
+    ///
+    /// Reads the keyboard and hands the result to [`Nav::apply`], which is
+    /// where the camera maths lives — a window is the one thing a test cannot
+    /// open, so the decision is kept clear of egui.
+    fn keyboard_navigation(&mut self, ui: &mut egui::Ui, dt: f32) -> bool {
+        // A focused text field owns the keyboard. Without this, typing a
+        // formula name into the filter box would fly the camera instead.
+        if ui.ctx().egui_wants_keyboard_input() {
+            return false;
+        }
+
+        let axis = |negative: egui::Key, positive: egui::Key| {
+            ui.input(|i| i.key_down(positive) as i32 as f32 - i.key_down(negative) as i32 as f32)
+        };
+
+        let nav = Nav {
+            yaw: axis(egui::Key::ArrowLeft, egui::Key::ArrowRight),
+            pitch: axis(egui::Key::ArrowDown, egui::Key::ArrowUp),
+            forward: axis(egui::Key::S, egui::Key::W),
+            strafe: axis(egui::Key::A, egui::Key::D),
+            lift: axis(egui::Key::Q, egui::Key::E),
+            // Shift hurries, Alt creeps — the range the mouse gets from moving
+            // faster or slower, which a held key cannot express on its own.
+            speed: ui.input(|i| {
+                if i.modifiers.shift {
+                    3.0
+                } else if i.modifiers.alt {
+                    0.3
+                } else {
+                    1.0
+                }
+            }),
+        };
+
+        nav.apply(&mut self.camera, dt)
+    }
+
     /// Draws the fractal and handles camera input over it.
     fn viewport(&mut self, ui: &mut egui::Ui) {
         let (rect, response) =
             ui.allocate_exact_size(ui.available_size(), egui::Sense::click_and_drag());
 
         self.interacting = false;
+
+        // A held key produces no further events, so the frame that would apply
+        // the next step of the motion has to be asked for explicitly.
+        let dt = ui.input(|i| i.stable_dt).min(0.1);
+        if self.keyboard_navigation(ui, dt) {
+            self.interacting = true;
+            ui.ctx().request_repaint();
+        }
 
         if response.dragged() {
             let delta = response.drag_delta();
@@ -356,6 +413,46 @@ impl eframe::App for App {
         Some(&mut *self)
     }
 }
+
+/// The camera motion a frame's held keys ask for, in units of "how much of
+/// each axis", before any rate or timestep is applied.
+#[derive(Clone, Copy, Default, PartialEq, Debug)]
+struct Nav {
+    yaw: f32,
+    pitch: f32,
+    forward: f32,
+    strafe: f32,
+    lift: f32,
+    /// Modifier multiplier: 3 with shift, 0.3 with alt, 1 otherwise.
+    speed: f32,
+}
+
+impl Nav {
+    /// Moves `camera` by one frame's worth. Returns whether anything moved.
+    fn apply(self, camera: &mut Camera, dt: f32) -> bool {
+        if [self.yaw, self.pitch, self.forward, self.strafe, self.lift]
+            .iter()
+            .all(|v| *v == 0.0)
+        {
+            return false;
+        }
+
+        let step = dt * self.speed;
+
+        // Negated to match the drag directions: the right arrow orbits the way
+        // dragging right does, so the two controls never disagree.
+        camera.orbit(-self.yaw * KEY_ORBIT * step, -self.pitch * KEY_ORBIT * step);
+        if self.forward != 0.0 {
+            camera.zoom((-self.forward * KEY_DOLLY * step).exp());
+        }
+        if self.strafe != 0.0 || self.lift != 0.0 {
+            camera.pan(-self.strafe * KEY_PAN * step, self.lift * KEY_PAN * step);
+        }
+        true
+    }
+}
+
+
 
 /// What a row in the stack editor asked to do. Applied after the loop, because
 /// mutating the vector while iterating it is not allowed.
@@ -563,4 +660,104 @@ fn stack_editor(params: &mut SceneParams, filter: &mut String, ui: &mut egui::Ui
         "Scaling formulas like the Mandelbox need a linear distance estimate; \
          escape-time formulas need the logarithmic one. Auto picks for you.",
     );
+}
+
+#[cfg(test)]
+mod nav_tests {
+    use super::*;
+
+    fn nav() -> Nav {
+        Nav {
+            speed: 1.0,
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn nothing_held_moves_nothing() {
+        let mut camera = Camera::default();
+        let before = camera;
+        assert!(!nav().apply(&mut camera, 0.016));
+        assert_eq!(camera, before);
+    }
+
+    #[test]
+    fn w_moves_closer_and_s_moves_away() {
+        let mut camera = Camera::default();
+        let start = camera.distance;
+
+        Nav { forward: 1.0, ..nav() }.apply(&mut camera, 0.1);
+        assert!(camera.distance < start, "W should move toward the fractal");
+
+        let near = camera.distance;
+        Nav { forward: -1.0, ..nav() }.apply(&mut camera, 0.1);
+        assert!(camera.distance > near, "S should move away");
+    }
+
+    #[test]
+    fn arrows_orbit_the_way_the_matching_drag_does() {
+        // Dragging right calls `orbit` with a negative yaw, so the right arrow
+        // must too, or mouse and keyboard fight each other.
+        let mut dragged = Camera::default();
+        dragged.orbit(-10.0 * ORBIT_SENSITIVITY, 0.0);
+
+        let mut keyed = Camera::default();
+        Nav { yaw: 1.0, ..nav() }.apply(&mut keyed, 0.1);
+
+        assert!(
+            (dragged.yaw - Camera::default().yaw).is_sign_negative()
+                == (keyed.yaw - Camera::default().yaw).is_sign_negative(),
+            "right arrow and right drag should orbit the same way"
+        );
+    }
+
+    #[test]
+    fn d_moves_the_camera_to_its_own_right() {
+        let mut camera = Camera::default();
+        let (right, _, _) = camera.basis();
+        let before = camera.target;
+
+        Nav { strafe: 1.0, ..nav() }.apply(&mut camera, 0.1);
+
+        let moved: f32 = (0..3).map(|i| (camera.target[i] - before[i]) * right[i]).sum();
+        assert!(moved > 0.0, "D should move along the camera's right axis");
+    }
+
+    #[test]
+    fn e_rises_and_q_falls() {
+        let mut camera = Camera::default();
+        let (_, up, _) = camera.basis();
+        let before = camera.target;
+
+        Nav { lift: 1.0, ..nav() }.apply(&mut camera, 0.1);
+        let moved: f32 = (0..3).map(|i| (camera.target[i] - before[i]) * up[i]).sum();
+        assert!(moved > 0.0, "E should rise");
+    }
+
+    #[test]
+    fn motion_does_not_depend_on_the_frame_rate() {
+        // Two frames at 30fps must land where one frame at 15fps does, or the
+        // fractal's own frame rate would change how far a key press travels.
+        let mut slow = Camera::default();
+        Nav { forward: 1.0, yaw: 1.0, ..nav() }.apply(&mut slow, 0.064);
+
+        let mut fast = Camera::default();
+        for _ in 0..2 {
+            Nav { forward: 1.0, yaw: 1.0, ..nav() }.apply(&mut fast, 0.032);
+        }
+
+        assert!((slow.distance - fast.distance).abs() < 1e-5, "{slow:?} {fast:?}");
+        assert!((slow.yaw - fast.yaw).abs() < 1e-5, "{slow:?} {fast:?}");
+    }
+
+    #[test]
+    fn shift_hurries_and_alt_creeps() {
+        let travel = |speed: f32| {
+            let mut camera = Camera::default();
+            Nav { forward: 1.0, speed, ..nav() }.apply(&mut camera, 0.1);
+            Camera::default().distance - camera.distance
+        };
+        assert!(travel(3.0) > travel(1.0));
+        assert!(travel(0.3) < travel(1.0));
+    }
 }
