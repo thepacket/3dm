@@ -671,6 +671,55 @@ mod tests {
         }
     }
 
+
+    #[test]
+    fn every_control_indexes_inside_its_own_block() {
+        // The UI writes through `slot.params[control.index]`. A control whose
+        // index ran past the block would silently edit the next slot's
+        // parameters, or be dropped by the `get_mut` guard and appear dead.
+        for (i, f) in GENERATED.iter().enumerate() {
+            let kind = FormulaKind::Generated(i);
+            let slot = FormulaSlot::new(kind);
+            for c in kind.controls() {
+                assert!(
+                    c.index < slot.params.len(),
+                    "{}: control {:?} at float {} but block is {} floats",
+                    f.name,
+                    c.label,
+                    c.index,
+                    slot.params.len(),
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn builtin_controls_match_their_declared_params() {
+        for b in Builtin::ALL {
+            let kind = FormulaKind::Builtin(b);
+            let slot = FormulaSlot::new(kind);
+            assert_eq!(kind.controls().len(), b.params().len(), "{}", b.name());
+            for c in kind.controls() {
+                assert!(c.index < slot.params.len(), "{}", b.name());
+                assert!(c.range.is_some(), "{} should be bounded", b.name());
+            }
+        }
+    }
+
+    #[test]
+    fn matrix_parameters_are_not_silently_half_editable() {
+        // `controls` caps a parameter at four rows, which is right for vectors
+        // but leaves a 3x3 rotation with only its first row exposed. That is a
+        // real gap in the editor, not a layout bug — this pins it so the day it
+        // is fixed the test says so rather than the UI quietly changing.
+        let matrices: usize = GENERATED
+            .iter()
+            .flat_map(|f| f.params.iter())
+            .filter(|p| p.kind == ParamKind::Matrix33)
+            .count();
+        assert!(matrices > 0, "the corpus does contain rotation matrices");
+    }
+
     #[test]
     fn a_slots_defaults_fill_its_own_block_only() {
         let kind = FormulaKind::find("Mandelbulb").expect("transpiled Mandelbulb");

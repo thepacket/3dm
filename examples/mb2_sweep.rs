@@ -94,6 +94,9 @@ async fn run(out_dir: Option<&str>) {
     // Kept for the contact sheet. 300 tiles at this size is a few tens of MB,
     // which is cheaper than decoding the PNGs back off disk.
     let mut sheet: Vec<(&str, Vec<u8>)> = Vec::new();
+    // Selecting a formula in the UI compiles a pipeline on the spot, so this is
+    // the latency the user actually feels.
+    let mut build_ms: Vec<(f32, &str)> = Vec::new();
 
     for (index, f) in GENERATED.iter().enumerate() {
         let mut params = SceneParams {
@@ -117,8 +120,10 @@ async fn run(out_dir: Option<&str>) {
         // so pipeline creation runs inside an error scope rather than under the
         // panicking uncaptured-error handler.
         let scope = device.push_error_scope(wgpu::ErrorFilter::Validation);
+        let started = std::time::Instant::now();
         pipeline.ensure(&device, key, &source);
         let built = scope.pop().await.is_none();
+        build_ms.push((started.elapsed().as_secs_f32() * 1000.0, f.name));
 
         let verdict = if !built {
             Verdict::ShaderError
@@ -154,6 +159,15 @@ async fn run(out_dir: Option<&str>) {
             println!("  {name:34} {why:?}");
         }
     }
+
+    build_ms.sort_by(|a, b| b.0.total_cmp(&a.0));
+    let total: f32 = build_ms.iter().map(|(ms, _)| ms).sum();
+    println!(
+        "\npipeline build: {:.0} ms mean, slowest {:.0} ms ({})",
+        total / build_ms.len() as f32,
+        build_ms[0].0,
+        build_ms[0].1,
+    );
 
     if let Some(dir) = out_dir {
         contact_sheet(&sheet, dir);
