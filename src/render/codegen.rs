@@ -189,9 +189,12 @@ mod tests {
         let mut stack = FormulaStack::default();
         stack.slots.push(FormulaSlot::builtin(Builtin::Mandelbox));
         let src = generate(&stack);
-        // Slot 1 must read its own vec4 pair, not slot 0's.
-        // Slot 1's block starts at float 136, i.e. vec4 34.
-        assert!(src.contains("u.pool[34].x"));
+        // Slot 1 must read its own block, not slot 0's: it starts at
+        // `POOL_FLOATS_PER_SLOT`, i.e. vec4 `POOL_VEC4S_PER_SLOT`.
+        assert!(src.contains(&format!(
+            "u.pool[{}].x",
+            crate::formulas::POOL_VEC4S_PER_SLOT
+        )));
         assert!(!src.contains("P0"));
     }
 

@@ -21,7 +21,8 @@
 
 use eframe::wgpu;
 use three_dm::formulas::{
-    Builtin, DeMode, FormulaKind, FormulaSlot, FormulaStack, ParamKind, generated::GENERATED,
+    Builtin, DeMode, DeriveOp, FormulaKind, FormulaSlot, FormulaStack, ParamKind,
+    generated::GENERATED,
 };
 use three_dm::{
     Camera, SceneParams,
@@ -67,8 +68,12 @@ enum Hybrid {
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let hybrid = args.iter().any(|a| a == "--hybrid");
+    // Rotation angles default to zero in Mandelbulber too, so a rotation
+    // transform is *correctly* inert out of the box. Dialling one in is the
+    // only way to show that the matrix derivation actually works.
+    let rotate = args.iter().any(|a| a == "--rotate");
     let out_dir = args.into_iter().find(|a| !a.starts_with("--"));
-    pollster::block_on(run(out_dir.as_deref(), hybrid));
+    pollster::block_on(run(out_dir.as_deref(), hybrid, rotate));
 }
 
 /// The scene for one sweep entry.
@@ -85,7 +90,7 @@ fn main() {
 /// reported the entire `TransfDIFS*` family as doing nothing. Instead each
 /// hybrid is compared against the base rendered under that same estimator, so
 /// the comparison stays honest without discarding what the formula does.
-fn scene(index: Option<usize>, hybrid: bool, force: Option<DeMode>) -> SceneParams {
+fn scene(index: Option<usize>, hybrid: bool, force: Option<DeMode>, rotate: bool) -> SceneParams {
     let base = if hybrid {
         vec![FormulaSlot::builtin(Builtin::Mandelbulb)]
     } else {
@@ -103,7 +108,11 @@ fn scene(index: Option<usize>, hybrid: bool, force: Option<DeMode>) -> ScenePara
     if hybrid {
         params.retune_for_stack();
         if let Some(i) = index {
-            params.stack.slots.push(FormulaSlot::new(FormulaKind::Generated(i)));
+            let mut slot = FormulaSlot::new(FormulaKind::Generated(i));
+            if rotate {
+                set_rotations(&mut slot, 45.0);
+            }
+            params.stack.slots.push(slot);
         }
         params.stack.de_mode_override = force;
     } else {
@@ -121,6 +130,33 @@ fn scene(index: Option<usize>, hybrid: bool, force: Option<DeMode>) -> ScenePara
     params
 }
 
+/// Dials every Euler rotation source in a slot to `degrees`.
+///
+/// The matrix itself is derived and not editable; its source angles are, and
+/// they are exactly the controls that were unreachable before the derivation
+/// mechanism existed.
+fn set_rotations(slot: &mut FormulaSlot, degrees: f32) {
+    let FormulaKind::Generated(i) = slot.kind else {
+        return;
+    };
+    let f = &GENERATED[i];
+    let layout = three_dm::formulas::mb2::layout(f);
+    for d in f.derivations {
+        if !matches!(d.op, DeriveOp::Rotation2 | DeriveOp::Rotation4) {
+            continue;
+        }
+        for source in d.sources {
+            if let Some(p) = layout.placements.iter().find(|p| p.param.offset == *source) {
+                for c in 0..3 {
+                    if let Some(v) = slot.params.get_mut(p.index + c) {
+                        *v = degrees;
+                    }
+                }
+            }
+        }
+    }
+}
+
 /// Fraction of pixels that differ appreciably between two frames.
 fn difference(a: &[u8], b: &[u8]) -> f32 {
     let differing = a
@@ -131,7 +167,7 @@ fn difference(a: &[u8], b: &[u8]) -> f32 {
     differing as f32 / (W * H) as f32
 }
 
-async fn run(out_dir: Option<&str>, hybrid: bool) {
+async fn run(out_dir: Option<&str>, hybrid: bool, rotate: bool) {
     if let Some(d) = out_dir {
         std::fs::create_dir_all(d).expect("cannot create output directory");
     }
@@ -190,7 +226,7 @@ async fn run(out_dir: Option<&str>, hybrid: bool) {
     let mut references: Vec<(DeMode, Vec<u8>)> = Vec::new();
     if hybrid {
         for mode in DeMode::ALL {
-            let params = scene(None, true, Some(mode));
+            let params = scene(None, true, Some(mode), false);
             let mut camera = Camera::default();
             camera.frame(params.fractal.bounding_radius);
             let (key, source) = params.shader();
@@ -218,7 +254,7 @@ async fn run(out_dir: Option<&str>, hybrid: bool) {
     let mut inert = Vec::new();
 
     for (index, f) in GENERATED.iter().enumerate() {
-        let params = scene(Some(index), hybrid, None);
+        let params = scene(Some(index), hybrid, None, rotate);
 
         let mut camera = Camera::default();
         camera.frame(params.fractal.bounding_radius);

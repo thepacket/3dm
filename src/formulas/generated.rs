@@ -4,7 +4,7 @@
 //! (<https://github.com/buddhi1980/mandelbulber2>, © Mandelbulber Team,
 //! GPL-3.0). 3DM is GPL-3.0-or-later as a result.
 
-use super::{DeFunction, GeneratedFormula, GeneratedParam, ParamKind};
+use super::{DeFunction, Derivation, DeriveOp, GeneratedFormula, GeneratedParam, ParamKind};
 
 pub static GENERATED: &[GeneratedFormula] = &[
     GeneratedFormula {
@@ -37,6 +37,9 @@ pub static GENERATED: &[GeneratedFormula] = &[
             GeneratedParam { path: "mandelbox.color.factor4D", kind: ParamKind::Float4, offset: 34, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "mandelbox.color.factorSp1", kind: ParamKind::Float, offset: 38, default: &[0.2] },
             GeneratedParam { path: "mandelbox.color.factorSp2", kind: ParamKind::Float, offset: 39, default: &[0.2] },
+        ],
+        derivations: &[
+            Derivation { target: 16, op: DeriveOp::Ratio, sources: &[17, 15] },
         ],
         wgsl: r####"
 	var colorAdd: f32 = 0.0;
@@ -186,6 +189,9 @@ pub static GENERATED: &[GeneratedFormula] = &[
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 37, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 38, default: &[1.0] },
         ],
+        derivations: &[
+            Derivation { target: 16, op: DeriveOp::Ratio, sources: &[17, 15] },
+        ],
         wgsl: r####"
 	var colorAdd: f32 = 0.0;
 
@@ -295,6 +301,10 @@ pub static GENERATED: &[GeneratedFormula] = &[
             GeneratedParam { path: "transformCommon.offset110", kind: ParamKind::Float4, offset: 48, default: &[1.0, 1.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.scale2", kind: ParamKind::Float, offset: 52, default: &[2.0] },
             GeneratedParam { path: "transformCommon.offsetA000", kind: ParamKind::Float4, offset: 53, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 57, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 26, op: DeriveOp::Rotation2, sources: &[57] },
         ],
         wgsl: r####"
 	
@@ -417,6 +427,11 @@ pub static GENERATED: &[GeneratedFormula] = &[
             GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 32, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 33, default: &[250.0] },
             GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 34, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 46, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 18, op: DeriveOp::Ratio, sources: &[20, 17] },
+            Derivation { target: 34, op: DeriveOp::Rotation2, sources: &[46] },
         ],
         wgsl: r####"
 	(*aux).actual_scale =
@@ -604,6 +619,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 83, default: &[0.0] },
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 84, default: &[250.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledAFalse", kind: ParamKind::Int, offset: 85, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 86, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 67, op: DeriveOp::Rotation2, sources: &[86] },
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -916,6 +935,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 65, default: &[0.0] },
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 66, default: &[250.0] },
             GeneratedParam { path: "mandelbox.color.factorSp2", kind: ParamKind::Float, offset: 67, default: &[0.2] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 68, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 21, op: DeriveOp::Reciprocal, sources: &[20] },
+            Derivation { target: 23, op: DeriveOp::Reciprocal, sources: &[22] },
+            Derivation { target: 52, op: DeriveOp::Rotation2, sources: &[68] },
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -1130,6 +1155,13 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 114, default: &[250.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 115, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "mandelbox.color.factorSp1", kind: ParamKind::Float, offset: 119, default: &[0.2] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 120, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 124, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 41, op: DeriveOp::Ratio, sources: &[42, 40] },
+            Derivation { target: 53, op: DeriveOp::Rotation2, sources: &[120] },
+            Derivation { target: 80, op: DeriveOp::Rotation2, sources: &[124] },
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -1365,6 +1397,11 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
             GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 31, default: &[250.0] },
             GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 32, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabled", kind: ParamKind::Int, offset: 44, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 45, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 16, op: DeriveOp::Ratio, sources: &[18, 15] },
+            Derivation { target: 32, op: DeriveOp::Rotation2, sources: &[45] },
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -1525,6 +1562,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.auxColorEnabled", kind: ParamKind::Int, offset: 45, default: &[1.0] },
             GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 46, default: &[0.0] },
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 47, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 48, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 33, op: DeriveOp::Rotation2, sources: &[48] },
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -1697,6 +1738,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 47, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 48, default: &[0.0] },
             GeneratedParam { path: "mandelbox.color.factor", kind: ParamKind::Float3, offset: 49, default: &[0.03, 0.05, 0.07, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 53, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 17, op: DeriveOp::Rotation2, sources: &[53] },
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -1801,6 +1846,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.stopIterationsB", kind: ParamKind::Int, offset: 9, default: &[250.0] },
             GeneratedParam { path: "transformCommon.offsetA111", kind: ParamKind::Float4, offset: 10, default: &[1.0, 1.0, 1.0, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
@@ -1894,6 +1941,13 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 102, default: &[250.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 103, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "mandelbox.color.factorSp1", kind: ParamKind::Float, offset: 107, default: &[0.2] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 108, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 112, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 42, op: DeriveOp::Ratio, sources: &[43, 41] },
+            Derivation { target: 61, op: DeriveOp::Rotation2, sources: &[108] },
+            Derivation { target: 88, op: DeriveOp::Rotation2, sources: &[112] },
         ],
         wgsl: r####"
 	var t: f32 = 1.0;
@@ -2113,6 +2167,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 45, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 46, default: &[0.0] },
         ],
+        derivations: &[
+            Derivation { target: 10, op: DeriveOp::Ratio, sources: &[11, 9] },
+        ],
         wgsl: r####"
 	var colorAdd: f32 = 0.0;
 	var rrCol: f32 = 0.0;
@@ -2289,6 +2346,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 63, default: &[0.0] },
             GeneratedParam { path: "mandelbox.color.factorSp1", kind: ParamKind::Float, offset: 64, default: &[0.2] },
             GeneratedParam { path: "mandelbox.color.factorSp2", kind: ParamKind::Float, offset: 65, default: &[0.2] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 66, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 47, op: DeriveOp::Rotation2, sources: &[66] },
         ],
         wgsl: r####"
 	var colorAdd: f32 = 0.0;
@@ -2577,6 +2638,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 66, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 78, default: &[0.0] },
             GeneratedParam { path: "mandelbox.color.factorSp2", kind: ParamKind::Float, offset: 79, default: &[0.2] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 80, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 35, op: DeriveOp::Reciprocal, sources: &[34] },
+            Derivation { target: 37, op: DeriveOp::Reciprocal, sources: &[36] },
+            Derivation { target: 66, op: DeriveOp::Rotation2, sources: &[80] },
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -2796,6 +2863,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 49, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 50, default: &[0.0] },
         ],
+        derivations: &[
+            Derivation { target: 14, op: DeriveOp::Ratio, sources: &[15, 13] },
+        ],
         wgsl: r####"
 	var colorAdd: f32 = 0.0;
 
@@ -2951,6 +3021,15 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 25, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterations", kind: ParamKind::Int, offset: 26, default: &[250.0] },
             GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 27, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "mandelbox.foldingSphericalFixed", kind: ParamKind::Float, offset: 39, default: &[1.0] },
+            GeneratedParam { path: "mandelbox.foldingSphericalMin", kind: ParamKind::Float, offset: 40, default: &[0.5] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 41, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 22, op: DeriveOp::Square, sources: &[39] },
+            Derivation { target: 19, op: DeriveOp::Square, sources: &[40] },
+            Derivation { target: 20, op: DeriveOp::Ratio, sources: &[22, 19] },
+            Derivation { target: 27, op: DeriveOp::Rotation2, sources: &[41] },
         ],
         wgsl: r####"
 	(*aux).actual_scale =
@@ -3026,6 +3105,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 2, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 3, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var temp: vec4<f32> = z;
 	var t: f32;
@@ -3075,6 +3156,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 11, default: &[1.0] },
             GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 12, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 13, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var temp: vec4<f32> = z;
@@ -3137,6 +3220,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 32, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 33, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 34, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 35, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 8, op: DeriveOp::Rotation2, sources: &[35] },
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -3236,6 +3323,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 74, default: &[0.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 75, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.additionConstant111", kind: ParamKind::Float4, offset: 79, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 83, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 55, op: DeriveOp::Rotation2, sources: &[83] },
         ],
         wgsl: r####"
 	var colorDist: f32 = (*aux).de;
@@ -3395,6 +3486,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.addCpixelEnabledFalse", kind: ParamKind::Int, offset: 9, default: &[0.0] },
             GeneratedParam { path: "transformCommon.constantMultiplier111", kind: ParamKind::Float4, offset: 10, default: &[1.0, 1.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 14, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 26, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 14, op: DeriveOp::Rotation2, sources: &[26] },
         ],
         wgsl: r####"
 	
@@ -3465,6 +3560,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.offset110", kind: ParamKind::Float4, offset: 50, default: &[1.0, 1.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.scale2", kind: ParamKind::Float, offset: 54, default: &[2.0] },
             GeneratedParam { path: "transformCommon.offsetA000", kind: ParamKind::Float4, offset: 55, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 59, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 28, op: DeriveOp::Rotation2, sources: &[59] },
         ],
         wgsl: r####"
 	
@@ -3616,6 +3715,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.offset110", kind: ParamKind::Float4, offset: 69, default: &[1.0, 1.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.scale2", kind: ParamKind::Float, offset: 73, default: &[2.0] },
             GeneratedParam { path: "transformCommon.offsetA000", kind: ParamKind::Float4, offset: 74, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 78, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 45, op: DeriveOp::Rotation2, sources: &[78] },
         ],
         wgsl: r####"
 	
@@ -3778,6 +3881,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 44, default: &[0.0] },
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 45, default: &[250.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 46, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "mandelbox.foldingSphericalMin", kind: ParamKind::Float, offset: 50, default: &[0.5] },
+            GeneratedParam { path: "transformCommon.rotationXYZ", kind: ParamKind::Float3, offset: 51, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 20, op: DeriveOp::Square, sources: &[50] },
+            Derivation { target: 31, op: DeriveOp::Rotation4, sources: &[51] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
@@ -3877,6 +3986,13 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 39, default: &[0.0] },
             GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 40, default: &[0.0] },
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 41, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.minR05", kind: ParamKind::Float, offset: 42, default: &[0.5] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 43, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 22, op: DeriveOp::Sqrt, sources: &[42] },
+            Derivation { target: 23, op: DeriveOp::Reciprocal, sources: &[22] },
+            Derivation { target: 27, op: DeriveOp::Rotation2, sources: &[43] },
         ],
         wgsl: r####"
 	var colorAdd: f32 = 0.0;
@@ -4013,6 +4129,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 62, default: &[0.0] },
             GeneratedParam { path: "mandelbox.color.factor", kind: ParamKind::Float3, offset: 63, default: &[0.03, 0.05, 0.07, 0.0] },
             GeneratedParam { path: "mandelbox.color.factorSp2", kind: ParamKind::Float, offset: 67, default: &[0.2] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 68, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 72, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 29, op: DeriveOp::Rotation2, sources: &[68] },
+            Derivation { target: 50, op: DeriveOp::Rotation2, sources: &[72] },
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -4103,6 +4225,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledEFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 1, default: &[0.0, 0.0, 0.0, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	(*aux).de = (*aux).de * 2.0 * (*aux).r + 1.0;
 	var zz: vec4<f32> = z * z;
@@ -4137,6 +4261,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         params: &[
             GeneratedParam { path: "transformCommon.constantMultiplier100", kind: ParamKind::Float4, offset: 0, default: &[1.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.angle0", kind: ParamKind::Float, offset: 4, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	(*aux).de = (*aux).r * (*aux).de * 2.0 + 1.0;
@@ -4220,6 +4346,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 73, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 74, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 75, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 76, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 80, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 16, op: DeriveOp::Rotation2, sources: &[76] },
+            Derivation { target: 61, op: DeriveOp::Rotation2, sources: &[80] },
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -4390,6 +4522,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 39, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.rotation2EnabledFalse", kind: ParamKind::Int, offset: 43, default: &[0.0] },
             GeneratedParam { path: "transformCommon.rotationMatrix2", kind: ParamKind::Matrix33, offset: 44, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 56, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 60, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 8, op: DeriveOp::Rotation2, sources: &[56] },
+            Derivation { target: 44, op: DeriveOp::Rotation2, sources: &[60] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0) && (*aux).i >= __MB2P1__
@@ -4538,6 +4676,11 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "mandelbox.color.factor", kind: ParamKind::Float3, offset: 85, default: &[0.03, 0.05, 0.07, 0.0] },
             GeneratedParam { path: "mandelbox.color.factorSp1", kind: ParamKind::Float, offset: 89, default: &[0.2] },
             GeneratedParam { path: "mandelbox.color.factorSp2", kind: ParamKind::Float, offset: 90, default: &[0.2] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 91, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 13, op: DeriveOp::Ratio, sources: &[14, 12] },
+            Derivation { target: 47, op: DeriveOp::Rotation2, sources: &[91] },
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -4786,6 +4929,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "mandelbox.color.factorSp1", kind: ParamKind::Float, offset: 35, default: &[0.2] },
             GeneratedParam { path: "mandelbox.color.factorSp2", kind: ParamKind::Float, offset: 36, default: &[0.2] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var colorAdd: f32 = 0.0;
 	var rrCol: f32 = 0.0;
@@ -4967,6 +5112,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "mandelbox.color.factor", kind: ParamKind::Float3, offset: 90, default: &[0.03, 0.05, 0.07, 0.0] },
             GeneratedParam { path: "mandelbox.color.factorSp1", kind: ParamKind::Float, offset: 94, default: &[0.2] },
             GeneratedParam { path: "mandelbox.color.factorSp2", kind: ParamKind::Float, offset: 95, default: &[0.2] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 96, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 57, op: DeriveOp::Rotation2, sources: &[96] },
         ],
         wgsl: r####"
 	
@@ -5218,6 +5367,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 14, default: &[0.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 15, default: &[0.0, 0.0, 0.0, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var oldZ: vec4<f32> = z;
 	z.x = abs(z.x + __MB2P0__.x)
@@ -5329,6 +5480,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "mandelbox.color.factor", kind: ParamKind::Float3, offset: 85, default: &[0.03, 0.05, 0.07, 0.0] },
             GeneratedParam { path: "mandelbox.color.factorSp1", kind: ParamKind::Float, offset: 89, default: &[0.2] },
             GeneratedParam { path: "mandelbox.color.factorSp2", kind: ParamKind::Float, offset: 90, default: &[0.2] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 91, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 44, op: DeriveOp::Rotation2, sources: &[91] },
         ],
         wgsl: r####"
 	
@@ -5544,6 +5699,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         bailout: 10.0,
         params: &[
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	
 
@@ -5582,6 +5739,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 17, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 18, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 19, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	(*aux).de = (*aux).de * 2.0 * (*aux).r;
@@ -5644,6 +5803,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant0000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	(*aux).de = (*aux).de * 2.0 * (*aux).r;
 	var newx: f32 = z.x * z.x - z.y * z.y - z.z * z.z - z.w * z.w;
@@ -5675,6 +5836,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "buffalo.absy", kind: ParamKind::Int, offset: 5, default: &[0.0] },
             GeneratedParam { path: "buffalo.absz", kind: ParamKind::Int, offset: 6, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	(*aux).de = (*aux).de * 2.0 * (*aux).r;
 
@@ -5705,6 +5868,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         bailout: 10.0,
         params: &[
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	
 
@@ -5729,6 +5894,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         add_c: false,
         bailout: 10.0,
         params: &[
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -5759,6 +5926,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 12, default: &[1.0] },
             GeneratedParam { path: "transformCommon.addCpixelEnabledFalse", kind: ParamKind::Int, offset: 13, default: &[0.0] },
             GeneratedParam { path: "transformCommon.constantMultiplierA111", kind: ParamKind::Float4, offset: 14, default: &[1.0, 1.0, 1.0, 0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -5819,6 +5988,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 44, default: &[0.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 45, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.additionConstant111", kind: ParamKind::Float4, offset: 49, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 53, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 26, op: DeriveOp::Rotation2, sources: &[53] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0))
@@ -5985,6 +6158,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 72, default: &[0.0] },
             GeneratedParam { path: "foldColor.difs1", kind: ParamKind::Float, offset: 73, default: &[1.0] },
             GeneratedParam { path: "foldColor.auxColorEnabled", kind: ParamKind::Int, offset: 74, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
@@ -6178,6 +6353,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 56, default: &[0.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 57, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledA", kind: ParamKind::Int, offset: 61, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 62, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 33, op: DeriveOp::Rotation2, sources: &[62] },
         ],
         wgsl: r####"
 	var colorAdd: f32 = 0.0;
@@ -6303,6 +6482,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.auxColorEnabled", kind: ParamKind::Int, offset: 4, default: &[1.0] },
             GeneratedParam { path: "foldColor.difs1", kind: ParamKind::Float, offset: 5, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var zt: vec4<f32> = z;
 	var radius2: f32 = __MB2P0__;
@@ -6382,6 +6563,15 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.stopIterationsC", kind: ParamKind::Int, offset: 46, default: &[250.0] },
             GeneratedParam { path: "mandelbox.mainRot", kind: ParamKind::Matrix33, offset: 47, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabled", kind: ParamKind::Int, offset: 59, default: &[1.0] },
+            GeneratedParam { path: "mandelbox.foldingSphericalFixed", kind: ParamKind::Float, offset: 60, default: &[1.0] },
+            GeneratedParam { path: "mandelbox.foldingSphericalMin", kind: ParamKind::Float, offset: 61, default: &[0.5] },
+            GeneratedParam { path: "mandelbox.rotationMain", kind: ParamKind::Float3, offset: 62, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 35, op: DeriveOp::Square, sources: &[60] },
+            Derivation { target: 32, op: DeriveOp::Square, sources: &[61] },
+            Derivation { target: 33, op: DeriveOp::Ratio, sources: &[35, 32] },
+            Derivation { target: 47, op: DeriveOp::Rotation2, sources: &[62] },
         ],
         wgsl: r####"
 	var colorAdd: f32 = 0.0;
@@ -6501,6 +6691,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         bailout: 10.0,
         params: &[
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	
 
@@ -6539,6 +6731,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.rotation44b", kind: ParamKind::Float3, offset: 21, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 25, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 26, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0))
@@ -6628,6 +6822,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.constantMultiplier121", kind: ParamKind::Float4, offset: 0, default: &[1.0, 2.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.additionConstant0555", kind: ParamKind::Float4, offset: 4, default: &[0.5, 0.5, 0.5, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	
 
@@ -6656,6 +6852,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         params: &[
             GeneratedParam { path: "transformCommon.constantMultiplier121", kind: ParamKind::Float4, offset: 0, default: &[1.0, 2.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.additionConstant0555", kind: ParamKind::Float4, offset: 4, default: &[0.5, 0.5, 0.5, 0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -6705,6 +6903,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 50, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 51, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 52, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 53, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 57, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 13, op: DeriveOp::Rotation2, sources: &[53] },
+            Derivation { target: 38, op: DeriveOp::Rotation2, sources: &[57] },
         ],
         wgsl: r####"
 	
@@ -6774,6 +6978,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         bailout: 10.0,
         params: &[
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	
 	
@@ -6802,6 +7008,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         params: &[
             GeneratedParam { path: "transformCommon.pwr8", kind: ParamKind::Float, offset: 0, default: &[8.0] },
             GeneratedParam { path: "transformCommon.pwr8a", kind: ParamKind::Float, offset: 1, default: &[8.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -6856,6 +7064,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.constantMultiplierC111", kind: ParamKind::Float4, offset: 38, default: &[1.0, 1.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 42, default: &[0.0] },
             GeneratedParam { path: "foldColor.difs1", kind: ParamKind::Float, offset: 43, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var oldZy: f32 = z.y;
@@ -6994,6 +7204,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.offset1", kind: ParamKind::Float, offset: 44, default: &[1.0] },
             GeneratedParam { path: "transformCommon.scale0", kind: ParamKind::Float, offset: 45, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	
 	if ((__MB2P0__ != 0)
@@ -7128,6 +7340,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.juliaC", kind: ParamKind::Float4, offset: 8, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.rotationEnabled", kind: ParamKind::Int, offset: 12, default: &[0.0] },
             GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 13, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 25, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 13, op: DeriveOp::Rotation2, sources: &[25] },
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -7174,6 +7390,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 25, default: &[0.0] },
             GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 26, default: &[0.0] },
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 27, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 28, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 13, op: DeriveOp::Rotation2, sources: &[28] },
         ],
         wgsl: r####"
 	var col: f32 = 0.0;
@@ -7308,6 +7528,11 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 86, default: &[250.0] },
             GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 87, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledA", kind: ParamKind::Int, offset: 88, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 89, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 41, op: DeriveOp::Ratio, sources: &[42, 40] },
+            Derivation { target: 70, op: DeriveOp::Rotation2, sources: &[89] },
         ],
         wgsl: r####"
 	var temp: f32 = 0.0;
@@ -7593,6 +7818,11 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 110, default: &[0.0] },
             GeneratedParam { path: "transformCommon.offsetE0", kind: ParamKind::Float, offset: 111, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 112, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 113, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 41, op: DeriveOp::Ratio, sources: &[42, 40] },
+            Derivation { target: 70, op: DeriveOp::Rotation2, sources: &[113] },
         ],
         wgsl: r####"
 	var temp: f32 = 0.0;
@@ -7882,6 +8112,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	(*aux).de = (*aux).de * 2.0 * (*aux).r * __MB2P0__ + __MB2P1__;
 
@@ -7907,6 +8139,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         params: &[
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	(*aux).de = (*aux).de * 2.0 * (*aux).r * __MB2P0__ + __MB2P1__;
@@ -7942,6 +8176,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 28, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 29, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 30, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 31, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 16, op: DeriveOp::Rotation2, sources: &[31] },
         ],
         wgsl: r####"
 	
@@ -8083,6 +8321,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "mandelbox.color.factorSp2", kind: ParamKind::Float, offset: 52, default: &[0.2] },
             GeneratedParam { path: "mandelbox.color.factorSp1", kind: ParamKind::Float, offset: 53, default: &[0.2] },
             GeneratedParam { path: "transformCommon.functionEnabledOFalse", kind: ParamKind::Int, offset: 54, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 55, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 36, op: DeriveOp::Rotation2, sources: &[55] },
         ],
         wgsl: r####"
 	var colorAdd: f32 = 0.0;
@@ -8304,6 +8546,11 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.minR2p25", kind: ParamKind::Float, offset: 50, default: &[0.25] },
             GeneratedParam { path: "mandelbox.color.factorSp1", kind: ParamKind::Float, offset: 51, default: &[0.2] },
             GeneratedParam { path: "transformCommon.functionEnabledXFalse", kind: ParamKind::Int, offset: 52, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 53, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 22, op: DeriveOp::Ratio, sources: &[23, 21] },
+            Derivation { target: 33, op: DeriveOp::Rotation2, sources: &[53] },
         ],
         wgsl: r####"
 	var colorAdd: f32 = 0.0;
@@ -8481,6 +8728,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 24, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 25, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 26, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 27, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 12, op: DeriveOp::Rotation2, sources: &[27] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0))
@@ -8524,6 +8775,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 20, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 21, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 22, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 23, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 8, op: DeriveOp::Rotation2, sources: &[23] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0))
@@ -8622,6 +8877,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 69, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAwFalse", kind: ParamKind::Int, offset: 70, default: &[0.0] },
             GeneratedParam { path: "transformCommon.scaleB1", kind: ParamKind::Float, offset: 71, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 72, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 34, op: DeriveOp::Rotation2, sources: &[72] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0))
@@ -8775,6 +9034,15 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "mandelbox.mainRotationEnabled", kind: ParamKind::Int, offset: 3, default: &[0.0] },
             GeneratedParam { path: "mandelbox.mainRot", kind: ParamKind::Matrix33, offset: 4, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
             GeneratedParam { path: "mandelbox.scale", kind: ParamKind::Float, offset: 16, default: &[2.0] },
+            GeneratedParam { path: "mandelbox.foldingSphericalFixed", kind: ParamKind::Float, offset: 17, default: &[1.0] },
+            GeneratedParam { path: "mandelbox.foldingSphericalMin", kind: ParamKind::Float, offset: 18, default: &[0.5] },
+            GeneratedParam { path: "mandelbox.rotationMain", kind: ParamKind::Float3, offset: 19, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 2, op: DeriveOp::Square, sources: &[17] },
+            Derivation { target: 0, op: DeriveOp::Square, sources: &[18] },
+            Derivation { target: 1, op: DeriveOp::Ratio, sources: &[2, 0] },
+            Derivation { target: 4, op: DeriveOp::Rotation2, sources: &[19] },
         ],
         wgsl: r####"
 	var ones: vec4<f32> = vec4<f32>(1.0, 1.0, 1.0, 1.0);
@@ -8821,6 +9089,15 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "mandelbox.mainRotationEnabled", kind: ParamKind::Int, offset: 12, default: &[0.0] },
             GeneratedParam { path: "mandelbox.mainRot", kind: ParamKind::Matrix33, offset: 13, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
             GeneratedParam { path: "mandelbox.scale", kind: ParamKind::Float, offset: 25, default: &[2.0] },
+            GeneratedParam { path: "mandelbox.foldingSphericalFixed", kind: ParamKind::Float, offset: 26, default: &[1.0] },
+            GeneratedParam { path: "mandelbox.foldingSphericalMin", kind: ParamKind::Float, offset: 27, default: &[0.5] },
+            GeneratedParam { path: "mandelbox.rotationMain", kind: ParamKind::Float3, offset: 28, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 7, op: DeriveOp::Square, sources: &[26] },
+            Derivation { target: 8, op: DeriveOp::Square, sources: &[27] },
+            Derivation { target: 9, op: DeriveOp::Ratio, sources: &[7, 8] },
+            Derivation { target: 13, op: DeriveOp::Rotation2, sources: &[28] },
         ],
         wgsl: r####"
 	var sm: f32 = __MB2P0__;
@@ -8888,6 +9165,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 17, default: &[250.0] },
             GeneratedParam { path: "transformCommon.rotation44a", kind: ParamKind::Float3, offset: 18, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.rotation44b", kind: ParamKind::Float3, offset: 22, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	(*aux).actual_scale =
@@ -8991,6 +9270,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "bulb.alphaAngleOffset", kind: ParamKind::Float, offset: 1, default: &[0.0] },
             GeneratedParam { path: "bulb.power", kind: ParamKind::Float, offset: 2, default: &[9.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	
 	var th0: f32 = asin(z.z / (*aux).r) + __MB2P0__;
@@ -9015,6 +9296,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         add_c: true,
         bailout: 10.0,
         params: &[
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -9054,6 +9337,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         add_c: true,
         bailout: 10.0,
         params: &[
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -9107,6 +9392,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.startIterationsB", kind: ParamKind::Int, offset: 10, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsB", kind: ParamKind::Int, offset: 11, default: &[250.0] },
             GeneratedParam { path: "transformCommon.scaleB1", kind: ParamKind::Float, offset: 12, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0))
@@ -9187,6 +9474,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 66, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 67, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 68, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 69, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "mandelbox.rotationMain", kind: ParamKind::Float3, offset: 73, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 3, op: DeriveOp::Rotation2, sources: &[69] },
+            Derivation { target: 39, op: DeriveOp::Rotation2, sources: &[73] },
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -9344,6 +9637,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "buffalo.absz", kind: ParamKind::Int, offset: 6, default: &[0.0] },
             GeneratedParam { path: "transformCommon.additionConstantA000", kind: ParamKind::Float4, offset: 7, default: &[0.0, 0.0, 0.0, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	(*aux).de = (*aux).de * 2.0 * (*aux).r;
 
@@ -9400,6 +9695,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 17, default: &[1.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 18, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset2", kind: ParamKind::Float, offset: 19, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)) { z.x = abs(z.x); }
@@ -9494,6 +9791,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 15, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 16, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	(*aux).de = (*aux).de * 2.0 * (*aux).r;
 
@@ -9551,6 +9850,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.scaleB1", kind: ParamKind::Float, offset: 2, default: &[1.0] },
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 3, default: &[0.0, 0.0, 0.0, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var tp: f32 = dot(z, z);
 	tp = tp * tp * tp * (*aux).r;
@@ -9594,6 +9895,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.scaleA1", kind: ParamKind::Float, offset: 5, default: &[1.0] },
             GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 6, default: &[1.0] },
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 7, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var Pow: f32 = __MB2P0__;
@@ -9655,6 +9958,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 11, default: &[1.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 12, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset2", kind: ParamKind::Float, offset: 13, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0))
@@ -9734,6 +10039,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.alternateEnabledFalse", kind: ParamKind::Int, offset: 24, default: &[0.0] },
             GeneratedParam { path: "mandelbulbMulti.orderOfXYZC", kind: ParamKind::Int, offset: 25, default: &[0.0] },
             GeneratedParam { path: "transformCommon.constantMultiplierC111", kind: ParamKind::Float4, offset: 26, default: &[1.0, 1.0, 1.0, 0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -9993,6 +10300,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 12, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 13, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
 	var power: f32 = __MB2P0__;
@@ -10066,6 +10375,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledyFalse", kind: ParamKind::Int, offset: 14, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 15, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 16, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -10190,6 +10501,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.scaleC1", kind: ParamKind::Float, offset: 45, default: &[1.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 46, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 47, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 48, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 33, op: DeriveOp::Rotation2, sources: &[48] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0))
@@ -10308,6 +10623,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.alternateEnabledFalse", kind: ParamKind::Int, offset: 16, default: &[0.0] },
             GeneratedParam { path: "mandelbulbMulti.orderOfXYZC", kind: ParamKind::Int, offset: 17, default: &[0.0] },
             GeneratedParam { path: "transformCommon.constantMultiplierC111", kind: ParamKind::Float4, offset: 18, default: &[1.0, 1.0, 1.0, 0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -10495,6 +10812,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 43, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 44, default: &[250.0] },
             GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 45, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 57, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 45, op: DeriveOp::Rotation2, sources: &[57] },
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -10701,6 +11022,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 19, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 20, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
 			&& (*aux).i >= __MB2P1__
@@ -10840,6 +11163,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 63, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 64, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 65, default: &[0.0] },
+            GeneratedParam { path: "mandelbox.rotationMain", kind: ParamKind::Float3, offset: 66, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 51, op: DeriveOp::Rotation2, sources: &[66] },
         ],
         wgsl: r####"
 	(*aux).de = (*aux).de * (*aux).r * 2.0;
@@ -11073,6 +11400,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 39, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 40, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 41, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 42, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 27, op: DeriveOp::Rotation2, sources: &[42] },
         ],
         wgsl: r####"
 	if ((*aux).i >= __MB2P0__
@@ -11208,6 +11539,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledBzFalse", kind: ParamKind::Int, offset: 80, default: &[0.0] },
             GeneratedParam { path: "foldColor.difs1", kind: ParamKind::Float, offset: 81, default: &[1.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 82, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 83, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 50, op: DeriveOp::Rotation2, sources: &[83] },
         ],
         wgsl: r####"
 	var t: f32 = 0.0;
@@ -11490,6 +11825,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 59, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 60, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 61, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 62, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 47, op: DeriveOp::Rotation2, sources: &[62] },
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -11715,6 +12054,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         bailout: 10.0,
         params: &[
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	
 
@@ -11781,6 +12122,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledEFalse", kind: ParamKind::Int, offset: 44, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsE", kind: ParamKind::Int, offset: 45, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsE", kind: ParamKind::Int, offset: 46, default: &[250.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var t: f32;
@@ -11934,6 +12277,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 44, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 45, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 46, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 47, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 32, op: DeriveOp::Rotation2, sources: &[47] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0))
@@ -12072,6 +12419,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledByFalse", kind: ParamKind::Int, offset: 75, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledBzFalse", kind: ParamKind::Int, offset: 76, default: &[0.0] },
             GeneratedParam { path: "transformCommon.additionConstant000", kind: ParamKind::Float4, offset: 77, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 81, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 36, op: DeriveOp::Rotation2, sources: &[81] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
@@ -12355,6 +12706,8 @@ v = vec3<f32>(z.x, z.y, z.z); break;
             GeneratedParam { path: "transformCommon.startIterationsO", kind: ParamKind::Int, offset: 19, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsO", kind: ParamKind::Int, offset: 20, default: &[250.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var th: f32 = z.z / (*aux).r;
 	if (!(__MB2P0__ != 0))
@@ -12444,6 +12797,8 @@ v = vec3<f32>(z.x, z.y, z.z); break;
             GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 35, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsO", kind: ParamKind::Int, offset: 36, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsO", kind: ParamKind::Int, offset: 37, default: &[250.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var temp: f32;
@@ -12611,6 +12966,8 @@ v = vec3<f32>(z.x, z.y, z.z); break;
             GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 66, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsO", kind: ParamKind::Int, offset: 67, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsO", kind: ParamKind::Int, offset: 68, default: &[250.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var temp: f32;
@@ -12826,6 +13183,8 @@ v = vec3<f32>(z.x, z.y, z.z); break;
             GeneratedParam { path: "transformCommon.startIterationsO", kind: ParamKind::Int, offset: 57, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsO", kind: ParamKind::Int, offset: 58, default: &[250.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var temp: f32;
 
@@ -13012,6 +13371,8 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
             GeneratedParam { path: "transformCommon.startIterationsO", kind: ParamKind::Int, offset: 21, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsO", kind: ParamKind::Int, offset: 22, default: &[250.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var th: f32 = z.z / (*aux).r;
 	if (!(__MB2P0__ != 0))
@@ -13114,6 +13475,8 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 26, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsO", kind: ParamKind::Int, offset: 27, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsO", kind: ParamKind::Int, offset: 28, default: &[250.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var th: f32 = z.z / (*aux).r;
@@ -13253,6 +13616,8 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 29, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 30, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 31, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -13422,6 +13787,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 19, default: &[0.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 20, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var Power: f32 = __MB2P0__;
 	var shift: f32 = __MB2P1__ * M_PI_F;
@@ -13516,6 +13883,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 45, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsE", kind: ParamKind::Int, offset: 46, default: &[0.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 47, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
@@ -13648,6 +14017,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 16, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 17, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var Power: f32 = __MB2P0__;
 	(*aux).de = pow((*aux).r, Power - 1.0) * (*aux).de * Power + 1.0;
@@ -13749,6 +14120,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 35, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsE", kind: ParamKind::Int, offset: 36, default: &[0.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 37, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var Power: f32 = __MB2P0__;
@@ -13853,6 +14226,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 13, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 14, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
 			&& (*aux).i >= __MB2P1__
@@ -13935,6 +14310,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 16, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 17, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 18, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
@@ -14021,6 +14398,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 36, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 37, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 38, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 39, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 43, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 5, op: DeriveOp::Rotation2, sources: &[39] },
+            Derivation { target: 24, op: DeriveOp::Rotation2, sources: &[43] },
         ],
         wgsl: r####"
 	var Offset: vec4<f32> = __MB2P0__;
@@ -14086,6 +14469,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 33, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 34, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 35, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotationXYZ", kind: ParamKind::Float3, offset: 36, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2XYZ", kind: ParamKind::Float3, offset: 40, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 4, op: DeriveOp::Rotation4, sources: &[36] },
+            Derivation { target: 16, op: DeriveOp::Rotation4, sources: &[40] },
         ],
         wgsl: r####"
 	z = abs(z);
@@ -14166,6 +14555,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 42, default: &[0.0] },
             GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 43, default: &[0.0] },
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 44, default: &[250.0] },
+        ],
+        derivations: &[
+            Derivation { target: 30, op: DeriveOp::Ratio, sources: &[32, 29] },
         ],
         wgsl: r####"
 	if ((*aux).i >= __MB2P0__
@@ -14367,6 +14759,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 52, default: &[0.0] },
             GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 53, default: &[0.0] },
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 54, default: &[250.0] },
+        ],
+        derivations: &[
+            Derivation { target: 40, op: DeriveOp::Ratio, sources: &[42, 39] },
         ],
         wgsl: r####"
 	var paraAddP0: f32 = 0.0;
@@ -14589,6 +14984,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 50, default: &[0.0] },
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 51, default: &[250.0] },
         ],
+        derivations: &[
+            Derivation { target: 45, op: DeriveOp::Ratio, sources: &[46, 44] },
+        ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
 			&& (*aux).i >= __MB2P1__
@@ -14777,6 +15175,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.stopIterationsA", kind: ParamKind::Int, offset: 46, default: &[250.0] },
             GeneratedParam { path: "transformCommon.additionConstantA000", kind: ParamKind::Float4, offset: 47, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 51, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 52, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 56, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 7, op: DeriveOp::Rotation2, sources: &[52] },
+            Derivation { target: 26, op: DeriveOp::Rotation2, sources: &[56] },
         ],
         wgsl: r####"
 	
@@ -14931,6 +15335,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 66, default: &[0.0] },
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 67, default: &[250.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 68, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 72, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 76, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 20, op: DeriveOp::Rotation2, sources: &[72] },
+            Derivation { target: 53, op: DeriveOp::Rotation2, sources: &[76] },
         ],
         wgsl: r####"
 	var Col: vec4<f32> = vec4<f32>(0.0, 0.0, 0.0, 0.0);
@@ -15089,6 +15499,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 50, default: &[0.0] },
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 51, default: &[250.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 52, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 56, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 60, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 12, op: DeriveOp::Rotation2, sources: &[56] },
+            Derivation { target: 37, op: DeriveOp::Rotation2, sources: &[60] },
         ],
         wgsl: r####"
 	var Col: vec4<f32> = vec4<f32>(0.0, 0.0, 0.0, 0.0);
@@ -15274,6 +15690,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 90, default: &[0.0] },
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 91, default: &[250.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 92, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "mandelbox.rotationMain", kind: ParamKind::Float3, offset: 96, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 21, op: DeriveOp::Rotation2, sources: &[96] },
         ],
         wgsl: r####"
 	var Col: vec4<f32> = vec4<f32>(0.0, 0.0, 0.0, 0.0);
@@ -15494,6 +15914,10 @@ case multi_OrderOfXYZCl_zyx: {
             GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 44, default: &[1.0] },
             GeneratedParam { path: "transformCommon.offset", kind: ParamKind::Float, offset: 45, default: &[0.0] },
             GeneratedParam { path: "transformCommon.offset0", kind: ParamKind::Float, offset: 46, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 47, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 15, op: DeriveOp::Rotation2, sources: &[47] },
         ],
         wgsl: r####"
 	z = abs(z);
@@ -15609,6 +16033,10 @@ case multi_OrderOfXYZCl_zyx: {
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 49, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 50, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 51, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 52, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 19, op: DeriveOp::Rotation2, sources: &[52] },
         ],
         wgsl: r####"
 	var oldZ: vec4<f32> = z;
@@ -15762,6 +16190,10 @@ case multi_OrderOfXYZCl_zyx: {
             GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 85, default: &[0.0] },
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 86, default: &[250.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 87, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 91, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 10, op: DeriveOp::Rotation2, sources: &[91] },
         ],
         wgsl: r####"
 	var Col: vec4<f32> = vec4<f32>(0.0, 0.0, 0.0, 0.0);
@@ -15981,6 +16413,10 @@ case multi_OrderOfXYZCl_zyx: {
             GeneratedParam { path: "transformCommon.stopIterationsA", kind: ParamKind::Int, offset: 43, default: &[250.0] },
             GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 44, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.additionConstantA000", kind: ParamKind::Float4, offset: 56, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 60, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 44, op: DeriveOp::Rotation2, sources: &[60] },
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -16217,6 +16653,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.offset01", kind: ParamKind::Float, offset: 94, default: &[0.1] },
             GeneratedParam { path: "transformCommon.offsetp1", kind: ParamKind::Float, offset: 95, default: &[0.1] },
             GeneratedParam { path: "transformCommon.functionEnabledTFalse", kind: ParamKind::Int, offset: 96, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 97, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 65, op: DeriveOp::Rotation2, sources: &[97] },
         ],
         wgsl: r####"
 	var temp: f32;
@@ -16485,6 +16925,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 24, default: &[1.0] },
             GeneratedParam { path: "transformCommon.offsetA0", kind: ParamKind::Float, offset: 25, default: &[0.0] },
             GeneratedParam { path: "transformCommon.offsetB0", kind: ParamKind::Float, offset: 26, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 27, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 9, op: DeriveOp::Rotation2, sources: &[27] },
         ],
         wgsl: r####"
 	var sc1: f32 = __MB2P0__ - 1.0;
@@ -16581,6 +17025,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 62, default: &[0.0] },
             GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 63, default: &[0.0] },
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 64, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 65, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 69, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 10, op: DeriveOp::Rotation2, sources: &[65] },
+            Derivation { target: 43, op: DeriveOp::Rotation2, sources: &[69] },
         ],
         wgsl: r####"
 	var t: f32;
@@ -16744,6 +17194,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.intB", kind: ParamKind::Int, offset: 40, default: &[0.0] },
             GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 41, default: &[1.0] },
             GeneratedParam { path: "transformCommon.offsetB0", kind: ParamKind::Float, offset: 42, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 43, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 19, op: DeriveOp::Rotation2, sources: &[43] },
         ],
         wgsl: r####"
 	var t: f32;
@@ -16833,6 +17287,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 5, default: &[0.0] },
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 6, default: &[250.0] },
             GeneratedParam { path: "transformCommon.scale3", kind: ParamKind::Float, offset: 7, default: &[3.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	z = abs(z);
@@ -16926,6 +17382,13 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 79, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsA", kind: ParamKind::Int, offset: 80, default: &[250.0] },
             GeneratedParam { path: "transformCommon.additionConstantA000", kind: ParamKind::Float4, offset: 81, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 85, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 89, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 23, op: DeriveOp::Ratio, sources: &[24, 22] },
+            Derivation { target: 34, op: DeriveOp::Rotation2, sources: &[85] },
+            Derivation { target: 55, op: DeriveOp::Rotation2, sources: &[89] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
@@ -17111,6 +17574,13 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledYFalse", kind: ParamKind::Int, offset: 84, default: &[0.0] },
             GeneratedParam { path: "transformCommon.scaleG1", kind: ParamKind::Float, offset: 85, default: &[1.0] },
             GeneratedParam { path: "transformCommon.offset0", kind: ParamKind::Float, offset: 86, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 87, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 91, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 23, op: DeriveOp::Ratio, sources: &[24, 22] },
+            Derivation { target: 34, op: DeriveOp::Rotation2, sources: &[87] },
+            Derivation { target: 54, op: DeriveOp::Rotation2, sources: &[91] },
         ],
         wgsl: r####"
 	var t: f32;
@@ -17270,6 +17740,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.additionConstant111d5", kind: ParamKind::Float4, offset: 23, default: &[1.0, 1.0, 1.0, 0.5] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 27, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
@@ -17403,6 +17875,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "bulb.alphaAngleOffset", kind: ParamKind::Float, offset: 1, default: &[0.0] },
             GeneratedParam { path: "bulb.power", kind: ParamKind::Float, offset: 2, default: &[9.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	
 	var th0: f32 = asin(z.z / (*aux).r) + __MB2P0__;
@@ -17428,6 +17902,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.scale3", kind: ParamKind::Float, offset: 0, default: &[3.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -17478,6 +17954,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "donut.number", kind: ParamKind::Float, offset: 1, default: &[9.0] },
             GeneratedParam { path: "donut.factor", kind: ParamKind::Float, offset: 2, default: &[3.0] },
             GeneratedParam { path: "donut.ringRadius", kind: ParamKind::Float, offset: 3, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var radius2: f32 = __MB2P0__;
@@ -17531,6 +18009,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.constantMultiplier000", kind: ParamKind::Float4, offset: 9, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.offset", kind: ParamKind::Float, offset: 13, default: &[0.0] },
             GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 14, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -17604,6 +18084,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.stopIterationsA", kind: ParamKind::Int, offset: 18, default: &[250.0] },
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 19, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 20, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -17694,6 +18176,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.offset", kind: ParamKind::Float, offset: 13, default: &[0.0] },
             GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 14, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
 
@@ -17772,6 +18256,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 20, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 21, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 22, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -17857,6 +18343,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledy", kind: ParamKind::Int, offset: 34, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledz", kind: ParamKind::Int, offset: 35, default: &[1.0] },
             GeneratedParam { path: "transformCommon.constantMultiplier000", kind: ParamKind::Float4, offset: 36, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 40, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 18, op: DeriveOp::Rotation2, sources: &[40] },
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -17952,6 +18442,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.offset", kind: ParamKind::Float, offset: 16, default: &[0.0] },
             GeneratedParam { path: "transformCommon.scale", kind: ParamKind::Float, offset: 17, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
 			&& (*aux).i >= __MB2P1__
@@ -18033,6 +18525,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 22, default: &[0.0] },
             GeneratedParam { path: "transformCommon.offset", kind: ParamKind::Float, offset: 23, default: &[0.0] },
             GeneratedParam { path: "transformCommon.scale", kind: ParamKind::Float, offset: 24, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
@@ -18203,6 +18697,8 @@ th0 += acos(v1 / sqrT); break;
             GeneratedParam { path: "transformCommon.functionEnabledOFalse", kind: ParamKind::Int, offset: 24, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 25, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
 			&& (*aux).i >= __MB2P1__
@@ -18352,6 +18848,8 @@ th0 += acos(v1 / sqrT); break;
             GeneratedParam { path: "transformCommon.functionEnabledBzFalse", kind: ParamKind::Int, offset: 57, default: &[0.0] },
             GeneratedParam { path: "foldColor.difs1", kind: ParamKind::Float, offset: 58, default: &[1.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 59, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
@@ -18548,6 +19046,8 @@ th0 += acos(v1 / sqrT); break;
             GeneratedParam { path: "transformCommon.offsetA1", kind: ParamKind::Float, offset: 14, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledYFalse", kind: ParamKind::Int, offset: 15, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	
 	if ((__MB2P0__ != 0))
@@ -18677,6 +19177,10 @@ th0 += acos(v1 / sqrT); break;
             GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 76, default: &[0.0] },
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 77, default: &[250.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 78, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 82, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 57, op: DeriveOp::Rotation2, sources: &[82] },
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -18860,6 +19364,10 @@ th0 += acos(v1 / sqrT); break;
             GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 98, default: &[0.0] },
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 99, default: &[250.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 100, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 104, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 11, op: DeriveOp::Rotation2, sources: &[104] },
         ],
         wgsl: r####"
 	var oldZz: f32 = z.z;
@@ -19122,6 +19630,10 @@ th0 += acos(v1 / sqrT); break;
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 63, default: &[0.0] },
             GeneratedParam { path: "foldColor.int0", kind: ParamKind::Int, offset: 64, default: &[0.0] },
             GeneratedParam { path: "foldColor.int2", kind: ParamKind::Int, offset: 65, default: &[2.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 66, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 25, op: DeriveOp::Rotation2, sources: &[66] },
         ],
         wgsl: r####"
 	var oldZ: vec4<f32> = z;
@@ -19275,6 +19787,8 @@ th0 += acos(v1 / sqrT); break;
         bailout: 10.0,
         params: &[
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	
 
@@ -19301,6 +19815,10 @@ th0 += acos(v1 / sqrT); break;
             GeneratedParam { path: "transformCommon.rotationEnabled", kind: ParamKind::Int, offset: 5, default: &[0.0] },
             GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 6, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.additionConstant000", kind: ParamKind::Float4, offset: 18, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 22, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 6, op: DeriveOp::Rotation2, sources: &[22] },
         ],
         wgsl: r####"
 	(*aux).de = (*aux).de * 2.0 * (*aux).r;
@@ -19336,6 +19854,8 @@ th0 += acos(v1 / sqrT); break;
             GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 10, default: &[250.0] },
             GeneratedParam { path: "transformCommon.rotation44a", kind: ParamKind::Float3, offset: 11, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.rotation44b", kind: ParamKind::Float3, offset: 15, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	(*aux).de *= 2.0 * (*aux).r;
@@ -19417,6 +19937,8 @@ th0 += acos(v1 / sqrT); break;
             GeneratedParam { path: "transformCommon.stopIterationsR", kind: ParamKind::Int, offset: 20, default: &[250.0] },
             GeneratedParam { path: "transformCommon.rotation44a", kind: ParamKind::Float3, offset: 21, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.rotation44b", kind: ParamKind::Float3, offset: 25, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	(*aux).de *= 2.0 * (*aux).r;
@@ -19502,6 +20024,8 @@ th0 += acos(v1 / sqrT); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	(*aux).de = (*aux).de * 2.0 * (*aux).r * __MB2P0__ + __MB2P1__;
 	var x2: f32 = z.x * z.x;
@@ -19528,6 +20052,8 @@ th0 += acos(v1 / sqrT); break;
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
             GeneratedParam { path: "transformCommon.constantMultiplier111", kind: ParamKind::Float4, offset: 2, default: &[1.0, 1.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.constantMultiplier222", kind: ParamKind::Float4, offset: 6, default: &[2.0, 2.0, 2.0, 0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	(*aux).de = (*aux).de * 2.0 * (*aux).r * __MB2P0__ + __MB2P1__;
@@ -19566,6 +20092,8 @@ th0 += acos(v1 / sqrT); break;
             GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 14, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledxFalse", kind: ParamKind::Int, offset: 15, default: &[0.0] },
             GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 16, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -19638,6 +20166,10 @@ th0 += acos(v1 / sqrT); break;
             GeneratedParam { path: "analyticDE.enabled", kind: ParamKind::Int, offset: 30, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 31, default: &[1.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 32, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 33, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 18, op: DeriveOp::Rotation2, sources: &[33] },
         ],
         wgsl: r####"
 	z *= __MB2P0__
@@ -19769,6 +20301,10 @@ th0 += acos(v1 / sqrT); break;
             GeneratedParam { path: "analyticDE.enabled", kind: ParamKind::Int, offset: 21, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 22, default: &[1.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 23, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 24, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 9, op: DeriveOp::Rotation2, sources: &[24] },
         ],
         wgsl: r####"
 	z *= __MB2P0__
@@ -19866,6 +20402,10 @@ th0 += acos(v1 / sqrT); break;
             GeneratedParam { path: "analyticDE.enabled", kind: ParamKind::Int, offset: 21, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 22, default: &[1.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 23, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 24, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 9, op: DeriveOp::Rotation2, sources: &[24] },
         ],
         wgsl: r####"
 	z *= __MB2P0__
@@ -19961,6 +20501,10 @@ th0 += acos(v1 / sqrT); break;
             GeneratedParam { path: "transformCommon.offsetA0", kind: ParamKind::Float, offset: 14, default: &[0.0] },
             GeneratedParam { path: "transformCommon.offsetB0", kind: ParamKind::Float, offset: 15, default: &[0.0] },
             GeneratedParam { path: "transformCommon.additionConstant000", kind: ParamKind::Float4, offset: 16, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 20, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 1, op: DeriveOp::Rotation2, sources: &[20] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0))
@@ -20011,6 +20555,10 @@ th0 += acos(v1 / sqrT); break;
             GeneratedParam { path: "analyticDE.enabled", kind: ParamKind::Int, offset: 22, default: &[1.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 23, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 24, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 25, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 2, op: DeriveOp::Rotation2, sources: &[25] },
         ],
         wgsl: r####"
 	var r: f32 = (*aux).r;
@@ -20059,6 +20607,10 @@ th0 += acos(v1 / sqrT); break;
             GeneratedParam { path: "analyticDE.enabled", kind: ParamKind::Int, offset: 20, default: &[1.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 21, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 22, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 23, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 1, op: DeriveOp::Rotation2, sources: &[23] },
         ],
         wgsl: r####"
 	var theta: f32 = 0.0;
@@ -20133,6 +20685,8 @@ th0 += acos(v1 / sqrT); break;
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 19, default: &[1.0] },
             GeneratedParam { path: "transformCommon.scaleA1", kind: ParamKind::Float, offset: 20, default: &[1.0] },
             GeneratedParam { path: "transformCommon.scale2", kind: ParamKind::Float, offset: 21, default: &[2.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -20296,6 +20850,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         bailout: 10.0,
         params: &[
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	
 	
@@ -20322,6 +20878,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         add_c: true,
         bailout: 10.0,
         params: &[
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -20357,6 +20915,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 8, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 9, default: &[1.0] },
             GeneratedParam { path: "transformCommon.scaleA1", kind: ParamKind::Float, offset: 10, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var oldZ: vec4<f32> = z;
@@ -20426,6 +20986,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 7, default: &[250.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 8, default: &[0.0, 0.0, 0.0, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	
 	
@@ -20476,6 +21038,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 24, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 25, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 26, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 27, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 12, op: DeriveOp::Rotation2, sources: &[27] },
         ],
         wgsl: r####"
 	
@@ -20589,6 +21155,14 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 61, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 62, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 63, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 64, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 68, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 43, op: DeriveOp::Reciprocal, sources: &[42] },
+            Derivation { target: 45, op: DeriveOp::Reciprocal, sources: &[44] },
+            Derivation { target: 49, op: DeriveOp::Rotation2, sources: &[64] },
+            Derivation { target: 7, op: DeriveOp::Rotation2, sources: &[68] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
@@ -20711,6 +21285,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 42, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 43, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 44, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 45, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 49, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 27, op: DeriveOp::Rotation2, sources: &[45] },
+            Derivation { target: 7, op: DeriveOp::Rotation2, sources: &[49] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
@@ -20822,6 +21402,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 47, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 48, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 49, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 50, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 35, op: DeriveOp::Rotation2, sources: &[50] },
         ],
         wgsl: r####"
 	
@@ -20945,6 +21529,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 18, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 19, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 20, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var temp: f32;
@@ -21113,6 +21699,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledXFalse", kind: ParamKind::Int, offset: 55, default: &[0.0] },
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 56, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledGFalse", kind: ParamKind::Int, offset: 57, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var t: f32 = 0.0;
@@ -21401,6 +21989,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledOFalse", kind: ParamKind::Int, offset: 21, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledYFalse", kind: ParamKind::Int, offset: 22, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 
 	
@@ -21527,6 +22117,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledZcFalse", kind: ParamKind::Int, offset: 54, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsZc", kind: ParamKind::Int, offset: 55, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsZc", kind: ParamKind::Int, offset: 56, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 57, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 16, op: DeriveOp::Rotation2, sources: &[57] },
         ],
         wgsl: r####" 
 	if ((__MB2P0__ != 0)
@@ -21646,6 +22240,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.scaleC1", kind: ParamKind::Float, offset: 12, default: &[1.0] },
             GeneratedParam { path: "transformCommon.offset1", kind: ParamKind::Float, offset: 13, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var p: vec4<f32> = z;
 	var dd: f32 = (*aux).de;
@@ -21702,6 +22298,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledz", kind: ParamKind::Int, offset: 10, default: &[1.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 11, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	if ((__MB2P0__ != 0))
 	{
@@ -21744,6 +22342,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledz", kind: ParamKind::Int, offset: 11, default: &[1.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 12, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var Offset: vec4<f32> = __MB2P0__;
 	var OffsetA: vec4<f32> = __MB2P4__;
@@ -21782,6 +22382,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledz", kind: ParamKind::Int, offset: 10, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledw", kind: ParamKind::Int, offset: 11, default: &[1.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 12, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0))
@@ -21832,6 +22434,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 12, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsD1", kind: ParamKind::Int, offset: 13, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	z += __MB2P0__;
 
@@ -21864,6 +22468,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledz", kind: ParamKind::Int, offset: 6, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabled", kind: ParamKind::Int, offset: 7, default: &[1.0] },
             GeneratedParam { path: "transformCommon.offset0000", kind: ParamKind::Float4, offset: 8, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -21899,6 +22505,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.addCpixelEnabledFalse", kind: ParamKind::Int, offset: 18, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 19, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsD1", kind: ParamKind::Int, offset: 20, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	z += __MB2P0__;
@@ -21945,6 +22553,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 22, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 23, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 24, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -22005,6 +22615,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 23, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 24, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 25, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var tempA: vec4<f32> = vec4<f32>(0.0, 0.0, 0.0, 0.0);
@@ -22067,6 +22679,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "mandelbox.color.factor", kind: ParamKind::Float3, offset: 12, default: &[0.03, 0.05, 0.07, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 16, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledCyFalse", kind: ParamKind::Int, offset: 17, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var limit: vec4<f32> = __MB2P0__;
@@ -22181,6 +22795,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 17, default: &[0.0] },
             GeneratedParam { path: "mandelbox.color.factor4D", kind: ParamKind::Float4, offset: 18, default: &[0.0, 0.0, 0.0, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var limit: vec4<f32> = __MB2P0__;
 
@@ -22246,6 +22862,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 9, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 10, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 11, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var foldX: f32 = __MB2P0__;
@@ -22334,6 +22952,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledBzFalse", kind: ParamKind::Int, offset: 73, default: &[0.0] },
             GeneratedParam { path: "foldColor.difs1", kind: ParamKind::Float, offset: 74, default: &[1.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 75, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 76, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 39, op: DeriveOp::Rotation2, sources: &[76] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
@@ -22453,6 +23075,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.additionConstant000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.additionConstantA000", kind: ParamKind::Float4, offset: 4, default: &[0.0, 0.0, 0.0, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	
 
@@ -22470,6 +23094,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant0000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -22494,6 +23120,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.scaleA1", kind: ParamKind::Float, offset: 11, default: &[1.0] },
             GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 12, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledByFalse", kind: ParamKind::Int, offset: 13, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -22556,6 +23184,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.stopIterationsC", kind: ParamKind::Int, offset: 18, default: &[250.0] },
             GeneratedParam { path: "transformCommon.functionEnabledBzFalse", kind: ParamKind::Int, offset: 19, default: &[0.0] },
             GeneratedParam { path: "transformCommon.scaleNeg1", kind: ParamKind::Float, offset: 20, default: &[-1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -22636,6 +23266,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledAy", kind: ParamKind::Int, offset: 18, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAz", kind: ParamKind::Int, offset: 19, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var signs: vec4<f32> = vec4<f32>(1.0, 1.0, 1.0, 1.0);
 	signs.x *= sign((*aux).const_c.x);
@@ -22700,6 +23332,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 24, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 25, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 26, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 27, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 4, op: DeriveOp::Rotation2, sources: &[27] },
         ],
         wgsl: r####"
 	var rotadd: vec4<f32> = __MB2P0__;
@@ -22742,6 +23378,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.stopIterations", kind: ParamKind::Int, offset: 5, default: &[250.0] },
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 6, default: &[0.0, 0.0, 0.0, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var tempVC: vec4<f32> = __MB2P0__;
 	if ((*aux).i < __MB2P4__)
@@ -22776,6 +23414,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         params: &[
             GeneratedParam { path: "transformCommon.constantMultiplier111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	z += (*aux).const_c * __MB2P0__;
 	return z;
@@ -22801,6 +23441,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.addCpixelEnabledFalse", kind: ParamKind::Int, offset: 15, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 16, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 17, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	if ((*aux).i >= __MB2P0__
@@ -22852,6 +23494,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.alternateEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "mandelbulbMulti.orderOfXYZ", kind: ParamKind::Int, offset: 1, default: &[0.0] },
             GeneratedParam { path: "transformCommon.constantMultiplier111", kind: ParamKind::Float4, offset: 2, default: &[1.0, 1.0, 1.0, 0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -22929,6 +23573,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.alternateEnabledFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
             GeneratedParam { path: "transformCommon.constantMultiplier111", kind: ParamKind::Float4, offset: 2, default: &[1.0, 1.0, 1.0, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
 
@@ -22971,6 +23617,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 13, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 14, default: &[0.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 15, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var cv: vec4<f32> = (*aux).const_c;
@@ -23032,6 +23680,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.stopIterationsG", kind: ParamKind::Int, offset: 3, default: &[250.0] },
             GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 4, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.constantMultiplier111", kind: ParamKind::Float4, offset: 16, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 20, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 4, op: DeriveOp::Rotation2, sources: &[20] },
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -23121,6 +23773,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 11, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 12, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 13, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var oldZ: vec4<f32> = z;
@@ -23232,6 +23886,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 18, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 19, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var oldZ: vec4<f32> = z;
 	var trigC: vec4<f32> = (*aux).const_c * __MB2P0__;
@@ -23314,6 +23970,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 19, default: &[0.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 20, default: &[0.0, 0.0, 0.0, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var cv: vec4<f32> = (*aux).const_c;
 	var rr: f32 = dot(cv, cv);
@@ -23377,6 +24035,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledz", kind: ParamKind::Int, offset: 2, default: &[1.0] },
             GeneratedParam { path: "transformCommon.constantMultiplier111", kind: ParamKind::Float4, offset: 3, default: &[1.0, 1.0, 1.0, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var tempFAB: vec4<f32> = (*aux).const_c;
 	if ((__MB2P0__ != 0)) { tempFAB.x = abs(tempFAB.x); }
@@ -23417,6 +24077,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 24, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 25, default: &[0.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 26, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var cv: vec4<f32> = (*aux).const_c;
@@ -23498,6 +24160,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.stopIterations", kind: ParamKind::Int, offset: 5, default: &[250.0] },
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 6, default: &[0.0, 0.0, 0.0, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var tempVC: vec4<f32> = __MB2P0__;
 	if ((*aux).i < __MB2P4__)
@@ -23547,6 +24211,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 16, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledByFalse", kind: ParamKind::Int, offset: 17, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 18, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var tempZ: vec4<f32> = z;
@@ -23661,6 +24327,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 17, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 18, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 19, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 20, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 4, op: DeriveOp::Rotation2, sources: &[20] },
         ],
         wgsl: r####"
 	z += __MB2P0__;
@@ -23689,6 +24359,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 7, default: &[1.0] },
             GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 8, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.additionConstantA000", kind: ParamKind::Float4, offset: 20, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 24, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 8, op: DeriveOp::Rotation2, sources: &[24] },
         ],
         wgsl: r####"
 	z += __MB2P0__;
@@ -23722,6 +24396,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 7, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 8, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 9, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var t: vec4<f32> = z;
@@ -23757,6 +24433,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabled", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 2, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -23806,6 +24484,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         bailout: 100.0,
         params: &[
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	
 	
@@ -23824,6 +24504,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         add_c: false,
         bailout: 100.0,
         params: &[
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -23846,6 +24528,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabled", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 2, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -23891,6 +24575,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.rotationEnabled", kind: ParamKind::Int, offset: 4, default: &[0.0] },
             GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 5, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.offset200", kind: ParamKind::Float4, offset: 17, default: &[2.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 21, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 5, op: DeriveOp::Rotation2, sources: &[21] },
         ],
         wgsl: r####"
 	var tempXZ: f32 = z.x * SQRT_2_3_F - z.z * SQRT_1_3_F;
@@ -23929,6 +24617,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.additionConstant111", kind: ParamKind::Float4, offset: 4, default: &[1.0, 1.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.rotationEnabled", kind: ParamKind::Int, offset: 8, default: &[0.0] },
             GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 9, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 21, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 9, op: DeriveOp::Rotation2, sources: &[21] },
         ],
         wgsl: r####"
 	var tempXZ: f32 = z.x * SQRT_2_3_F - z.z * SQRT_1_3_F;
@@ -23969,6 +24661,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.scale3D444", kind: ParamKind::Float4, offset: 4, default: &[4.0, 4.0, 4.0, 0.0] },
             GeneratedParam { path: "transformCommon.rotationEnabled", kind: ParamKind::Int, offset: 8, default: &[0.0] },
             GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 9, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 21, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 9, op: DeriveOp::Rotation2, sources: &[21] },
         ],
         wgsl: r####"
 	var tempXZ: f32 = z.x * SQRT_2_3_F - z.z * SQRT_1_3_F;
@@ -24015,6 +24711,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 10, default: &[1.0] },
             GeneratedParam { path: "transformCommon.rotationEnabled", kind: ParamKind::Int, offset: 11, default: &[0.0] },
             GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 12, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 24, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 12, op: DeriveOp::Rotation2, sources: &[24] },
         ],
         wgsl: r####"
 	
@@ -24062,6 +24762,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 10, default: &[1.0] },
             GeneratedParam { path: "transformCommon.rotationEnabled", kind: ParamKind::Int, offset: 11, default: &[0.0] },
             GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 12, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 24, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 12, op: DeriveOp::Rotation2, sources: &[24] },
         ],
         wgsl: r####"
 	
@@ -24114,6 +24818,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 14, default: &[1.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 15, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 16, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var master: f32 = __MB2P0__ / 100.0;
@@ -24183,6 +24889,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 18, default: &[1.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 19, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 20, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var master: f32 = __MB2P0__ / 100.0;
@@ -24288,6 +24996,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 8, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledCyFalse", kind: ParamKind::Int, offset: 9, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var oldZ: vec4<f32> = z;
 	var colorAdd: f32 = 0.0;
@@ -24388,6 +25098,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 2, default: &[0.0] },
             GeneratedParam { path: "mandelbox.color.factor4D", kind: ParamKind::Float4, offset: 3, default: &[0.0, 0.0, 0.0, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var oldZ: vec4<f32> = z;
 	if (z.x > __MB2P0__)
@@ -24453,6 +25165,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 19, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 20, default: &[0.0] },
             GeneratedParam { path: "transformCommon.addCpixelEnabledFalse", kind: ParamKind::Int, offset: 21, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -24548,6 +25262,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 21, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 22, default: &[0.0] },
             GeneratedParam { path: "mandelbox.color.factor4D", kind: ParamKind::Float4, offset: 23, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var oldZ: vec4<f32> = z;
@@ -24650,6 +25366,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 9, default: &[0.0] },
             GeneratedParam { path: "mandelbox.color.factor", kind: ParamKind::Float3, offset: 10, default: &[0.03, 0.05, 0.07, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var oldZ: vec4<f32> = z;
 	var Value4: vec4<f32> = __MB2P0__;
@@ -24700,6 +25418,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.additionConstant000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var temp: vec4<f32> = z;
 	z.x = sign(z.x) * __MB2P0__.x + z.x;
@@ -24737,6 +25457,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 19, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 20, default: &[0.0] },
             GeneratedParam { path: "transformCommon.addCpixelEnabledFalse", kind: ParamKind::Int, offset: 21, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var size: vec4<f32> = __MB2P0__;
@@ -24822,6 +25544,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 22, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 23, default: &[0.0] },
             GeneratedParam { path: "transformCommon.addCpixelEnabledFalse", kind: ParamKind::Int, offset: 24, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var size: vec4<f32> = __MB2P0__;
@@ -24921,6 +25645,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 47, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 48, default: &[0.0] },
             GeneratedParam { path: "transformCommon.addCpixelEnabledFalse", kind: ParamKind::Int, offset: 49, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var size: vec4<f32> = __MB2P0__;
@@ -25067,6 +25793,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 21, default: &[1.0] },
             GeneratedParam { path: "transformCommon.addCpixelEnabledFalse", kind: ParamKind::Int, offset: 22, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var box_size: vec4<f32> = __MB2P0__;
 	var wrap_mode: vec4<f32> = z;
@@ -25154,6 +25882,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 30, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 31, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 32, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 33, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 14, op: DeriveOp::Rotation2, sources: &[33] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
@@ -25215,6 +25947,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledwFalse", kind: ParamKind::Int, offset: 19, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 20, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var upper: vec4<f32> = __MB2P0__;
 	var lower: vec4<f32> = __MB2P4__;
@@ -25271,6 +26005,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 5, default: &[0.0] },
             GeneratedParam { path: "foldColor.difs1", kind: ParamKind::Float, offset: 6, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var R: f32;
 	if (!(__MB2P0__ != 0))
@@ -25321,6 +26057,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 10, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 11, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 12, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	if (!(__MB2P0__ != 0))
@@ -25436,6 +26174,16 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 45, default: &[0.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 46, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.additionConstant111", kind: ParamKind::Float4, offset: 50, default: &[1.0, 1.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 54, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 37, op: DeriveOp::Cos, sources: &[36] },
+            Derivation { target: 34, op: DeriveOp::Cos, sources: &[33] },
+            Derivation { target: 31, op: DeriveOp::Cos, sources: &[30] },
+            Derivation { target: 38, op: DeriveOp::Sin, sources: &[36] },
+            Derivation { target: 35, op: DeriveOp::Sin, sources: &[33] },
+            Derivation { target: 32, op: DeriveOp::Sin, sources: &[30] },
+            Derivation { target: 17, op: DeriveOp::Rotation2, sources: &[54] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0))
@@ -25558,6 +26306,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.offset0", kind: ParamKind::Float, offset: 14, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 15, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var q: vec4<f32> = abs(z) - __MB2P0__;
 	var zc: vec4<f32> = q;
@@ -25653,6 +26403,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledZcFalse", kind: ParamKind::Int, offset: 77, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsZc", kind: ParamKind::Int, offset: 78, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsZc", kind: ParamKind::Int, offset: 79, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 80, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 84, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 32, op: DeriveOp::Rotation2, sources: &[80] },
+            Derivation { target: 44, op: DeriveOp::Rotation2, sources: &[84] },
         ],
         wgsl: r####"
 	
@@ -25817,6 +26573,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.offset0", kind: ParamKind::Float, offset: 25, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 26, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	z += __MB2P0__;
 	var zc: vec4<f32> = z;
@@ -25904,6 +26662,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.startIterationsZc", kind: ParamKind::Int, offset: 17, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsZc", kind: ParamKind::Int, offset: 18, default: &[250.0] },
             GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 19, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var zc: vec4<f32> = z;
@@ -26002,6 +26762,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledxFalse", kind: ParamKind::Int, offset: 64, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 65, default: &[1.0] },
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 66, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 67, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 27, op: DeriveOp::Rotation2, sources: &[67] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)) { (*aux).dist = length(z) / (*aux).de; }
@@ -26192,6 +26956,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 66, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledzFalse", kind: ParamKind::Int, offset: 67, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
 	var zc: vec4<f32>;
@@ -26366,6 +27132,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.auxColorEnabledAFalse", kind: ParamKind::Int, offset: 17, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 18, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var zc: vec4<f32> = z;
 	var temp: f32 = 0.0;
@@ -26484,6 +27252,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledZcFalse", kind: ParamKind::Int, offset: 55, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsZc", kind: ParamKind::Int, offset: 56, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsZc", kind: ParamKind::Int, offset: 57, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 58, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 11, op: DeriveOp::Rotation2, sources: &[58] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0))
@@ -26646,6 +27418,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 42, default: &[0.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 43, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 47, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 48, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 15, op: DeriveOp::Rotation2, sources: &[48] },
         ],
         wgsl: r####"
 	var normalTopA: vec4<f32> = vec4<f32>(0.0, 0.81373347121, 0.5812382, 0.0);
@@ -26768,6 +27544,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 11, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 12, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var zc: vec4<f32> = z;
 	var rads4: vec4<f32> = __MB2P0__;
@@ -26850,6 +27628,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 58, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 59, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledEFalse", kind: ParamKind::Int, offset: 60, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 61, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 3, op: DeriveOp::Rotation2, sources: &[61] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
@@ -26983,6 +27765,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 20, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 24, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 25, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 26, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 3, op: DeriveOp::Rotation2, sources: &[26] },
         ],
         wgsl: r####"
 	var zc: vec4<f32> = z;
@@ -27067,6 +27853,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 55, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 56, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledYFalse", kind: ParamKind::Int, offset: 57, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 58, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 62, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 8, op: DeriveOp::Rotation2, sources: &[58] },
+            Derivation { target: 27, op: DeriveOp::Rotation2, sources: &[62] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0))
@@ -27204,6 +27996,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledGFalse", kind: ParamKind::Int, offset: 71, default: &[0.0] },
             GeneratedParam { path: "foldColor.difs1", kind: ParamKind::Float, offset: 72, default: &[1.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 73, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 74, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 8, op: DeriveOp::Rotation2, sources: &[74] },
         ],
         wgsl: r####"
 	var temp: f32;
@@ -27367,6 +28163,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 31, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledAFalse", kind: ParamKind::Int, offset: 32, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 33, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 34, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 7, op: DeriveOp::Rotation2, sources: &[34] },
         ],
         wgsl: r####"
 	var lenX: f32 = __MB2P0__;
@@ -27505,6 +28305,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledZcFalse", kind: ParamKind::Int, offset: 60, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsZc", kind: ParamKind::Int, offset: 61, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsZc", kind: ParamKind::Int, offset: 62, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 63, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 16, op: DeriveOp::Rotation2, sources: &[63] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0))
@@ -27652,6 +28456,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 30, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 34, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 35, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 36, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 11, op: DeriveOp::Rotation2, sources: &[36] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0))
@@ -27737,6 +28545,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 34, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledAFalse", kind: ParamKind::Int, offset: 35, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 36, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 37, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 9, op: DeriveOp::Rotation2, sources: &[37] },
         ],
         wgsl: r####"
 	var q: vec4<f32> = z;
@@ -27860,6 +28672,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 52, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledAFalse", kind: ParamKind::Int, offset: 53, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 54, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 55, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 9, op: DeriveOp::Rotation2, sources: &[55] },
         ],
         wgsl: r####"
 	var q: vec4<f32> = z;
@@ -28052,6 +28868,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledZcFalse", kind: ParamKind::Int, offset: 60, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsZc", kind: ParamKind::Int, offset: 61, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsZc", kind: ParamKind::Int, offset: 62, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 63, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 16, op: DeriveOp::Rotation2, sources: &[63] },
         ],
         wgsl: r####" 
 	if ((__MB2P0__ != 0)
@@ -28190,6 +29010,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.auxColorEnabledAFalse", kind: ParamKind::Int, offset: 30, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 31, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	z += __MB2P0__;
 
@@ -28289,6 +29111,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 10, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 11, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var zc: vec4<f32> = z;
 	var vecLen: f32;
@@ -28368,6 +29192,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledZcFalse", kind: ParamKind::Int, offset: 59, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsZc", kind: ParamKind::Int, offset: 60, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsZc", kind: ParamKind::Int, offset: 61, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 62, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 66, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 6, op: DeriveOp::Rotation2, sources: &[62] },
+            Derivation { target: 24, op: DeriveOp::Rotation2, sources: &[66] },
         ],
         wgsl: r####"
 	var zc: vec4<f32> = z;
@@ -28514,6 +29344,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledZcFalse", kind: ParamKind::Int, offset: 52, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsZc", kind: ParamKind::Int, offset: 53, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsZc", kind: ParamKind::Int, offset: 54, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 55, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 59, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 5, op: DeriveOp::Rotation2, sources: &[55] },
+            Derivation { target: 19, op: DeriveOp::Rotation2, sources: &[59] },
         ],
         wgsl: r####"
 	
@@ -28648,6 +29484,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledZcFalse", kind: ParamKind::Int, offset: 65, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsZc", kind: ParamKind::Int, offset: 66, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsZc", kind: ParamKind::Int, offset: 67, default: &[250.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 68, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 72, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 17, op: DeriveOp::Rotation2, sources: &[68] },
+            Derivation { target: 32, op: DeriveOp::Rotation2, sources: &[72] },
         ],
         wgsl: r####"
 	
@@ -28805,6 +29647,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 22, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 23, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var zc: vec4<f32> = z;
 
@@ -28934,6 +29778,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 74, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 75, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledZcFalse", kind: ParamKind::Int, offset: 76, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 77, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 19, op: DeriveOp::Rotation2, sources: &[77] },
         ],
         wgsl: r####"
 	if ((*aux).i >= __MB2P0__
@@ -29135,6 +29983,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.auxColorEnabledAFalse", kind: ParamKind::Int, offset: 50, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 51, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
 			&& (*aux).i >= __MB2P1__
@@ -29292,6 +30142,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 17, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 18, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var zc: vec4<f32> = z;
 	var temp: f32 = 0.0;
@@ -29412,6 +30264,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 55, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 59, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 60, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 61, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 17, op: DeriveOp::Rotation2, sources: &[61] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
@@ -29565,6 +30421,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 34, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 38, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 39, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 40, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 10, op: DeriveOp::Rotation2, sources: &[40] },
         ],
         wgsl: r####"
 	z += __MB2P0__;
@@ -29673,6 +30533,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 39, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 43, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 44, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 45, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 10, op: DeriveOp::Rotation2, sources: &[45] },
         ],
         wgsl: r####"
 	z += __MB2P0__;
@@ -29779,6 +30643,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 41, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 45, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 46, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 47, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 31, op: DeriveOp::Cos, sources: &[29] },
+            Derivation { target: 30, op: DeriveOp::Sin, sources: &[29] },
+            Derivation { target: 17, op: DeriveOp::Rotation2, sources: &[47] },
         ],
         wgsl: r####"
 	var temp: f32;
@@ -29909,6 +30779,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 46, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 50, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 51, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 52, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 15, op: DeriveOp::Rotation2, sources: &[52] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0))
@@ -30054,6 +30928,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.difs0", kind: ParamKind::Float, offset: 73, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledAFalse", kind: ParamKind::Int, offset: 74, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledBFalse", kind: ParamKind::Int, offset: 75, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 76, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 14, op: DeriveOp::Rotation2, sources: &[76] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
@@ -30220,6 +31098,16 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 12, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 13, default: &[0.0] },
             GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 14, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.angleDegA", kind: ParamKind::Float, offset: 26, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.angleDegB", kind: ParamKind::Float, offset: 27, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 28, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 1, op: DeriveOp::Cos, sources: &[26] },
+            Derivation { target: 4, op: DeriveOp::Cos, sources: &[27] },
+            Derivation { target: 3, op: DeriveOp::Sin, sources: &[26] },
+            Derivation { target: 2, op: DeriveOp::Sin, sources: &[27] },
+            Derivation { target: 14, op: DeriveOp::Rotation2, sources: &[28] },
         ],
         wgsl: r####"
 	var t: f32;
@@ -30265,6 +31153,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledy", kind: ParamKind::Int, offset: 1, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -30334,6 +31224,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 14, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 15, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 16, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -30425,6 +31317,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 14, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 15, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
@@ -30467,6 +31361,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.scaleA1", kind: ParamKind::Float, offset: 5, default: &[1.0] },
             GeneratedParam { path: "transformCommon.scaleB1", kind: ParamKind::Float, offset: 6, default: &[1.0] },
             GeneratedParam { path: "transformCommon.offset1", kind: ParamKind::Float, offset: 7, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var newZx: f32 = z.x;
@@ -30512,6 +31408,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.offset", kind: ParamKind::Float, offset: 3, default: &[0.0] },
             GeneratedParam { path: "transformCommon.offset0", kind: ParamKind::Float, offset: 4, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var zA: vec4<f32> =select(vec4<f32>(0, 0, 0, 0), z, ((*aux).i == __MB2P0__));
 	var zB: vec4<f32> =select(vec4<f32>(0, 0, 0, 0), z, ((*aux).i == __MB2P1__));
@@ -30535,6 +31433,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.scale", kind: ParamKind::Float, offset: 2, default: &[1.0] },
             GeneratedParam { path: "transformCommon.offset", kind: ParamKind::Float, offset: 3, default: &[0.0] },
             GeneratedParam { path: "transformCommon.offset0", kind: ParamKind::Float, offset: 4, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var zA4: vec4<f32> =select(vec4<f32>(0, 0, 0, 0), z, ((*aux).i == __MB2P0__));
@@ -30580,6 +31480,11 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.startIterationsK", kind: ParamKind::Int, offset: 43, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsK", kind: ParamKind::Int, offset: 44, default: &[250.0] },
             GeneratedParam { path: "mandelbox.color.factorSp1", kind: ParamKind::Float, offset: 45, default: &[0.2] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 46, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 10, op: DeriveOp::Ratio, sources: &[11, 9] },
+            Derivation { target: 18, op: DeriveOp::Rotation2, sources: &[46] },
         ],
         wgsl: r####"
 	var colorAdd: f32 = 0.0;
@@ -30680,6 +31585,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "mandelbulbMulti.orderOfXYZC", kind: ParamKind::Int, offset: 14, default: &[0.0] },
             GeneratedParam { path: "transformCommon.constantMultiplier111", kind: ParamKind::Float4, offset: 15, default: &[1.0, 1.0, 1.0, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
 
@@ -30773,6 +31680,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 7, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 8, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	z *= __MB2P0__;
 	var zi: vec4<f32> = z;
@@ -30803,6 +31712,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.offsetp5555", kind: ParamKind::Float4, offset: 0, default: &[0.5, 0.5, 0.5, 0.5] },
             GeneratedParam { path: "transformCommon.offsetA0000", kind: ParamKind::Float4, offset: 4, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledSwFalse", kind: ParamKind::Int, offset: 8, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -30916,6 +31827,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.offsetA000", kind: ParamKind::Float4, offset: 4, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledSwFalse", kind: ParamKind::Int, offset: 8, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	
 
@@ -31011,6 +31924,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.offsetA000", kind: ParamKind::Float4, offset: 10, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.offsetF000", kind: ParamKind::Float4, offset: 14, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledSwFalse", kind: ParamKind::Int, offset: 18, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -31127,6 +32042,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 21, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 22, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	if ((__MB2P0__ != 0))
 	{
@@ -31219,6 +32136,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 55, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 56, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 57, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 58, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 62, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 7, op: DeriveOp::Rotation2, sources: &[58] },
+            Derivation { target: 27, op: DeriveOp::Rotation2, sources: &[62] },
         ],
         wgsl: r####"
 	z = abs(z);
@@ -31304,6 +32227,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         params: &[
             GeneratedParam { path: "transformCommon.multiplication", kind: ParamKind::Float, offset: 0, default: &[2.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var th0: f32 = asin(z.z / (*aux).r);
 	var ph0: f32 = atan2(z.y, z.x);
@@ -31326,6 +32251,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 4, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledy", kind: ParamKind::Int, offset: 5, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledz", kind: ParamKind::Int, offset: 6, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -31353,6 +32280,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 6, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 7, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 8, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	if (z.x + z.y < 0.0) { z = vec4<f32>(-z.y, -z.x, z.z, z.w); }
@@ -31398,6 +32327,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 9, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 10, default: &[0.0] },
             GeneratedParam { path: "mandelbox.color.factor4D", kind: ParamKind::Float4, offset: 11, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var limit: vec4<f32> = __MB2P0__ / 2.0;
@@ -31474,6 +32405,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 16, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 17, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 18, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var temp: vec4<f32> = z;
@@ -31610,6 +32543,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 12, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 13, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var platonicR: f32 = 0.0;
 	var rho: f32 = 0.0;
@@ -31690,6 +32625,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 30, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 31, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 32, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 33, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 17, op: DeriveOp::Rotation2, sources: &[33] },
         ],
         wgsl: r####"
 	var oldZ: vec4<f32> = z;
@@ -31778,6 +32717,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 30, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 31, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 32, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 33, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 17, op: DeriveOp::Rotation2, sources: &[33] },
         ],
         wgsl: r####"
 	var oldZ: vec4<f32> = z;
@@ -31871,6 +32814,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 24, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 25, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var oldZ: vec4<f32> = z;
 	
@@ -31958,6 +32903,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 33, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 34, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 35, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 36, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 15, op: DeriveOp::Rotation2, sources: &[36] },
         ],
         wgsl: r####"
 	if ((*aux).i >= __MB2P0__
@@ -32023,6 +32972,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 24, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 25, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var partA: vec4<f32> = z;
 	if ((__MB2P0__ != 0)) 
@@ -32085,6 +33036,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 13, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 14, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var a: vec4<f32> = __MB2P0__;
 	if ((__MB2P4__ != 0))
@@ -32146,6 +33099,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 17, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 18, default: &[0.0] },
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 19, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
@@ -32254,6 +33209,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         params: &[
             GeneratedParam { path: "bulb.power", kind: ParamKind::Float, offset: 0, default: &[9.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var rp: f32 = pow((*aux).r, __MB2P0__ - 1.0);
 	(*aux).de = rp * (*aux).de * __MB2P0__ + 1.0;
@@ -32283,6 +33240,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledy", kind: ParamKind::Int, offset: 23, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledz", kind: ParamKind::Int, offset: 24, default: &[1.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 25, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var tempZ: vec4<f32> = z;
@@ -32407,6 +33366,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledAwFalse", kind: ParamKind::Int, offset: 19, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 20, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var tempZ: vec4<f32> = z;
 
@@ -32489,6 +33450,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 11, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 12, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var useAngle: f32 = __MB2P0__;
 
@@ -32542,6 +33505,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 0, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 12, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 0, op: DeriveOp::Rotation2, sources: &[12] },
         ],
         wgsl: r####"
 	
@@ -32560,6 +33527,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         params: &[
             GeneratedParam { path: "transformCommon.rotation44a", kind: ParamKind::Float3, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.rotation44b", kind: ParamKind::Float3, offset: 4, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -32634,6 +33603,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 16, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 17, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 18, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 
@@ -32800,6 +33771,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledBz", kind: ParamKind::Int, offset: 33, default: &[1.0] },
             GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 34, default: &[1.0] },
             GeneratedParam { path: "transformCommon.rotationMatrix2", kind: ParamKind::Matrix33, offset: 35, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 47, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation2", kind: ParamKind::Float3, offset: 51, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 0, op: DeriveOp::Rotation2, sources: &[47] },
+            Derivation { target: 35, op: DeriveOp::Rotation2, sources: &[51] },
         ],
         wgsl: r####"
 	
@@ -32878,6 +33855,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 8, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsC", kind: ParamKind::Int, offset: 9, default: &[250.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	
 	var tp: vec4<f32>;
@@ -32922,6 +33901,10 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.rotationMatrixXYZ", kind: ParamKind::Matrix33, offset: 0, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotationXYZ", kind: ParamKind::Float3, offset: 12, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 0, op: DeriveOp::Rotation4, sources: &[12] },
         ],
         wgsl: r####"
 	
@@ -32940,6 +33923,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         params: &[
             GeneratedParam { path: "transformCommon.scale", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var sqrRout: f32 = dot(z, z) * __MB2P0__;
@@ -32960,6 +33945,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 2, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 3, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	z *= __MB2P0__;
@@ -32984,6 +33971,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 5, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 6, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	z *= __MB2P0__;
@@ -33014,6 +34003,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.scaleVary0", kind: ParamKind::Float, offset: 7, default: &[0.0] },
             GeneratedParam { path: "transformCommon.scaleC1", kind: ParamKind::Float, offset: 8, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledMFalse", kind: ParamKind::Int, offset: 9, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var useScale: f32 = 1.0;
@@ -33055,6 +34046,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 6, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 7, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	z -= __MB2P0__;
 	z *= __MB2P4__;
@@ -33085,6 +34078,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 16, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 17, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 18, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	z += __MB2P0__;
@@ -33128,6 +34123,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.offset0", kind: ParamKind::Float, offset: 12, default: &[0.0] },
             GeneratedParam { path: "transformCommon.offset4", kind: ParamKind::Float, offset: 13, default: &[4.0] },
             GeneratedParam { path: "transformCommon.functionEnabledBzFalse", kind: ParamKind::Int, offset: 14, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	if ((*aux).i >= __MB2P0__
@@ -33220,6 +34217,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 8, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledBzFalse", kind: ParamKind::Int, offset: 9, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
@@ -33279,6 +34278,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 20, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 21, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 22, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var v: vec4<f32>;
@@ -33349,6 +34350,8 @@ v = vec4<f32>(z.z, z.y, z.x, z.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 13, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 14, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 15, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -33435,6 +34438,8 @@ z = oldZ * (sinZ * cosZ); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 18, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 19, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 20, default: &[1.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var oldZ: vec4<f32> = z;
@@ -33536,6 +34541,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 13, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 14, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var oldZ: vec4<f32> = z;
 	var trigZ: vec4<f32> = vec4<f32>(0.0, 0.0, 0.0, 0.0);
@@ -33599,6 +34606,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 20, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 21, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	if ((__MB2P0__ != 0))
 		{ z.x = tan(sin((z.x - __MB2P1__.x)
@@ -33641,6 +34650,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 20, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 21, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	if ((__MB2P0__ != 0))
 		{ z.x = sin((z.x - __MB2P1__.x)
@@ -33682,6 +34693,10 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 18, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 19, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 20, default: &[0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 21, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 3, op: DeriveOp::Rotation2, sources: &[21] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
@@ -33778,6 +34793,10 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "transformCommon.functionEnabledGFalse", kind: ParamKind::Int, offset: 78, default: &[0.0] },
             GeneratedParam { path: "foldColor.difs1", kind: ParamKind::Float, offset: 79, default: &[1.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 80, default: &[0.0, 0.0, 0.0, 0.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 84, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 27, op: DeriveOp::Rotation2, sources: &[84] },
         ],
         wgsl: r####"
 	var temp: f32;
@@ -34009,6 +35028,10 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 32, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 33, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 34, default: &[1.0] },
+            GeneratedParam { path: "transformCommon.rotation", kind: ParamKind::Float3, offset: 35, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 9, op: DeriveOp::Rotation2, sources: &[35] },
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
@@ -34075,6 +35098,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "transformCommon.functionEnabledz", kind: ParamKind::Int, offset: 4, default: &[1.0] },
             GeneratedParam { path: "transformCommon.offsetA000", kind: ParamKind::Float4, offset: 5, default: &[0.0, 0.0, 0.0, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	
 
@@ -34133,6 +35158,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "transformCommon.functionEnabledz", kind: ParamKind::Int, offset: 11, default: &[1.0] },
             GeneratedParam { path: "transformCommon.offsetA000", kind: ParamKind::Float4, offset: 12, default: &[0.0, 0.0, 0.0, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	
 
@@ -34186,6 +35213,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "transformCommon.functionEnabledBFalse", kind: ParamKind::Int, offset: 2, default: &[0.0] },
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 3, default: &[0.0, 0.0, 0.0, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	
 
@@ -34238,6 +35267,13 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 11, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 12, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 13, default: &[0.0] },
+            GeneratedParam { path: "mandelbox.foldingSphericalFixed", kind: ParamKind::Float, offset: 14, default: &[1.0] },
+            GeneratedParam { path: "mandelbox.foldingSphericalMin", kind: ParamKind::Float, offset: 15, default: &[0.5] },
+        ],
+        derivations: &[
+            Derivation { target: 9, op: DeriveOp::Square, sources: &[14] },
+            Derivation { target: 5, op: DeriveOp::Square, sources: &[15] },
+            Derivation { target: 6, op: DeriveOp::Ratio, sources: &[9, 5] },
         ],
         wgsl: r####"
 	var r2: f32 = dot(z, z);
@@ -34290,6 +35326,9 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "transformCommon.maxR2d1", kind: ParamKind::Float, offset: 8, default: &[1.0] },
             GeneratedParam { path: "mandelbox.color.factorSp2", kind: ParamKind::Float, offset: 9, default: &[0.2] },
         ],
+        derivations: &[
+            Derivation { target: 5, op: DeriveOp::Ratio, sources: &[8, 4] },
+        ],
         wgsl: r####"
 	
 	
@@ -34337,6 +35376,9 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 10, default: &[0.0] },
             GeneratedParam { path: "mandelbox.color.factorSp1", kind: ParamKind::Float, offset: 11, default: &[0.2] },
             GeneratedParam { path: "mandelbox.color.factorSp2", kind: ParamKind::Float, offset: 12, default: &[0.2] },
+        ],
+        derivations: &[
+            Derivation { target: 8, op: DeriveOp::Ratio, sources: &[9, 7] },
         ],
         wgsl: r####"
 	var rrCol: f32 = 0.0;
@@ -34400,6 +35442,11 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 6, default: &[0.0] },
             GeneratedParam { path: "mandelbox.color.factorSp1", kind: ParamKind::Float, offset: 7, default: &[0.2] },
             GeneratedParam { path: "mandelbox.color.factorSp2", kind: ParamKind::Float, offset: 8, default: &[0.2] },
+            GeneratedParam { path: "transformCommon.minR05", kind: ParamKind::Float, offset: 9, default: &[0.5] },
+        ],
+        derivations: &[
+            Derivation { target: 4, op: DeriveOp::Sqrt, sources: &[9] },
+            Derivation { target: 5, op: DeriveOp::Reciprocal, sources: &[4] },
         ],
         wgsl: r####"
 	var r2: f32 = dot(z, z);
@@ -34447,6 +35494,9 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "mandelbox.color.factorSp1", kind: ParamKind::Float, offset: 12, default: &[0.2] },
             GeneratedParam { path: "transformCommon.maxR2d1", kind: ParamKind::Float, offset: 13, default: &[1.0] },
             GeneratedParam { path: "mandelbox.color.factorSp2", kind: ParamKind::Float, offset: 14, default: &[0.2] },
+        ],
+        derivations: &[
+            Derivation { target: 10, op: DeriveOp::Ratio, sources: &[13, 9] },
         ],
         wgsl: r####"
 	var tempZ: f32 = abs(z.z) - __MB2P0__;
@@ -34510,6 +35560,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 15, default: &[0.0] },
             GeneratedParam { path: "mandelbox.color.factorSp1", kind: ParamKind::Float, offset: 16, default: &[0.2] },
             GeneratedParam { path: "mandelbox.color.factorSp2", kind: ParamKind::Float, offset: 17, default: &[0.2] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var temp3: vec4<f32>;
@@ -34622,6 +35674,9 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 33, default: &[0.0] },
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 34, default: &[250.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 35, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 3, op: DeriveOp::Ratio, sources: &[7, 4] },
         ],
         wgsl: r####"
 	var m: f32 = 1.0;
@@ -34756,6 +35811,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 13, default: &[0.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 14, default: &[0.0, 0.0, 0.0, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var lpN: vec4<f32> = abs(z);
 	lpN.x = pow(lpN.x, __MB2P0__);
@@ -34837,6 +35894,9 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 30, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 31, default: &[0.0] },
         ],
+        derivations: &[
+            Derivation { target: 8, op: DeriveOp::Ratio, sources: &[9, 7] },
+        ],
         wgsl: r####"
 	var oldZ: vec4<f32> = z;
 	var m: f32 = 1.0;
@@ -34917,6 +35977,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 6, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 7, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var signs: vec4<f32> = z;
 	signs.x = sign(z.x);
@@ -34957,6 +36019,10 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 12, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 13, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 14, default: &[0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 5, op: DeriveOp::Reciprocal, sources: &[4] },
+            Derivation { target: 7, op: DeriveOp::Reciprocal, sources: &[6] },
         ],
         wgsl: r####"
 	z += __MB2P0__;
@@ -35004,6 +36070,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 20, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 21, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 22, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var signs: vec4<f32> = z;
@@ -35078,6 +36146,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "mandelbox.color.factorSp2", kind: ParamKind::Float, offset: 22, default: &[0.2] },
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 23, default: &[0.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 24, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var xyzBias: vec4<f32>;
@@ -35160,6 +36230,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 24, default: &[250.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 25, default: &[0.0, 0.0, 0.0, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var oldZ: vec4<f32> = z;
 	var rr: f32 = 1.0;
@@ -35235,6 +36307,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 5, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAwFalse", kind: ParamKind::Int, offset: 6, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var rSqrL: f32;
 	var tempC: vec4<f32>;
@@ -35306,6 +36380,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 15, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 16, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 17, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var lpN: vec4<f32> = abs(z);
@@ -35386,6 +36462,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 38, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 39, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 40, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var rr: f32 = 0.0;
@@ -35531,6 +36609,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 25, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 26, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	
 	if ((__MB2P0__ != 0)
@@ -35604,6 +36684,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "foldColor.startIterationsA", kind: ParamKind::Int, offset: 32, default: &[0.0] },
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 33, default: &[250.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 34, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var oldZ: vec4<f32> = z;
@@ -35713,6 +36795,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "transformCommon.scale", kind: ParamKind::Float, offset: 1, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 2, default: &[1.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	
 	z *= 1.0 + __MB2P0__ / -length(z);
@@ -35737,6 +36821,13 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "mandelbox.color.factorSp1", kind: ParamKind::Float, offset: 5, default: &[0.2] },
             GeneratedParam { path: "mandelbox.fR2", kind: ParamKind::Float, offset: 6, default: &[0.0] },
             GeneratedParam { path: "mandelbox.color.factorSp2", kind: ParamKind::Float, offset: 7, default: &[0.2] },
+            GeneratedParam { path: "mandelbox.foldingSphericalFixed", kind: ParamKind::Float, offset: 8, default: &[1.0] },
+            GeneratedParam { path: "mandelbox.foldingSphericalMin", kind: ParamKind::Float, offset: 9, default: &[0.5] },
+        ],
+        derivations: &[
+            Derivation { target: 6, op: DeriveOp::Square, sources: &[8] },
+            Derivation { target: 2, op: DeriveOp::Square, sources: &[9] },
+            Derivation { target: 3, op: DeriveOp::Ratio, sources: &[6, 2] },
         ],
         wgsl: r####"
 	
@@ -35795,6 +36886,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "transformCommon.functionEnabledAwFalse", kind: ParamKind::Int, offset: 20, default: &[0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabled", kind: ParamKind::Int, offset: 21, default: &[1.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 22, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var zc: vec4<f32> = (z);
@@ -35905,6 +36998,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "transformCommon.offset0", kind: ParamKind::Float, offset: 38, default: &[0.0] },
             GeneratedParam { path: "transformCommon.offset01", kind: ParamKind::Float, offset: 39, default: &[0.1] },
             GeneratedParam { path: "transformCommon.functionEnabledZcFalse", kind: ParamKind::Int, offset: 40, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	if ((*aux).i >= __MB2P0__
@@ -36056,6 +37151,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 48, default: &[250.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 49, default: &[0.0, 0.0, 0.0, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var oldZ: vec4<f32> = z;
 	if ((__MB2P0__ != 0))
@@ -36197,6 +37294,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 13, default: &[0.0] },
             GeneratedParam { path: "mandelbox.color.factor", kind: ParamKind::Float3, offset: 14, default: &[0.03, 0.05, 0.07, 0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	
 
@@ -36281,6 +37380,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 11, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 12, default: &[0.0] },
             GeneratedParam { path: "mandelbox.color.factor4D", kind: ParamKind::Float4, offset: 13, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	
@@ -36367,6 +37468,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 15, default: &[250.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledAFalse", kind: ParamKind::Int, offset: 16, default: &[0.0] },
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 17, default: &[0.0, 0.0, 0.0, 0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var oldZ: vec4<f32> = z;
@@ -36488,6 +37591,8 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 5, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterations", kind: ParamKind::Int, offset: 6, default: &[250.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	switch __MB2P0__ {
 case multi_OrderOfXYZCl_xyz: {
@@ -36573,6 +37678,9 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 40, default: &[0.0] },
             GeneratedParam { path: "mandelbox.color.factor", kind: ParamKind::Float3, offset: 41, default: &[0.03, 0.05, 0.07, 0.0] },
             GeneratedParam { path: "transformCommon.additionConstant111", kind: ParamKind::Float4, offset: 45, default: &[1.0, 1.0, 1.0, 0.0] },
+        ],
+        derivations: &[
+            Derivation { target: 12, op: DeriveOp::Ratio, sources: &[14, 11] },
         ],
         wgsl: r####"
 	var colorAdd: f32 = 0.0;
@@ -36746,6 +37854,8 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
             GeneratedParam { path: "bulb.betaAngleOffset", kind: ParamKind::Float, offset: 1, default: &[0.0] },
             GeneratedParam { path: "bulb.alphaAngleOffset", kind: ParamKind::Float, offset: 2, default: &[0.0] },
         ],
+        derivations: &[
+        ],
         wgsl: r####"
 	var rp: f32 = pow((*aux).r, __MB2P0__ - 1.0);
 	(*aux).de = rp * (*aux).de * __MB2P0__ + 1.0;
@@ -36799,6 +37909,8 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 29, default: &[0.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 30, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 31, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var t: f32;
@@ -36901,6 +38013,8 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 38, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 39, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 40, default: &[0.0] },
+        ],
+        derivations: &[
         ],
         wgsl: r####"
 	var t: f32;

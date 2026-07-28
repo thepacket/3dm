@@ -6,6 +6,7 @@
 //! Mandelbulber2 is GPL-3.0, which is why 3DM is too. See the project README.
 
 mod defaults;
+mod derive;
 mod meta;
 mod translate;
 mod types;
@@ -235,7 +236,7 @@ fn emit(
          //! Translated from Mandelbulber2's OpenCL formula sources\n\
          //! (<https://github.com/buddhi1980/mandelbulber2>, © Mandelbulber Team,\n\
          //! GPL-3.0). 3DM is GPL-3.0-or-later as a result.\n\n\
-         use super::{DeFunction, GeneratedFormula, GeneratedParam, ParamKind};\n\n\
+         use super::{DeFunction, Derivation, DeriveOp, GeneratedFormula, GeneratedParam, ParamKind};\n\n\
          pub static GENERATED: &[GeneratedFormula] = &[\n",
     );
 
@@ -243,6 +244,47 @@ fn emit(
         // The `.cl` stem is Mandelbulber's `internalName`, which is what the
         // C++ definitions are keyed by.
         let m = metas.get(f.source_file.trim_end_matches(".cl"));
+
+        // Mandelbulber precomputes some parameters instead of storing them, so
+        // the settings files hold their *sources* and not them. Append those
+        // sources — they pick up real defaults, where the derived parameter
+        // could only ever have been zero — and record how to recompute from
+        // them. See `derive.rs`.
+        let mut params = f.params.clone();
+        let mut derivations: Vec<(usize, derive::Op, Vec<usize>)> = Vec::new();
+        let mut next = params
+            .iter()
+            .map(|p| p.offset + p.ty.floats())
+            .max()
+            .unwrap_or(0);
+
+        for rule in derive::RULES {
+            let Some(target) = params.iter().find(|p| p.path == rule.target) else {
+                continue;
+            };
+            let target_offset = target.offset;
+
+            let mut sources = Vec::new();
+            for path in rule.sources {
+                if let Some(existing) = params.iter().find(|p| &p.path == path) {
+                    sources.push(existing.offset);
+                    continue;
+                }
+                let ty = if derive::source_is_vector(path) {
+                    types::ParamType::Float3
+                } else {
+                    types::ParamType::Float
+                };
+                sources.push(next);
+                params.push(translate::Param {
+                    path: (*path).to_owned(),
+                    ty,
+                    offset: next,
+                });
+                next += ty.floats();
+            }
+            derivations.push((target_offset, rule.op, sources));
+        }
         s.push_str(&format!(
             "    GeneratedFormula {{\n        name: {:?},\n        source: {:?},\n        param_floats: {},\n        \
              de_function: DeFunction::{},\n        add_c: {},\n        bailout: {:?},\n        params: &[\n",
@@ -253,7 +295,7 @@ fn emit(
             m.add_c,
             m.bailout,
         ));
-        for p in &f.params {
+        for p in &params {
             // Identity for matrices, which Mandelbulber computes rather than
             // stores; zeros only where the value is genuinely unknown.
             let default: Vec<f32> = match defaults.get(&p.path) {
@@ -266,6 +308,13 @@ fn emit(
             s.push_str(&format!(
                 "            GeneratedParam {{ path: {:?}, kind: ParamKind::{:?}, offset: {}, default: &{:?} }},\n",
                 p.path, p.ty, p.offset, default
+            ));
+        }
+        s.push_str("        ],\n        derivations: &[\n");
+        for (target, op, sources) in &derivations {
+            s.push_str(&format!(
+                "            Derivation {{ target: {target}, op: DeriveOp::{}, sources: &{sources:?} }},\n",
+                op.variant(),
             ));
         }
         s.push_str("        ],\n        wgsl: r####\"");

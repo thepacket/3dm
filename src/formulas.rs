@@ -78,6 +78,36 @@ pub enum DeFunction {
     Unsupported,
 }
 
+/// How a derived parameter is computed from its sources.
+///
+/// Mandelbulber fills these in once per edit, in
+/// `sFractal::RecalculateFractalParams`, and never stores them — so the
+/// transpiler finds no default and would emit zero. A zero squared fold radius
+/// is a fold that never fires; a zero reciprocal is an inversion by zero.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum DeriveOp {
+    Square,
+    Reciprocal,
+    Sqrt,
+    Ratio,
+    /// Of an angle in degrees.
+    Cos,
+    Sin,
+    /// 3x3 rotation from Euler angles in degrees, `Rz·Ry·Rx`.
+    Rotation2,
+    /// The same from `Rx·Ry·Rz`.
+    Rotation4,
+}
+
+/// One recipe: where to write, what to compute, and what to read.
+/// Offsets are placeholder numbers, resolved to pool positions by [`mb2`].
+#[derive(Debug)]
+pub struct Derivation {
+    pub target: usize,
+    pub op: DeriveOp,
+    pub sources: &'static [usize],
+}
+
 /// A formula translated from Mandelbulber2 by `tools/mb2-transpile`.
 #[derive(Debug)]
 pub struct GeneratedFormula {
@@ -94,6 +124,9 @@ pub struct GeneratedFormula {
     /// Escape radius this formula was designed around.
     pub bailout: f32,
     pub params: &'static [GeneratedParam],
+    /// Recipes for the parameters Mandelbulber computes rather than stores,
+    /// applied by [`mb2::recompute`] before the block is uploaded.
+    pub derivations: &'static [Derivation],
     /// WGSL body with `__MB2Pn__` placeholders for parameter reads.
     pub wgsl: &'static str,
 }
@@ -111,9 +144,13 @@ pub const MAX_PARAMS: usize = 6;
 /// uniform space that a tighter packing would save, and in exchange a slot's
 /// parameters sit at the same address no matter what the other slots hold, so
 /// editing one formula cannot disturb another's reads. The widest formula in
-/// the corpus needs 133 floats once its vectors are aligned — see the test
-/// below, which fails if a future Mandelbulber release exceeds this.
-pub const POOL_VEC4S_PER_SLOT: usize = 34;
+/// the corpus needs 144 floats once its vectors are aligned and the sources of
+/// its derived parameters are appended — see the test below, which fails if a
+/// future Mandelbulber release exceeds this. It already has: adding the derived
+/// parameters' sources pushed the widest formula from 133 floats past a stride
+/// of 136, and that test is the only reason it was noticed rather than shipped
+/// as one slot quietly reading another's parameters.
+pub const POOL_VEC4S_PER_SLOT: usize = 40;
 
 /// f32 slots reserved per formula in the parameter pool.
 pub const POOL_FLOATS_PER_SLOT: usize = POOL_VEC4S_PER_SLOT * 4;
@@ -517,6 +554,17 @@ impl FormulaKind {
             Self::Generated(i) => mb2::layout(&GENERATED[i])
                 .placements
                 .iter()
+                // A derived parameter is recomputed from its source on every
+                // upload, so editing it would be overwritten before it reached
+                // the GPU. The source is in the list instead — which is what
+                // finally makes the rotation angles reachable, the matrix
+                // having never been editable in any useful sense.
+                .filter(|p| {
+                    !GENERATED[i]
+                        .derivations
+                        .iter()
+                        .any(|d| d.target == p.param.offset)
+                })
                 .flat_map(|p| {
                     let floats = p.param.kind.floats().min(4);
                     // A vec4 parameter becomes four controls, suffixed, because
@@ -549,7 +597,11 @@ impl FormulaKind {
                 }
                 v
             }
-            Self::Generated(i) => mb2::layout(&GENERATED[i]).defaults(),
+            Self::Generated(i) => {
+                let mut block = mb2::layout(&GENERATED[i]).defaults();
+                mb2::recompute(&GENERATED[i], &mut block);
+                block
+            }
         }
     }
 }

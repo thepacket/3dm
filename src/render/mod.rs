@@ -74,8 +74,19 @@ impl Uniforms {
         let mut pool = [[0.0f32; 4]; POOL_VEC4S];
         for (index, slot) in params.stack.active() {
             ranges[index] = [slot.start_iter as f32, slot.end_iter as f32, 0.0, 0.0];
+            // Mandelbulber recomputes its derived parameters after every edit;
+            // 3DM does it here, on the way to the GPU, so the editable values
+            // and the ones the shader reads can share one block.
+            let mut block: Vec<f32> = slot.params.clone();
+            if let crate::formulas::FormulaKind::Generated(g) = slot.kind {
+                crate::formulas::mb2::recompute(
+                    &crate::formulas::generated::GENERATED[g],
+                    &mut block,
+                );
+            }
+
             let base = index * POOL_FLOATS_PER_SLOT;
-            for (i, v) in slot.params.iter().take(POOL_FLOATS_PER_SLOT).enumerate() {
+            for (i, v) in block.iter().take(POOL_FLOATS_PER_SLOT).enumerate() {
                 pool[(base + i) / 4][(base + i) % 4] = *v;
             }
         }

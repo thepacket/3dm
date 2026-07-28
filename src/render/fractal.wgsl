@@ -37,7 +37,7 @@ struct Uniforms {
     // 4D offsets — which is why these live in a pool instead of in `ranges`.
     // Generated code indexes this with constants; the stride must match
     // `formulas::POOL_VEC4S_PER_SLOT`.
-    pool: array<vec4<f32>, 204>,
+    pool: array<vec4<f32>, 240>,
 };
 
 @group(0) @binding(0) var<uniform> u: Uniforms;

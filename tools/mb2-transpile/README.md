@@ -26,6 +26,7 @@ It reads exactly four things:
 | `mandelbulber2/opencl/fractal_cl.h` | parameter types and enumerators |
 | `mandelbulber2/src/fractal.cpp` | struct path → settings name |
 | `mandelbulber2/src/initparameters.cpp` | settings name → default value |
+| `mandelbulber2/src/fractal.cpp` (`RecalculateFractalParams`) | derived parameters |
 | `mandelbulber2/formula/definition/fractal_*.cpp` | estimator, bailout, `+ c` flag |
 
 The estimator comes from `DEAnalyticFunction`, which is what Mandelbulber's
@@ -84,7 +85,7 @@ cargo run --release --example mb2_sweep -- /tmp/sweep
 Builds a real wgpu pipeline per formula, renders it, and classifies the result
 as fractal detail / smooth blob / empty / shader error — then writes a contact
 sheet, because whether a shape is *right* is not something a number can tell
-you. Currently 276 render with detail, 29 as smooth blobs, 37 empty, 19 fail to
+you. Currently 278 render with detail, 28 as smooth blobs, 36 empty, 19 fail to
 build.
 
 Of those 37 empties, 26 are `Transf*` formulas — transforms meant to be composed
@@ -95,10 +96,13 @@ cargo run --release --example mb2_sweep -- /tmp/hybrid --hybrid
 ```
 
 stacks each formula onto a known-good Mandelbulb and asks whether the picture
-changed, which is the only automatic way to judge a transform. Currently 283
-reshape the bulb, 33 erase it, 26 have no effect and 19 fail to build — and the
+changed, which is the only automatic way to judge a transform. Currently 286
+reshape the bulb, 32 erase it, 24 have no effect and 19 fail to build — and the
 report says *why* each inert one is inert, since an offset whose default is zero
-is a no-op by design rather than a bug.
+is a no-op by design rather than a bug. `--rotate` additionally dials every
+Euler rotation to 45 degrees, since rotation angles default to zero in
+Mandelbulber too and a rotation transform is therefore *correctly* inert out of
+the box — proving the matrix derivation works needs a non-zero angle.
 
 ## Gotcha
 
