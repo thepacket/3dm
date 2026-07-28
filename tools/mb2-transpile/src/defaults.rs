@@ -21,8 +21,6 @@ pub struct Default {
 
 pub struct Defaults {
     by_path: HashMap<String, Default>,
-    /// Settings names that had no `addParam`, kept for reporting.
-    pub unmatched: usize,
 }
 
 impl Defaults {
@@ -31,20 +29,13 @@ impl Defaults {
         let values = parse_name_to_value(initparameters_cpp);
 
         let mut by_path = HashMap::new();
-        let mut unmatched = 0;
         for (path, name) in names {
-            match values.get(&name) {
-                Some(v) => {
-                    by_path.insert(path, v.clone());
-                }
-                None => unmatched += 1,
+            if let Some(v) = values.get(&name) {
+                by_path.insert(path, v.clone());
             }
         }
 
-        Self {
-            by_path,
-            unmatched,
-        }
+        Self { by_path }
     }
 
     pub fn get(&self, path: &str) -> Option<&Default> {

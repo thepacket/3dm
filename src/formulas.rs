@@ -10,6 +10,56 @@
 //! fragments into one straight-line distance estimator, so there is no
 //! per-iteration branching on the GPU.
 
+pub mod generated;
+
+/// Type of a transpiled formula's parameter, mirroring Mandelbulber's own.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum ParamKind {
+    Float,
+    Float3,
+    Float4,
+    Int,
+    Bool,
+    Matrix33,
+}
+
+impl ParamKind {
+    /// f32 slots this occupies in the parameter pool.
+    pub fn floats(self) -> usize {
+        match self {
+            Self::Float | Self::Int | Self::Bool => 1,
+            Self::Float3 | Self::Float4 => 4,
+            Self::Matrix33 => 12,
+        }
+    }
+}
+
+/// One parameter of a transpiled formula.
+#[derive(Debug)]
+pub struct GeneratedParam {
+    /// Mandelbulber's own path, e.g. `mandelbox.foldingLimit`. Kept because it
+    /// is the only human-readable name we have for the parameter.
+    pub path: &'static str,
+    pub kind: ParamKind,
+    /// Offset in f32 units within this formula's parameter block.
+    pub offset: usize,
+    /// Default recovered from Mandelbulber's sources. A formula run with zeroed
+    /// parameters usually renders nothing at all, so these matter.
+    pub default: &'static [f32],
+}
+
+/// A formula translated from Mandelbulber2 by `tools/mb2-transpile`.
+#[derive(Debug)]
+pub struct GeneratedFormula {
+    pub name: &'static str,
+    /// Originating `.cl` file, for tracing a shape back to its source.
+    pub source: &'static str,
+    pub param_floats: usize,
+    pub params: &'static [GeneratedParam],
+    /// WGSL body with `__MB2Pn__` placeholders for parameter reads.
+    pub wgsl: &'static str,
+}
+
 /// Formula slots available in the stack. MB3D allows six; more than that is
 /// rarely legible and every slot costs shader instructions.
 pub const MAX_SLOTS: usize = 6;
