@@ -373,12 +373,27 @@ fn rewrite_bool_context(src: &str, params: &[Param]) -> String {
 
         let after = src[j..].trim_start();
         let before = out.trim_end();
-        let boolean_context = after.starts_with("&&")
-            || after.starts_with("||")
-            || before.ends_with("&&")
-            || before.ends_with("||")
-            || before.ends_with('!')
-            || (before.ends_with("if (") && after.starts_with(')'));
+
+        // Being *next to* `&&` is not enough. In
+        // `enabled && aux->i >= startIterations && ...` the `startIterations`
+        // parameter is followed by `&&`, but it is the right operand of `>=`
+        // and so a number, not a condition. Wrapping it produced `i32 >= bool`,
+        // which parses but fails validation — which is how it survived until
+        // the compile check grew a validator. An operator that consumes a value
+        // on either side therefore vetoes the boolean reading.
+        const VALUE_OPS: [&str; 11] = [
+            "<=", ">=", "==", "!=", "<", ">", "+", "-", "*", "/", "%",
+        ];
+        let is_value = VALUE_OPS.iter().any(|op| before.ends_with(op))
+            || VALUE_OPS.iter().any(|op| after.starts_with(op));
+
+        let boolean_context = !is_value
+            && (after.starts_with("&&")
+                || after.starts_with("||")
+                || before.ends_with("&&")
+                || before.ends_with("||")
+                || before.ends_with('!')
+                || (before.ends_with("if (") && after.starts_with(')')));
 
         if boolean_context {
             out.push_str(&format!("(__MB2P{offset}__ != 0)"));

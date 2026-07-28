@@ -7,12 +7,42 @@
 //! that loop branch-free; the cost is a shader rebuild when the stack's
 //! *structure* changes, which is rare compared to dragging a slider.
 
-use crate::formulas::{DeMode, FormulaStack, VEC4S_PER_SLOT};
+use crate::formulas::generated::{ENUMERATORS, GENERATED};
+use crate::formulas::{DeMode, FormulaKind, FormulaStack, POOL_FLOATS_PER_SLOT, mb2};
 
 /// Where the generated distance estimator is spliced into the static shader.
 const MARKER: &str = "//__GENERATED_DE__";
 
 const TEMPLATE: &str = include_str!("fractal.wgsl");
+
+/// The pool expression a formula's parameter reads are written against.
+const POOL: &str = "u.pool";
+
+/// This slot's WGSL body, with parameter placeholders resolved to pool reads.
+///
+/// The two formula sources use different placeholder spellings — `P0`..`P5` for
+/// the hand-written ones, `__MB2Pn__` for the transpiled ones — but they are
+/// resolved against the same pool and produce the same ABI, so the iteration
+/// loop does not care which it got.
+fn body(kind: FormulaKind, base: usize) -> String {
+    match kind {
+        FormulaKind::Builtin(b) => {
+            let read = |n: usize| {
+                let at = base + n;
+                format!("{POOL}[{}].{}", at / 4, ["x", "y", "z", "w"][at % 4])
+            };
+            // Descending, so `P1` cannot clobber the start of a hypothetical
+            // `P1x`, and because `P0`..`P5` are not delimited the way the
+            // transpiled placeholders are.
+            (0..crate::formulas::MAX_PARAMS)
+                .rev()
+                .fold(b.wgsl_body().to_owned(), |s, n| {
+                    s.replace(&format!("P{n}"), &read(n))
+                })
+        }
+        FormulaKind::Generated(i) => mb2::substitute(&GENERATED[i], POOL, base),
+    }
+}
 
 /// Builds the complete shader source for `stack`.
 pub fn generate(stack: &FormulaStack) -> String {
@@ -20,31 +50,30 @@ pub fn generate(stack: &FormulaStack) -> String {
     let mut dispatch = String::new();
 
     for (index, slot) in stack.active() {
-        let base = index * VEC4S_PER_SLOT;
-
-        // Params 0-3 sit in the slot's first vec4, 4-5 in the second; the
-        // second vec4's zw carry the iteration range.
-        let body = slot
-            .kind
-            .wgsl_body()
-            .replace("P0", &format!("u.slots[{base}].x"))
-            .replace("P1", &format!("u.slots[{base}].y"))
-            .replace("P2", &format!("u.slots[{base}].z"))
-            .replace("P3", &format!("u.slots[{base}].w"))
-            .replace("P4", &format!("u.slots[{}].x", base + 1))
-            .replace("P5", &format!("u.slots[{}].y", base + 1));
-
         functions.push_str(&format!(
-            "// slot {index}: {}\n\
-             fn slot_{index}(z: ptr<function, vec3<f32>>, dr: ptr<function, f32>, c: vec3<f32>) {{{body}}}\n\n",
-            slot.kind.name(),
+            "// slot {index}: {name}\n\
+             fn slot_{index}(z_in: vec4<f32>, aux: ptr<function, Aux>) -> vec4<f32> {{\n\
+             \x20   var z = z_in;\n{body}}}\n\n",
+            name = slot.kind.name(),
+            body = body(slot.kind, index * POOL_FLOATS_PER_SLOT),
         ));
+
+        // Mandelbulber's formulas do the `z -> z^n` half of an escape-time
+        // iteration and leave the `+ c` to their caller, which is this loop.
+        // Whether a given formula wants it is recorded in its C++ definition
+        // and recovered by the transpiler; without it an escape-time formula
+        // never sees the sampled point and renders as a plain sphere.
+        let add_c = if slot.kind.adds_c() {
+            " z = z + aux.const_c;"
+        } else {
+            ""
+        };
 
         // The iteration range is a uniform read, so dragging it does not
         // invalidate this pipeline.
         dispatch.push_str(&format!(
-            "        if (fi >= u.slots[{hi}].z && fi < u.slots[{hi}].w) {{ slot_{index}(&z, &dr, pos); }}\n",
-            hi = base + 1,
+            "        if (aux.i >= u.ranges[{index}].x && aux.i < u.ranges[{index}].y) \
+             {{ z = slot_{index}(z, &aux);{add_c} }}\n"
         ));
     }
 
@@ -54,20 +83,46 @@ pub fn generate(stack: &FormulaStack) -> String {
     }
 
     let distance = match stack.de_mode() {
-        DeMode::Log => "0.5 * log(safe_r) * safe_r / max(dr, 1e-9)",
-        DeMode::Linear => "safe_r / max(dr, 1e-9)",
+        DeMode::Log => "0.5 * log(safe_r) * safe_r / max(aux.de, 1e-9)",
+        DeMode::Linear => "safe_r / max(aux.de, 1e-9)",
     };
 
     let de = format!(
-        r#"{functions}fn fractal_de(pos: vec3<f32>) -> Field {{
+        r#"{ENUMERATORS}
+{functions}fn fractal_de(pos: vec3<f32>) -> Field {{
     let max_iter = i32(u.fractal.y);
     let bailout = u.fractal.z;
 
-    var z = pos;
-    var dr = 1.0;
+    var z = vec4<f32>(pos, 0.0);
     var r = length(pos);
     var trap = 1e20;
     var i = 0;
+
+    // Mandelbulber threads this through every formula. Most fields exist only
+    // so that the transpiled bodies compile, but `de` is the running derivative
+    // the distance estimate divides by, and `const_c` is the sampled point that
+    // escape-time formulas add back each iteration.
+    var aux: Aux;
+    aux.de = 1.0;
+    aux.de0 = 1.0;
+    aux.r = r;
+    aux.i = 0.0;
+    aux.color = 1.0;
+    // Mandelbulber seeds this from the Mandelbox scale, which 3DM has no global
+    // equivalent of; formulas that use it overwrite it on their first
+    // iteration, so a neutral 1.0 is the safe seed.
+    aux.actual_scale = 1.0;
+    aux.actual_scale_a = 0.0;
+    aux.c = vec4<f32>(pos, 0.0);
+    aux.const_c = vec4<f32>(pos, 0.0);
+    aux.old_z = vec4<f32>(0.0);
+    aux.last_z = vec4<f32>(0.0);
+    aux.dist = 0.0;
+    aux.pos_neg = 1.0;
+    aux.temp1000 = 1000.0;
+    aux.color_hybrid = 0.0;
+    aux.r_dz = 1.0;
+    aux.old_r = 0.0;
 
     loop {{
         if (i >= max_iter) {{ break; }}
@@ -75,7 +130,11 @@ pub fn generate(stack: &FormulaStack) -> String {
         if (r > bailout) {{ break; }}
         trap = min(trap, r);
 
-        let fi = f32(i);
+        aux.old_r = aux.r;
+        aux.r = r;
+        aux.old_z = aux.last_z;
+        aux.last_z = z;
+        aux.i = f32(i);
 {dispatch}
         i = i + 1;
     }}
@@ -94,13 +153,15 @@ pub fn generate(stack: &FormulaStack) -> String {
         TEMPLATE.contains(MARKER),
         "fractal.wgsl lost its {MARKER} marker"
     );
-    TEMPLATE.replace(MARKER, &de)
+    // The prelude declares `Aux` and Mandelbulber's helpers, which every
+    // formula body is written against.
+    TEMPLATE.replace(MARKER, &format!("{}\n{de}", mb2::PRELUDE))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::formulas::{FormulaKind, FormulaSlot};
+    use crate::formulas::{Builtin, FormulaSlot};
 
     #[test]
     fn default_stack_generates_a_de_and_consumes_the_marker() {
@@ -113,17 +174,18 @@ mod tests {
     #[test]
     fn params_are_rewritten_to_this_slots_uniforms() {
         let mut stack = FormulaStack::default();
-        stack.slots.push(FormulaSlot::new(FormulaKind::Mandelbox));
+        stack.slots.push(FormulaSlot::builtin(Builtin::Mandelbox));
         let src = generate(&stack);
         // Slot 1 must read its own vec4 pair, not slot 0's.
-        assert!(src.contains("u.slots[2].x"));
+        // Slot 1's block starts at float 136, i.e. vec4 34.
+        assert!(src.contains("u.pool[34].x"));
         assert!(!src.contains("P0"));
     }
 
     #[test]
     fn disabled_slots_are_not_emitted() {
         let mut stack = FormulaStack::default();
-        stack.slots.push(FormulaSlot::new(FormulaKind::Mandelbox));
+        stack.slots.push(FormulaSlot::builtin(Builtin::Mandelbox));
         stack.slots[1].enabled = false;
         assert!(!generate(&stack).contains("fn slot_1("));
     }
@@ -133,10 +195,10 @@ mod tests {
         let mut stack = FormulaStack::default();
         assert!(generate(&stack).contains("log(safe_r)"));
 
-        stack.slots.push(FormulaSlot::new(FormulaKind::Mandelbox));
+        stack.slots.push(FormulaSlot::builtin(Builtin::Mandelbox));
         let src = generate(&stack);
         assert!(!src.contains("log(safe_r)"));
-        assert!(src.contains("safe_r / max(dr"));
+        assert!(src.contains("safe_r / max(aux.de"));
     }
 
     #[test]
@@ -152,7 +214,7 @@ mod tests {
             "params and iteration ranges are uniforms, not generated code"
         );
 
-        stack.slots.push(FormulaSlot::new(FormulaKind::Sierpinski));
+        stack.slots.push(FormulaSlot::builtin(Builtin::Sierpinski));
         assert_ne!(stack.signature(), before, "adding a formula changes the shader");
     }
 

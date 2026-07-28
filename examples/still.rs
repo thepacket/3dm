@@ -10,7 +10,7 @@
 //! way to eyeball a hybrid without driving the UI.
 
 use eframe::wgpu;
-use three_dm::formulas::{FormulaKind, FormulaSlot, FormulaStack};
+use three_dm::formulas::{Builtin, DeMode, FormulaKind, FormulaSlot, FormulaStack};
 use three_dm::params::DebugView;
 use three_dm::{
     Camera, SceneParams,
@@ -39,15 +39,16 @@ fn preset(name: &str) -> FormulaStack {
         de_mode_override: None,
     };
     match name {
-        "mandelbox" => stack.slots.push(FormulaSlot::new(FormulaKind::Mandelbox)),
-        "sierpinski" => stack.slots.push(FormulaSlot::new(FormulaKind::Sierpinski)),
-        "juliabulb" => stack.slots.push(FormulaSlot::new(FormulaKind::Juliabulb)),
+        "mandelbox" => stack.slots.push(FormulaSlot::builtin(Builtin::Mandelbox)),
+        "sierpinski" => stack.slots.push(FormulaSlot::builtin(Builtin::Sierpinski)),
+        "juliabulb" => stack.slots.push(FormulaSlot::builtin(Builtin::Juliabulb)),
+        "mandelbulb" => stack.slots.push(FormulaSlot::builtin(Builtin::Mandelbulb)),
         // A bulb for the first few iterations, then a box for the rest: the
         // disjoint ranges are what fuse two shapes instead of averaging them.
         "hybrid" => {
-            let mut bulb = FormulaSlot::new(FormulaKind::Mandelbulb);
+            let mut bulb = FormulaSlot::builtin(Builtin::Mandelbulb);
             bulb.end_iter = 3;
-            let mut box_ = FormulaSlot::new(FormulaKind::Mandelbox);
+            let mut box_ = FormulaSlot::builtin(Builtin::Mandelbox);
             box_.start_iter = 3;
             stack.slots.push(bulb);
             stack.slots.push(box_);
@@ -55,10 +56,16 @@ fn preset(name: &str) -> FormulaStack {
         // Rotating between folds is the classic way to break a Mandelbox's
         // axis alignment.
         "rotbox" => {
-            stack.slots.push(FormulaSlot::new(FormulaKind::Mandelbox));
-            stack.slots.push(FormulaSlot::new(FormulaKind::Rotate));
+            stack.slots.push(FormulaSlot::builtin(Builtin::Mandelbox));
+            stack.slots.push(FormulaSlot::builtin(Builtin::Rotate));
         }
-        _ => stack.slots.push(FormulaSlot::new(FormulaKind::Mandelbulb)),
+        // Anything else names a transpiled Mandelbulber formula, which is the
+        // whole point of this example now: rendering one is the only way to
+        // tell a correct translation from a merely compiling one.
+        other => match FormulaKind::find(other) {
+            Some(kind) => stack.slots.push(FormulaSlot::new(kind)),
+            None => panic!("unknown formula {other:?} — no builtin and no transpiled match"),
+        },
     }
     stack
 }
@@ -87,6 +94,13 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
 
     let mut params = SceneParams::default();
     params.stack = preset(stack_name);
+    // The transpiler does not recover which estimator a Mandelbulber formula
+    // wants, so trying both is part of looking at a newly wired-up formula.
+    params.stack.de_mode_override = match std::env::var("DM3_DE").as_deref() {
+        Ok("log") => Some(DeMode::Log),
+        Ok("linear") => Some(DeMode::Linear),
+        _ => None,
+    };
     params.retune_for_stack();
 
     // Diagnostic: strip everything that could darken the image, leaving the

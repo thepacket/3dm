@@ -19,12 +19,12 @@ use eframe::egui_wgpu::{self, CallbackResources, CallbackTrait, ScreenDescriptor
 use eframe::wgpu;
 
 use crate::camera::Camera;
-use crate::formulas::{MAX_SLOTS, VEC4S_PER_SLOT};
+use crate::formulas::{MAX_SLOTS, POOL_FLOATS_PER_SLOT, POOL_VEC4S_PER_SLOT};
 use crate::params::SceneParams;
 
-/// `vec4`s of slot storage in the uniform block. Must match the array length
-/// declared in `fractal.wgsl`.
-pub const SLOT_VEC4S: usize = MAX_SLOTS * VEC4S_PER_SLOT;
+/// `vec4`s of parameter pool in the uniform block. Must match the array
+/// length declared in `fractal.wgsl`.
+pub const POOL_VEC4S: usize = MAX_SLOTS * POOL_VEC4S_PER_SLOT;
 
 /// GPU-side scene description. Laid out as `vec4`s so that WGSL's `uniform`
 /// address space alignment rules are satisfied without any padding fields.
@@ -43,7 +43,9 @@ pub struct Uniforms {
     palette_base: [f32; 4],
     palette_amp: [f32; 4],
     bg: [f32; 4],
-    slots: [[f32; 4]; SLOT_VEC4S],
+    /// x = start iteration, y = end iteration, per slot.
+    ranges: [[f32; 4]; MAX_SLOTS],
+    pool: [[f32; 4]; POOL_VEC4S],
 }
 
 impl Default for Uniforms {
@@ -66,12 +68,16 @@ impl Uniforms {
         let m = &params.march;
         let s = &params.shading;
 
-        let mut slots = [[0.0f32; 4]; SLOT_VEC4S];
+        // Each slot's parameters go to the same fixed address the generated
+        // shader reads them from; anything the formula does not use stays zero.
+        let mut ranges = [[0.0f32; 4]; MAX_SLOTS];
+        let mut pool = [[0.0f32; 4]; POOL_VEC4S];
         for (index, slot) in params.stack.active() {
-            let base = index * VEC4S_PER_SLOT;
-            let p = &slot.params;
-            slots[base] = [p[0], p[1], p[2], p[3]];
-            slots[base + 1] = [p[4], p[5], slot.start_iter as f32, slot.end_iter as f32];
+            ranges[index] = [slot.start_iter as f32, slot.end_iter as f32, 0.0, 0.0];
+            let base = index * POOL_FLOATS_PER_SLOT;
+            for (i, v) in slot.params.iter().take(POOL_FLOATS_PER_SLOT).enumerate() {
+                pool[(base + i) / 4][(base + i) % 4] = *v;
+            }
         }
 
         Self {
@@ -113,7 +119,8 @@ impl Uniforms {
                 s.palette_freq,
             ],
             bg: [s.background[0], s.background[1], s.background[2], s.fog],
-            slots,
+            ranges,
+            pool,
         }
     }
 }

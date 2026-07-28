@@ -4,13 +4,16 @@
 //! (<https://github.com/buddhi1980/mandelbulber2>, © Mandelbulber Team,
 //! GPL-3.0). 3DM is GPL-3.0-or-later as a result.
 
-use super::{GeneratedFormula, GeneratedParam, ParamKind};
+use super::{DeFunction, GeneratedFormula, GeneratedParam, ParamKind};
 
 pub static GENERATED: &[GeneratedFormula] = &[
     GeneratedFormula {
         name: "Abox4d",
         source: "abox4d.cl",
         param_floats: 40,
+        de_function: DeFunction::Linear,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "mandelbox.scale", kind: ParamKind::Float, offset: 0, default: &[2.0] },
             GeneratedParam { path: "mandelboxVary4D.scaleVary", kind: ParamKind::Float, offset: 1, default: &[0.0] },
@@ -87,7 +90,7 @@ pub static GENERATED: &[GeneratedFormula] = &[
 
 	
 	if ((__MB2P18__ != 0)
-			&& (*aux).i >= (__MB2P19__ != 0)
+			&& (*aux).i >= __MB2P19__
 			&& (*aux).i < __MB2P20__)
 	{
 		var tp: vec4<f32>;
@@ -157,6 +160,9 @@ pub static GENERATED: &[GeneratedFormula] = &[
         name: "AboxDonut4d",
         source: "abox_donut4d.cl",
         param_floats: 39,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.scaleA2", kind: ParamKind::Float, offset: 0, default: &[2.0] },
             GeneratedParam { path: "transformCommon.offset4", kind: ParamKind::Float, offset: 1, default: &[4.0] },
@@ -235,7 +241,7 @@ pub static GENERATED: &[GeneratedFormula] = &[
 	z += (*aux).const_c * __MB2P23__;
 
 	
-	if ((__MB2P27__ != 0) && (*aux).i >= (__MB2P28__ != 0)
+	if ((__MB2P27__ != 0) && (*aux).i >= __MB2P28__
 			&& (*aux).i < __MB2P29__)
 	{
 		if (zCol.x != oldZ.x) { colorAdd += __MB2P30__.x; }
@@ -260,6 +266,9 @@ pub static GENERATED: &[GeneratedFormula] = &[
         name: "AboxKlein",
         source: "abox_klein.cl",
         param_floats: 57,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.sphereInversionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsX", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -290,7 +299,7 @@ pub static GENERATED: &[GeneratedFormula] = &[
         wgsl: r####"
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		z += __MB2P3__;
@@ -378,6 +387,9 @@ pub static GENERATED: &[GeneratedFormula] = &[
         name: "AboxMod1",
         source: "abox_mod1.cl",
         param_floats: 46,
+        de_function: DeFunction::Linear,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "mandelbox.scale", kind: ParamKind::Float, offset: 0, default: &[2.0] },
             GeneratedParam { path: "mandelboxVary4D.scaleVary", kind: ParamKind::Float, offset: 1, default: &[0.0] },
@@ -434,7 +446,7 @@ pub static GENERATED: &[GeneratedFormula] = &[
 
 	var rr: f32 = (z.x * z.x + z.y * z.y + z.z * z.z);
 	if ((__MB2P13__ != 0)
-			&& (*aux).i >= (__MB2P14__ != 0)
+			&& (*aux).i >= __MB2P14__
 			&& (*aux).i < __MB2P15__)
 	{
 		rr = pow(rr, __MB2P16__);
@@ -458,7 +470,7 @@ pub static GENERATED: &[GeneratedFormula] = &[
 	(*aux).de = (*aux).de * abs((*aux).actual_scale) + 1.0;
 
 	if ((__MB2P22__ != 0)
-			&& (*aux).i >= (__MB2P23__ != 0)
+			&& (*aux).i >= __MB2P23__
 			&& (*aux).i < __MB2P24__)
 	{
 		var tempC: vec4<f32> = c;
@@ -522,7 +534,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P31__ != 0)
-			&& (*aux).i >= (__MB2P32__ != 0)
+			&& (*aux).i >= __MB2P32__
 			&& (*aux).i < __MB2P33__)
 	{
 		z = mb2_mat_mul(__MB2P34__, z);
@@ -534,6 +546,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "AboxMod13",
         source: "abox_mod13.cl",
         param_floats: 86,
+        de_function: DeFunction::Linear,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAzFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsE", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -597,7 +612,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var rrCol: f32 = 0.0;
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		if ((__MB2P3__ != 0))
@@ -619,7 +634,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	var oldZ: vec4<f32> = z;
-	if ((*aux).i >= (__MB2P8__ != 0)
+	if ((*aux).i >= __MB2P8__
 			&& (*aux).i < __MB2P9__)
 	{
 		z.x = abs(z.x + __MB2P10__.x)
@@ -633,7 +648,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		}
 
 		if ((__MB2P15__ != 0)
-				&& (*aux).i >= (__MB2P16__ != 0)
+				&& (*aux).i >= __MB2P16__
 				&& (*aux).i < __MB2P17__)
 		{
 			if (z.x != oldZ.x) { colorAdd += __MB2P18__.x; }
@@ -642,7 +657,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		}
 
 		if ((__MB2P22__ != 0)
-				&& (*aux).i >= (__MB2P23__ != 0)
+				&& (*aux).i >= __MB2P23__
 				&& (*aux).i < __MB2P24__)
 		{
 			var limit: vec4<f32> = __MB2P10__;
@@ -671,7 +686,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z = vec4<f32>(z.z, z.y, z.x, z.w);
 	}
 	
-	if ((*aux).i >= (__MB2P30__ != 0)
+	if ((*aux).i >= __MB2P30__
 			&& (*aux).i < __MB2P31__)
 	{
 		var rr: f32 = dot(z, z);
@@ -698,7 +713,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	var useScale: f32 = __MB2P40__;
 	if ((__MB2P41__ != 0)
-			&& (*aux).i >= (__MB2P42__ != 0)
+			&& (*aux).i >= __MB2P42__
 			&& (*aux).i < __MB2P43__)
 	{
 		useScale += (*aux).actual_scale_a;
@@ -720,7 +735,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	
-	if ((*aux).i >= (__MB2P47__ != 0)
+	if ((*aux).i >= __MB2P47__
 			&& (*aux).i < __MB2P48__)
 	{
 		if ((__MB2P49__ != 0))
@@ -737,7 +752,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P55__ != 0)
-			&& (*aux).i >= (__MB2P56__ != 0)
+			&& (*aux).i >= __MB2P56__
 			&& (*aux).i < __MB2P57__)
 	{
 		var tempC: vec4<f32> = c;
@@ -802,7 +817,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 	
 	if ((__MB2P64__ != 0)
-			&& (*aux).i >= (__MB2P65__ != 0)
+			&& (*aux).i >= __MB2P65__
 			&& (*aux).i < __MB2P66__)
 	{
 		z = mb2_mat_mul(__MB2P67__, z);
@@ -812,14 +827,14 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		{ (*aux).de = (*aux).de * __MB2P80__ + __MB2P81__; }
 
 	
-	if ((__MB2P82__ != 0) && (*aux).i >= (__MB2P83__ != 0)
+	if ((__MB2P82__ != 0) && (*aux).i >= __MB2P83__
 			&& (*aux).i < __MB2P84__)
 	{
 		if ((__MB2P85__ != 0))
 		{
 			colorAdd = 0.0;
 			if ((__MB2P15__ != 0)
-					&& (*aux).i >= (__MB2P16__ != 0)
+					&& (*aux).i >= __MB2P16__
 					&& (*aux).i < __MB2P17__)
 			{
 				if (zCol.x != oldZ.x)
@@ -855,6 +870,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "AboxMod14",
         source: "abox_mod14.cl",
         param_floats: 68,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsA", kind: ParamKind::Int, offset: 1, default: &[250.0] },
@@ -904,7 +922,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var colorAdd: f32 = 0.0;
 	var m: f32 = 1.0;
 	
-	if ((*aux).i >= (__MB2P0__ != 0)
+	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
 	{
 		z.x = abs(z.x + __MB2P2__.x)
@@ -918,7 +936,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		}
 	}
 	if ((__MB2P7__ != 0)
-			&& (*aux).i >= (__MB2P8__ != 0)
+			&& (*aux).i >= __MB2P8__
 			&& (*aux).i < __MB2P9__)
 	{
 		var limit: vec4<f32> = __MB2P2__;
@@ -944,7 +962,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	z += __MB2P14__;
 
 	
-	if ((*aux).i >= (__MB2P18__ != 0)
+	if ((*aux).i >= __MB2P18__
 			&& (*aux).i < __MB2P19__)
 	{
 		var rr: f32 = dot(z, z);
@@ -960,7 +978,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	var useScale: f32 = __MB2P24__;
 	if ((__MB2P25__ != 0)
-			&& (*aux).i >= (__MB2P26__ != 0)
+			&& (*aux).i >= __MB2P26__
 			&& (*aux).i < __MB2P27__)
 	{
 		useScale += (*aux).actual_scale_a;
@@ -980,7 +998,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P31__ != 0)
-			&& (*aux).i >= (__MB2P32__ != 0)
+			&& (*aux).i >= __MB2P32__
 			&& (*aux).i < __MB2P33__)
 	{
 		var offset: vec4<f32> = (*aux).pos_neg * __MB2P34__;
@@ -997,7 +1015,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P41__ != 0)
-			&& (*aux).i >= (__MB2P42__ != 0)
+			&& (*aux).i >= __MB2P42__
 			&& (*aux).i < __MB2P43__)
 	{
 		var tempC: vec4<f32> = c;
@@ -1012,13 +1030,13 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 	
 	if ((__MB2P49__ != 0)
-			&& (*aux).i >= (__MB2P50__ != 0)
+			&& (*aux).i >= __MB2P50__
 			&& (*aux).i < __MB2P51__)
 	{
 		z = mb2_mat_mul(__MB2P52__, z);
 	}
 	
-	if ((__MB2P64__ != 0) && (*aux).i >= (__MB2P65__ != 0)
+	if ((__MB2P64__ != 0) && (*aux).i >= __MB2P65__
 			&& (*aux).i < __MB2P66__)
 	{
 		colorAdd += __MB2P67__ * m;
@@ -1031,6 +1049,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "AboxMod15",
         source: "abox_mod15.cl",
         param_floats: 120,
+        de_function: DeFunction::Linear,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -1116,7 +1137,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	if ((__MB2P0__ != 0))
 	{
-		if ((*aux).i >= (__MB2P1__ != 0)
+		if ((*aux).i >= __MB2P1__
 				&& (*aux).i < __MB2P2__)
 		{
 			if ((__MB2P3__ != 0)) { z.x = abs(z.x); }
@@ -1124,7 +1145,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 			if ((__MB2P5__ != 0)) { z.z = abs(z.z); }
 		}
 
-		if ((*aux).i >= (__MB2P6__ != 0)
+		if ((*aux).i >= __MB2P6__
 				&& (*aux).i < __MB2P7__)
 		{
 			switch __MB2P8__ {
@@ -1159,7 +1180,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 
 	
 	if ((__MB2P12__ != 0)
-			&& (*aux).i >= (__MB2P13__ != 0)
+			&& (*aux).i >= __MB2P13__
 			&& (*aux).i < __MB2P14__)
 	{
 		z += __MB2P15__;
@@ -1172,7 +1193,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 	}
 
 	var oldZ: vec4<f32> = z;
-	if ((*aux).i >= (__MB2P25__ != 0)
+	if ((*aux).i >= __MB2P25__
 			&& (*aux).i < __MB2P26__)
 	{
 		z.x = abs(z.x + __MB2P27__.x)
@@ -1186,14 +1207,14 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 	var zCol: vec4<f32> = z;
 
 	
-	if ((*aux).i >= (__MB2P32__ != 0)
+	if ((*aux).i >= __MB2P32__
 			&& (*aux).i < __MB2P33__)
 		{ z += __MB2P34__; }
 
 	
 	var rrCol: f32 = 0.0;
 	var m: f32 = 1.0;
-	if ((*aux).i >= (__MB2P38__ != 0)
+	if ((*aux).i >= __MB2P38__
 			&& (*aux).i < __MB2P39__)
 	{
 		var rr: f32 = dot(z, z);
@@ -1207,7 +1228,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 	}
 
 	
-	if ((*aux).i >= (__MB2P43__ != 0)
+	if ((*aux).i >= __MB2P43__
 			&& (*aux).i < __MB2P44__)
 	{
 		var useScale: f32 = 1.0;
@@ -1225,29 +1246,29 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 	}
 
 	if ((__MB2P50__ != 0)
-			&& (*aux).i >= (__MB2P51__ != 0)
+			&& (*aux).i >= __MB2P51__
 			&& (*aux).i < __MB2P52__)
 	{
 		z = mb2_mat_mul(__MB2P53__, z);
 	}
 
 	if ((__MB2P65__ != 0)
-			&& (*aux).i >= (__MB2P66__ != 0)
+			&& (*aux).i >= __MB2P66__
 			&& (*aux).i < __MB2P67__)
 	{
 		z += c * __MB2P68__;
 	}
 
-	if ((*aux).i >= (__MB2P72__ != 0)
+	if ((*aux).i >= __MB2P72__
 			&& (*aux).i < __MB2P73__)
 		{ z += __MB2P74__; }
 
-	if ((*aux).i >= (__MB2P78__ != 0)
+	if ((*aux).i >= __MB2P78__
 			&& (*aux).i < __MB2P79__)
 		{ z = mb2_mat_mul(__MB2P80__, z); }
 
 	if ((__MB2P92__ != 0)
-			&& (*aux).i >= (__MB2P93__ != 0)
+			&& (*aux).i >= __MB2P93__
 			&& (*aux).i < __MB2P94__)
 	{
 		var foldX: f32 = __MB2P95__;
@@ -1266,11 +1287,11 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 		z.x = z.x + z.y - __MB2P98__;
 		z.y = t - z.y - __MB2P99__;
 		if ((__MB2P100__ != 0)
-				&& (*aux).i >= (__MB2P101__ != 0)
+				&& (*aux).i >= __MB2P101__
 				&& (*aux).i < __MB2P102__)
 			{ z.x = -abs(z.x); }
 		if ((__MB2P103__ != 0)
-				&& (*aux).i >= (__MB2P104__ != 0)
+				&& (*aux).i >= __MB2P104__
 				&& (*aux).i < __MB2P105__)
 			{ z.y = -abs(z.y); }
 
@@ -1280,18 +1301,18 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 		z.x *= 0.5;
 		z.y *= 0.5;
 		if ((__MB2P106__ != 0)
-				&& (*aux).i >= (__MB2P107__ != 0)
+				&& (*aux).i >= __MB2P107__
 				&& (*aux).i < __MB2P108__)
 			{ z.x = foldX - abs(z.x + foldX); }
 		if ((__MB2P109__ != 0)
-				&& (*aux).i >= (__MB2P110__ != 0)
+				&& (*aux).i >= __MB2P110__
 				&& (*aux).i < __MB2P111__)
 			{ z.y = foldY - abs(z.y + foldY); }
 	}
 
 	if ((__MB2P112__ != 0))
 	{
-		if ((*aux).i >= (__MB2P113__ != 0)
+		if ((*aux).i >= __MB2P113__
 				&& (*aux).i < __MB2P114__)
 		{
 			zCol = abs(zCol - oldZ);
@@ -1315,6 +1336,9 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         name: "AboxMod2",
         source: "abox_mod2.cl",
         param_floats: 45,
+        de_function: DeFunction::Linear,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "mandelbox.scale", kind: ParamKind::Float, offset: 0, default: &[2.0] },
             GeneratedParam { path: "mandelboxVary4D.scaleVary", kind: ParamKind::Float, offset: 1, default: &[0.0] },
@@ -1391,7 +1415,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 
 	
 	if ((__MB2P20__ != 0)
-			&& (*aux).i >= (__MB2P21__ != 0)
+			&& (*aux).i >= __MB2P21__
 			&& (*aux).i < __MB2P22__)
 	{
 		var tempC: vec4<f32> = c;
@@ -1455,7 +1479,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 	
 	if ((__MB2P29__ != 0)
-			&& (*aux).i >= (__MB2P30__ != 0)
+			&& (*aux).i >= __MB2P30__
 			&& (*aux).i < __MB2P31__)
 	{
 		z = mb2_mat_mul(__MB2P32__, z);
@@ -1472,6 +1496,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "AboxModKaliEiffie",
         source: "abox_mod_kali_eiffie.cl",
         param_floats: 48,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledM", kind: ParamKind::Int, offset: 4, default: &[1.0] },
@@ -1518,7 +1545,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	if (z.z != oldZ.z) { colorAdd += __MB2P5__.z; }
 
 	if ((__MB2P9__ != 0)
-			&& (*aux).i >= (__MB2P10__ != 0)
+			&& (*aux).i >= __MB2P10__
 			&& (*aux).i < __MB2P11__) 
 	{
 		var zLimit: f32 = __MB2P0__.z * __MB2P12__;
@@ -1618,13 +1645,13 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		}
 		z += tempC * __MB2P26__;
 	}
-	if ((__MB2P30__ != 0) && (*aux).i >= (__MB2P31__ != 0)
+	if ((__MB2P30__ != 0) && (*aux).i >= __MB2P31__
 			&& (*aux).i < __MB2P32__)
 	{
 		z = mb2_mat_mul(__MB2P33__, z);
 	}
 
-	if ((__MB2P45__ != 0) && (*aux).i >= (__MB2P46__ != 0)
+	if ((__MB2P45__ != 0) && (*aux).i >= __MB2P46__
 			&& (*aux).i < __MB2P47__)
 	{
 		(*aux).color += colorAdd;
@@ -1636,6 +1663,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "AboxModKaliV2",
         source: "abox_mod_kali_v2.cl",
         param_floats: 53,
+        de_function: DeFunction::Linear,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant0555", kind: ParamKind::Float4, offset: 0, default: &[0.5, 0.5, 0.5, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledM", kind: ParamKind::Int, offset: 4, default: &[1.0] },
@@ -1703,7 +1733,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	z += __MB2P10__;
 
 	
-	if ((__MB2P14__ != 0) && (*aux).i >= (__MB2P15__ != 0)
+	if ((__MB2P14__ != 0) && (*aux).i >= __MB2P15__
 			&& (*aux).i < __MB2P16__)
 	{
 		z = mb2_mat_mul(__MB2P17__, z);
@@ -1713,7 +1743,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P29__ != 0)
-			&& (*aux).i >= (__MB2P30__ != 0)
+			&& (*aux).i >= __MB2P30__
 			&& (*aux).i < __MB2P31__)
 	{
 		var tempFAB: vec4<f32> = c;
@@ -1730,7 +1760,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P39__ != 0)
-			&& (*aux).i >= (__MB2P40__ != 0)
+			&& (*aux).i >= __MB2P40__
 			&& (*aux).i < __MB2P41__)
 	{
 		if ((__MB2P42__ != 0)) { z.x *= sign(oldZ.x); }
@@ -1758,6 +1788,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "AboxModKaliV3",
         source: "abox_mod_kali_v3.cl",
         param_floats: 14,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterations15", kind: ParamKind::Int, offset: 1, default: &[15.0] },
@@ -1769,7 +1802,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.offsetA111", kind: ParamKind::Float4, offset: 10, default: &[1.0, 1.0, 1.0, 0.0] },
         ],
         wgsl: r####"
-	if ((*aux).i >= (__MB2P0__ != 0)
+	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
 	{
 		z = __MB2P2__ - abs(z);
@@ -1781,7 +1814,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		(*aux).de = (*aux).de * abs(m) + 1.0;
 	}
 
-	if ((*aux).i >= (__MB2P8__ != 0)
+	if ((*aux).i >= __MB2P8__
 			&& (*aux).i < __MB2P9__)
 	{
 		z += __MB2P10__;
@@ -1795,6 +1828,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "AboxSmooth",
         source: "abox_smooth.cl",
         param_floats: 108,
+        de_function: DeFunction::Linear,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.sphereInversionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsI", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -1863,7 +1899,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var t: f32 = 1.0;
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		z += __MB2P3__;
@@ -1878,7 +1914,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	var oldZ: vec4<f32> = z;
 	if ((__MB2P13__ != 0)
-			&& (*aux).i >= (__MB2P14__ != 0)
+			&& (*aux).i >= __MB2P14__
 			&& (*aux).i < __MB2P15__)
 	{
 		var sm: f32 = __MB2P16__;
@@ -1905,7 +1941,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P22__ != 0)
-			&& (*aux).i >= (__MB2P23__ != 0)
+			&& (*aux).i >= __MB2P23__
 			&& (*aux).i < __MB2P24__)
 	{
 		z.x = abs(z.x + __MB2P17__.x)
@@ -1918,7 +1954,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P25__ != 0)
-			&& (*aux).i >= (__MB2P26__ != 0)
+			&& (*aux).i >= __MB2P26__
 			&& (*aux).i < __MB2P27__)
 	{
 		var limit: vec4<f32> = __MB2P17__;
@@ -1942,7 +1978,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var zCol: vec4<f32> = z;
 
 	
-	if ((*aux).i >= (__MB2P32__ != 0)
+	if ((*aux).i >= __MB2P32__
 			&& (*aux).i < __MB2P33__)
 		{ z += __MB2P34__; }
 
@@ -1950,7 +1986,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var rrCol: f32 = dot(z, z);
 	var m: f32 = 1.0;
 	if ((__MB2P38__ != 0)
-			&& (*aux).i >= (__MB2P39__ != 0)
+			&& (*aux).i >= __MB2P39__
 			&& (*aux).i < __MB2P40__)
 	{
 		var rr: f32 = rrCol;
@@ -1963,7 +1999,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P44__ != 0)
-			&& (*aux).i >= (__MB2P45__ != 0)
+			&& (*aux).i >= __MB2P45__
 			&& (*aux).i < __MB2P46__)
 	{
 		var rr: f32 = dot(z, z);
@@ -1973,7 +2009,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		var sm1: f32 = (__MB2P42__ * rk1) + (1.0 - rk1);
 
 		t = 1.0;
-		if ((*aux).i >= (__MB2P48__ != 0)
+		if ((*aux).i >= __MB2P48__
 				&& (*aux).i < __MB2P49__)
 		{
 			var rk2: f32 = SmoothConditionALessB(
@@ -1988,7 +2024,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var rrCol2: f32 = dot(z, z);
 	var useScale: f32 = 1.0;
 	
-	if ((*aux).i >= (__MB2P51__ != 0)
+	if ((*aux).i >= __MB2P51__
 			&& (*aux).i < __MB2P52__)
 	{
 		useScale = ((*aux).actual_scale_a + __MB2P53__);
@@ -2004,28 +2040,28 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P58__ != 0)
-			&& (*aux).i >= (__MB2P59__ != 0)
+			&& (*aux).i >= __MB2P59__
 			&& (*aux).i < __MB2P60__)
 	{
 		z = mb2_mat_mul(__MB2P61__, z);
 	}
 
 	if ((__MB2P73__ != 0)
-			&& (*aux).i >= (__MB2P74__ != 0)
+			&& (*aux).i >= __MB2P74__
 			&& (*aux).i < __MB2P75__)
 	{
 		z += (*aux).const_c * __MB2P76__;
 	}
 
-	if ((*aux).i >= (__MB2P80__ != 0)
+	if ((*aux).i >= __MB2P80__
 			&& (*aux).i < __MB2P81__)
 		{ z += __MB2P82__; }
 
-	if ((*aux).i >= (__MB2P86__ != 0)
+	if ((*aux).i >= __MB2P86__
 			&& (*aux).i < __MB2P87__)
 		{ z = mb2_mat_mul(__MB2P88__, z); }
 
-	if ((__MB2P100__ != 0) && (*aux).i >= (__MB2P101__ != 0)
+	if ((__MB2P100__ != 0) && (*aux).i >= __MB2P101__
 			&& (*aux).i < __MB2P102__)
 	{
 		var colorAdd: f32 = 0.0;
@@ -2046,6 +2082,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "AboxSphere4d",
         source: "abox_sphere4d.cl",
         param_floats: 47,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset1111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 1.0] },
             GeneratedParam { path: "transformCommon.functionEnabled", kind: ParamKind::Int, offset: 4, default: &[1.0] },
@@ -2123,7 +2162,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).de = (*aux).de * abs(useScale) + 1.0;
 	
 	if ((__MB2P13__ != 0)
-			&& (*aux).i >= (__MB2P14__ != 0)
+			&& (*aux).i >= __MB2P14__
 			&& (*aux).i < __MB2P15__)
 	{
 		
@@ -2134,7 +2173,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P18__ != 0)
-			&& (*aux).i >= (__MB2P19__ != 0)
+			&& (*aux).i >= __MB2P19__
 			&& (*aux).i < __MB2P20__)
 	{
 		var tp: vec4<f32>;
@@ -2209,6 +2248,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "AboxSurfBox",
         source: "abox_surf_box.cl",
         param_floats: 66,
+        de_function: DeFunction::Linear,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.startIterationsB", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsB", kind: ParamKind::Int, offset: 1, default: &[250.0] },
@@ -2256,7 +2298,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	var c: vec4<f32> = (*aux).const_c;
 
-	if ((*aux).i >= (__MB2P0__ != 0)
+	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
 	{
 		
@@ -2304,7 +2346,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var rr: f32 = dot(z, z);
 	rrCol = rr;
 	
-	if ((*aux).i >= (__MB2P16__ != 0)
+	if ((*aux).i >= __MB2P16__
 			&& (*aux).i < __MB2P17__)
 	{
 		
@@ -2330,7 +2372,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	var useScale: f32 = __MB2P24__;
 	if ((__MB2P25__ != 0)
-			&& (*aux).i >= (__MB2P26__ != 0)
+			&& (*aux).i >= __MB2P26__
 			&& (*aux).i < __MB2P27__)
 	{
 		useScale += (*aux).actual_scale_a;
@@ -2356,7 +2398,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P35__ != 0)
-			&& (*aux).i >= (__MB2P36__ != 0)
+			&& (*aux).i >= __MB2P36__
 			&& (*aux).i < __MB2P37__)
 	{
 		var tempC: vec4<f32> = c;
@@ -2420,13 +2462,13 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 	
 	if ((__MB2P44__ != 0)
-			&& (*aux).i >= (__MB2P45__ != 0)
+			&& (*aux).i >= __MB2P45__
 			&& (*aux).i < __MB2P46__)
 	{
 		z = mb2_mat_mul(__MB2P47__, z);
 	}
 	
-	if ((*aux).i >= (__MB2P59__ != 0)
+	if ((*aux).i >= __MB2P59__
 			&& (*aux).i < __MB2P60__)
 	{
 		z *= __MB2P61__;
@@ -2480,6 +2522,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "AboxTetra",
         source: "abox_tetra.cl",
         param_floats: 80,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstantA000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 4, default: &[1.0] },
@@ -2544,7 +2589,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	if ((__MB2P6__ != 0)) { z.z = abs(z.z); }
 
 	if ((__MB2P7__ != 0)
-			&& (*aux).i >= (__MB2P8__ != 0)
+			&& (*aux).i >= __MB2P8__
 			&& (*aux).i < __MB2P9__)
 	{
 		var temp: f32 = 0.0;
@@ -2568,7 +2613,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		}
 	}
 	if ((__MB2P10__ != 0)
-			&& (*aux).i >= (__MB2P11__ != 0)
+			&& (*aux).i >= __MB2P11__
 			&& (*aux).i < __MB2P12__)
 	{
 		if (z.x - z.y < 0.0)
@@ -2593,7 +2638,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P13__ != 0)
-			&& (*aux).i >= (__MB2P14__ != 0)
+			&& (*aux).i >= __MB2P14__
 			&& (*aux).i < __MB2P15__)
 	{
 		z.x = abs(z.x + __MB2P16__.x)
@@ -2607,7 +2652,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		}
 
 		if ((__MB2P21__ != 0)
-				&& (*aux).i >= (__MB2P22__ != 0)
+				&& (*aux).i >= __MB2P22__
 				&& (*aux).i < __MB2P23__)
 		{
 			var limit: vec4<f32> = __MB2P16__;
@@ -2633,7 +2678,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	z -= __MB2P28__;
 
 	
-	if ((*aux).i >= (__MB2P32__ != 0)
+	if ((*aux).i >= __MB2P32__
 			&& (*aux).i < __MB2P33__)
 	{
 		var rr: f32 = dot(z, z);
@@ -2649,7 +2694,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	var useScale: f32 = __MB2P38__;
 	if ((__MB2P39__ != 0)
-			&& (*aux).i >= (__MB2P40__ != 0)
+			&& (*aux).i >= __MB2P40__
 			&& (*aux).i < __MB2P41__)
 	{
 		useScale += (*aux).actual_scale_a;
@@ -2669,7 +2714,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P45__ != 0)
-			&& (*aux).i >= (__MB2P46__ != 0)
+			&& (*aux).i >= __MB2P46__
 			&& (*aux).i < __MB2P47__)
 	{
 		var offset: vec4<f32> = (*aux).pos_neg * __MB2P48__;
@@ -2686,7 +2731,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P55__ != 0)
-			&& (*aux).i >= (__MB2P56__ != 0)
+			&& (*aux).i >= __MB2P56__
 			&& (*aux).i < __MB2P57__)
 	{
 		var tempC: vec4<f32> = c;
@@ -2701,7 +2746,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 	
 	if ((__MB2P63__ != 0)
-			&& (*aux).i >= (__MB2P64__ != 0)
+			&& (*aux).i >= __MB2P64__
 			&& (*aux).i < __MB2P65__)
 	{
 		z = mb2_mat_mul(__MB2P66__, z);
@@ -2719,6 +2764,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "AboxTetra4d",
         source: "abox_tetra4d.cl",
         param_floats: 51,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offsetA0000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.offset1111", kind: ParamKind::Float4, offset: 4, default: &[1.0, 1.0, 1.0, 1.0] },
@@ -2797,7 +2845,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).de = (*aux).de * abs(useScale) + 1.0;
 	
 	if ((__MB2P17__ != 0)
-			&& (*aux).i >= (__MB2P18__ != 0)
+			&& (*aux).i >= __MB2P18__
 			&& (*aux).i < __MB2P19__)
 	{
 		
@@ -2808,7 +2856,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P22__ != 0)
-			&& (*aux).i >= (__MB2P23__ != 0)
+			&& (*aux).i >= __MB2P23__
 			&& (*aux).i < __MB2P24__)
 	{
 		var tp: vec4<f32>;
@@ -2883,6 +2931,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "AboxVSIcen1",
         source: "abox_vs_icen1.cl",
         param_floats: 39,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "mandelbox.scale", kind: ParamKind::Float, offset: 0, default: &[2.0] },
             GeneratedParam { path: "mandelboxVary4D.scaleVary", kind: ParamKind::Float, offset: 1, default: &[0.0] },
@@ -2945,7 +2996,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	z *= (*aux).actual_scale; 
 	(*aux).de = (*aux).de * abs((*aux).actual_scale) + 1.0;
 
-	if ((__MB2P24__ != 0) && (*aux).i >= (__MB2P25__ != 0)
+	if ((__MB2P24__ != 0) && (*aux).i >= __MB2P25__
 			&& (*aux).i < __MB2P26__)
 	{
 		z = mb2_mat_mul(__MB2P27__, z);
@@ -2966,6 +3017,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Aexion",
         source: "aexion.cl",
         param_floats: 4,
+        de_function: DeFunction::Logarithmic,
+        add_c: false,
+        bailout: 10000.0,
         params: &[
             GeneratedParam { path: "aexion.cadd", kind: ParamKind::Float, offset: 0, default: &[0.0] },
             GeneratedParam { path: "analyticDE.enabled", kind: ParamKind::Int, offset: 1, default: &[1.0] },
@@ -3009,6 +3063,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Aexion4dV2",
         source: "aexion4d_v2.cl",
         param_floats: 14,
+        de_function: DeFunction::Logarithmic,
+        add_c: false,
+        bailout: 10000.0,
         params: &[
             GeneratedParam { path: "aexion.cadd", kind: ParamKind::Float, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.offsetA0000", kind: ParamKind::Float4, offset: 1, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -3061,6 +3118,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "AexionOctopusMod",
         source: "aexion_octopus_mod.cl",
         param_floats: 35,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.scale3D111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 4, default: &[1.0] },
@@ -3124,6 +3184,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "AmazingIfs",
         source: "amazing_ifs.cl",
         param_floats: 83,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.sphereInversionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsX", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -3179,7 +3242,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		z += __MB2P3__;
@@ -3201,7 +3264,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P21__ != 0)
-			&& (*aux).i >= (__MB2P22__ != 0)
+			&& (*aux).i >= __MB2P22__
 			&& (*aux).i < __MB2P23__)
 	{
 		z.y = abs(z.y);
@@ -3262,7 +3325,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	var useScale: f32 = 1.0;
-	if ((*aux).i >= (__MB2P48__ != 0)
+	if ((*aux).i >= __MB2P48__
 			&& (*aux).i < __MB2P49__)
 	{
 		useScale = ((*aux).actual_scale_a + __MB2P50__) / dividend;
@@ -3282,7 +3345,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	if ((__MB2P67__ != 0))
 	{
 		(*aux).de0 = length(z) / (*aux).de;
-		if (!(__MB2P68__ != 0) && (*aux).i >= (__MB2P69__ != 0)
+		if (!(__MB2P68__ != 0) && (*aux).i >= __MB2P69__
 				&& (*aux).i < __MB2P70__)
 			{ (*aux).de0 = min((*aux).dist, (*aux).de0); }
 		(*aux).dist = (*aux).de0;
@@ -3319,6 +3382,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "AmazingSurf",
         source: "amazing_surf.cl",
         param_floats: 26,
+        de_function: DeFunction::Linear,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "mandelbox.scale", kind: ParamKind::Float, offset: 0, default: &[2.0] },
             GeneratedParam { path: "mandelboxVary4D.scaleVary", kind: ParamKind::Float, offset: 1, default: &[0.0] },
@@ -3368,6 +3434,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "AmazingSurfKlein",
         source: "amazing_surf_klein.cl",
         param_floats: 59,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.sphereInversionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsX", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -3400,7 +3469,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         wgsl: r####"
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		z += __MB2P3__;
@@ -3500,6 +3569,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "AmazingSurfKleinV2",
         source: "amazing_surf_klein_v2.cl",
         param_floats: 78,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -3548,7 +3620,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         wgsl: r####"
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		z.x = abs(z.x);
@@ -3563,7 +3635,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P9__ != 0)
-			&& (*aux).i >= (__MB2P10__ != 0)
+			&& (*aux).i >= __MB2P10__
 			&& (*aux).i < __MB2P11__)
 	{
 		z += __MB2P12__;
@@ -3584,7 +3656,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 					- abs(z.y - __MB2P23__.y) - z.y;
 
 		if ((__MB2P27__ != 0)
-				&& (*aux).i >= (__MB2P28__ != 0)
+				&& (*aux).i >= __MB2P28__
 				&& (*aux).i < __MB2P29__)
 		{
 			var tt: f32 = z.x;
@@ -3593,7 +3665,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		}
 
 		if ((__MB2P30__ != 0)
-				&& (*aux).i >= (__MB2P31__ != 0)
+				&& (*aux).i >= __MB2P31__
 				&& (*aux).i < __MB2P32__)
 		{
 			z.z = abs(z.z + __MB2P23__.z)
@@ -3606,7 +3678,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 			z.z = tt;
 		}
 		if ((__MB2P33__ != 0)
-				&& (*aux).i >= (__MB2P34__ != 0)
+				&& (*aux).i >= __MB2P34__
 				&& (*aux).i < __MB2P35__)
 		{
 			var tt: f32 = z.x;
@@ -3625,7 +3697,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z *= useScale;
 		(*aux).de = (*aux).de * abs(useScale) + __MB2P38__;
 		if ((__MB2P39__ != 0)
-				&& (*aux).i >= (__MB2P40__ != 0)
+				&& (*aux).i >= __MB2P40__
 				&& (*aux).i < __MB2P41__)
 		{
 			
@@ -3638,7 +3710,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		{
 			z = mb2_mat_mul(__MB2P45__, z);
 		}
-		if ((*aux).i >= (__MB2P57__ != 0)
+		if ((*aux).i >= __MB2P57__
 				&& (*aux).i < __MB2P58__)
 			{ z += __MB2P59__; }
 
@@ -3678,6 +3750,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "AmazingSurfM3d",
         source: "amazing_surf_m3d.cl",
         param_floats: 50,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledSwFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -3706,7 +3781,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		if ((__MB2P3__ != 0)) { z.x = -z.x; }
@@ -3728,7 +3803,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	
 	var rr: f32 = dot(z, z);
 	if ((__MB2P16__ != 0)
-			&& (*aux).i >= (__MB2P17__ != 0)
+			&& (*aux).i >= __MB2P17__
 			&& (*aux).i < __MB2P18__)
 	{
 		rr = dot(z, z) - z.z * z.z * __MB2P19__;
@@ -3754,7 +3829,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	if ((__MB2P43__ != 0))
 	{
 		var colorAdd: f32 = 0.0;
-		if ((*aux).i >= (__MB2P44__ != 0)
+		if ((*aux).i >= __MB2P44__
 				&& (*aux).i < __MB2P45__)
 		{
 			zCol = abs(zCol - oldZ);
@@ -3776,6 +3851,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "AmazingSurfMod1",
         source: "amazing_surf_mod1.cl",
         param_floats: 42,
+        de_function: DeFunction::Linear,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "mandelbox.scale", kind: ParamKind::Float, offset: 0, default: &[2.0] },
             GeneratedParam { path: "mandelboxVary4D.scaleVary", kind: ParamKind::Float, offset: 1, default: &[0.0] },
@@ -3894,7 +3972,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	z = mb2_mat_mul(__MB2P27__, z);
 
-	if ((__MB2P39__ != 0) && (*aux).i >= (__MB2P40__ != 0)
+	if ((__MB2P39__ != 0) && (*aux).i >= __MB2P40__
 			&& (*aux).i < __MB2P41__)
 	{
 		(*aux).color += colorAdd;
@@ -3906,6 +3984,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "AmazingSurfMod4",
         source: "amazing_surf_mod4.cl",
         param_floats: 68,
+        de_function: DeFunction::Linear,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.sphereInversionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsX", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -3939,7 +4020,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		z += __MB2P3__;
@@ -4015,6 +4096,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Benesi",
         source: "benesi.cl",
         param_floats: 5,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledEFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 1, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -4047,6 +4131,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "BenesiPineTree",
         source: "benesi_pine_tree.cl",
         param_floats: 5,
+        de_function: DeFunction::Logarithmic,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.constantMultiplier100", kind: ParamKind::Float4, offset: 0, default: &[1.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.angle0", kind: ParamKind::Float, offset: 4, default: &[0.0] },
@@ -4093,6 +4180,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "BenesiPwr2Mandelbulb",
         source: "benesi_pwr2_mandelbulb.cl",
         param_floats: 76,
+        de_function: DeFunction::Logarithmic,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -4135,7 +4225,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var c: vec4<f32> = (*aux).const_c;
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		var gap: vec4<f32> = __MB2P3__;
@@ -4169,7 +4259,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		}
 	}
 	
-	if ((__MB2P8__ != 0) && (*aux).i >= (__MB2P9__ != 0)
+	if ((__MB2P8__ != 0) && (*aux).i >= __MB2P9__
 			&& (*aux).i < __MB2P10__)
 	{
 		var tempXZ: f32 = z.x * SQRT_2_3_F - z.z * SQRT_1_3_F;
@@ -4195,7 +4285,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P32__ != 0)
-			&& (*aux).i >= (__MB2P33__ != 0)
+			&& (*aux).i >= __MB2P33__
 			&& (*aux).i < __MB2P34__)
 	{ 
 		var zz: vec4<f32> = z * z;
@@ -4215,7 +4305,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 	
 	if ((__MB2P39__ != 0)
-			&& (*aux).i >= (__MB2P40__ != 0)
+			&& (*aux).i >= __MB2P40__
 			&& (*aux).i < __MB2P41__)
 	{
 		var zz: vec4<f32> = z * z;
@@ -4247,7 +4337,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P47__ != 0)
-			&& (*aux).i >= (__MB2P48__ != 0)
+			&& (*aux).i >= __MB2P48__
 			&& (*aux).i < __MB2P49__)
 	{
 		z = vec4<f32>(z.x * cos(z.y * __MB2P50__),
@@ -4257,7 +4347,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		(*aux).de *= abs(__MB2P52__);
 	}
 
-	if ((__MB2P53__ != 0) && (*aux).i >= (__MB2P54__ != 0)
+	if ((__MB2P53__ != 0) && (*aux).i >= __MB2P54__
 			&& (*aux).i < __MB2P55__)
 		{ z += __MB2P56__; }
 
@@ -4274,6 +4364,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "BenesiT1PineTree",
         source: "benesi_t1_pine_tree.cl",
         param_floats: 56,
+        de_function: DeFunction::Logarithmic,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.benesiT1Enabled", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -4299,13 +4392,13 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.rotationMatrix2", kind: ParamKind::Matrix33, offset: 44, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
         ],
         wgsl: r####"
-	if ((__MB2P0__ != 0) && (*aux).i >= (__MB2P1__ != 0)
+	if ((__MB2P0__ != 0) && (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 
 		
 		if ((__MB2P0__ != 0)
-				&& (*aux).i >= (__MB2P1__ != 0)
+				&& (*aux).i >= __MB2P1__
 				&& (*aux).i < __MB2P2__)
 		{
 			var tempXZ: f32 = z.x * SQRT_2_3_F - z.z * SQRT_1_3_F;
@@ -4332,7 +4425,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 	
 	if ((__MB2P24__ != 0)
-			&& (*aux).i >= (__MB2P25__ != 0)
+			&& (*aux).i >= __MB2P25__
 			&& (*aux).i < __MB2P26__)
 	{
 		var zz: vec4<f32> = z * z;
@@ -4364,7 +4457,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P32__ != 0)
-			&& (*aux).i >= (__MB2P33__ != 0)
+			&& (*aux).i >= __MB2P33__
 			&& (*aux).i < __MB2P34__)
 	{
 		z = vec4<f32>(z.x * cos(z.y * __MB2P35__),
@@ -4391,6 +4484,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "BoxFoldBulbMenger",
         source: "box_fold_bulb_menger.cl",
         param_floats: 91,
+        de_function: DeFunction::Logarithmic,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.startIterationsB", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsB", kind: ParamKind::Int, offset: 1, default: &[250.0] },
@@ -4450,7 +4546,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var zCol: vec4<f32> = z;
 	var oldZ: vec4<f32> = z;
 	
-	if ((*aux).i >= (__MB2P0__ != 0)
+	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
 	{
 		z.x = abs(z.x + __MB2P2__.x)
@@ -4463,7 +4559,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	
-	if ((*aux).i >= (__MB2P6__ != 0)
+	if ((*aux).i >= __MB2P6__
 			&& (*aux).i < __MB2P7__)
 	{
 		var rr: f32 = dot(z, z);
@@ -4486,7 +4582,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z -= __MB2P8__;
 	}
 	
-	if ((*aux).i >= (__MB2P15__ != 0)
+	if ((*aux).i >= __MB2P15__
 			&& (*aux).i < __MB2P16__)
 	{
 		z *= __MB2P17__;
@@ -4495,14 +4591,14 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P18__ != 0)
-			&& (*aux).i >= (__MB2P19__ != 0)
+			&& (*aux).i >= __MB2P19__
 			&& (*aux).i < __MB2P20__)
 	{
 		z += c * __MB2P21__;
 	}
 
 	if ((__MB2P25__ != 0)
-			&& (*aux).i >= (__MB2P26__ != 0)
+			&& (*aux).i >= __MB2P26__
 			&& (*aux).i < __MB2P27__)
 	{
 		var tempXZ: f32 = z.x * SQRT_2_3_F - z.z * SQRT_1_3_F;
@@ -4523,7 +4619,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P36__ != 0)
-			&& (*aux).i >= (__MB2P37__ != 0)
+			&& (*aux).i >= __MB2P37__
 			&& (*aux).i < __MB2P38__)
 
 	{
@@ -4546,12 +4642,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P44__ != 0)
-			&& (*aux).i >= (__MB2P45__ != 0)
+			&& (*aux).i >= __MB2P45__
 			&& (*aux).i < __MB2P46__)
 		{ z = mb2_mat_mul(__MB2P47__, z); }
 
 	
-	if ((*aux).i >= (__MB2P59__ != 0)
+	if ((*aux).i >= __MB2P59__
 			&& (*aux).i < __MB2P60__)
 	{
 		(*aux).r = length(z);
@@ -4589,7 +4685,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 	
 	if ((__MB2P71__ != 0)
-			&& (*aux).i >= (__MB2P72__ != 0)
+			&& (*aux).i >= __MB2P72__
 			&& (*aux).i < __MB2P73__)
 	{
 		z = abs(z + __MB2P74__);
@@ -4657,6 +4753,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "BoxFoldBulbPow2V2",
         source: "box_fold_bulb_pow2_v2.cl",
         param_floats: 37,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.startIterationsB", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsB", kind: ParamKind::Int, offset: 1, default: &[250.0] },
@@ -4693,7 +4792,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var zCol: vec4<f32> = z;
 	var oldZ: vec4<f32> = z;
 	
-	if ((*aux).i >= (__MB2P0__ != 0)
+	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
 	{
 		z.x = abs(z.x + __MB2P2__.x)
@@ -4706,7 +4805,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	
-	if ((*aux).i >= (__MB2P6__ != 0)
+	if ((*aux).i >= __MB2P6__
 			&& (*aux).i < __MB2P7__)
 	{
 		var rr: f32 = dot(z, z);
@@ -4731,7 +4830,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 	
 	var useScale: f32 = 1.0;
-	if ((*aux).i >= (__MB2P14__ != 0)
+	if ((*aux).i >= __MB2P14__
 			&& (*aux).i < __MB2P15__)
 	{
 
@@ -4740,7 +4839,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z *= useScale;
 		(*aux).de = (*aux).de * abs(useScale);
 
-		if ((*aux).i >= (__MB2P17__ != 0)
+		if ((*aux).i >= __MB2P17__
 				&& (*aux).i < __MB2P18__)
 		{
 			
@@ -4753,7 +4852,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		}
 	}
 
-	if ((*aux).i >= (__MB2P22__ != 0)
+	if ((*aux).i >= __MB2P22__
 			&& (*aux).i < __MB2P23__)
 	{
 		(*aux).r = length(z);
@@ -4777,7 +4876,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z.z *= __MB2P25__;
 	}
 
-	if ((__MB2P28__ != 0) && (*aux).i >= (__MB2P29__ != 0)
+	if ((__MB2P28__ != 0) && (*aux).i >= __MB2P29__
 			&& (*aux).i < __MB2P30__)
 	{
 		if (zCol.x != oldZ.x)
@@ -4809,6 +4908,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "BoxFoldBulbPow2V3",
         source: "box_fold_bulb_pow2_v3.cl",
         param_floats: 96,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.sphereInversionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -4869,7 +4971,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         wgsl: r####"
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		var rr: f32 = 1.0;
@@ -4889,7 +4991,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var oldZ: vec4<f32> = z;
 
 	
-	if ((*aux).i >= (__MB2P13__ != 0)
+	if ((*aux).i >= __MB2P13__
 			&& (*aux).i < __MB2P14__)
 	{
 		z.x = abs(z.x + __MB2P15__.x)
@@ -4902,7 +5004,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	
-	if ((*aux).i >= (__MB2P19__ != 0)
+	if ((*aux).i >= __MB2P19__
 			&& (*aux).i < __MB2P20__)
 	{
 		var rr: f32 = dot(z, z);
@@ -4925,7 +5027,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z -= __MB2P21__;
 	}
 	
-	if ((*aux).i >= (__MB2P27__ != 0)
+	if ((*aux).i >= __MB2P27__
 			&& (*aux).i < __MB2P28__)
 	{
 
@@ -4934,7 +5036,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z *= useScale;
 		(*aux).de = (*aux).de * abs(useScale);
 
-		if ((*aux).i >= (__MB2P30__ != 0)
+		if ((*aux).i >= __MB2P30__
 				&& (*aux).i < __MB2P31__)
 		{
 			
@@ -4948,7 +5050,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P35__ != 0)
-			&& (*aux).i >= (__MB2P36__ != 0)
+			&& (*aux).i >= __MB2P36__
 			&& (*aux).i < __MB2P37__)
 	{
 		var tempXZ: f32 = z.x * SQRT_2_3_F - z.z * SQRT_1_3_F;
@@ -4969,7 +5071,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P46__ != 0)
-			&& (*aux).i >= (__MB2P47__ != 0)
+			&& (*aux).i >= __MB2P47__
 			&& (*aux).i < __MB2P48__)
 
 	{
@@ -4991,12 +5093,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P54__ != 0)
-			&& (*aux).i >= (__MB2P55__ != 0)
+			&& (*aux).i >= __MB2P55__
 			&& (*aux).i < __MB2P56__)
 		{ z = mb2_mat_mul(__MB2P57__, z); }
 
 	if ((__MB2P69__ != 0)
-			&& (*aux).i >= (__MB2P70__ != 0)
+			&& (*aux).i >= __MB2P70__
 			&& (*aux).i < __MB2P71__)
 	{ 
 		z = abs(z + __MB2P72__);
@@ -5033,7 +5135,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		(*aux).de *= __MB2P76__;
 	}
 
-	if ((*aux).i >= (__MB2P82__ != 0)
+	if ((*aux).i >= __MB2P82__
 			&& (*aux).i < __MB2P83__)
 	{
 		(*aux).r = length(z);
@@ -5098,6 +5200,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "BoxFoldBulbV4",
         source: "box_fold_bulb_v4.cl",
         param_floats: 19,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset222", kind: ParamKind::Float4, offset: 0, default: &[2.0, 2.0, 2.0, 0.0] },
             GeneratedParam { path: "transformCommon.startIterationsB", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -5119,7 +5224,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 				- abs(z.x - __MB2P0__.x) - z.x;
 	z.y = abs(z.y + __MB2P0__.y)
 				- abs(z.y - __MB2P0__.y) - z.y;
-	if ((*aux).i >= (__MB2P4__ != 0)
+	if ((*aux).i >= __MB2P4__
 			&& (*aux).i < __MB2P5__)
 		{ z.z = abs(z.z + __MB2P0__.z)
 					- abs(z.z - __MB2P0__.z) - z.z; }
@@ -5170,6 +5275,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "BoxFoldQuat",
         source: "box_fold_quat.cl",
         param_floats: 91,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.startIterationsB", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsB", kind: ParamKind::Int, offset: 1, default: &[250.0] },
@@ -5229,7 +5337,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var zCol: vec4<f32> = z;
 	var oldZ: vec4<f32> = z;
 	
-	if ((*aux).i >= (__MB2P0__ != 0)
+	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
 	{
 		z.x = abs(z.x + __MB2P2__.x)
@@ -5242,7 +5350,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	
-	if ((*aux).i >= (__MB2P6__ != 0)
+	if ((*aux).i >= __MB2P6__
 			&& (*aux).i < __MB2P7__)
 	{
 
@@ -5266,7 +5374,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z -= __MB2P8__;
 	}
 	
-	if ((*aux).i >= (__MB2P14__ != 0)
+	if ((*aux).i >= __MB2P14__
 			&& (*aux).i < __MB2P15__)
 	{
 
@@ -5275,7 +5383,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z *= useScale;
 		(*aux).de = (*aux).de * abs(useScale);
 
-		if ((*aux).i >= (__MB2P17__ != 0)
+		if ((*aux).i >= __MB2P17__
 				&& (*aux).i < __MB2P18__)
 		{
 			
@@ -5289,7 +5397,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P22__ != 0)
-			&& (*aux).i >= (__MB2P23__ != 0)
+			&& (*aux).i >= __MB2P23__
 			&& (*aux).i < __MB2P24__)
 	{
 		var tempXZ: f32 = z.x * SQRT_2_3_F - z.z * SQRT_1_3_F;
@@ -5310,7 +5418,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P33__ != 0)
-			&& (*aux).i >= (__MB2P34__ != 0)
+			&& (*aux).i >= __MB2P34__
 			&& (*aux).i < __MB2P35__)
 
 	{
@@ -5333,12 +5441,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P41__ != 0)
-			&& (*aux).i >= (__MB2P42__ != 0)
+			&& (*aux).i >= __MB2P42__
 			&& (*aux).i < __MB2P43__)
 		{ z = mb2_mat_mul(__MB2P44__, z); }
 
 	if ((__MB2P56__ != 0)
-			&& (*aux).i >= (__MB2P57__ != 0)
+			&& (*aux).i >= __MB2P57__
 			&& (*aux).i < __MB2P58__)
 	{ 
 		z = abs(z + __MB2P59__);
@@ -5368,7 +5476,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		(*aux).de *= __MB2P63__;
 	}
 
-	if ((*aux).i >= (__MB2P68__ != 0)
+	if ((*aux).i >= __MB2P68__
 			&& (*aux).i < __MB2P69__)
 	{
 		(*aux).r = length(z);
@@ -5431,6 +5539,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Bristorbrot",
         source: "bristorbrot.cl",
         param_floats: 0,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
         ],
         wgsl: r####"
@@ -5450,6 +5561,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Bristorbrot2",
         source: "bristorbrot2.cl",
         param_floats: 20,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "buffalo.preabsx", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "buffalo.preabsy", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -5524,6 +5638,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Bristorbrot4d",
         source: "bristorbrot4d.cl",
         param_floats: 4,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant0000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
         ],
@@ -5546,6 +5663,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Buffalo",
         source: "buffalo.cl",
         param_floats: 7,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "buffalo.preabsx", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "buffalo.preabsy", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -5580,6 +5700,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Coastalbrot",
         source: "coastalbrot.cl",
         param_floats: 0,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
         ],
         wgsl: r####"
@@ -5602,6 +5725,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Collatz",
         source: "collatz.cl",
         param_floats: 0,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
         ],
         wgsl: r####"
@@ -5620,6 +5746,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "CollatzMod",
         source: "collatz_mod.cl",
         param_floats: 18,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.constantMultiplierB111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.scale4", kind: ParamKind::Float, offset: 4, default: &[4.0] },
@@ -5659,6 +5788,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "DIFSAmazingIfs",
         source: "difs_amazing_ifs.cl",
         param_floats: 53,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -5700,7 +5832,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P8__ != 0)
-			&& (*aux).i >= (__MB2P9__ != 0)
+			&& (*aux).i >= __MB2P9__
 			&& (*aux).i < __MB2P10__)
 	{
 		z.y = abs(z.y);
@@ -5738,7 +5870,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	
-	if ((*aux).i >= (__MB2P18__ != 0)
+	if ((*aux).i >= __MB2P18__
 			&& (*aux).i < __MB2P19__)
 	{
 		z *= __MB2P20__;
@@ -5753,7 +5885,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	
 	var colorDist: f32 = (*aux).dist;
 	(*aux).de0 = length(z) / (*aux).de;
-	if (!(__MB2P38__ != 0) && (*aux).i >= (__MB2P39__ != 0)
+	if (!(__MB2P38__ != 0) && (*aux).i >= __MB2P39__
 			&& (*aux).i < __MB2P40__)
 		{ (*aux).de0 = min((*aux).dist, (*aux).de0); }
 	(*aux).dist = (*aux).de0;
@@ -5789,6 +5921,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "DIFSGreekIfs",
         source: "difs_greek_ifs.cl",
         param_floats: 75,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -5853,7 +5988,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		if ((__MB2P3__ != 0))
@@ -5890,12 +6025,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	if (zc.x > 0.0) { zc.y += __MB2P18__; }
 
 	if (!(__MB2P19__ != 0)
-			&& (*aux).i >= (__MB2P20__ != 0)
+			&& (*aux).i >= __MB2P20__
 			&& (*aux).i < __MB2P21__)
 		{ zc.y = zc.y + sign(zc.x) * __MB2P22__ + __MB2P23__; }
 
 	if ((__MB2P24__ != 0)
-			&& (*aux).i >= (__MB2P25__ != 0)
+			&& (*aux).i >= __MB2P25__
 			&& (*aux).i < __MB2P26__)
 		{ zc.x =
 			zc.x + sign(zc.y) * __MB2P27__ + __MB2P28__; }
@@ -5911,7 +6046,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P33__ != 0) 
-			&& (*aux).i >= (__MB2P34__ != 0)
+			&& (*aux).i >= __MB2P34__
 			&& (*aux).i < __MB2P35__)
 		{ zc.x = sqrt((zc.x * zc.x) + (zc.y * zc.y)); }
 
@@ -5973,7 +6108,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var colDist: f32 = (*aux).dist;
 	(*aux).dist = min((*aux).dist, t / ((*aux).de + __MB2P63__));
 
-	if ((__MB2P64__ != 0) && (*aux).i >= (__MB2P65__ != 0)
+	if ((__MB2P64__ != 0) && (*aux).i >= __MB2P65__
 			&& (*aux).i < __MB2P66__)
 	{
 		var colorAdd: f32 = 0.0;
@@ -6000,6 +6135,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "DIFSHextgrid2",
         source: "difs_hextgrid2.cl",
         param_floats: 62,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.sphereInversionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsX", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -6046,7 +6184,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		z += __MB2P3__;
@@ -6059,7 +6197,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P13__ != 0)
-			&& (*aux).i >= (__MB2P14__ != 0)
+			&& (*aux).i >= __MB2P14__
 			&& (*aux).i < __MB2P15__)
 	{
 		var Tp: f32 = __MB2P16__;
@@ -6069,7 +6207,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	
-	if ((*aux).i >= (__MB2P18__ != 0)
+	if ((*aux).i >= __MB2P18__
 			&& (*aux).i < __MB2P19__)
 	{
 		var useScale: f32 = (*aux).actual_scale_a + __MB2P20__;
@@ -6077,7 +6215,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		(*aux).de = (*aux).de * abs(useScale);
 		
 		if ((__MB2P21__ != 0)
-				&& (*aux).i >= (__MB2P22__ != 0)
+				&& (*aux).i >= __MB2P22__
 				&& (*aux).i < __MB2P23__)
 		{
 			
@@ -6092,7 +6230,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P30__ != 0)
-			&& (*aux).i >= (__MB2P31__ != 0)
+			&& (*aux).i >= __MB2P31__
 			&& (*aux).i < __MB2P32__)
 	{
 		z = mb2_mat_mul(__MB2P33__, z);
@@ -6103,7 +6241,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var zc: vec4<f32> = z;
 
 	
-	if ((*aux).i >= (__MB2P45__ != 0)
+	if ((*aux).i >= __MB2P45__
 			&& (*aux).i < __MB2P46__)
 	{
 		var size: f32 = __MB2P47__;
@@ -6126,7 +6264,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P51__ != 0) && colorDist != (*aux).dist
-			&& (*aux).i >= (__MB2P52__ != 0)
+			&& (*aux).i >= __MB2P52__
 			&& (*aux).i < __MB2P53__)
 	{
 		colorAdd += ((*aux).i * __MB2P54__ + __MB2P55__);
@@ -6154,6 +6292,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "DIFSMsltoeDonut",
         source: "difs_msltoe_donut.cl",
         param_floats: 6,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "donut.ringThickness", kind: ParamKind::Float, offset: 0, default: &[0.1] },
             GeneratedParam { path: "donut.number", kind: ParamKind::Float, offset: 1, default: &[9.0] },
@@ -6200,6 +6341,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "FoldBoxMod1",
         source: "fold_box_mod1.cl",
         param_floats: 60,
+        de_function: DeFunction::Linear,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterations", kind: ParamKind::Int, offset: 1, default: &[250.0] },
@@ -6241,7 +6385,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         ],
         wgsl: r####"
 	var colorAdd: f32 = 0.0;
-	if ((*aux).i >= (__MB2P0__ != 0)
+	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
 	{
 		var tempA: vec4<f32> = vec4<f32>(0.0, 0.0, 0.0, 0.0);
@@ -6271,7 +6415,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P24__ != 0)
-			&& (*aux).i >= (__MB2P25__ != 0)
+			&& (*aux).i >= __MB2P25__
 			&& (*aux).i < __MB2P26__) 
 	{
 		if (abs(z.x) > __MB2P27__)
@@ -6293,7 +6437,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		}
 	}
 
-	if ((*aux).i >= (__MB2P30__ != 0)
+	if ((*aux).i >= __MB2P30__
 			&& (*aux).i < __MB2P31__) 
 	{
 		var r2: f32 = dot(z, z);
@@ -6316,7 +6460,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P37__ != 0)
-			&& (*aux).i >= (__MB2P38__ != 0)
+			&& (*aux).i >= __MB2P38__
 			&& (*aux).i < __MB2P39__)
 	{
 		var useScale: f32 = (*aux).actual_scale_a + __MB2P40__;
@@ -6336,7 +6480,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z *= __MB2P40__;
 		(*aux).de = (*aux).de * abs(__MB2P40__) + 1.0;
 	}
-	if ((__MB2P44__ != 0) && (*aux).i >= (__MB2P45__ != 0)
+	if ((__MB2P44__ != 0) && (*aux).i >= __MB2P45__
 			&& (*aux).i < __MB2P46__)
 		{ z = mb2_mat_mul(__MB2P47__, z); }
 
@@ -6352,6 +6496,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Hypercomplex",
         source: "hypercomplex.cl",
         param_floats: 0,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
         ],
         wgsl: r####"
@@ -6373,6 +6520,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "HypercomplexV2",
         source: "hypercomplex_v2.cl",
         param_floats: 27,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -6415,7 +6565,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P14__ != 0)
-			&& (*aux).i >= (__MB2P15__ != 0)
+			&& (*aux).i >= __MB2P15__
 			&& (*aux).i < __MB2P16__)
 	{
 		var tp: vec4<f32>;
@@ -6471,6 +6621,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Ides",
         source: "ides.cl",
         param_floats: 8,
+        de_function: DeFunction::Unsupported,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.constantMultiplier121", kind: ParamKind::Float4, offset: 0, default: &[1.0, 2.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.additionConstant0555", kind: ParamKind::Float4, offset: 4, default: &[0.5, 0.5, 0.5, 0.0] },
@@ -6497,6 +6650,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Ides2",
         source: "ides2.cl",
         param_floats: 8,
+        de_function: DeFunction::Unsupported,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.constantMultiplier121", kind: ParamKind::Float4, offset: 0, default: &[1.0, 2.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.additionConstant0555", kind: ParamKind::Float4, offset: 4, default: &[0.5, 0.5, 0.5, 0.0] },
@@ -6520,6 +6676,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "IfsGen",
         source: "ifs_gen.cl",
         param_floats: 53,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAy", kind: ParamKind::Int, offset: 1, default: &[1.0] },
@@ -6562,7 +6721,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).de *= abs(useScale);
 
 	if ((__MB2P8__ != 0)
-			&& (*aux).i >= (__MB2P9__ != 0)
+			&& (*aux).i >= __MB2P9__
 			&& (*aux).i < __MB2P10__)
 	{
 		
@@ -6574,14 +6733,14 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	z = mb2_mat_mul(__MB2P13__, z);
 
 	
-	if ((*aux).i >= (__MB2P25__ != 0)
+	if ((*aux).i >= __MB2P25__
 			&& (*aux).i < __MB2P26__)
 		{ z += __MB2P27__; }
 
 	
 	var m: f32 = 1.0;
 	if ((__MB2P31__ != 0)
-			&& (*aux).i >= (__MB2P32__ != 0)
+			&& (*aux).i >= __MB2P32__
 			&& (*aux).i < __MB2P33__)
 	{
 		var rr: f32 = dot(z, z);
@@ -6595,7 +6754,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	
-	if ((*aux).i >= (__MB2P36__ != 0)
+	if ((*aux).i >= __MB2P36__
 			&& (*aux).i < __MB2P37__)
 	{
 		z = mb2_mat_mul(__MB2P38__, z);
@@ -6610,6 +6769,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "ImaginaryScatorPower2",
         source: "imaginary_scator_power2.cl",
         param_floats: 0,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 10.0,
         params: &[
         ],
         wgsl: r####"
@@ -6634,6 +6796,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "IqBulb",
         source: "iq_bulb.cl",
         param_floats: 2,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.pwr8", kind: ParamKind::Float, offset: 0, default: &[8.0] },
             GeneratedParam { path: "transformCommon.pwr8a", kind: ParamKind::Float, offset: 1, default: &[8.0] },
@@ -6664,6 +6829,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "JosKleinian",
         source: "jos_kleinian.cl",
         param_floats: 44,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.sphereInversionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 1, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -6709,7 +6877,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	var box_size: vec4<f32> = __MB2P11__;
 	
-	if ((*aux).i >= (__MB2P15__ != 0)
+	if ((*aux).i >= __MB2P15__
 			&& (*aux).i < __MB2P16__)
 	{
 		var a: f32 = __MB2P17__;
@@ -6742,7 +6910,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		(*aux).de *= abs(iR);
 	}
 	
-	if ((__MB2P20__ != 0) && (*aux).i >= (__MB2P21__ != 0)
+	if ((__MB2P20__ != 0) && (*aux).i >= __MB2P21__
 			&& (*aux).i < __MB2P22__)
 	{
 		var colorAdd: f32 = 0.0;
@@ -6751,7 +6919,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		colorAdd += __MB2P23__.z * abs(z.y - oldZy);
 
 		if ((__MB2P27__ != 0)
-				&& (*aux).i >= (__MB2P28__ != 0)
+				&& (*aux).i >= __MB2P28__
 				&& (*aux).i < __MB2P29__)
 		{
 			var Size: f32 = box_size.x * __MB2P30__.x;
@@ -6787,6 +6955,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "JosKleinianV2",
         source: "jos_kleinian_v2.cl",
         param_floats: 46,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.sphereInversionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -6826,7 +6997,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         wgsl: r####"
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		var rr: f32 = 1.0;
@@ -6841,7 +7012,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P14__ != 0)
-			&& (*aux).i >= (__MB2P15__ != 0)
+			&& (*aux).i >= __MB2P15__
 			&& (*aux).i < __MB2P16__)
 	{
 		var oldZ: vec4<f32> = z;
@@ -6881,7 +7052,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P29__ != 0)
-			&& (*aux).i >= (__MB2P30__ != 0)
+			&& (*aux).i >= __MB2P30__
 			&& (*aux).i < __MB2P31__)
 	{
 		if (z.z > z.x)
@@ -6893,7 +7064,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	
-	if ((*aux).i >= (__MB2P32__ != 0)
+	if ((*aux).i >= __MB2P32__
 			&& (*aux).i < __MB2P33__)
 	{
 		var a: f32 = __MB2P34__;
@@ -6931,7 +7102,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P41__ != 0)
-			&& (*aux).i >= (__MB2P42__ != 0)
+			&& (*aux).i >= __MB2P42__
 			&& (*aux).i < __MB2P43__)
 	{
 		z.z = sign(z.z)
@@ -6945,6 +7116,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Kalisets1",
         source: "kalisets1.cl",
         param_floats: 25,
+        de_function: DeFunction::Linear,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.minR0", kind: ParamKind::Float, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.scale", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -6985,6 +7159,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Koch",
         source: "koch.cl",
         param_floats: 28,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 4, default: &[1.0] },
@@ -7040,7 +7217,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P10__ != 0)
-			&& (*aux).i >= (__MB2P11__ != 0)
+			&& (*aux).i >= __MB2P11__
 			&& (*aux).i < __MB2P12__)
 	{
 		z = mb2_mat_mul(__MB2P13__, z);
@@ -7050,7 +7227,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).dist = abs(length(z) - length(Offset));
 	(*aux).dist = (*aux).dist / (*aux).de;
 
-	if ((__MB2P25__ != 0) && (*aux).i >= (__MB2P26__ != 0)
+	if ((__MB2P25__ != 0) && (*aux).i >= __MB2P26__
 			&& (*aux).i < __MB2P27__)
 	{
 		if (colDist != (*aux).dist) { (*aux).color += col; }
@@ -7064,6 +7241,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "KochIfs",
         source: "koch_ifs.cl",
         param_floats: 89,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.startIterationsCx", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -7134,22 +7314,22 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var colAdd: f32 = 0.0;
 
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 		{ z.x = abs(z.x); }
 
 	if ((__MB2P3__ != 0)
-			&& (*aux).i >= (__MB2P4__ != 0)
+			&& (*aux).i >= __MB2P4__
 			&& (*aux).i < __MB2P5__)
 		{ z.y = abs(z.y); }
 
 	if ((__MB2P6__ != 0)
-			&& (*aux).i >= (__MB2P7__ != 0)
+			&& (*aux).i >= __MB2P7__
 			&& (*aux).i < __MB2P8__)
 		{ z.z = abs(z.z); }
 
 	if ((__MB2P9__ != 0)
-			&& (*aux).i >= (__MB2P10__ != 0)
+			&& (*aux).i >= __MB2P10__
 			&& (*aux).i < __MB2P11__)
 	{
 		if (z.y > z.x)
@@ -7162,7 +7342,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P16__ != 0)
-			&& (*aux).i >= (__MB2P17__ != 0)
+			&& (*aux).i >= __MB2P17__
 			&& (*aux).i < __MB2P18__)
 	{
 		z = z - __MB2P19__;
@@ -7170,7 +7350,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P23__ != 0)
-			&& (*aux).i >= (__MB2P24__ != 0)
+			&& (*aux).i >= __MB2P24__
 			&& (*aux).i < __MB2P25__)
 	{
 		
@@ -7205,7 +7385,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P33__ != 0)
-			&& (*aux).i >= (__MB2P34__ != 0)
+			&& (*aux).i >= __MB2P34__
 			&& (*aux).i < __MB2P35__)
 	{
 		z += __MB2P36__;
@@ -7231,7 +7411,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var third: f32 = FRAC_1_3_F;
 	if ((__MB2P44__ != 0)) { third = -FRAC_1_3_F; }
 
-	if ((*aux).i >= (__MB2P45__ != 0)
+	if ((*aux).i >= __MB2P45__
 			&& (*aux).i < __MB2P46__)
 	{
 		z.x += third;
@@ -7245,7 +7425,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z.x -= third;
 	}
 
-	if ((*aux).i >= (__MB2P47__ != 0)
+	if ((*aux).i >= __MB2P47__
 			&& (*aux).i < __MB2P48__)
 	{
 		z.x -= third;
@@ -7259,7 +7439,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z.x += third;
 	}
 
-	if ((*aux).i >= (__MB2P49__ != 0)
+	if ((*aux).i >= __MB2P49__
 			&& (*aux).i < __MB2P50__)
 		{ z = z - __MB2P51__; }
 
@@ -7279,13 +7459,13 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	z *= useScale;
 
 	if ((__MB2P64__ != 0)
-			&& (*aux).i >= (__MB2P65__ != 0)
+			&& (*aux).i >= __MB2P65__
 			&& (*aux).i < __MB2P66__)
 		{ z.z = -z.z; }
 
 	
 	if ((__MB2P67__ != 0)
-			&& (*aux).i >= (__MB2P68__ != 0)
+			&& (*aux).i >= __MB2P68__
 			&& (*aux).i < __MB2P69__)
 	{
 		z = mb2_mat_mul(__MB2P70__, z);
@@ -7301,7 +7481,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	
-	if ((__MB2P84__ != 0) && (*aux).i >= (__MB2P85__ != 0)
+	if ((__MB2P84__ != 0) && (*aux).i >= __MB2P85__
 			&& (*aux).i < __MB2P86__)
 	{
 		colAdd += (*aux).i * __MB2P87__ + __MB2P12__.w;
@@ -7322,6 +7502,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "KochV5",
         source: "koch_v5.cl",
         param_floats: 113,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.startIterationsCx", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -7416,22 +7599,22 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var colAdd: f32 = 0.0;
 
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 		{ z.x = abs(z.x); }
 
 	if ((__MB2P3__ != 0)
-			&& (*aux).i >= (__MB2P4__ != 0)
+			&& (*aux).i >= __MB2P4__
 			&& (*aux).i < __MB2P5__)
 		{ z.y = abs(z.y); }
 
 	if ((__MB2P6__ != 0)
-			&& (*aux).i >= (__MB2P7__ != 0)
+			&& (*aux).i >= __MB2P7__
 			&& (*aux).i < __MB2P8__)
 		{ z.z = abs(z.z); }
 
 	if ((__MB2P9__ != 0)
-			&& (*aux).i >= (__MB2P10__ != 0)
+			&& (*aux).i >= __MB2P10__
 			&& (*aux).i < __MB2P11__)
 	{
 		if (z.y > z.x)
@@ -7444,7 +7627,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P16__ != 0)
-			&& (*aux).i >= (__MB2P17__ != 0)
+			&& (*aux).i >= __MB2P17__
 			&& (*aux).i < __MB2P18__)
 	{
 		z = z - __MB2P19__;
@@ -7452,7 +7635,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P23__ != 0)
-			&& (*aux).i >= (__MB2P24__ != 0)
+			&& (*aux).i >= __MB2P24__
 			&& (*aux).i < __MB2P25__)
 	{
 		
@@ -7487,7 +7670,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P33__ != 0)
-			&& (*aux).i >= (__MB2P34__ != 0)
+			&& (*aux).i >= __MB2P34__
 			&& (*aux).i < __MB2P35__)
 	{
 		z += __MB2P36__;
@@ -7513,7 +7696,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var third: f32 = FRAC_1_3_F;
 	if ((__MB2P44__ != 0)) { third = -FRAC_1_3_F; }
 
-	if ((*aux).i >= (__MB2P45__ != 0)
+	if ((*aux).i >= __MB2P45__
 			&& (*aux).i < __MB2P46__)
 	{
 		z.x += third;
@@ -7527,7 +7710,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z.x -= third;
 	}
 
-	if ((*aux).i >= (__MB2P47__ != 0)
+	if ((*aux).i >= __MB2P47__
 			&& (*aux).i < __MB2P48__)
 	{
 		z.x -= third;
@@ -7541,7 +7724,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z.x += third;
 	}
 
-	if ((*aux).i >= (__MB2P49__ != 0)
+	if ((*aux).i >= __MB2P49__
 			&& (*aux).i < __MB2P50__)
 		{ z = z - __MB2P51__; }
 
@@ -7561,13 +7744,13 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	z *= useScale;
 
 	if ((__MB2P64__ != 0)
-			&& (*aux).i >= (__MB2P65__ != 0)
+			&& (*aux).i >= __MB2P65__
 			&& (*aux).i < __MB2P66__)
 		{ z.z = -z.z; }
 
 	
 	if ((__MB2P67__ != 0)
-			&& (*aux).i >= (__MB2P68__ != 0)
+			&& (*aux).i >= __MB2P68__
 			&& (*aux).i < __MB2P69__)
 	{
 		z = mb2_mat_mul(__MB2P70__, z);
@@ -7584,7 +7767,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		if ((__MB2P83__ != 0))
 		{
 			
-			if ((*aux).i >= (__MB2P84__ != 0)
+			if ((*aux).i >= __MB2P84__
 					&& (*aux).i < __MB2P85__)
 			{
 				var a: f32;
@@ -7619,7 +7802,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 		
 		if ((__MB2P90__ != 0)
-				&& (*aux).i >= (__MB2P91__ != 0)
+				&& (*aux).i >= __MB2P91__
 				&& (*aux).i < __MB2P92__)
 		{
 			var g: f32;
@@ -7634,7 +7817,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 		
 		if ((__MB2P96__ != 0)
-				&& (*aux).i >= (__MB2P97__ != 0)
+				&& (*aux).i >= __MB2P97__
 				&& (*aux).i < __MB2P98__)
 		{
 			var e: f32 = __MB2P99__;
@@ -7661,7 +7844,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		d = d / (*aux).de - __MB2P103__;
 		colDist = (*aux).dist;
 
-		if ((*aux).i >= (__MB2P104__ != 0)
+		if ((*aux).i >= __MB2P104__
 				&& (*aux).i < __MB2P105__)
 		{
 			(*aux).dist = min(d, (*aux).dist);
@@ -7672,7 +7855,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		}
 	}
 	
-	if ((__MB2P106__ != 0) && (*aux).i >= (__MB2P107__ != 0)
+	if ((__MB2P106__ != 0) && (*aux).i >= __MB2P107__
 			&& (*aux).i < __MB2P108__)
 	{
 		if ((__MB2P109__ != 0) || colDist != (*aux).dist)
@@ -7692,6 +7875,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Lkmitch",
         source: "lkmitch.cl",
         param_floats: 2,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -7715,6 +7901,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Makin3d2",
         source: "makin3d2.cl",
         param_floats: 2,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -7738,6 +7927,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandalayBoxV1",
         source: "mandalay_box_v1.cl",
         param_floats: 31,
+        de_function: DeFunction::Linear,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.additionConstant111", kind: ParamKind::Float4, offset: 1, default: &[1.0, 1.0, 1.0, 0.0] },
@@ -7852,6 +8044,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandalayBoxV2",
         source: "mandalay_box_v2.cl",
         param_floats: 55,
+        de_function: DeFunction::Linear,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -7895,7 +8090,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		z.x = abs(z.x + __MB2P3__.x)
@@ -7914,7 +8109,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var signZ: f32 = sign(z.z);
 
 	if ((__MB2P8__ != 0)
-			&& (*aux).i >= (__MB2P9__ != 0)
+			&& (*aux).i >= __MB2P9__
 			&& (*aux).i < __MB2P10__)
 	{
 		if ((__MB2P11__ != 0)) { z.x = abs(z.x); }
@@ -7993,7 +8188,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	var useScale: f32 = 1.0;
-	if ((*aux).i >= (__MB2P23__ != 0)
+	if ((*aux).i >= __MB2P23__
 			&& (*aux).i < __MB2P24__)
 	{
 
@@ -8019,7 +8214,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).de = (*aux).de * abs(useScale) + 1.0;
 
 	if ((__MB2P28__ != 0)
-			&& (*aux).i >= (__MB2P29__ != 0)
+			&& (*aux).i >= __MB2P29__
 			&& (*aux).i < __MB2P30__)
 	{
 		
@@ -8030,7 +8225,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P33__ != 0)
-			&& (*aux).i >= (__MB2P34__ != 0)
+			&& (*aux).i >= __MB2P34__
 			&& (*aux).i < __MB2P35__)
 	{
 		z = mb2_mat_mul(__MB2P36__, z);
@@ -8066,6 +8261,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandalayKIFS",
         source: "mandalay_kifs.cl",
         param_floats: 53,
+        de_function: DeFunction::Linear,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -8113,7 +8311,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		z.x = abs(z.x + __MB2P3__.x)
@@ -8128,7 +8326,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P8__ != 0)
-			&& (*aux).i >= (__MB2P9__ != 0)
+			&& (*aux).i >= __MB2P9__
 			&& (*aux).i < __MB2P10__)
 	{
 		if ((__MB2P11__ != 0)) { z.x = abs(z.x); }
@@ -8198,7 +8396,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	var useScale: f32 = 1.0;
-	if ((*aux).i >= (__MB2P19__ != 0)
+	if ((*aux).i >= __MB2P19__
 			&& (*aux).i < __MB2P20__)
 	{
 		var rr: f32 = dot(z, z);
@@ -8223,7 +8421,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).de = (*aux).de * abs(useScale) + 1.0;
 
 	if ((__MB2P25__ != 0)
-			&& (*aux).i >= (__MB2P26__ != 0)
+			&& (*aux).i >= __MB2P26__
 			&& (*aux).i < __MB2P27__)
 	{
 		
@@ -8234,7 +8432,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P30__ != 0)
-			&& (*aux).i >= (__MB2P31__ != 0)
+			&& (*aux).i >= __MB2P31__
 			&& (*aux).i < __MB2P32__)
 	{
 		z = mb2_mat_mul(__MB2P33__, z);
@@ -8269,6 +8467,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Mandelbar",
         source: "mandelbar.cl",
         param_floats: 27,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -8310,6 +8511,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbarV2",
         source: "mandelbar_v2.cl",
         param_floats: 23,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -8362,6 +8566,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbarV3",
         source: "mandelbar_v3.cl",
         param_floats: 72,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -8442,12 +8649,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z.y = (z.y * z.y - z.x * z.x) * m2;
 
 		if ((__MB2P4__ != 0)
-				&& (*aux).i >= (__MB2P5__ != 0)
+				&& (*aux).i >= __MB2P5__
 				&& (*aux).i < __MB2P6__)
 			{ z.x = -temp; }
 
 		if ((__MB2P7__ != 0)
-				&& (*aux).i >= (__MB2P8__ != 0)
+				&& (*aux).i >= __MB2P8__
 				&& (*aux).i < __MB2P9__)
 		{
 			z.x = -temp;
@@ -8455,12 +8662,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		}
 
 		if ((__MB2P10__ != 0)
-				&& (*aux).i >= (__MB2P11__ != 0)
+				&& (*aux).i >= __MB2P11__
 				&& (*aux).i < __MB2P12__)
 			{ z.x = temp; }
 
 		if ((__MB2P13__ != 0)
-				&& (*aux).i >= (__MB2P14__ != 0)
+				&& (*aux).i >= __MB2P14__
 				&& (*aux).i < __MB2P15__)
 		{
 			z.x = temp;
@@ -8469,14 +8676,14 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P16__ != 0)
-			&& (*aux).i >= (__MB2P17__ != 0)
+			&& (*aux).i >= __MB2P17__
 			&& (*aux).i < __MB2P18__)
 	{
 		z.z *= __MB2P19__;
 	}
 
 	if ((__MB2P20__ != 0)
-			&& (*aux).i >= (__MB2P21__ != 0)
+			&& (*aux).i >= __MB2P21__
 			&& (*aux).i < __MB2P22__)
 	{
 		z *= __MB2P23__;
@@ -8485,22 +8692,22 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P24__ != 0)
-			&& (*aux).i >= (__MB2P25__ != 0)
+			&& (*aux).i >= __MB2P25__
 			&& (*aux).i < __MB2P26__)
 		{ z += __MB2P27__; }
 
 	if ((__MB2P31__ != 0)
-			&& (*aux).i >= (__MB2P32__ != 0)
+			&& (*aux).i >= __MB2P32__
 			&& (*aux).i < __MB2P33__)
 		{ z = mb2_mat_mul(__MB2P34__, z); }
 
 	if ((__MB2P46__ != 0)
-			&& (*aux).i >=(__MB2P47__ != 0)
+			&& (*aux).i >=__MB2P47__
 			&& (*aux).i < __MB2P48__)
 		{ z += (*aux).const_c * __MB2P49__; }
 
 	
-	if ((__MB2P53__ != 0) && (*aux).i >= (__MB2P54__ != 0)
+	if ((__MB2P53__ != 0) && (*aux).i >= __MB2P54__
 			&& (*aux).i < __MB2P55__)
 	{
 
@@ -8558,6 +8765,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelboxFast",
         source: "mandelbox_fast.cl",
         param_floats: 17,
+        de_function: DeFunction::Linear,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "mandelbox.mR2", kind: ParamKind::Float, offset: 0, default: &[0.0] },
             GeneratedParam { path: "mandelbox.mboxFactor1", kind: ParamKind::Float, offset: 1, default: &[0.0] },
@@ -8595,6 +8805,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelboxSmooth",
         source: "mandelbox_smooth.cl",
         param_floats: 26,
+        de_function: DeFunction::Linear,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "mandelbox.sharpness", kind: ParamKind::Float, offset: 0, default: &[3.0] },
             GeneratedParam { path: "mandelbox.foldingLimit", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -8654,6 +8867,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelboxVaryScale4d",
         source: "mandelbox_vary_scale4d.cl",
         param_floats: 26,
+        de_function: DeFunction::Linear,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "mandelbox.scale", kind: ParamKind::Float, offset: 0, default: &[2.0] },
             GeneratedParam { path: "mandelboxVary4D.scaleVary", kind: ParamKind::Float, offset: 1, default: &[0.0] },
@@ -8713,7 +8929,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P15__ != 0)
-			&& (*aux).i >= (__MB2P16__ != 0)
+			&& (*aux).i >= __MB2P16__
 			&& (*aux).i < __MB2P17__)
 	{
 		var tp: vec4<f32>;
@@ -8767,6 +8983,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Mandelbulb",
         source: "mandelbulb.cl",
         param_floats: 3,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "bulb.betaAngleOffset", kind: ParamKind::Float, offset: 0, default: &[0.0] },
             GeneratedParam { path: "bulb.alphaAngleOffset", kind: ParamKind::Float, offset: 1, default: &[0.0] },
@@ -8792,6 +9011,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Mandelbulb2",
         source: "mandelbulb2.cl",
         param_floats: 0,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
         ],
         wgsl: r####"
@@ -8828,6 +9050,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Mandelbulb3",
         source: "mandelbulb3.cl",
         param_floats: 0,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
         ],
         wgsl: r####"
@@ -8865,6 +9090,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbulbAbs",
         source: "mandelbulb_abs.cl",
         param_floats: 13,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -8887,7 +9115,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		if ((__MB2P2__ != 0)) { z.y = abs(z.y); }
 		if ((__MB2P3__ != 0)) { z.z = abs(z.z); }
 	}
-	if ((*aux).i >= (__MB2P4__ != 0)
+	if ((*aux).i >= __MB2P4__
 			&& (*aux).i < __MB2P5__)
 	{
 		z.z *= __MB2P6__;
@@ -8905,7 +9133,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	z.y = cth * sin(ph) * rp;
 	z.z = sin(th) * rp;
 
-	if ((*aux).i >= (__MB2P10__ != 0)
+	if ((*aux).i >= __MB2P10__
 			&& (*aux).i < __MB2P11__)
 	{
 		z.z *= __MB2P12__;
@@ -8917,6 +9145,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbulbAbsPower2",
         source: "mandelbulb_abs_power2.cl",
         param_floats: 69,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.rotationEnabled", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -8962,14 +9193,14 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		z = mb2_mat_mul(__MB2P3__, z);
 	}
 	
 	if ((__MB2P15__ != 0)
-			&& (*aux).i >= (__MB2P16__ != 0)
+			&& (*aux).i >= __MB2P16__
 			&& (*aux).i < __MB2P17__)
 	{
 		z += __MB2P18__;
@@ -9002,14 +9233,14 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P29__ != 0)
-			&& (*aux).i >= (__MB2P30__ != 0)
+			&& (*aux).i >= __MB2P30__
 			&& (*aux).i < __MB2P31__)
 	{
 		z += __MB2P32__;
 	}
 	
 	if ((__MB2P36__ != 0)
-			&& (*aux).i >= (__MB2P37__ != 0)
+			&& (*aux).i >= __MB2P37__
 			&& (*aux).i < __MB2P38__)
 	{
 		z = mb2_mat_mul(__MB2P39__, z);
@@ -9017,7 +9248,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P51__ != 0)
-			&& (*aux).i >= (__MB2P52__ != 0)
+			&& (*aux).i >= __MB2P52__
 			&& (*aux).i < __MB2P53__)
 	{
 		var tempC: vec4<f32> = c;
@@ -9082,7 +9313,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P60__ != 0)
-			&& (*aux).i >= (__MB2P61__ != 0)
+			&& (*aux).i >= __MB2P61__
 			&& (*aux).i < __MB2P62__)
 	{
 		if ((__MB2P63__ != 0)) { z.x = abs(z.x); }
@@ -9100,6 +9331,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbulbAtan2Power2",
         source: "mandelbulb_atan2_power2.cl",
         param_floats: 11,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "buffalo.preabsx", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "buffalo.preabsy", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -9142,6 +9376,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbulbBermarte",
         source: "mandelbulb_bermarte.cl",
         param_floats: 20,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAyFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -9238,6 +9475,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbulbEye",
         source: "mandelbulb_eye.cl",
         param_floats: 17,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 2.0,
         params: &[
             GeneratedParam { path: "buffalo.preabsx", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "buffalo.preabsy", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -9302,6 +9542,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbulbIqPow8",
         source: "mandelbulb_iq_pow8.cl",
         param_floats: 7,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.scaleA1", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -9339,6 +9582,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbulbIqV2",
         source: "mandelbulb_iq_v2.cl",
         param_floats: 11,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "bulb.power", kind: ParamKind::Float, offset: 0, default: &[9.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -9391,6 +9637,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbulbKali",
         source: "mandelbulb_kali.cl",
         param_floats: 14,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -9454,6 +9703,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbulbKaliMulti",
         source: "mandelbulb_kali_multi.cl",
         param_floats: 30,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -9725,6 +9977,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbulbKosalos",
         source: "mandelbulb_kosalos.cl",
         param_floats: 14,
+        de_function: DeFunction::Logarithmic,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "bulb.power", kind: ParamKind::Float, offset: 0, default: &[9.0] },
             GeneratedParam { path: "transformCommon.scaleA1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -9793,6 +10048,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbulbKosalosV2",
         source: "mandelbulb_kosalos_v2.cl",
         param_floats: 17,
+        de_function: DeFunction::Logarithmic,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "bulb.power", kind: ParamKind::Float, offset: 0, default: &[9.0] },
             GeneratedParam { path: "transformCommon.scaleA1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -9894,6 +10152,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbulbLambda",
         source: "mandelbulb_lambda.cl",
         param_floats: 48,
+        de_function: DeFunction::Logarithmic,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -9934,15 +10195,15 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	if ((__MB2P0__ != 0))
 	{
 		if ((__MB2P1__ != 0)
-				&& (*aux).i >= (__MB2P2__ != 0)
+				&& (*aux).i >= __MB2P2__
 				&& (*aux).i < __MB2P3__)
 			{ z.x = abs(z.x); }
 		if ((__MB2P4__ != 0)
-				&& (*aux).i >= (__MB2P5__ != 0)
+				&& (*aux).i >= __MB2P5__
 				&& (*aux).i < __MB2P6__)
 			{ z.y = abs(z.y); }
 		if ((__MB2P7__ != 0)
-				&& (*aux).i >= (__MB2P8__ != 0)
+				&& (*aux).i >= __MB2P8__
 				&& (*aux).i < __MB2P9__)
 			{ z.z = abs(z.z); }
 	}
@@ -9984,7 +10245,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	if ((__MB2P20__ != 0))
 	{
 		if ((__MB2P21__ != 0)
-				&& (*aux).i >= (__MB2P22__ != 0)
+				&& (*aux).i >= __MB2P22__
 				&& (*aux).i < __MB2P23__)
 		{
 			var temp: f32 = z.x;
@@ -9992,7 +10253,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 			z.y = temp;
 		}
 		if ((__MB2P24__ != 0)
-				&& (*aux).i >= (__MB2P25__ != 0)
+				&& (*aux).i >= __MB2P25__
 				&& (*aux).i < __MB2P26__)
 		{
 			var temp: f32 = z.x;
@@ -10008,7 +10269,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P30__ != 0)
-			&& (*aux).i >= (__MB2P31__ != 0)
+			&& (*aux).i >= __MB2P31__
 			&& (*aux).i < __MB2P32__)
 	{
 		z = mb2_mat_mul(__MB2P33__, z);
@@ -10024,6 +10285,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbulbMulti",
         source: "mandelbulb_multi.cl",
         param_floats: 22,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -10187,6 +10451,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbulbMulti2",
         source: "mandelbulb_multi2.cl",
         param_floats: 57,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -10234,15 +10501,15 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	if ((__MB2P0__ != 0))
 	{
 		if ((__MB2P1__ != 0)
-				&& (*aux).i >= (__MB2P2__ != 0)
+				&& (*aux).i >= __MB2P2__
 				&& (*aux).i < __MB2P3__)
 			{ z.x = abs(z.x); }
 		if ((__MB2P4__ != 0)
-				&& (*aux).i >= (__MB2P5__ != 0)
+				&& (*aux).i >= __MB2P5__
 				&& (*aux).i < __MB2P6__)
 			{ z.y = abs(z.y); }
 		if ((__MB2P7__ != 0)
-				&& (*aux).i >= (__MB2P8__ != 0)
+				&& (*aux).i >= __MB2P8__
 				&& (*aux).i < __MB2P9__)
 			{ z.z = abs(z.z); }
 	}
@@ -10311,7 +10578,7 @@ v = vec3<f32>(z.x, z.y, z.z); break;
 	if ((__MB2P21__ != 0))
 	{
 		if ((__MB2P22__ != 0)
-				&& (*aux).i >= (__MB2P23__ != 0)
+				&& (*aux).i >= __MB2P23__
 				&& (*aux).i < __MB2P24__)
 		{
 			var temp: f32 = z.x;
@@ -10319,7 +10586,7 @@ v = vec3<f32>(z.x, z.y, z.z); break;
 			z.y = temp;
 		}
 		if ((__MB2P25__ != 0)
-				&& (*aux).i >= (__MB2P26__ != 0)
+				&& (*aux).i >= __MB2P26__
 				&& (*aux).i < __MB2P27__)
 		{
 			var temp: f32 = z.x;
@@ -10396,7 +10663,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 	
 	if ((__MB2P42__ != 0)
-			&& (*aux).i >= (__MB2P43__ != 0)
+			&& (*aux).i >= __MB2P43__
 			&& (*aux).i < __MB2P44__)
 	{
 		z = mb2_mat_mul(__MB2P45__, z);
@@ -10408,6 +10675,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbulbPow2V1",
         source: "mandelbulb_pow2_v1.cl",
         param_floats: 21,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -10433,7 +10703,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		if ((__MB2P3__ != 0)) { z.x = abs(z.x); }
@@ -10442,7 +10712,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P6__ != 0)
-			&& (*aux).i >= (__MB2P7__ != 0)
+			&& (*aux).i >= __MB2P7__
 			&& (*aux).i < __MB2P8__)
 	{
 		var m2: f32 = z.x * z.x + z.z * z.z;
@@ -10477,7 +10747,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P12__ != 0)
-			&& (*aux).i >= (__MB2P13__ != 0)
+			&& (*aux).i >= __MB2P13__
 			&& (*aux).i < __MB2P14__)
 	{
 		var m2: f32 = z.y * z.y + z.x * z.x;
@@ -10523,6 +10793,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbulbPow2V2",
         source: "mandelbulb_pow2_v2.cl",
         param_floats: 66,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -10573,7 +10846,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var c: vec4<f32> = (*aux).const_c;
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		if ((__MB2P3__ != 0)) { z.x = abs(z.x); }
@@ -10581,7 +10854,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		if ((__MB2P5__ != 0)) { z.z = abs(z.z); }
 	}
 	
-	if ((*aux).i >= (__MB2P6__ != 0)
+	if ((*aux).i >= __MB2P6__
 			&& (*aux).i < __MB2P7__)
 	{
 		var v: vec4<f32> = z;
@@ -10615,17 +10888,17 @@ v = vec4<f32>(z.z, z.y, z.x, z.w); break;
 	
 	var oldZ: vec4<f32> = z;
 
-	if ((*aux).i >= (__MB2P9__ != 0)
+	if ((*aux).i >= __MB2P9__
 			&& (*aux).i < __MB2P10__)
 	{
 		var zz: vec4<f32> = z * z;
 		if ((__MB2P11__ != 0)
-				&& (*aux).i >= (__MB2P12__ != 0)
+				&& (*aux).i >= __MB2P12__
 				&& (*aux).i < __MB2P13__)
 			{ zz *= __MB2P14__; }
 		var Scale2: vec4<f32> = vec4<f32>(2.0, 2.0, 2.0, 1.0);
 		if ((__MB2P18__ != 0)
-				&& (*aux).i >= (__MB2P19__ != 0)
+				&& (*aux).i >= __MB2P19__
 				&& (*aux).i < __MB2P20__)
 			{ Scale2 = __MB2P21__; }
 
@@ -10674,7 +10947,7 @@ case multi_combo4Cl_type4: {
 
 	
 	if ((__MB2P27__ != 0)
-			&& (*aux).i >= (__MB2P28__ != 0)
+			&& (*aux).i >= __MB2P28__
 			&& (*aux).i < __MB2P29__)
 	{
 		if ((__MB2P30__ != 0)) { z.x = abs(z.x); }
@@ -10683,7 +10956,7 @@ case multi_combo4Cl_type4: {
 	}
 
 	
-	if ((*aux).i >= (__MB2P33__ != 0)
+	if ((*aux).i >= __MB2P33__
 			&& (*aux).i < __MB2P34__)
 	{
 		z += __MB2P35__;
@@ -10691,7 +10964,7 @@ case multi_combo4Cl_type4: {
 
 	
 	if ((__MB2P39__ != 0)
-			&& (*aux).i >= (__MB2P40__ != 0)
+			&& (*aux).i >= __MB2P40__
 			&& (*aux).i < __MB2P41__)
 	{
 		var tempC: vec4<f32> = c;
@@ -10755,7 +11028,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 	
 	if ((__MB2P48__ != 0)
-			&& (*aux).i >= (__MB2P49__ != 0)
+			&& (*aux).i >= __MB2P49__
 			&& (*aux).i < __MB2P50__)
 	{
 		z = mb2_mat_mul(__MB2P51__, z);
@@ -10771,6 +11044,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbulbPow2V3",
         source: "mandelbulb_pow2_v3.cl",
         param_floats: 42,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.startIterationsB", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsB", kind: ParamKind::Int, offset: 1, default: &[250.0] },
@@ -10799,7 +11075,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 41, default: &[0.0] },
         ],
         wgsl: r####"
-	if ((*aux).i >= (__MB2P0__ != 0)
+	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
 	{
 		if ((__MB2P2__ != 0))
@@ -10814,7 +11090,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P9__ != 0)
-			&& (*aux).i >= (__MB2P10__ != 0)
+			&& (*aux).i >= __MB2P10__
 			&& (*aux).i < __MB2P11__)
 	{
 		if ((__MB2P12__ != 0)) { z.x = abs(z.x); }
@@ -10849,7 +11125,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	z += __MB2P20__;
 
 	if ((__MB2P24__ != 0)
-			&& (*aux).i >= (__MB2P25__ != 0)
+			&& (*aux).i >= __MB2P25__
 			&& (*aux).i < __MB2P26__)
 	{
 		z = mb2_mat_mul(__MB2P27__, z);
@@ -10865,6 +11141,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbulbPow2V4",
         source: "mandelbulb_pow2_v4.cl",
         param_floats: 83,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledTFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsT", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -10955,7 +11234,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		cosPhi = w.x * w.x - w.y * w.y;
 
 		if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 				 { cosPhi = -cosPhi; }
 
@@ -10968,7 +11247,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		cosTheta2 = cosTheta1;
 
 		if ((__MB2P3__ != 0)
-				&& (*aux).i >= (__MB2P4__ != 0)
+				&& (*aux).i >= __MB2P4__
 				&& (*aux).i < __MB2P5__)
 			{ cosTheta1 = -cosTheta1; }
 
@@ -10986,7 +11265,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	
 	
 	if ((__MB2P8__ != 0)
-			&& (*aux).i >= (__MB2P9__ != 0)
+			&& (*aux).i >= __MB2P9__
 			&& (*aux).i < __MB2P10__)
 	{
 		
@@ -10996,7 +11275,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P11__ != 0)
-			&& (*aux).i >= (__MB2P12__ != 0)
+			&& (*aux).i >= __MB2P12__
 			&& (*aux).i < __MB2P13__)
 	{
 	
@@ -11006,7 +11285,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P14__ != 0)
-			&& (*aux).i >= (__MB2P15__ != 0)
+			&& (*aux).i >= __MB2P15__
 			&& (*aux).i < __MB2P16__)
 	{
 		g = vec4<f32>(cos(z.x), cos(z.y), cos(z.z), 0.0);
@@ -11017,7 +11296,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P17__ != 0)
-			&& (*aux).i >= (__MB2P18__ != 0)
+			&& (*aux).i >= __MB2P18__
 			&& (*aux).i < __MB2P19__)
 	{
 		f = vec4<f32>(z.x * z.x, z.y * z.y, z.z * z.z, 0.0);
@@ -11029,7 +11308,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P20__ != 0)
-			&& (*aux).i >= (__MB2P21__ != 0)
+			&& (*aux).i >= __MB2P21__
 			&& (*aux).i < __MB2P22__)
 	{
 	
@@ -11039,7 +11318,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P23__ != 0)
-			&& (*aux).i >= (__MB2P24__ != 0)
+			&& (*aux).i >= __MB2P24__
 			&& (*aux).i < __MB2P25__)
 	{
 		f = vec4<f32>(z.x * z.x * z.y, z.y * z.y, z.z * z.z, 0.0);
@@ -11060,7 +11339,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	
 	
 	if ((__MB2P26__ != 0)
-			&& (*aux).i >= (__MB2P27__ != 0)
+			&& (*aux).i >= __MB2P27__
 			&& (*aux).i < __MB2P28__)
 	{
 	
@@ -11082,7 +11361,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 
 	if ((__MB2P29__ != 0)
-			&& (*aux).i >=(__MB2P30__ != 0)
+			&& (*aux).i >=__MB2P30__
 			&& (*aux).i < __MB2P31__)
 	{
 		z = r * r * vec4<f32>(sinPhi * cosTheta, cosPhi * cosTheta, sinTheta, 0.0);
@@ -11097,14 +11376,14 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P32__ != 0)
-			&& (*aux).i >= (__MB2P33__ != 0)
+			&& (*aux).i >= __MB2P33__
 			&& (*aux).i < __MB2P34__)
 	{
 		z.z *= __MB2P35__;
 	}
 
 	if ((__MB2P36__ != 0)
-			&& (*aux).i >= (__MB2P37__ != 0)
+			&& (*aux).i >= __MB2P37__
 			&& (*aux).i < __MB2P38__)
 	{
 		z *= __MB2P39__;
@@ -11112,22 +11391,22 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P40__ != 0)
-			&& (*aux).i >=(__MB2P41__ != 0)
+			&& (*aux).i >=__MB2P41__
 			&& (*aux).i < __MB2P42__)
 		{ z += __MB2P43__; } 
 
 	if ((__MB2P47__ != 0)
-			&& (*aux).i >= (__MB2P48__ != 0)
+			&& (*aux).i >= __MB2P48__
 			&& (*aux).i < __MB2P49__)
 		{ z = mb2_mat_mul(__MB2P50__, z); }
 
 	if ((__MB2P62__ != 0)
-			&& (*aux).i >=(__MB2P63__ != 0)
+			&& (*aux).i >=__MB2P63__
 			&& (*aux).i < __MB2P64__)
 		{ z += (*aux).const_c * __MB2P65__; }
 
 	
-	if ((__MB2P69__ != 0) && (*aux).i >= (__MB2P70__ != 0)
+	if ((__MB2P69__ != 0) && (*aux).i >= __MB2P70__
 			&& (*aux).i < __MB2P71__)
 	{
 		var colAdd: f32 = __MB2P72__.w + (*aux).i * __MB2P76__;
@@ -11165,6 +11444,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbulbPower1234",
         source: "mandelbulb_power1234.cl",
         param_floats: 62,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -11214,15 +11496,15 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	if ((__MB2P0__ != 0))
 	{
 		if ((__MB2P1__ != 0)
-				&& (*aux).i >= (__MB2P2__ != 0)
+				&& (*aux).i >= __MB2P2__
 				&& (*aux).i < __MB2P3__)
 			{ z.x = abs(z.x); }
 		if ((__MB2P4__ != 0)
-				&& (*aux).i >= (__MB2P5__ != 0)
+				&& (*aux).i >= __MB2P5__
 				&& (*aux).i < __MB2P6__)
 			{ z.y = abs(z.y); }
 		if ((__MB2P7__ != 0)
-				&& (*aux).i >= (__MB2P8__ != 0)
+				&& (*aux).i >= __MB2P8__
 				&& (*aux).i < __MB2P9__)
 			{ z.z = abs(z.z); }
 	}
@@ -11327,7 +11609,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	if ((__MB2P23__ != 0))
 	{
 		if ((__MB2P24__ != 0)
-				&& (*aux).i >= (__MB2P25__ != 0)
+				&& (*aux).i >= __MB2P25__
 				&& (*aux).i < __MB2P26__)
 		{
 			var temp: f32 = z.x;
@@ -11335,7 +11617,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 			z.y = temp;
 		}
 		if ((__MB2P27__ != 0)
-				&& (*aux).i >= (__MB2P28__ != 0)
+				&& (*aux).i >= __MB2P28__
 				&& (*aux).i < __MB2P29__)
 		{
 			var temp: f32 = z.x;
@@ -11414,7 +11696,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 	
 	if ((__MB2P44__ != 0)
-			&& (*aux).i >= (__MB2P45__ != 0)
+			&& (*aux).i >= __MB2P45__
 			&& (*aux).i < __MB2P46__)
 	{
 		z = mb2_mat_mul(__MB2P47__, z);
@@ -11428,6 +11710,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbulbPower2",
         source: "mandelbulb_power2.cl",
         param_floats: 0,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
         ],
         wgsl: r####"
@@ -11451,6 +11736,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbulbPupuku",
         source: "mandelbulb_pupuku.cl",
         param_floats: 47,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -11497,7 +11785,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         wgsl: r####"
 	var t: f32;
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		if ((__MB2P3__ != 0)) { z.x = abs(z.x); }
@@ -11522,7 +11810,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var rp: f32 = pow((*aux).r, __MB2P13__ - __MB2P17__);
 
 	if ((__MB2P18__ != 0)
-			&& (*aux).i >= (__MB2P19__ != 0)
+			&& (*aux).i >= __MB2P19__
 			&& (*aux).i < __MB2P20__)
 	{
 		if (cos(th) < 0.0) { ph = ph + M_PI_F; }
@@ -11544,7 +11832,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		zth = cos(th);
 	}
 	if ((__MB2P23__ != 0)
-			&& (*aux).i >= (__MB2P24__ != 0)
+			&& (*aux).i >= __MB2P24__
 			&& (*aux).i < __MB2P25__)
 	{
 		z.x = (1.0 + (t - 1.0) * __MB2P26__) * cos(ph);
@@ -11554,7 +11842,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z.x = t * cos(ph);
 	}
 	if ((__MB2P27__ != 0)
-			&& (*aux).i >= (__MB2P28__ != 0)
+			&& (*aux).i >= __MB2P28__
 			&& (*aux).i < __MB2P29__)
 	{
 		z.y = (1.0 + (t - 1.0) * __MB2P30__) * sin(ph);
@@ -11571,7 +11859,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	z += __MB2P33__;
 
-	if ((*aux).i >= (__MB2P37__ != 0)
+	if ((*aux).i >= __MB2P37__
 			&& (*aux).i < __MB2P38__)
 	{
 		z *= __MB2P39__;
@@ -11600,7 +11888,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		}
 		else
 		{
-			if ((*aux).i >= (__MB2P45__ != 0)
+			if ((*aux).i >= __MB2P45__
 					&& (*aux).i < __MB2P46__)
 			{
 				(*aux).dist = min((*aux).dist, (*aux).de0);
@@ -11618,6 +11906,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbulbQuadrat",
         source: "mandelbulb_quadrat.cl",
         param_floats: 47,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -11657,7 +11948,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		(*aux).de = (*aux).de * 2.0 * length(z) + 1.0;
 		var temp: f32 = 0.0;
 		if ((__MB2P5__ != 0)
-				&& (*aux).i >= (__MB2P6__ != 0)
+				&& (*aux).i >= __MB2P6__
 				&& (*aux).i < __MB2P7__)
 			{ temp = __MB2P8__; }
 
@@ -11688,7 +11979,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 		var temp: f32 = 0.0;
 		if ((__MB2P19__ != 0)
-				&& (*aux).i >= (__MB2P20__ != 0)
+				&& (*aux).i >= __MB2P20__
 				&& (*aux).i < __MB2P21__)
 			{ temp = __MB2P22__; }
 
@@ -11725,6 +12016,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelbulbQuat",
         source: "mandelbulb_quat.cl",
         param_floats: 81,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.addCpixelEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -11781,7 +12075,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		var c: vec4<f32> = (*aux).const_c;
@@ -11846,7 +12140,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	
-	if ((*aux).i >= (__MB2P9__ != 0)
+	if ((*aux).i >= __MB2P9__
 			&& (*aux).i < __MB2P10__)
 	{
 		(*aux).r = length(z);
@@ -11869,7 +12163,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 	
 	if ((__MB2P20__ != 0)
-			&& (*aux).i >= (__MB2P21__ != 0)
+			&& (*aux).i >= __MB2P21__
 			&& (*aux).i < __MB2P22__)
 	{
 		(*aux).r = length(z);
@@ -11921,28 +12215,28 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 	
 	if ((__MB2P33__ != 0)
-			&& (*aux).i >= (__MB2P34__ != 0)
+			&& (*aux).i >= __MB2P34__
 			&& (*aux).i < __MB2P35__)
 	{
 		z = mb2_mat_mul(__MB2P36__, z);
 	}
 	
-	if ((*aux).i >= (__MB2P48__ != 0)
+	if ((*aux).i >= __MB2P48__
 			&& (*aux).i < __MB2P49__)
 	{
 		(*aux).r = length(z);
 		if ((__MB2P50__ != 0))
 		{
 			if ((__MB2P51__ != 0)
-					&& (*aux).i >= (__MB2P52__ != 0)
+					&& (*aux).i >= __MB2P52__
 					&& (*aux).i < __MB2P53__)
 				{ z.x = abs(z.x); }
 			if ((__MB2P54__ != 0)
-					&& (*aux).i >= (__MB2P55__ != 0)
+					&& (*aux).i >= __MB2P55__
 					&& (*aux).i < __MB2P56__)
 				{ z.y = abs(z.y); }
 			if ((__MB2P57__ != 0)
-					&& (*aux).i >= (__MB2P58__ != 0)
+					&& (*aux).i >= __MB2P58__
 					&& (*aux).i < __MB2P59__)
 				{ z.z = abs(z.z); }
 		}
@@ -12041,6 +12335,9 @@ v = vec3<f32>(z.x, z.y, z.z); break;
         name: "MandelbulbSinCos",
         source: "mandelbulb_sin_cos.cl",
         param_floats: 21,
+        de_function: DeFunction::Logarithmic,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledBFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -12098,7 +12395,7 @@ v = vec3<f32>(z.x, z.y, z.z); break;
 		else
 			{ (*aux).de0 = 0.01; } 
 
-		if ((*aux).i >= (__MB2P19__ != 0)
+		if ((*aux).i >= __MB2P19__
 				&& (*aux).i < __MB2P20__)
 			{ (*aux).dist = min((*aux).dist, (*aux).de0); }
 		else
@@ -12111,6 +12408,9 @@ v = vec3<f32>(z.x, z.y, z.z); break;
         name: "MandelbulbSinCosV2",
         source: "mandelbulb_sin_cos_v2.cl",
         param_floats: 38,
+        de_function: DeFunction::Logarithmic,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledBFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -12187,7 +12487,7 @@ v = vec3<f32>(z.x, z.y, z.z); break;
 	}
 
 	if ((__MB2P7__ != 0)
-			&& (*aux).i >= (__MB2P8__ != 0)
+			&& (*aux).i >= __MB2P8__
 			&& (*aux).i < __MB2P9__)
 	{
 		if (!(__MB2P10__ != 0))
@@ -12204,7 +12504,7 @@ v = vec3<f32>(z.x, z.y, z.z); break;
 	}
 
 	if ((__MB2P11__ != 0)
-			&& (*aux).i >= (__MB2P12__ != 0)
+			&& (*aux).i >= __MB2P12__
 			&& (*aux).i < __MB2P13__)
 	{
 		z.x += (trg.x - z.x) * __MB2P14__;
@@ -12216,7 +12516,7 @@ v = vec3<f32>(z.x, z.y, z.z); break;
 	}
 
 	if ((__MB2P17__ != 0)
-			&& (*aux).i >= (__MB2P18__ != 0)
+			&& (*aux).i >= __MB2P18__
 			&& (*aux).i < __MB2P19__)
 	{
 		z.x = cos(ph);
@@ -12246,7 +12546,7 @@ v = vec3<f32>(z.x, z.y, z.z); break;
 		else
 			{ (*aux).de0 = 0.0; }
 
-		if ((*aux).i >= (__MB2P36__ != 0)
+		if ((*aux).i >= __MB2P36__
 				&& (*aux).i < __MB2P37__)
 			{ (*aux).dist = min((*aux).dist, (*aux).de0); }
 		else
@@ -12259,6 +12559,9 @@ v = vec3<f32>(z.x, z.y, z.z); break;
         name: "MandelbulbSinCosV3",
         source: "mandelbulb_sin_cos_v3.cl",
         param_floats: 69,
+        de_function: DeFunction::Logarithmic,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -12312,7 +12615,7 @@ v = vec3<f32>(z.x, z.y, z.z); break;
         wgsl: r####"
 	var temp: f32;
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		if ((__MB2P3__ != 0))
@@ -12399,7 +12702,7 @@ v = vec3<f32>(z.x, z.y, z.z); break;
 	}
 
 	if ((__MB2P33__ != 0)
-			&& (*aux).i >= (__MB2P34__ != 0)
+			&& (*aux).i >= __MB2P34__
 			&& (*aux).i < __MB2P35__)
 	{
 		if (!(__MB2P36__ != 0))
@@ -12417,14 +12720,14 @@ v = vec3<f32>(z.x, z.y, z.z); break;
 	}
 
 	if ((__MB2P37__ != 0)
-			&& (*aux).i >= (__MB2P38__ != 0)
+			&& (*aux).i >= __MB2P38__
 			&& (*aux).i < __MB2P39__)
 	{
 		z += (trg * rp - z) * __MB2P40__;
 	}
 
 	if ((__MB2P44__ != 0)
-			&& (*aux).i >= (__MB2P45__ != 0)
+			&& (*aux).i >= __MB2P45__
 			&& (*aux).i < __MB2P46__)
 	{
 		z.x = cos(ph);
@@ -12458,7 +12761,7 @@ v = vec3<f32>(z.x, z.y, z.z); break;
 		else
 			{ (*aux).de0 = 0.0; } 
 
-		if ((*aux).i >= (__MB2P67__ != 0)
+		if ((*aux).i >= __MB2P67__
 				&& (*aux).i < __MB2P68__)
 			{ (*aux).dist = min((*aux).dist, (*aux).de0); }
 		else
@@ -12471,6 +12774,9 @@ v = vec3<f32>(z.x, z.y, z.z); break;
         name: "MandelbulbSinCosV4",
         source: "mandelbulb_sin_cos_v4.cl",
         param_floats: 59,
+        de_function: DeFunction::Logarithmic,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledTFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsT", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -12524,7 +12830,7 @@ v = vec3<f32>(z.x, z.y, z.z); break;
 	var temp: f32;
 
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		var t: vec4<f32> = z;
@@ -12540,7 +12846,7 @@ v = vec3<f32>(z.x, z.y, z.z); break;
 	}
 
 	if ((__MB2P9__ != 0)
-			&& (*aux).i >= (__MB2P10__ != 0)
+			&& (*aux).i >= __MB2P10__
 			&& (*aux).i < __MB2P11__)
 	{
 		if ((__MB2P12__ != 0))
@@ -12610,7 +12916,7 @@ v = vec3<f32>(z.x, z.y, z.z); break;
 	z *= rp;
 
 	if ((__MB2P32__ != 0)
-			&& (*aux).i >= (__MB2P33__ != 0)
+			&& (*aux).i >= __MB2P33__
 			&& (*aux).i < __MB2P34__)
 	{
 		switch __MB2P35__ {
@@ -12640,7 +12946,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 	}
 
 	if ((__MB2P36__ != 0)
-			&& (*aux).i >= (__MB2P37__ != 0)
+			&& (*aux).i >= __MB2P37__
 			&& (*aux).i < __MB2P38__)
 	{
 		z.z *= __MB2P39__;
@@ -12650,7 +12956,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 	z += (*aux).const_c * __MB2P44__;
 
 	if ((__MB2P48__ != 0)
-			&& (*aux).i >= (__MB2P49__ != 0)
+			&& (*aux).i >= __MB2P49__
 			&& (*aux).i < __MB2P50__)
 	{
 		z.y = abs(z.y) + __MB2P51__;
@@ -12671,7 +12977,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 		else
 			{ (*aux).de0 = 0.0; } 
 
-		if ((*aux).i >= (__MB2P57__ != 0)
+		if ((*aux).i >= __MB2P57__
 				&& (*aux).i < __MB2P58__)
 			{ (*aux).dist = min((*aux).dist, (*aux).de0); }
 		else
@@ -12684,6 +12990,9 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         name: "MandelbulbTails",
         source: "mandelbulb_tails.cl",
         param_floats: 23,
+        de_function: DeFunction::Unsupported,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledBFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -12765,7 +13074,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 		else
 			{ (*aux).de0 = 0.01; } 
 
-		if ((*aux).i >= (__MB2P21__ != 0)
+		if ((*aux).i >= __MB2P21__
 				&& (*aux).i < __MB2P22__)
 			{ (*aux).dist = min((*aux).dist, (*aux).de0); }
 		else
@@ -12778,6 +13087,9 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         name: "MandelbulbTailsV2",
         source: "mandelbulb_tails_v2.cl",
         param_floats: 29,
+        de_function: DeFunction::Unsupported,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledBFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -12854,7 +13166,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 	
 
 	
-	if ((*aux).i >= (__MB2P14__ != 0)
+	if ((*aux).i >= __MB2P14__
 			&& (*aux).i < __MB2P15__)
 	{
 		var t: vec4<f32> = z;
@@ -12898,7 +13210,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 		else
 			{ (*aux).de0 = 0.01; } 
 
-		if ((*aux).i >= (__MB2P27__ != 0)
+		if ((*aux).i >= __MB2P27__
 				&& (*aux).i < __MB2P28__)
 			{ (*aux).dist = min((*aux).dist, (*aux).de0); }
 		else
@@ -12911,6 +13223,9 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         name: "Mandelcup",
         source: "mandelcup.cl",
         param_floats: 32,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledNFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -12944,15 +13259,15 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 	if ((__MB2P0__ != 0))
 	{
 		if ((__MB2P1__ != 0)
-				&& (*aux).i >= (__MB2P2__ != 0)
+				&& (*aux).i >= __MB2P2__
 				&& (*aux).i < __MB2P3__)
 			{ z.x = abs(z.x); }
 		if ((__MB2P4__ != 0)
-				&& (*aux).i >= (__MB2P5__ != 0)
+				&& (*aux).i >= __MB2P5__
 				&& (*aux).i < __MB2P6__)
 			{ z.y = abs(z.y); }
 		if ((__MB2P7__ != 0)
-				&& (*aux).i >= (__MB2P8__ != 0)
+				&& (*aux).i >= __MB2P8__
 				&& (*aux).i < __MB2P9__)
 			{ z.z = abs(z.z); }
 	}
@@ -13084,6 +13399,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Mandelnest",
         source: "mandelnest.cl",
         param_floats: 21,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "bulb.power", kind: ParamKind::Float, offset: 0, default: &[9.0] },
             GeneratedParam { path: "transformCommon.offset0", kind: ParamKind::Float, offset: 1, default: &[0.0] },
@@ -13132,7 +13450,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	z *= pow(r, Power - __MB2P7__);
 
-	if ((*aux).i >= (__MB2P8__ != 0)
+	if ((*aux).i >= __MB2P8__
 			&& (*aux).i < __MB2P9__)
 		{ z += __MB2P10__; }
 
@@ -13158,6 +13476,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Mandelnest4d",
         source: "mandelnest4d.cl",
         param_floats: 48,
+        de_function: DeFunction::Logarithmic,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -13198,7 +13519,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		if ((__MB2P3__ != 0))
@@ -13280,7 +13601,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	z *= pow(r, Power - __MB2P35__);
 
-	if ((*aux).i >= (__MB2P36__ != 0)
+	if ((*aux).i >= __MB2P36__
 			&& (*aux).i < __MB2P37__)
 		{ z += __MB2P38__; }
 
@@ -13313,6 +13634,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelnestFull",
         source: "mandelnest_full.cl",
         param_floats: 18,
+        de_function: DeFunction::Logarithmic,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "bulb.power", kind: ParamKind::Float, offset: 0, default: &[9.0] },
             GeneratedParam { path: "transformCommon.offsetA000", kind: ParamKind::Float4, offset: 1, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -13395,6 +13719,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandelnestV2",
         source: "mandelnest_v2.cl",
         param_floats: 38,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "bulb.power", kind: ParamKind::Float, offset: 0, default: &[9.0] },
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 1, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -13480,7 +13807,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	z *= pow(r, Power - __MB2P25__);
 
-	if ((*aux).i >= (__MB2P26__ != 0)
+	if ((*aux).i >= __MB2P26__
 			&& (*aux).i < __MB2P27__)
 		{ z += __MB2P28__; }
 
@@ -13509,6 +13836,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Mandeltorus",
         source: "mandeltorus.cl",
         param_floats: 15,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -13525,7 +13855,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__) 
 	{
 		z *= __MB2P3__;
@@ -13585,6 +13915,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MandeltorusV2",
         source: "mandeltorus_v2.cl",
         param_floats: 19,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -13605,7 +13938,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__) 
 	{
 		z *= __MB2P3__;
@@ -13617,7 +13950,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	var off1p5: f32 = 1.0;
 
-	if ((*aux).i >= (__MB2P9__ != 0)
+	if ((*aux).i >= __MB2P9__
 			&& (*aux).i < __MB2P10__)
 	{
 		off1p5 = __MB2P11__;
@@ -13673,6 +14006,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Menger3",
         source: "menger3.cl",
         param_floats: 39,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.scale3", kind: ParamKind::Float, offset: 4, default: &[3.0] },
@@ -13716,7 +14052,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z.y = temp;
 		col += __MB2P17__.z;
 	}
-	if ((__MB2P21__ != 0) && (*aux).i >= (__MB2P22__ != 0)
+	if ((__MB2P21__ != 0) && (*aux).i >= __MB2P22__
 			&& (*aux).i < __MB2P23__)
 	{
 		(*aux).color += col;
@@ -13738,6 +14074,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Menger3M3d",
         source: "menger3_m3d.cl",
         param_floats: 36,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.rotationMatrixXYZ", kind: ParamKind::Matrix33, offset: 4, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
@@ -13793,6 +14132,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Menger4d",
         source: "menger4d.cl",
         param_floats: 45,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsC", kind: ParamKind::Int, offset: 1, default: &[250.0] },
@@ -13826,7 +14168,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "foldColor.stopIterationsA", kind: ParamKind::Int, offset: 44, default: &[250.0] },
         ],
         wgsl: r####"
-	if ((*aux).i >= (__MB2P0__ != 0)
+	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
 	{
 		z += __MB2P2__; 
@@ -13876,7 +14218,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P10__ != 0)
-			&& (*aux).i >= (__MB2P11__ != 0)
+			&& (*aux).i >= __MB2P11__
 			&& (*aux).i < __MB2P12__)
 	{
 		var tp: vec4<f32>;
@@ -13936,7 +14278,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).de *= scaleM;
 
 	if ((__MB2P26__ != 0)
-			&& (*aux).i >= (__MB2P27__ != 0)
+			&& (*aux).i >= __MB2P27__
 			&& (*aux).i < __MB2P28__)
 	{
 		var r2: f32 = dot(z, z);
@@ -13969,7 +14311,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	(*aux).de *= __MB2P41__;
 
-	if ((__MB2P42__ != 0) && (*aux).i >= (__MB2P43__ != 0)
+	if ((__MB2P42__ != 0) && (*aux).i >= __MB2P43__
 			&& (*aux).i < __MB2P44__)
 	{
 		(*aux).color += col;
@@ -13981,6 +14323,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Menger4dMod1",
         source: "menger4d_mod1.cl",
         param_floats: 55,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "Cpara.enabledParabFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "Cpara.parabOffset0", kind: ParamKind::Float, offset: 1, default: &[0.0] },
@@ -14032,7 +14377,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z.w += paraAddP0;
 	}
 
-	if ((*aux).i >= (__MB2P4__ != 0)
+	if ((*aux).i >= __MB2P4__
 			&& (*aux).i < __MB2P5__)
 	{
 		z += __MB2P6__; 
@@ -14082,7 +14427,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P14__ != 0)
-			&& (*aux).i >= (__MB2P15__ != 0)
+			&& (*aux).i >= __MB2P15__
 			&& (*aux).i < __MB2P16__)
 	{
 		var tp: vec4<f32>;
@@ -14135,7 +14480,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	z.y = scaleM * z.y - offsetM.y;
 	z.w = scaleM * z.w - offsetM.w;
 	if ((__MB2P30__ != 0)
-			&& (*aux).i >= (__MB2P31__ != 0)
+			&& (*aux).i >= __MB2P31__
 			&& (*aux).i < __MB2P32__)
 	{
 		z.z -= 0.5 * offsetM.z / scaleM;
@@ -14150,7 +14495,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).de *= scaleM;
 
 	if ((__MB2P33__ != 0)
-			&& (*aux).i >= (__MB2P34__ != 0)
+			&& (*aux).i >= __MB2P34__
 			&& (*aux).i < __MB2P35__)
 	{
 		var rr: f32 = 0.;
@@ -14196,7 +14541,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	(*aux).de *= __MB2P51__;
 
-	if ((__MB2P52__ != 0) && (*aux).i >= (__MB2P53__ != 0)
+	if ((__MB2P52__ != 0) && (*aux).i >= __MB2P53__
 			&& (*aux).i < __MB2P54__)
 	{
 		(*aux).color += col;
@@ -14208,6 +14553,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Menger4dMod2",
         source: "menger4d_mod2.cl",
         param_floats: 52,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -14243,7 +14591,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		if ((__MB2P3__ != 0))
@@ -14260,7 +14608,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	z = abs(z);
-	if ((*aux).i >= (__MB2P9__ != 0)
+	if ((*aux).i >= __MB2P9__
 			&& (*aux).i < __MB2P10__)
 	{
 		z += __MB2P11__; 
@@ -14309,7 +14657,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P19__ != 0)
-			&& (*aux).i >= (__MB2P20__ != 0)
+			&& (*aux).i >= __MB2P20__
 			&& (*aux).i < __MB2P21__)
 	{
 		var tp: vec4<f32>;
@@ -14371,7 +14719,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).de *= __MB2P30__;
 
 	if ((__MB2P41__ != 0)
-			&& (*aux).i >= (__MB2P42__ != 0)
+			&& (*aux).i >= __MB2P42__
 			&& (*aux).i < __MB2P43__)
 	{
 		var rr: f32 = dot(z, z);
@@ -14392,7 +14740,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	(*aux).de = (*aux).de * __MB2P47__ + __MB2P48__;
 
-	if ((__MB2P49__ != 0) && (*aux).i >= (__MB2P50__ != 0)
+	if ((__MB2P49__ != 0) && (*aux).i >= __MB2P50__
 			&& (*aux).i < __MB2P51__)
 	{
 		(*aux).color += col;
@@ -14404,6 +14752,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MengerChebyshev",
         source: "menger_chebyshev.cl",
         param_floats: 52,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsC1", kind: ParamKind::Int, offset: 1, default: &[1.0] },
@@ -14429,7 +14780,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         ],
         wgsl: r####"
 	
-	if ((*aux).i >= (__MB2P0__ != 0)
+	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
 	{
 		if ((__MB2P2__ != 0))
@@ -14477,7 +14828,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	z = abs(z);
 
 	
-	if ((__MB2P4__ != 0) && (*aux).i >= (__MB2P5__ != 0)
+	if ((__MB2P4__ != 0) && (*aux).i >= __MB2P5__
 			&& (*aux).i < __MB2P6__)
 	{
 		z = mb2_mat_mul(__MB2P7__, z);
@@ -14506,7 +14857,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z.y = temp;
 		col += __MB2P19__.z;
 	}
-	if ((__MB2P23__ != 0) && (*aux).i >= (__MB2P24__ != 0)
+	if ((__MB2P23__ != 0) && (*aux).i >= __MB2P24__
 			&& (*aux).i < __MB2P25__)
 	{
 		(*aux).color += col;
@@ -14520,7 +14871,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P44__ != 0)
-			&& (*aux).i >= (__MB2P45__ != 0)
+			&& (*aux).i >= __MB2P45__
 			&& (*aux).i < __MB2P46__) 
 	{
 		var temp: vec4<f32> = z;
@@ -14544,6 +14895,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MengerCrossKIFS",
         source: "menger_cross_kifs.cl",
         param_floats: 72,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.constantMultiplier000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -14584,7 +14938,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var t: f32;
 	var dot1: f32;
 	if ((__MB2P4__ != 0)
-			&& (*aux).i >= (__MB2P5__ != 0)
+			&& (*aux).i >= __MB2P5__
 			&& (*aux).i < __MB2P6__)
 	{
 		z.y = abs(z.y);
@@ -14628,7 +14982,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P33__ != 0)
-			&& (*aux).i >= (__MB2P34__ != 0)
+			&& (*aux).i >= __MB2P34__
 			&& (*aux).i < __MB2P35__)
 	{ 
 		var lengthL: f32;
@@ -14681,13 +15035,13 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 			z.x = abs(z.x + __MB2P48__) + __MB2P49__;
 		}
 		if ((__MB2P50__ != 0)
-				&& (*aux).i >= (__MB2P51__ != 0)
+				&& (*aux).i >= __MB2P51__
 				&& (*aux).i < __MB2P52__)
 		{
 			z = mb2_mat_mul(__MB2P53__, z);
 		}
 	}
-	if ((__MB2P65__ != 0) && (*aux).i >= (__MB2P66__ != 0)
+	if ((__MB2P65__ != 0) && (*aux).i >= __MB2P66__
 			&& (*aux).i < __MB2P67__)
 	{
 		Col.x *= __MB2P68__.x;
@@ -14703,6 +15057,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MengerCrossMod1",
         source: "menger_cross_mod1.cl",
         param_floats: 56,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.constantMultiplier000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 4, default: &[1.0] },
@@ -14739,7 +15096,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var gap: vec4<f32> = __MB2P0__;
 
 	if ((__MB2P4__ != 0)
-			&& (*aux).i >= (__MB2P5__ != 0)
+			&& (*aux).i >= __MB2P5__
 			&& (*aux).i < __MB2P6__)
 	{
 		z.y = abs(z.y);
@@ -14780,7 +15137,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P25__ != 0)
-			&& (*aux).i >= (__MB2P26__ != 0)
+			&& (*aux).i >= __MB2P26__
 			&& (*aux).i < __MB2P27__)
 	{ 
 		z.y = abs(z.y);
@@ -14832,14 +15189,14 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 			z.x = abs(z.x + __MB2P32__) + __MB2P33__;
 		}
 		if ((__MB2P34__ != 0)
-				&& (*aux).i >= (__MB2P35__ != 0)
+				&& (*aux).i >= __MB2P35__
 				&& (*aux).i < __MB2P36__)
 		{
 			z = mb2_mat_mul(__MB2P37__, z);
 		}
 	}
 
-	if ((__MB2P49__ != 0) && (*aux).i >= (__MB2P50__ != 0)
+	if ((__MB2P49__ != 0) && (*aux).i >= __MB2P50__
 			&& (*aux).i < __MB2P51__)
 	{
 		Col.x *= __MB2P52__.x;
@@ -14858,6 +15215,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MengerMiddleMod",
         source: "menger_middle_mod.cl",
         param_floats: 96,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.sphereInversionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -14920,7 +15280,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var t: f32 = 0.0;
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		var rr: f32 = 1.0;
@@ -14958,14 +15318,14 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		Col.z = 1.0;
 	}
 
-	if ((__MB2P18__ != 0) && (*aux).i >= (__MB2P19__ != 0)
+	if ((__MB2P18__ != 0) && (*aux).i >= __MB2P19__
 			&& (*aux).i < __MB2P20__) 
 	{
 		z = mb2_mat_mul(__MB2P21__, z);
 	}
 
 	if ((__MB2P33__ != 0)
-			&& (*aux).i >= (__MB2P34__ != 0)
+			&& (*aux).i >= __MB2P34__
 			&& (*aux).i < __MB2P35__) 
 	{
 		if (abs(z.x) > __MB2P36__)
@@ -14987,7 +15347,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		}
 	}
 	if ((__MB2P43__ != 0)
-			&& (*aux).i >= (__MB2P44__ != 0)
+			&& (*aux).i >= __MB2P44__
 			&& (*aux).i < __MB2P45__)
 	{ 
 		var tempA: vec4<f32> = vec4<f32>(0.0, 0.0, 0.0, 0.0);
@@ -15011,7 +15371,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 			{ tempB.z = abs(z.z - __MB2P52__.z); }
 		z.z = tempA.z - tempB.z - (z.z * __MB2P56__.z);
 
-		if ((*aux).i >= (__MB2P64__ != 0)
+		if ((*aux).i >= __MB2P64__
 				&& (*aux).i < __MB2P65__)
 		{
 			z *= __MB2P66__;
@@ -15020,7 +15380,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 	
 	var useScale: f32 = 1.0;
-	if ((*aux).i >= (__MB2P67__ != 0)
+	if ((*aux).i >= __MB2P67__
 			&& (*aux).i < __MB2P68__)
 	{
 		useScale = (*aux).actual_scale_a + __MB2P69__;
@@ -15033,7 +15393,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 			{ (*aux).de = (*aux).de * abs(useScale) * __MB2P13__ + __MB2P71__; }
 
 		if ((__MB2P72__ != 0)
-				&& (*aux).i >= (__MB2P73__ != 0)
+				&& (*aux).i >= __MB2P73__
 				&& (*aux).i < __MB2P74__)
 		{
 			
@@ -15090,7 +15450,7 @@ case multi_OrderOfXYZCl_zyx: {
 }
 		z += (*aux).c * __MB2P85__;
 	}
-	if ((__MB2P89__ != 0) && (*aux).i >= (__MB2P90__ != 0)
+	if ((__MB2P89__ != 0) && (*aux).i >= __MB2P90__
 			&& (*aux).i < __MB2P91__)
 	{
 		Col.x *= __MB2P92__.x;
@@ -15106,6 +15466,9 @@ case multi_OrderOfXYZCl_zyx: {
         name: "MengerMod1",
         source: "menger_mod1.cl",
         param_floats: 47,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -15157,7 +15520,7 @@ case multi_OrderOfXYZCl_zyx: {
 		z.y = temp;
 		col += __MB2P0__.z;
 	}
-	if ((__MB2P4__ != 0) && (*aux).i >= (__MB2P5__ != 0)
+	if ((__MB2P4__ != 0) && (*aux).i >= __MB2P5__
 			&& (*aux).i < __MB2P6__)
 	{
 		(*aux).color += col;
@@ -15169,7 +15532,7 @@ case multi_OrderOfXYZCl_zyx: {
 
 	(*aux).de *= __MB2P7__;
 
-	if ((__MB2P12__ != 0) && (*aux).i >= (__MB2P13__ != 0)
+	if ((__MB2P12__ != 0) && (*aux).i >= __MB2P13__
 			&& (*aux).i < __MB2P14__)
 	{
 		z = mb2_mat_mul(__MB2P15__, z);
@@ -15180,7 +15543,7 @@ case multi_OrderOfXYZCl_zyx: {
 
 	
 	if ((__MB2P33__ != 0)
-			&& (*aux).i >= (__MB2P34__ != 0)
+			&& (*aux).i >= __MB2P34__
 			&& (*aux).i < __MB2P35__) 
 	{
 		var temp: vec4<f32> = z;
@@ -15213,6 +15576,9 @@ case multi_OrderOfXYZCl_zyx: {
         name: "MengerPolyFold",
         source: "menger_poly_fold.cl",
         param_floats: 52,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterations1", kind: ParamKind::Int, offset: 1, default: &[1.0] },
@@ -15246,7 +15612,7 @@ case multi_OrderOfXYZCl_zyx: {
         ],
         wgsl: r####"
 	var oldZ: vec4<f32> = z;
-	if ((*aux).i >= (__MB2P0__ != 0)
+	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
 	{
 		
@@ -15318,7 +15684,7 @@ case multi_OrderOfXYZCl_zyx: {
 		z.y = temp;
 		col += __MB2P31__.z;
 	}
-	if ((__MB2P35__ != 0) && (*aux).i >= (__MB2P36__ != 0)
+	if ((__MB2P35__ != 0) && (*aux).i >= __MB2P36__
 			&& (*aux).i < __MB2P37__)
 	{
 		(*aux).color += col;
@@ -15348,6 +15714,9 @@ case multi_OrderOfXYZCl_zyx: {
         name: "MengerPrismShape",
         source: "menger_prism_shape.cl",
         param_floats: 91,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.constantMultiplier000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -15400,7 +15769,7 @@ case multi_OrderOfXYZCl_zyx: {
 	var t: f32;
 	var dot1: f32;
 
-	if ((*aux).i >= (__MB2P4__ != 0)
+	if ((*aux).i >= __MB2P4__
 			&& (*aux).i < __MB2P5__)
 	{
 		z.y = abs(z.y);
@@ -15437,12 +15806,12 @@ case multi_OrderOfXYZCl_zyx: {
 	}
 
 	if ((__MB2P7__ != 0)
-			&& (*aux).i >= (__MB2P8__ != 0)
+			&& (*aux).i >= __MB2P8__
 			&& (*aux).i < __MB2P9__)
 		{ z = mb2_mat_mul(__MB2P10__, z); }
 
 	if ((__MB2P22__ != 0)
-			&& (*aux).i >= (__MB2P23__ != 0)
+			&& (*aux).i >= __MB2P23__
 			&& (*aux).i < __MB2P24__)
 	{
 		var tempXZ: f32 = z.x * SQRT_2_3_F - z.z * SQRT_1_3_F;
@@ -15464,7 +15833,7 @@ case multi_OrderOfXYZCl_zyx: {
 	}
 
 	if ((__MB2P33__ != 0)
-			&& (*aux).i >= (__MB2P34__ != 0)
+			&& (*aux).i >= __MB2P34__
 			&& (*aux).i < __MB2P35__)
 	{
 		var tempXZ: f32 = z.x * SQRT_2_3_F - z.z * SQRT_1_3_F;
@@ -15487,7 +15856,7 @@ case multi_OrderOfXYZCl_zyx: {
 			z.z * SQRT_2_3_F - tempXZ * SQRT_1_3_F, z.w);
 	}
 	if ((__MB2P44__ != 0)
-			&& (*aux).i >= (__MB2P45__ != 0)
+			&& (*aux).i >= __MB2P45__
 			&& (*aux).i < __MB2P46__)
 	{
 		var tempA: vec4<f32> = vec4<f32>(0.0, 0.0, 0.0, 0.0);
@@ -15520,7 +15889,7 @@ case multi_OrderOfXYZCl_zyx: {
 		z += __MB2P65__;
 	}
 	if ((__MB2P69__ != 0)
-			&& (*aux).i >= (__MB2P70__ != 0)
+			&& (*aux).i >= __MB2P70__
 			&& (*aux).i < __MB2P71__)
 	{
 		z = abs(z);
@@ -15559,7 +15928,7 @@ case multi_OrderOfXYZCl_zyx: {
 	if ((__MB2P81__ != 0))
 		{ (*aux).de = (*aux).de * __MB2P82__ + __MB2P83__; }
 
-	if ((__MB2P84__ != 0) && (*aux).i >= (__MB2P85__ != 0)
+	if ((__MB2P84__ != 0) && (*aux).i >= __MB2P85__
 			&& (*aux).i < __MB2P86__)
 	{
 		Col.x *= __MB2P87__.x;
@@ -15577,6 +15946,9 @@ case multi_OrderOfXYZCl_zyx: {
         name: "MengerPwr2Poly",
         source: "menger_pwr2_poly.cl",
         param_floats: 60,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterations1", kind: ParamKind::Int, offset: 1, default: &[1.0] },
@@ -15613,7 +15985,7 @@ case multi_OrderOfXYZCl_zyx: {
         wgsl: r####"
 	var c: vec4<f32> = (*aux).const_c;
 
-	if ((*aux).i >= (__MB2P0__ != 0)
+	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
 	{
 		var partA: vec4<f32> = z;
@@ -15750,7 +16122,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		(*aux).de *= __MB2P36__;
 
 		if ((__MB2P41__ != 0)
-				&& (*aux).i >= (__MB2P42__ != 0)
+				&& (*aux).i >= __MB2P42__
 				&& (*aux).i < __MB2P43__) 
 		{
 			z = mb2_mat_mul(__MB2P44__, z);
@@ -15764,6 +16136,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MengerPyramid",
         source: "menger_pyramid.cl",
         param_floats: 97,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -15848,7 +16223,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var ang: f32;
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		if ((__MB2P3__ != 0))
@@ -15882,7 +16257,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z += __MB2P9__;
 	}
 
-	if ((*aux).i >= (__MB2P13__ != 0)
+	if ((*aux).i >= __MB2P13__
 			&& (*aux).i < __MB2P14__)
 	{
 		
@@ -15922,7 +16297,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P27__ != 0)
-			&& (*aux).i >= (__MB2P28__ != 0)
+			&& (*aux).i >= __MB2P28__
 			&& (*aux).i < __MB2P29__)
 	{
 		if (!(__MB2P30__ != 0))
@@ -15988,7 +16363,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P48__ != 0)
-			&& (*aux).i >= (__MB2P49__ != 0)
+			&& (*aux).i >= __MB2P49__
 			&& (*aux).i < __MB2P50__)
 	{
 		if ((z.z < (__MB2P51__ + 0.5) * __MB2P52__)
@@ -16001,7 +16376,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P55__ != 0)
-			&& (*aux).i >= (__MB2P56__ != 0)
+			&& (*aux).i >= __MB2P56__
 			&& (*aux).i < __MB2P57__)
 	{
 		if ((__MB2P58__ != 0))
@@ -16018,7 +16393,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		
 		z = abs(z);
 		
-		if (k >= (__MB2P63__ != 0)
+		if (k >= __MB2P63__
 				&& k < __MB2P64__)
 		{
 			z = mb2_mat_mul(__MB2P65__, z);
@@ -16046,7 +16421,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 			z.y = temp;
 			col += __MB2P77__.z;
 		}
-		if ((__MB2P81__ != 0) && k >= (__MB2P82__ != 0)
+		if ((__MB2P81__ != 0) && k >= __MB2P82__
 				&& k < __MB2P83__)
 		{
 			(*aux).color += col;
@@ -16093,6 +16468,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MengerSmooth",
         source: "menger_smooth.cl",
         param_floats: 27,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.scale3", kind: ParamKind::Float, offset: 0, default: &[3.0] },
             GeneratedParam { path: "transformCommon.offset0005", kind: ParamKind::Float, offset: 1, default: &[0.005] },
@@ -16147,7 +16525,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).de *= __MB2P0__;
 
 	if ((__MB2P6__ != 0)
-			&& (*aux).i >= (__MB2P7__ != 0)
+			&& (*aux).i >= __MB2P7__
 			&& (*aux).i < __MB2P8__)
 	{
 		z = mb2_mat_mul(__MB2P9__, z);
@@ -16168,6 +16546,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MengerSmoothChebyshev",
         source: "menger_smooth_chebyshev.cl",
         param_floats: 65,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsC1", kind: ParamKind::Int, offset: 1, default: &[1.0] },
@@ -16205,7 +16586,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var t: f32;
 
 	
-	if ((*aux).i >= (__MB2P0__ != 0)
+	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
 	{
 		if ((__MB2P2__ != 0))
@@ -16262,14 +16643,14 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z += vec4<f32>(t, t, t, 0.0);
 	}
 
-	if ((*aux).i >= (__MB2P8__ != 0)
+	if ((*aux).i >= __MB2P8__
 			&& (*aux).i < __MB2P9__)
 	{
 		z = mb2_mat_mul(__MB2P10__, z);
 	}
 
 	var OffsetS: f32 = 0.0;
-	if ((*aux).i >= (__MB2P22__ != 0)
+	if ((*aux).i >= __MB2P22__
 			&& (*aux).i < __MB2P23__)
 	{
 		OffsetS = __MB2P24__;
@@ -16309,14 +16690,14 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).de *= __MB2P39__;
 
 	if ((__MB2P40__ != 0)
-			&& (*aux).i >= (__MB2P41__ != 0)
+			&& (*aux).i >= __MB2P41__
 			&& (*aux).i < __MB2P42__)
 	{
 		z = mb2_mat_mul(__MB2P43__, z);
 	}
 
 	if ((__MB2P55__ != 0)
-			&& (*aux).i >= (__MB2P56__ != 0)
+			&& (*aux).i >= __MB2P56__
 			&& (*aux).i < __MB2P57__) 
 	{
 		z.x += sign(z.x) * __MB2P58__.x;
@@ -16324,7 +16705,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z.z += sign(z.z) * __MB2P58__.z;
 	}
 
-	if ((__MB2P62__ != 0) && (*aux).i >= (__MB2P63__ != 0)
+	if ((__MB2P62__ != 0) && (*aux).i >= __MB2P63__
 			&& (*aux).i < __MB2P64__)
 	{
 		(*aux).color += col;
@@ -16336,6 +16717,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MengerSmoothMod1",
         source: "menger_smooth_mod1.cl",
         param_floats: 43,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabled", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.offset0", kind: ParamKind::Float, offset: 1, default: &[0.0] },
@@ -16409,14 +16793,14 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).de *= __MB2P15__;
 
 	if ((__MB2P16__ != 0)
-			&& (*aux).i >= (__MB2P17__ != 0)
+			&& (*aux).i >= __MB2P17__
 			&& (*aux).i < __MB2P18__)
 	{
 		z = mb2_mat_mul(__MB2P19__, z);
 	}
 
 	if ((__MB2P31__ != 0)
-			&& (*aux).i >= (__MB2P32__ != 0)
+			&& (*aux).i >= __MB2P32__
 			&& (*aux).i < __MB2P33__) 
 	{
 		z.x += sign(z.x) * __MB2P34__.x;
@@ -16440,6 +16824,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MengerSponge",
         source: "menger_sponge.cl",
         param_floats: 8,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "foldColor.difs0000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -16473,7 +16860,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z.y = temp;
 		col += __MB2P0__.z;
 	}
-	if ((__MB2P4__ != 0) && (*aux).i >= (__MB2P5__ != 0)
+	if ((__MB2P4__ != 0) && (*aux).i >= __MB2P5__
 			&& (*aux).i < __MB2P6__)
 	{
 		(*aux).color += col;
@@ -16493,6 +16880,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MengerV4",
         source: "menger_v4.cl",
         param_floats: 85,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -16539,7 +16929,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		var ang: f32 = sqrt(z.x * z.x + z.y * z.y) * __MB2P3__
@@ -16554,7 +16944,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P7__ != 0)
-			&& (*aux).i >= (__MB2P8__ != 0)
+			&& (*aux).i >= __MB2P8__
 			&& (*aux).i < __MB2P9__)
 	{
 		if (z.x + z.y < 0.0) { z = vec4<f32>(-z.y, -z.x, z.z, z.w); }
@@ -16570,7 +16960,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P15__ != 0)
-			&& (*aux).i >= (__MB2P16__ != 0)
+			&& (*aux).i >= __MB2P16__
 			&& (*aux).i < __MB2P17__)
 	{
 		z += __MB2P18__;
@@ -16592,14 +16982,14 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z -= __MB2P18__;
 	}
 	
-	if ((*aux).i >= (__MB2P25__ != 0)
+	if ((*aux).i >= __MB2P25__
 			&& (*aux).i < __MB2P26__)
 	{
 		z = abs(z);
 		z += __MB2P27__;
 
 		if ((__MB2P31__ != 0)
-				&& (*aux).i >= (__MB2P32__ != 0)
+				&& (*aux).i >= __MB2P32__
 				&& (*aux).i < __MB2P33__)
 		{
 			z = mb2_mat_mul(__MB2P34__, z);
@@ -16637,7 +17027,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 		var useScale: f32 = __MB2P67__;
 		if ((__MB2P68__ != 0)
-				&& (*aux).i >= (__MB2P69__ != 0)
+				&& (*aux).i >= __MB2P69__
 				&& (*aux).i < __MB2P70__)
 		{
 			useScale += (*aux).actual_scale_a;
@@ -16659,7 +17049,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P78__ != 0)
-			&& (*aux).i >= (__MB2P79__ != 0)
+			&& (*aux).i >= __MB2P79__
 			&& (*aux).i < __MB2P80__) 
 	{
 		z.x = sign(z.x) * __MB2P81__.x + z.x;
@@ -16673,6 +17063,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MengerV5",
         source: "menger_v5.cl",
         param_floats: 87,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -16722,7 +17115,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         wgsl: r####"
 	var t: f32;
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		var ang: f32 = sqrt(z.x * z.x + z.y * z.y) * __MB2P3__
@@ -16737,7 +17130,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P7__ != 0)
-			&& (*aux).i >= (__MB2P8__ != 0)
+			&& (*aux).i >= __MB2P8__
 			&& (*aux).i < __MB2P9__)
 	{
 		if (z.x + z.y < 0.0) { z = vec4<f32>(-z.y, -z.x, z.z, z.w); }
@@ -16753,7 +17146,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P15__ != 0)
-			&& (*aux).i >= (__MB2P16__ != 0)
+			&& (*aux).i >= __MB2P16__
 			&& (*aux).i < __MB2P17__)
 	{
 		z += __MB2P18__;
@@ -16775,14 +17168,14 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z -= __MB2P18__;
 	}
 	
-	if ((*aux).i >= (__MB2P25__ != 0)
+	if ((*aux).i >= __MB2P25__
 			&& (*aux).i < __MB2P26__)
 	{
 		z = abs(z);
 		z += __MB2P27__;
 
 		if ((__MB2P31__ != 0)
-				&& (*aux).i >= (__MB2P32__ != 0)
+				&& (*aux).i >= __MB2P32__
 				&& (*aux).i < __MB2P33__)
 		{
 			z = mb2_mat_mul(__MB2P34__, z);
@@ -16810,7 +17203,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 		var useScale: f32 = __MB2P66__;
 		if ((__MB2P67__ != 0)
-				&& (*aux).i >= (__MB2P68__ != 0)
+				&& (*aux).i >= __MB2P68__
 				&& (*aux).i < __MB2P69__)
 		{
 			useScale += (*aux).actual_scale_a;
@@ -16832,7 +17225,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P77__ != 0)
-			&& (*aux).i >= (__MB2P78__ != 0)
+			&& (*aux).i >= __MB2P78__
 			&& (*aux).i < __MB2P79__) 
 	{
 		z.x = sign(z.x) * __MB2P80__.x + z.x;
@@ -16856,6 +17249,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MixPinski4d",
         source: "mix_pinski4d.cl",
         param_floats: 28,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.startIterationsS", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsS", kind: ParamKind::Int, offset: 1, default: &[250.0] },
@@ -16875,7 +17271,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 27, default: &[1.0] },
         ],
         wgsl: r####"
-	if ((*aux).i >= (__MB2P0__ != 0)
+	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
 	{
 		var temp: f32;
@@ -16924,14 +17320,14 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		(*aux).de *= abs(__MB2P2__);
 	}
 
-	if ((*aux).i >= (__MB2P3__ != 0)
+	if ((*aux).i >= __MB2P3__
 			&& (*aux).i < __MB2P4__)
 	{
 		z += __MB2P5__; 
 	}
 	
 	if ((__MB2P9__ != 0)
-			&& (*aux).i >= (__MB2P10__ != 0)
+			&& (*aux).i >= __MB2P10__
 			&& (*aux).i < __MB2P11__)
 	{
 		var tp: vec4<f32>;
@@ -16978,7 +17374,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 			z.w = tp.z * -sin(zeta) + tp.w * cos(zeta);
 		}
 	}
-	if ((*aux).i >= (__MB2P20__ != 0)
+	if ((*aux).i >= __MB2P20__
 			&& (*aux).i < __MB2P21__)
 	{
 		var scaleM: f32 = __MB2P22__;
@@ -16999,6 +17395,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "ModulusMandelbulb",
         source: "modulus_mandelbulb.cl",
         param_floats: 3,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "bulb.betaAngleOffset", kind: ParamKind::Float, offset: 0, default: &[0.0] },
             GeneratedParam { path: "bulb.alphaAngleOffset", kind: ParamKind::Float, offset: 1, default: &[0.0] },
@@ -17024,6 +17423,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "ModulusMengerSponge",
         source: "modulus_menger_sponge.cl",
         param_floats: 1,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.scale3", kind: ParamKind::Float, offset: 0, default: &[3.0] },
         ],
@@ -17068,6 +17470,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MsltoeDonut",
         source: "msltoe_donut.cl",
         param_floats: 4,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 4.0,
         params: &[
             GeneratedParam { path: "donut.ringThickness", kind: ParamKind::Float, offset: 0, default: &[0.1] },
             GeneratedParam { path: "donut.number", kind: ParamKind::Float, offset: 1, default: &[9.0] },
@@ -17113,6 +17518,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MsltoeSym2Mod",
         source: "msltoe_sym2_mod.cl",
         param_floats: 15,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.scale", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.additionConstant000", kind: ParamKind::Float4, offset: 1, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -17177,6 +17585,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MsltoeSym3Mod",
         source: "msltoe_sym3_mod.cl",
         param_floats: 21,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.scale0", kind: ParamKind::Float, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.scale", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -17239,7 +17650,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).de = (*aux).de * abs(__MB2P15__) + 1.0;
 
 	if ((__MB2P16__ != 0) 
-			&& (*aux).i >= (__MB2P17__ != 0)
+			&& (*aux).i >= __MB2P17__
 			&& (*aux).i < __MB2P18__)
 	{
 		(*aux).r = length(z);
@@ -17269,6 +17680,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MsltoeSym3Mod2",
         source: "msltoe_sym3_mod2.cl",
         param_floats: 15,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.scale0", kind: ParamKind::Float, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.additionConstant000", kind: ParamKind::Float4, offset: 1, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -17337,6 +17751,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MsltoeSym3Mod4",
         source: "msltoe_sym3_mod4.cl",
         param_floats: 23,
+        de_function: DeFunction::Logarithmic,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.int8Y", kind: ParamKind::Int, offset: 0, default: &[8.0] },
             GeneratedParam { path: "transformCommon.scale", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -17394,7 +17811,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).de *= abs(__MB2P15__);
 
 	if ((__MB2P16__ != 0) 
-			&& (*aux).i >= (__MB2P17__ != 0)
+			&& (*aux).i >= __MB2P17__
 			&& (*aux).i < __MB2P18__)
 	{
 		(*aux).r = length(z);
@@ -17422,6 +17839,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MsltoeSym4Mod",
         source: "msltoe_sym4_mod.cl",
         param_floats: 40,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.constantMultiplier111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -17512,6 +17932,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MsltoeToroidal",
         source: "msltoe_toroidal.cl",
         param_floats: 18,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -17531,7 +17954,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__) 
 	{
 		z *= __MB2P3__;
@@ -17584,6 +18007,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MsltoeToroidalMulti",
         source: "msltoe_toroidal_multi.cl",
         param_floats: 25,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -17610,7 +18036,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__) 
 	{
 		z *= __MB2P3__;
@@ -17749,6 +18175,9 @@ th0 += acos(v1 / sqrT); break;
         name: "MsltoeToroidalV2",
         source: "msltoe_toroidal_v2.cl",
         param_floats: 26,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -17776,7 +18205,7 @@ th0 += acos(v1 / sqrT); break;
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__) 
 	{
 		z *= __MB2P3__;
@@ -17800,7 +18229,7 @@ th0 += acos(v1 / sqrT); break;
 	else
 	{
 		if ((__MB2P9__ != 0)
-				&& (*aux).i >= (__MB2P10__ != 0)
+				&& (*aux).i >= __MB2P10__
 				&& (*aux).i < __MB2P11__)
 		{
 			if (!(__MB2P12__ != 0))
@@ -17868,6 +18297,9 @@ th0 += acos(v1 / sqrT); break;
         name: "MsltoeToroidalV3",
         source: "msltoe_toroidal_v3.cl",
         param_floats: 60,
+        de_function: DeFunction::Logarithmic,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -17923,7 +18355,7 @@ th0 += acos(v1 / sqrT); break;
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__) 
 	{
 		z *= __MB2P3__;
@@ -17951,7 +18383,7 @@ th0 += acos(v1 / sqrT); break;
 	}
 	else
 	{
-		if ((*aux).i >= (__MB2P11__ != 0)
+		if ((*aux).i >= __MB2P11__
 				&& (*aux).i < __MB2P12__)
 		{
 			if (!(__MB2P13__ != 0))
@@ -17997,7 +18429,7 @@ th0 += acos(v1 / sqrT); break;
 	(*aux).de *= __MB2P22__;
 
 	if ((__MB2P23__ != 0)
-			&& (*aux).i >= (__MB2P24__ != 0)
+			&& (*aux).i >= __MB2P24__
 			&& (*aux).i < __MB2P25__)
 	{
 		var tempFAB: vec4<f32> = (*aux).const_c;
@@ -18013,7 +18445,7 @@ th0 += acos(v1 / sqrT); break;
 	}
 
 	if ((__MB2P33__ != 0)
-			&& (*aux).i >= (__MB2P34__ != 0)
+			&& (*aux).i >= __MB2P34__
 			&& (*aux).i < __MB2P35__) 
 	{
 		
@@ -18041,7 +18473,7 @@ th0 += acos(v1 / sqrT); break;
 		if (!(__MB2P40__ != 0))
 		{
 			if ((__MB2P41__ != 0)
-					&& (*aux).i >= (__MB2P42__ != 0)
+					&& (*aux).i >= __MB2P42__
 					&& (*aux).i < __MB2P43__)
 			{
 				(*aux).dist = min((*aux).dist, (*aux).de0);
@@ -18060,7 +18492,7 @@ th0 += acos(v1 / sqrT); break;
 	}
 
 	
-	if ((__MB2P46__ != 0) && (*aux).i >= (__MB2P47__ != 0)
+	if ((__MB2P46__ != 0) && (*aux).i >= __MB2P47__
 			&& (*aux).i < __MB2P48__)
 	{
 
@@ -18098,6 +18530,9 @@ th0 += acos(v1 / sqrT); break;
         name: "NewtonPow3",
         source: "newton_pow3.cl",
         param_floats: 16,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -18194,6 +18629,9 @@ th0 += acos(v1 / sqrT); break;
         name: "PseudoKleinianMod3",
         source: "pseudo_kleinian_mod3.cl",
         param_floats: 82,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.sphereInversionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsX", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -18246,7 +18684,7 @@ th0 += acos(v1 / sqrT); break;
 
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		z += __MB2P3__;
@@ -18259,7 +18697,7 @@ th0 += acos(v1 / sqrT); break;
 	}
 
 	
-	if ((*aux).i >= (__MB2P13__ != 0)
+	if ((*aux).i >= __MB2P13__
 			&& (*aux).i < __MB2P14__)
 	{
 		z.x -= __MB2P15__.x * sign(z.x);
@@ -18271,7 +18709,7 @@ th0 += acos(v1 / sqrT); break;
 	
 	var cSize: vec4<f32> = __MB2P19__;
 	if ((__MB2P23__ != 0)
-			&& (*aux).i >= (__MB2P24__ != 0)
+			&& (*aux).i >= __MB2P24__
 			&& (*aux).i < __MB2P25__)
 	{
 		var tempZ: vec4<f32> = z;
@@ -18291,7 +18729,7 @@ th0 += acos(v1 / sqrT); break;
 	z += __MB2P27__;
 
 	if ((__MB2P31__ != 0)
-			&& (*aux).i >= (__MB2P32__ != 0)
+			&& (*aux).i >= __MB2P32__
 			&& (*aux).i < __MB2P33__)
 	{
 		z.x += (*aux).pos_neg * __MB2P34__.x;
@@ -18302,7 +18740,7 @@ th0 += acos(v1 / sqrT); break;
 	}
 
 	if ((__MB2P39__ != 0)
-			&& (*aux).i >= (__MB2P40__ != 0)
+			&& (*aux).i >= __MB2P40__
 			&& (*aux).i < __MB2P41__)
 	{
 		z = abs(z + __MB2P42__)
@@ -18322,7 +18760,7 @@ th0 += acos(v1 / sqrT); break;
 	}
 
 	if ((__MB2P54__ != 0)
-			&& (*aux).i >= (__MB2P55__ != 0)
+			&& (*aux).i >= __MB2P55__
 			&& (*aux).i < __MB2P56__)
 	{
 		z = mb2_mat_mul(__MB2P57__, z);
@@ -18347,7 +18785,7 @@ th0 += acos(v1 / sqrT); break;
 	(*aux).dist = (*aux).de0;
 
 	
-	if ((__MB2P75__ != 0) && (*aux).i >= (__MB2P76__ != 0)
+	if ((__MB2P75__ != 0) && (*aux).i >= __MB2P76__
 			&& (*aux).i < __MB2P77__)
 	{
 		colorAdd += __MB2P78__.x * abs(z.x);
@@ -18364,6 +18802,9 @@ th0 += acos(v1 / sqrT); break;
         name: "PseudoKleinianStdDE",
         source: "pseudo_kleinian_std_de.cl",
         param_floats: 104,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.constantMultiplier000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -18427,7 +18868,7 @@ th0 += acos(v1 / sqrT); break;
 	var dot1: f32;
 
 	if ((__MB2P4__ != 0)
-			&& (*aux).i >= (__MB2P5__ != 0)
+			&& (*aux).i >= __MB2P5__
 			&& (*aux).i < __MB2P6__)
 	{
 		z.y = abs(z.y);
@@ -18459,12 +18900,12 @@ th0 += acos(v1 / sqrT); break;
 	}
 
 	if ((__MB2P8__ != 0)
-			&& (*aux).i >= (__MB2P9__ != 0)
+			&& (*aux).i >= __MB2P9__
 			&& (*aux).i < __MB2P10__)
 		{ z = mb2_mat_mul(__MB2P11__, z); }
 
 	if ((__MB2P23__ != 0)
-			&& (*aux).i >= (__MB2P24__ != 0)
+			&& (*aux).i >= __MB2P24__
 			&& (*aux).i < __MB2P25__)
 	{
 		var tempXZ: f32 = z.x * SQRT_2_3_F - z.z * SQRT_1_3_F;
@@ -18486,7 +18927,7 @@ th0 += acos(v1 / sqrT); break;
 	}
 
 	if ((__MB2P34__ != 0)
-			&& (*aux).i >= (__MB2P35__ != 0)
+			&& (*aux).i >= __MB2P35__
 			&& (*aux).i < __MB2P36__)
 	{
 		var tempXZ: f32 = z.x * SQRT_2_3_F - z.z * SQRT_1_3_F;
@@ -18509,7 +18950,7 @@ th0 += acos(v1 / sqrT); break;
 			z.z * SQRT_2_3_F - tempXZ * SQRT_1_3_F, z.w);
 	}
 	if ((__MB2P45__ != 0)
-			&& (*aux).i >= (__MB2P46__ != 0)
+			&& (*aux).i >= __MB2P46__
 			&& (*aux).i < __MB2P47__)
 	{
 		var tempA: vec4<f32> = vec4<f32>(0.0, 0.0, 0.0, 0.0);
@@ -18542,7 +18983,7 @@ th0 += acos(v1 / sqrT); break;
 		
 	}
 	if ((__MB2P66__ != 0)
-			&& (*aux).i >= (__MB2P67__ != 0)
+			&& (*aux).i >= __MB2P67__
 			&& (*aux).i < __MB2P68__)
 	{
 		z = abs(z);
@@ -18579,7 +19020,7 @@ th0 += acos(v1 / sqrT); break;
 	var k: f32 = 1.0;
 	var cSize: vec4<f32> = __MB2P80__;
 	if ((__MB2P84__ != 0)
-			&& (*aux).i >= (__MB2P85__ != 0)
+			&& (*aux).i >= __MB2P85__
 			&& (*aux).i < __MB2P86__)
 	{
 		var tempZ: vec4<f32> = z;
@@ -18601,7 +19042,7 @@ th0 += acos(v1 / sqrT); break;
 	}
 
 	if ((__MB2P90__ != 0)
-			&& (*aux).i >= (__MB2P91__ != 0)
+			&& (*aux).i >= __MB2P91__
 			&& (*aux).i < __MB2P92__)
 	{
 		
@@ -18621,7 +19062,7 @@ th0 += acos(v1 / sqrT); break;
 	(*aux).dist = sqrt(z.x * z.x + z.y * z.y) / (*aux).de;
 
 	
-	if ((__MB2P97__ != 0) && (*aux).i >= (__MB2P98__ != 0)
+	if ((__MB2P97__ != 0) && (*aux).i >= __MB2P98__
 			&& (*aux).i < __MB2P99__)
 	{
 		var colorAdd: f32 = 0.0;
@@ -18637,6 +19078,9 @@ th0 += acos(v1 / sqrT); break;
         name: "PseudoKleinianTrigV2",
         source: "pseudo_kleinian_trig_v2.cl",
         param_floats: 66,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -18685,7 +19129,7 @@ th0 += acos(v1 / sqrT); break;
 
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		z += __MB2P3__;
@@ -18701,7 +19145,7 @@ th0 += acos(v1 / sqrT); break;
 	}
 
 	
-	if ((*aux).i >= (__MB2P12__ != 0)
+	if ((*aux).i >= __MB2P12__
 			&& (*aux).i < __MB2P13__)
 	{
 		if ((__MB2P14__ != 0)) { z.x = abs(z.x); }
@@ -18743,14 +19187,14 @@ th0 += acos(v1 / sqrT); break;
 
 	
 	if ((__MB2P22__ != 0)
-			&& (*aux).i >= (__MB2P23__ != 0)
+			&& (*aux).i >= __MB2P23__
 			&& (*aux).i < __MB2P24__)
 	{
 		z = mb2_mat_mul(__MB2P25__, z);
 	}
 
 	
-	if ((*aux).i >= (__MB2P37__ != 0)
+	if ((*aux).i >= __MB2P37__
 			&& (*aux).i < __MB2P38__)
 	{
 		z *= __MB2P39__;
@@ -18767,7 +19211,7 @@ th0 += acos(v1 / sqrT); break;
 	(*aux).de = (*aux).de * __MB2P46__ * stretch + __MB2P47__;
 
 	var colDist: f32 = (*aux).dist;
-	if ((*aux).i >= (__MB2P48__ != 0)
+	if ((*aux).i >= __MB2P48__
 			&& (*aux).i < __MB2P49__)
 	{
 		
@@ -18794,7 +19238,7 @@ th0 += acos(v1 / sqrT); break;
 	}
 
 	
-	if ((__MB2P55__ != 0) && (*aux).i >= (__MB2P56__ != 0)
+	if ((__MB2P55__ != 0) && (*aux).i >= __MB2P56__
 			&& (*aux).i < __MB2P57__)
 	{
 		var addCol: f32 = abs(z.x * z.y) * __MB2P58__;
@@ -18826,6 +19270,9 @@ th0 += acos(v1 / sqrT); break;
         name: "Quaternion",
         source: "quaternion.cl",
         param_floats: 0,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
         ],
         wgsl: r####"
@@ -18845,6 +19292,9 @@ th0 += acos(v1 / sqrT); break;
         name: "Quaternion3d",
         source: "quaternion3d.cl",
         param_floats: 22,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.constantMultiplier122", kind: ParamKind::Float4, offset: 0, default: &[1.0, 2.0, 2.0, 0.0] },
             GeneratedParam { path: "transformCommon.scaleA1", kind: ParamKind::Float, offset: 4, default: &[1.0] },
@@ -18875,6 +19325,9 @@ th0 += acos(v1 / sqrT); break;
         name: "Quaternion4d",
         source: "quaternion4d.cl",
         param_floats: 19,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.constantMultiplier1220", kind: ParamKind::Float4, offset: 0, default: &[1.0, 2.0, 2.0, 0.0] },
             GeneratedParam { path: "transformCommon.additionConstant0000", kind: ParamKind::Float4, offset: 4, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -18892,7 +19345,7 @@ th0 += acos(v1 / sqrT); break;
 
 	
 	if ((__MB2P8__ != 0)
-			&& (*aux).i >= (__MB2P9__ != 0)
+			&& (*aux).i >= __MB2P9__
 			&& (*aux).i < __MB2P10__)
 	{
 		var tp: vec4<f32>;
@@ -18946,6 +19399,9 @@ th0 += acos(v1 / sqrT); break;
         name: "QuaternionCubic4d",
         source: "quaternion_cubic4d.cl",
         param_floats: 29,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledxFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledyFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -18985,7 +19441,7 @@ th0 += acos(v1 / sqrT); break;
 
 	
 	if ((__MB2P18__ != 0)
-			&& (*aux).i >= (__MB2P19__ != 0)
+			&& (*aux).i >= __MB2P19__
 			&& (*aux).i < __MB2P20__)
 	{
 		var tp: vec4<f32>;
@@ -19039,6 +19495,9 @@ th0 += acos(v1 / sqrT); break;
         name: "QuickDudley",
         source: "quick_dudley.cl",
         param_floats: 2,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -19061,6 +19520,9 @@ th0 += acos(v1 / sqrT); break;
         name: "QuickDudleyMod",
         source: "quick_dudley_mod.cl",
         param_floats: 10,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -19089,6 +19551,9 @@ th0 += acos(v1 / sqrT); break;
         name: "RiemannBulbMsltoeMod2",
         source: "riemann_bulb_msltoe_mod2.cl",
         param_floats: 17,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 1.5,
         params: &[
             GeneratedParam { path: "transformCommon.minR05", kind: ParamKind::Float, offset: 0, default: &[0.5] },
             GeneratedParam { path: "transformCommon.functionEnabled", kind: ParamKind::Int, offset: 1, default: &[1.0] },
@@ -19150,6 +19615,9 @@ th0 += acos(v1 / sqrT); break;
         name: "RiemannSphereHoboldMulti",
         source: "riemann_sphere_hobold_multi.cl",
         param_floats: 33,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 2.5,
         params: &[
             GeneratedParam { path: "transformCommon.scale08", kind: ParamKind::Float, offset: 0, default: &[0.8] },
             GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 1, default: &[1.0] },
@@ -19287,6 +19755,9 @@ th0 += acos(v1 / sqrT); break;
         name: "RiemannSphereHoboldPow4",
         source: "riemann_sphere_hobold_pow4.cl",
         param_floats: 24,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 2.5,
         params: &[
             GeneratedParam { path: "transformCommon.scale08", kind: ParamKind::Float, offset: 0, default: &[0.8] },
             GeneratedParam { path: "transformCommon.offsetA0", kind: ParamKind::Float, offset: 1, default: &[0.0] },
@@ -19381,6 +19852,9 @@ th0 += acos(v1 / sqrT); break;
         name: "RiemannSphereHoboldPow8",
         source: "riemann_sphere_hobold_pow8.cl",
         param_floats: 24,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 2.5,
         params: &[
             GeneratedParam { path: "transformCommon.scale08", kind: ParamKind::Float, offset: 0, default: &[0.8] },
             GeneratedParam { path: "transformCommon.offsetA0", kind: ParamKind::Float, offset: 1, default: &[0.0] },
@@ -19477,6 +19951,9 @@ th0 += acos(v1 / sqrT); break;
         name: "RiemannSphereMsltoe",
         source: "riemann_sphere_msltoe.cl",
         param_floats: 20,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 1.5,
         params: &[
             GeneratedParam { path: "transformCommon.rotationEnabled", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 1, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
@@ -19522,6 +19999,9 @@ th0 += acos(v1 / sqrT); break;
         name: "RiemannSphereMsltoeV1",
         source: "riemann_sphere_msltoe_v1.cl",
         param_floats: 25,
+        de_function: DeFunction::Logarithmic,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.scale", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.rotationEnabled", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -19566,6 +20046,9 @@ th0 += acos(v1 / sqrT); break;
         name: "RiemannSphereMsltoeV2",
         source: "riemann_sphere_msltoe_v2.cl",
         param_floats: 23,
+        de_function: DeFunction::Logarithmic,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.rotationEnabled", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 1, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
@@ -19630,6 +20113,9 @@ th0 += acos(v1 / sqrT); break;
         name: "ScatorPower2",
         source: "scator_power2.cl",
         param_floats: 22,
+        de_function: DeFunction::Unsupported,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledXFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledYFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -19698,7 +20184,7 @@ th0 += acos(v1 / sqrT); break;
 
 	
 	if ((__MB2P7__ != 0)
-			&& (*aux).i >= (__MB2P8__ != 0)
+			&& (*aux).i >= __MB2P8__
 			&& (*aux).i < __MB2P9__)
 	{
 		var c: vec4<f32> = (*aux).const_c;
@@ -19805,6 +20291,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "ScatorPower2Imaginary",
         source: "scator_power2_imaginary.cl",
         param_floats: 0,
+        de_function: DeFunction::Unsupported,
+        add_c: true,
+        bailout: 10.0,
         params: &[
         ],
         wgsl: r####"
@@ -19829,6 +20318,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "ScatorPower2Real",
         source: "scator_power2_real.cl",
         param_floats: 0,
+        de_function: DeFunction::Unsupported,
+        add_c: true,
+        bailout: 10.0,
         params: &[
         ],
         wgsl: r####"
@@ -19853,6 +20345,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "ScatorPower2StdR",
         source: "scator_power2_std_r.cl",
         param_floats: 11,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.constantMultiplier122", kind: ParamKind::Float4, offset: 1, default: &[1.0, 2.0, 2.0, 0.0] },
@@ -19917,6 +20412,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "ScatorTest",
         source: "scator_test.cl",
         param_floats: 12,
+        de_function: DeFunction::Unsupported,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.scaleB1", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.scaleC1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -19948,7 +20446,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).de = (*aux).de * length(z) / (*aux).r + __MB2P3__;
 	(*aux).de *= __MB2P4__;
 
-	if ((__MB2P5__ != 0) && (*aux).i >= (__MB2P6__ != 0)
+	if ((__MB2P5__ != 0) && (*aux).i >= __MB2P6__
 			&& (*aux).i < __MB2P7__)
 	{
 		(*aux).color += __MB2P8__.x;
@@ -19961,6 +20459,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Sierpinski3d",
         source: "sierpinski3d.cl",
         param_floats: 27,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabled", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -20026,14 +20527,14 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	z *= __MB2P2__;
 
-	if ((*aux).i >= (__MB2P3__ != 0)
+	if ((*aux).i >= __MB2P3__
 			&& (*aux).i < __MB2P4__)
 	{
 		z -= __MB2P5__; 
 	}
 	
 	if ((__MB2P9__ != 0)
-			&& (*aux).i >= (__MB2P10__ != 0)
+			&& (*aux).i >= __MB2P10__
 			&& (*aux).i < __MB2P11__)
 	{
 		z = mb2_mat_mul(__MB2P12__, z);
@@ -20051,6 +20552,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Sierpinski3dV2",
         source: "sierpinski3d_v2.cl",
         param_floats: 64,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledTFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsT", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -20088,7 +20592,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		z += __MB2P3__;
@@ -20098,17 +20602,17 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	{
 		
 		if ((__MB2P20__ != 0)
-				&& (*aux).i >= (__MB2P21__ != 0)
+				&& (*aux).i >= __MB2P21__
 				&& (*aux).i < __MB2P22__)
 			{ z.x = abs(z.x + __MB2P23__.x); }
 
 		if ((__MB2P27__ != 0)
-				&& (*aux).i >= (__MB2P28__ != 0)
+				&& (*aux).i >= __MB2P28__
 				&& (*aux).i < __MB2P29__)
 			{ z.y = abs(z.y + __MB2P23__.y); }
 
 		if ((__MB2P30__ != 0)
-				&& (*aux).i >= (__MB2P31__ != 0)
+				&& (*aux).i >= __MB2P31__
 				&& (*aux).i < __MB2P32__)
 			{ z.z = abs(z.z + __MB2P23__.z); }
 	}
@@ -20154,7 +20658,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P39__ != 0)
-			&& (*aux).i >= (__MB2P40__ != 0)
+			&& (*aux).i >= __MB2P40__
 			&& (*aux).i < __MB2P41__)
 	{
 		var m: f32 = 1.0;
@@ -20171,7 +20675,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P46__ != 0)
-			&& (*aux).i >= (__MB2P47__ != 0)
+			&& (*aux).i >= __MB2P47__
 			&& (*aux).i < __MB2P48__)
 	{
 		z = mb2_mat_mul(__MB2P49__, z);
@@ -20186,6 +20690,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Sierpinski3dV3",
         source: "sierpinski3d_v3.cl",
         param_floats: 45,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledTFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsT", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -20207,7 +20714,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		z += __MB2P3__;
@@ -20237,7 +20744,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	z -= __MB2P20__; 
 
 	if ((__MB2P24__ != 0)
-			&& (*aux).i >= (__MB2P25__ != 0)
+			&& (*aux).i >= __MB2P25__
 			&& (*aux).i < __MB2P26__)
 	{
 		z = mb2_mat_mul(__MB2P27__, z);
@@ -20245,7 +20752,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P39__ != 0)
-			&& (*aux).i >= (__MB2P40__ != 0)
+			&& (*aux).i >= __MB2P40__
 			&& (*aux).i < __MB2P41__)
 	{
 		var temp: vec4<f32> = z;
@@ -20281,6 +20788,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Sierpinski3dV4",
         source: "sierpinski3d_v4.cl",
         param_floats: 50,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.sphereInversionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -20316,7 +20826,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         wgsl: r####"
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		var rr: f32 = 1.0;
@@ -20332,15 +20842,15 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	{
 		
 		if ((__MB2P14__ != 0)
-				&& (*aux).i >= (__MB2P15__ != 0)
+				&& (*aux).i >= __MB2P15__
 				&& (*aux).i < __MB2P16__)
 			{ z.x = abs(z.x); }
 		if ((__MB2P17__ != 0)
-				&& (*aux).i >= (__MB2P18__ != 0)
+				&& (*aux).i >= __MB2P18__
 				&& (*aux).i < __MB2P19__)
 			{ z.y = abs(z.y); }
 		if ((__MB2P20__ != 0)
-				&& (*aux).i >= (__MB2P21__ != 0)
+				&& (*aux).i >= __MB2P21__
 				&& (*aux).i < __MB2P22__)
 			{ z.z = abs(z.z); }
 	}
@@ -20394,14 +20904,14 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	z *= __MB2P25__;
 
-	if ((*aux).i >= (__MB2P26__ != 0)
+	if ((*aux).i >= __MB2P26__
 			&& (*aux).i < __MB2P27__)
 	{
 		z -= __MB2P28__; 
 	}
 	
 	if ((__MB2P32__ != 0)
-			&& (*aux).i >= (__MB2P33__ != 0)
+			&& (*aux).i >= __MB2P33__
 			&& (*aux).i < __MB2P34__)
 	{
 		z = mb2_mat_mul(__MB2P35__, z);
@@ -20419,6 +20929,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Sierpinski4d",
         source: "sierpinski4d.cl",
         param_floats: 21,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.scaleA2", kind: ParamKind::Float, offset: 0, default: &[2.0] },
             GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -20479,7 +20992,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	z *= __MB2P0__;
 
-	if ((*aux).i >= (__MB2P1__ != 0)
+	if ((*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		z -= __MB2P3__; 
@@ -20487,7 +21000,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P7__ != 0)
-			&& (*aux).i >= (__MB2P8__ != 0)
+			&& (*aux).i >= __MB2P8__
 			&& (*aux).i < __MB2P9__)
 	{
 		var tp: vec4<f32>;
@@ -20547,6 +21060,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "SphereClusterV3",
         source: "sphere_cluster_v3.cl",
         param_floats: 58,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.scaleG1", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.scale2", kind: ParamKind::Float, offset: 1, default: &[2.0] },
@@ -20668,7 +21184,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	for (n = 0; n < __MB2P8__; n = n + 1)
 	{
 		if ((__MB2P9__ != 0)
-				&& n >= (__MB2P10__ != 0)
+				&& n >= __MB2P10__
 				&& n < __MB2P11__)
 		{
 			if ((__MB2P12__ != 0))
@@ -20680,16 +21196,16 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		}
 
 		var is: bool = true;
-		if (n >= (__MB2P19__ != 0)
+		if (n >= __MB2P19__
 				&& n < __MB2P20__)
 			{ is = false; } 
 
 		var on: bool = true;
-		if (n >= (__MB2P21__ != 0)
+		if (n >= __MB2P21__
 				&& n < __MB2P22__)
 			{ on = false; }
 
-		if (recurse && n >= (__MB2P23__ != 0)
+		if (recurse && n >= __MB2P23__
 				&& n < __MB2P24__)
 		{
 			if (length(p) > excess)
@@ -20790,7 +21306,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 		if (!(__MB2P31__ != 0))
 		{
-			if (on == true && n >= (__MB2P32__ != 0)
+			if (on == true && n >= __MB2P32__
 					&& n < __MB2P33__)
 			{
 				p *= t;
@@ -20799,7 +21315,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		}
 		else
 		{
-			if (recurse && n >= (__MB2P32__ != 0)
+			if (recurse && n >= __MB2P32__
 					&& n < __MB2P33__)
 			{
 				p *= t;
@@ -20814,7 +21330,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		
 		(*aux).de = (*aux).de * __MB2P36__ + __MB2P37__;
 
-		if ((__MB2P38__ != 0) && n >= (__MB2P39__ != 0)
+		if ((__MB2P38__ != 0) && n >= __MB2P39__
 				&& n < __MB2P40__)
 		{
 			t = length(z);
@@ -20863,6 +21379,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TestingLog",
         source: "testing_log.cl",
         param_floats: 23,
+        de_function: DeFunction::Logarithmic,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset100", kind: ParamKind::Float4, offset: 0, default: &[1.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -20967,6 +21486,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TestingTransform",
         source: "testing_transform.cl",
         param_floats: 57,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -21008,7 +21530,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         ],
         wgsl: r####" 
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		z.y = abs(z.y);
@@ -21020,7 +21542,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z += __MB2P4__;
 	}
 
-	if ((*aux).i >= (__MB2P8__ != 0)
+	if ((*aux).i >= __MB2P8__
 			&& (*aux).i < __MB2P9__)
 	{
 		if ((__MB2P10__ != 0)) { z.x = abs(z.x); }
@@ -21029,7 +21551,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P13__ != 0)
-			&& (*aux).i >= (__MB2P14__ != 0)
+			&& (*aux).i >= __MB2P14__
 			&& (*aux).i < __MB2P15__)
 	{
 		z = mb2_mat_mul(__MB2P16__, z);
@@ -21083,13 +21605,13 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	var colDist: f32 = (*aux).dist;
 
-	if ((*aux).i >= (__MB2P46__ != 0)
+	if ((*aux).i >= __MB2P46__
 			&& (*aux).i < __MB2P47__)
 		{ t = min((*aux).dist, t / (*aux).de); }
 	(*aux).dist = t;
 
 	
-	if ((*aux).i >= (__MB2P48__ != 0) && (*aux).i < __MB2P49__)
+	if ((*aux).i >= __MB2P48__ && (*aux).i < __MB2P49__)
 	{
 		var addColor: f32 = 0.0;
 		addColor += __MB2P50__.x * zc.x;
@@ -21098,7 +21620,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P54__ != 0)
-			&& (*aux).i >= (__MB2P55__ != 0)
+			&& (*aux).i >= __MB2P55__
 			&& (*aux).i < __MB2P56__)
 		{ z = zc; }
 	return z;
@@ -21108,6 +21630,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TestingTransform2",
         source: "testing_transform2.cl",
         param_floats: 14,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledzFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -21133,7 +21658,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	if ((__MB2P0__ != 0)) { z = abs(z); }
 
-	if ((*aux).i >= (__MB2P1__ != 0)
+	if ((*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 		{ z -= __MB2P3__; }
 
@@ -21166,6 +21691,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAbsAddConditional",
         source: "transf_abs_add_conditional.cl",
         param_floats: 12,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.offset111", kind: ParamKind::Float4, offset: 1, default: &[1.0, 1.0, 1.0, 0.0] },
@@ -21204,6 +21732,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAbsAddConditional2",
         source: "transf_abs_add_conditional2.cl",
         param_floats: 13,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.offsetA111", kind: ParamKind::Float4, offset: 4, default: &[1.0, 1.0, 1.0, 0.0] },
@@ -21240,6 +21771,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAbsAddConditional4d",
         source: "transf_abs_add_conditional4d.cl",
         param_floats: 13,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.offset1111", kind: ParamKind::Float4, offset: 1, default: &[1.0, 1.0, 1.0, 1.0] },
@@ -21285,6 +21819,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAbsAddConstant",
         source: "transf_abs_add_constant.cl",
         param_floats: 14,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 4, default: &[1.0] },
@@ -21307,7 +21844,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	z += __MB2P7__;
 
 	if ((__MB2P11__ != 0)
-			&& (*aux).i >= (__MB2P12__ != 0)
+			&& (*aux).i >= __MB2P12__
 			&& (*aux).i < __MB2P13__)
 		{ (*aux).const_c = z; }
 	return z;
@@ -21317,6 +21854,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAbsAddConstant4d",
         source: "transf_abs_add_constant4d.cl",
         param_floats: 12,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant0000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 4, default: &[1.0] },
@@ -21343,6 +21883,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAbsAddConstantV2",
         source: "transf_abs_add_constant_v2.cl",
         param_floats: 21,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 4, default: &[1.0] },
@@ -21375,7 +21918,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		{ z.z = __MB2P12__.z - abs(__MB2P12__.z - z.z); }
 
 	if ((__MB2P18__ != 0)
-			&& (*aux).i >= (__MB2P19__ != 0)
+			&& (*aux).i >= __MB2P19__
 			&& (*aux).i < __MB2P20__)
 		{ (*aux).const_c = z; }
 	return z;
@@ -21385,6 +21928,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAbsAddMulti",
         source: "transf_abs_add_multi.cl",
         param_floats: 25,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.additionConstant000", kind: ParamKind::Float4, offset: 1, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -21441,6 +21987,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAbsAddMulti4d",
         source: "transf_abs_add_multi4d.cl",
         param_floats: 26,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.additionConstant0000", kind: ParamKind::Float4, offset: 1, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -21505,6 +22054,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAbsAddTgladFold",
         source: "transf_abs_add_tglad_fold.cl",
         param_floats: 18,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -21523,7 +22075,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	z = abs(z + limit) - abs(z - limit) - z;
 
 	if ((__MB2P4__ != 0)
-			&& (*aux).i >= (__MB2P5__ != 0)
+			&& (*aux).i >= __MB2P5__
 			&& (*aux).i < __MB2P6__)
 	{
 		var length: vec4<f32> = 2.0 * limit;
@@ -21608,6 +22160,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAbsAddTgladFold4d",
         source: "transf_abs_add_tglad_fold4d.cl",
         param_floats: 22,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant0000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 4, default: &[1.0] },
@@ -21632,22 +22187,22 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var oldZ: vec4<f32> = z;
 
 	if ((__MB2P4__ != 0)
-			&& (*aux).i >= (__MB2P5__ != 0)
+			&& (*aux).i >= __MB2P5__
 			&& (*aux).i < __MB2P6__)
 		{ z.x = abs(z.x + limit.x) - abs(z.x - limit.x) - z.x; }
 
 	if ((__MB2P7__ != 0)
-			&& (*aux).i >= (__MB2P8__ != 0)
+			&& (*aux).i >= __MB2P8__
 			&& (*aux).i < __MB2P9__)
 		{ z.y = abs(z.y + limit.y) - abs(z.y - limit.y) - z.y; }
 
 	if ((__MB2P10__ != 0)
-			&& (*aux).i >= (__MB2P11__ != 0)
+			&& (*aux).i >= __MB2P11__
 			&& (*aux).i < __MB2P12__)
 		{ z.z = abs(z.z + limit.z) - abs(z.z - limit.z) - z.z; }
 
 	if ((__MB2P13__ != 0)
-			&& (*aux).i >= (__MB2P14__ != 0)
+			&& (*aux).i >= __MB2P14__
 			&& (*aux).i < __MB2P15__)
 		{ z.w = abs(z.w + limit.w) - abs(z.w - limit.w) - z.w; }
 
@@ -21675,6 +22230,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAbsRecFoldXY",
         source: "transf_abs_rec_fold_xy.cl",
         param_floats: 12,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset1", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.offsetA1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -21725,6 +22283,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAbsSym3",
         source: "transf_abs_sym3.cl",
         param_floats: 76,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -21776,7 +22337,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		if ((__MB2P3__ != 0)) { z.x = abs(z.x); }
@@ -21785,7 +22346,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z += __MB2P6__;
 	}
 
-	if ((*aux).i >= (__MB2P10__ != 0)
+	if ((*aux).i >= __MB2P10__
 			&& (*aux).i < __MB2P11__)
 	{
 		if ((__MB2P12__ != 0)) { z.x = abs(z.x); }
@@ -21818,7 +22379,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P26__ != 0)
-			&& (*aux).i >= (__MB2P27__ != 0)
+			&& (*aux).i >= __MB2P27__
 			&& (*aux).i < __MB2P28__)
 	{
 		if ((__MB2P29__ != 0)) { z.x = abs(z.x); }
@@ -21828,13 +22389,13 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P36__ != 0)
-			&& (*aux).i >= (__MB2P37__ != 0)
+			&& (*aux).i >= __MB2P37__
 			&& (*aux).i < __MB2P38__)
 	{
 		z = mb2_mat_mul(__MB2P39__, z);
 	}
 	
-	if ((*aux).i >= (__MB2P51__ != 0)
+	if ((*aux).i >= __MB2P51__
 			&& (*aux).i < __MB2P52__)
 	{
 		z *= __MB2P53__;
@@ -21842,14 +22403,14 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P55__ != 0)
-			&& (*aux).i >= (__MB2P56__ != 0)
+			&& (*aux).i >= __MB2P56__
 			&& (*aux).i < __MB2P57__)
 	{
 		(*aux).const_c = z * __MB2P58__;
 	}
 
 	
-	if ((__MB2P62__ != 0) && (*aux).i >= (__MB2P63__ != 0)
+	if ((__MB2P62__ != 0) && (*aux).i >= __MB2P63__
 			&& (*aux).i < __MB2P64__)
 	{
 		var colAdd: f32 = __MB2P65__.w + (*aux).i * __MB2P69__;
@@ -21885,6 +22446,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddConstant",
         source: "transf_add_constant.cl",
         param_floats: 8,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.additionConstantA000", kind: ParamKind::Float4, offset: 4, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -21901,6 +22465,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddConstant4d",
         source: "transf_add_constant4d.cl",
         param_floats: 4,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant0000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
         ],
@@ -21915,6 +22482,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddConstantMod1",
         source: "transf_add_constant_mod1.cl",
         param_floats: 14,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstantA000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledBx", kind: ParamKind::Int, offset: 4, default: &[1.0] },
@@ -21931,7 +22501,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	z += __MB2P0__;
 	
 	if ((__MB2P4__ != 0)
-			&& (*aux).i >= (__MB2P5__ != 0)
+			&& (*aux).i >= __MB2P5__
 			&& (*aux).i < __MB2P6__)
 	{
 		var temp: vec4<f32> = __MB2P7__;
@@ -21946,7 +22516,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	else if ((__MB2P13__ != 0)
-					 && (*aux).i >= (__MB2P5__ != 0)
+					 && (*aux).i >= __MB2P5__
 					 && (*aux).i < __MB2P6__)
 	{
 		var temp: vec4<f32> = __MB2P7__;
@@ -21967,6 +22537,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddConstantMod2",
         source: "transf_add_constant_mod2.cl",
         param_floats: 21,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstantA000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -21991,7 +22564,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	
 	if ((__MB2P4__ != 0))
 	{
-		if ((*aux).i >= (__MB2P5__ != 0)
+		if ((*aux).i >= __MB2P5__
 				&& (*aux).i < __MB2P6__)
 		{
 			if ((__MB2P7__ != 0))
@@ -22007,7 +22580,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	if ((__MB2P12__ != 0))
 	{
-		if ((*aux).i >= (__MB2P13__ != 0)
+		if ((*aux).i >= __MB2P13__
 				&& (*aux).i < __MB2P14__)
 		{
 			if ((__MB2P15__ != 0))
@@ -22023,7 +22596,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	if ((__MB2P16__ != 0))
 	{
-		if ((*aux).i >= (__MB2P17__ != 0)
+		if ((*aux).i >= __MB2P17__
 				&& (*aux).i < __MB2P18__)
 		{
 			if ((__MB2P19__ != 0))
@@ -22044,6 +22617,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddConstantMod3",
         source: "transf_add_constant_mod3.cl",
         param_floats: 20,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstantA000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -22093,7 +22669,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P14__ != 0)
-			&& (*aux).i >= (__MB2P15__ != 0)
+			&& (*aux).i >= __MB2P15__
 			&& (*aux).i < __MB2P16__)
 	{
 		if ((__MB2P17__ != 0)) { z.x = abs(z.x); }
@@ -22107,6 +22683,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddConstantRotV1",
         source: "transf_add_constant_rot_v1.cl",
         param_floats: 27,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstantA000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 4, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
@@ -22132,13 +22711,13 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 	else 
 	{
-		if ((*aux).i >= (__MB2P17__ != 0)
+		if ((*aux).i >= __MB2P17__
 				&& (*aux).i < __MB2P18__)
 			{ z.x += (*aux).pos_neg * rotadd.x; }
-		if ((*aux).i >= (__MB2P19__ != 0)
+		if ((*aux).i >= __MB2P19__
 				&& (*aux).i < __MB2P20__)
 			{ z.y += (*aux).pos_neg * rotadd.y; }
-		if ((*aux).i >= (__MB2P21__ != 0)
+		if ((*aux).i >= __MB2P21__
 				&& (*aux).i < __MB2P22__)
 			{ z.z += (*aux).pos_neg * rotadd.z; }
 	}
@@ -22154,6 +22733,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddConstantVaryV1",
         source: "transf_add_constant_vary_v1.cl",
         param_floats: 10,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.startIterations250", kind: ParamKind::Int, offset: 4, default: &[250.0] },
@@ -22166,8 +22748,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	{
 		;
 	}
-	if ((*aux).i >= (__MB2P4__ != 0)
-			&& (*aux).i < (__MB2P5__ != 0)
+	if ((*aux).i >= __MB2P4__
+			&& (*aux).i < __MB2P5__
 			&& (__MB2P5__ - __MB2P4__
 					!= 0))
 	{
@@ -22188,6 +22770,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddCpixel",
         source: "transf_add_cpixel.cl",
         param_floats: 4,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.constantMultiplier111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
         ],
@@ -22200,6 +22785,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddCpixel4d",
         source: "transf_add_cpixel4d.cl",
         param_floats: 18,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsD1", kind: ParamKind::Int, offset: 1, default: &[1.0] },
@@ -22215,7 +22803,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 17, default: &[0.0] },
         ],
         wgsl: r####"
-	if ((*aux).i >= (__MB2P0__ != 0)
+	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
 	{
 		var t: vec4<f32> = (*aux).const_c;
@@ -22257,6 +22845,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddCpixelAxisSwap",
         source: "transf_add_cpixel_axis_swap.cl",
         param_floats: 6,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.alternateEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "mandelbulbMulti.orderOfXYZ", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -22330,6 +22921,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddCpixelCxCyAxisSwap",
         source: "transf_add_cpixel_cx_cy_axis_swap.cl",
         param_floats: 6,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabled", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.alternateEnabledFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -22360,6 +22954,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddCpixelInvert",
         source: "transf_add_cpixel_invert.cl",
         param_floats: 19,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAyFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -22425,6 +23022,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddCpixelRotated",
         source: "transf_add_cpixel_rotated.cl",
         param_floats: 20,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.alternateEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "mandelbulbMulti.orderOfXYZ", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -22493,7 +23093,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 }
 }
 	}
-	if ((*aux).i >= (__MB2P2__ != 0)
+	if ((*aux).i >= __MB2P2__
 			&& (*aux).i < __MB2P3__)
 	{
 		tempC = mb2_mat_mul(__MB2P4__, tempC);
@@ -22506,6 +23106,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddCpixelScator",
         source: "transf_add_cpixel_scator.cl",
         param_floats: 14,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledSwFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.scale0", kind: ParamKind::Float, offset: 1, default: &[0.0] },
@@ -22610,6 +23213,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddCpixelSinOrCos",
         source: "transf_add_cpixel_sin_or_cos.cl",
         param_floats: 20,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.constantMultiplierC111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledBxFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -22688,6 +23294,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddCpixelSphereFold",
         source: "transf_add_cpixel_sphere_fold.cl",
         param_floats: 24,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "mandelbox.offset", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.minR2p25", kind: ParamKind::Float, offset: 4, default: &[0.25] },
@@ -22759,6 +23368,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddCpixelSymmetrical",
         source: "transf_add_cpixel_symmetrical.cl",
         param_floats: 7,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledy", kind: ParamKind::Int, offset: 1, default: &[1.0] },
@@ -22783,6 +23395,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddCpixelTile",
         source: "transf_add_cpixel_tile.cl",
         param_floats: 30,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 1, default: &[1.0] },
@@ -22874,6 +23489,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddCpixelVaryV1",
         source: "transf_add_cpixel_vary_v1.cl",
         param_floats: 10,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.constantMultiplier111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.startIterations250", kind: ParamKind::Int, offset: 4, default: &[250.0] },
@@ -22886,8 +23504,8 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	{
 		;
 	}
-	if ((*aux).i >= (__MB2P4__ != 0)
-			&& (*aux).i < (__MB2P5__ != 0)
+	if ((*aux).i >= __MB2P4__
+			&& (*aux).i < __MB2P5__
 			&& (__MB2P5__ - __MB2P4__
 					!= 0))
 	{
@@ -22909,6 +23527,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddExp2Z",
         source: "transf_add_exp2_z.cl",
         param_floats: 19,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 1, default: &[1.0] },
@@ -23030,6 +23651,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddNorm",
         source: "transf_add_norm.cl",
         param_floats: 20,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 4, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
@@ -23054,6 +23678,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddScaleRotate",
         source: "transf_add_scale_rotate.cl",
         param_floats: 24,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 4, default: &[1.0] },
@@ -23084,6 +23711,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddSphericalInvert",
         source: "transf_add_spherical_invert.cl",
         param_floats: 10,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.scaleA1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -23120,6 +23750,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBenesiCubeSphere",
         source: "transf_benesi_cube_sphere.cl",
         param_floats: 3,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "analyticDE.enabled", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -23168,6 +23801,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBenesiMagBackward",
         source: "transf_benesi_mag_backward.cl",
         param_floats: 0,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
         ],
         wgsl: r####"
@@ -23184,6 +23820,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBenesiMagForward",
         source: "transf_benesi_mag_forward.cl",
         param_floats: 0,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
         ],
         wgsl: r####"
@@ -23200,6 +23839,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBenesiSphereCube",
         source: "transf_benesi_sphere_cube.cl",
         param_floats: 3,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "analyticDE.enabled", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "analyticDE.scale1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -23241,6 +23883,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBenesiT1",
         source: "transf_benesi_t1.cl",
         param_floats: 21,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.scale3D222", kind: ParamKind::Float4, offset: 0, default: &[2.0, 2.0, 2.0, 0.0] },
             GeneratedParam { path: "transformCommon.rotationEnabled", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -23276,6 +23921,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBenesiT1Mod",
         source: "transf_benesi_t1_mod.cl",
         param_floats: 21,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.scale3D333", kind: ParamKind::Float4, offset: 0, default: &[3.0, 3.0, 3.0, 0.0] },
             GeneratedParam { path: "transformCommon.additionConstant111", kind: ParamKind::Float4, offset: 4, default: &[1.0, 1.0, 1.0, 0.0] },
@@ -23313,6 +23961,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBenesiT2",
         source: "transf_benesi_t2.cl",
         param_floats: 21,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.scale3D444", kind: ParamKind::Float4, offset: 4, default: &[4.0, 4.0, 4.0, 0.0] },
@@ -23353,6 +24004,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBenesiT3",
         source: "transf_benesi_t3.cl",
         param_floats: 24,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant222", kind: ParamKind::Float4, offset: 0, default: &[2.0, 2.0, 2.0, 0.0] },
             GeneratedParam { path: "transformCommon.scale3D222", kind: ParamKind::Float4, offset: 4, default: &[2.0, 2.0, 2.0, 0.0] },
@@ -23397,6 +24051,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBenesiT4",
         source: "transf_benesi_t4.cl",
         param_floats: 24,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.scale3D222", kind: ParamKind::Float4, offset: 4, default: &[2.0, 2.0, 2.0, 0.0] },
@@ -23439,6 +24096,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBlockify",
         source: "transf_blockify.cl",
         param_floats: 17,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.scale", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.constantMultiplier111", kind: ParamKind::Float4, offset: 1, default: &[1.0, 1.0, 1.0, 0.0] },
@@ -23501,6 +24161,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBlockifyV2",
         source: "transf_blockify_v2.cl",
         param_floats: 21,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.scale", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.constantMultiplier111", kind: ParamKind::Float4, offset: 1, default: &[1.0, 1.0, 1.0, 0.0] },
@@ -23613,6 +24276,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBoxFold",
         source: "transf_box_fold.cl",
         param_floats: 10,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "mandelbox.foldingLimit", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "mandelbox.foldingValue", kind: ParamKind::Float, offset: 1, default: &[2.0] },
@@ -23713,6 +24379,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBoxFold4d",
         source: "transf_box_fold4d.cl",
         param_floats: 7,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "mandelbox.foldingLimit", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "mandelbox.foldingValue", kind: ParamKind::Float, offset: 1, default: &[2.0] },
@@ -23767,6 +24436,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBoxFold4dInfy",
         source: "transf_box_fold4d_infy.cl",
         param_floats: 22,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset2222", kind: ParamKind::Float4, offset: 0, default: &[2.0, 2.0, 2.0, 2.0] },
             GeneratedParam { path: "transformCommon.scale4", kind: ParamKind::Float, offset: 4, default: &[4.0] },
@@ -23857,6 +24529,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBoxFold4dTglad",
         source: "transf_box_fold4d_tglad.cl",
         param_floats: 27,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset1111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledCyFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -23965,6 +24640,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBoxFoldXYZ",
         source: "transf_box_fold_xyz.cl",
         param_floats: 14,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant222", kind: ParamKind::Float4, offset: 0, default: &[2.0, 2.0, 2.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -24015,6 +24693,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBoxOffset",
         source: "transf_box_offset.cl",
         param_floats: 5,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -24039,6 +24720,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBoxTiling4d",
         source: "transf_box_tiling4d.cl",
         param_floats: 22,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset2222", kind: ParamKind::Float4, offset: 0, default: &[2.0, 2.0, 2.0, 2.0] },
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -24121,6 +24805,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBoxTilingV2",
         source: "transf_box_tiling_v2.cl",
         param_floats: 25,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset222", kind: ParamKind::Float4, offset: 0, default: &[2.0, 2.0, 2.0, 0.0] },
             GeneratedParam { path: "transformCommon.offset111", kind: ParamKind::Float4, offset: 4, default: &[1.0, 1.0, 1.0, 0.0] },
@@ -24201,6 +24888,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBoxTilingV3",
         source: "transf_box_tiling_v3.cl",
         param_floats: 50,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset222", kind: ParamKind::Float4, offset: 0, default: &[2.0, 2.0, 2.0, 0.0] },
             GeneratedParam { path: "transformCommon.additionConstantA000", kind: ParamKind::Float4, offset: 4, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -24355,6 +25045,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBoxWrap4d",
         source: "transf_box_wrap4d.cl",
         param_floats: 23,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset1111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledxFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -24438,6 +25131,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfCayley2V1",
         source: "transf_cayley2_v1.cl",
         param_floats: 33,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -24461,7 +25157,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		var xTemp: f32 = SQRT_1_2_F * (z.x - z.y);
@@ -24479,7 +25175,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	z += __MB2P7__;
 
 	if ((__MB2P11__ != 0)
-			&& (*aux).i >= (__MB2P12__ != 0)
+			&& (*aux).i >= __MB2P12__
 			&& (*aux).i < __MB2P13__)
 	{
 		z = mb2_mat_mul(__MB2P14__, z);
@@ -24502,6 +25198,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfClamp4d",
         source: "transf_clamp4d.cl",
         param_floats: 21,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset1111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 1.0] },
             GeneratedParam { path: "transformCommon.offsetNeg1111", kind: ParamKind::Float4, offset: 4, default: &[-1.0, -1.0, -1.0, -1.0] },
@@ -24560,6 +25259,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDELinearCube",
         source: "transf_de_linear_cube.cl",
         param_floats: 7,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -24602,6 +25304,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDiagonalFold",
         source: "transf_diagonal_fold.cl",
         param_floats: 13,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 1, default: &[1.0] },
@@ -24651,7 +25356,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	else
 	{
 		if ((__MB2P1__ != 0)
-				&& (*aux).i >= (__MB2P4__ != 0)
+				&& (*aux).i >= __MB2P4__
 				&& (*aux).i < __MB2P5__)
 		{
 			if (z.x > z.y)
@@ -24662,7 +25367,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 			}
 		}
 		if ((__MB2P2__ != 0)
-				&& (*aux).i >= (__MB2P6__ != 0)
+				&& (*aux).i >= __MB2P6__
 				&& (*aux).i < __MB2P7__)
 		{
 			if (z.y > z.z)
@@ -24673,7 +25378,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 			}
 		}
 		if ((__MB2P3__ != 0)
-				&& (*aux).i >= (__MB2P8__ != 0)
+				&& (*aux).i >= __MB2P8__
 				&& (*aux).i < __MB2P9__)
 		{
 			if (z.z > z.x)
@@ -24696,6 +25401,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSAmazingIfs",
         source: "transf_difs_amazing_ifs.cl",
         param_floats: 54,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -24804,7 +25512,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).dist = (*aux).de0;
 
 	
-	if ((__MB2P40__ != 0) && (*aux).i >= (__MB2P41__ != 0)
+	if ((__MB2P40__ != 0) && (*aux).i >= __MB2P41__
 			&& (*aux).i < __MB2P42__)
 	{
 		var colorAdd: f32 = 0.0;
@@ -24835,6 +25543,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSBox",
         source: "transf_difs_box.cl",
         param_floats: 16,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.offsetB0", kind: ParamKind::Float, offset: 4, default: &[0.0] },
@@ -24858,7 +25569,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).dist = min((*aux).dist, zcd / ((*aux).de + 1.0) - __MB2P4__);
 
 	if ((__MB2P5__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P6__ != 0)
+			&& (*aux).i >= __MB2P6__
 			&& (*aux).i < __MB2P7__)
 	{
 		var addCol: f32 = __MB2P8__.x + (*aux).i * __MB2P12__;
@@ -24892,6 +25603,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSBoxFrame",
         source: "transf_difs_box_frame.cl",
         param_floats: 80,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -24943,7 +25657,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         wgsl: r####"
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		z.y = abs(z.y);
@@ -24955,7 +25669,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P4__ != 0)
-			&& (*aux).i >= (__MB2P5__ != 0)
+			&& (*aux).i >= __MB2P5__
 			&& (*aux).i < __MB2P6__)
 	{
 		z.z = abs(z.z);
@@ -24967,7 +25681,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P8__ != 0)
-			&& (*aux).i >= (__MB2P9__ != 0)
+			&& (*aux).i >= __MB2P9__
 			&& (*aux).i < __MB2P10__)
 	{
 		z.x = abs(z.x);
@@ -24979,20 +25693,20 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P12__ != 0)
-			&& (*aux).i >= (__MB2P13__ != 0)
+			&& (*aux).i >= __MB2P13__
 			&& (*aux).i < __MB2P14__)
 	{
 		z = abs(z - __MB2P15__);
 	}
 
 	if ((__MB2P19__ != 0)
-			&& (*aux).i >= (__MB2P20__ != 0)
+			&& (*aux).i >= __MB2P20__
 			&& (*aux).i < __MB2P21__)
 	{
 		z = abs(z + __MB2P22__)
 				- abs(z - __MB2P22__) - z;
 	}
-	if ((*aux).i >= (__MB2P26__ != 0)
+	if ((*aux).i >= __MB2P26__
 			&& (*aux).i < __MB2P27__)
 	{
 		z *= __MB2P28__;
@@ -25000,7 +25714,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P29__ != 0)
-			&& (*aux).i >= (__MB2P30__ != 0)
+			&& (*aux).i >= __MB2P30__
 			&& (*aux).i < __MB2P31__)
 	{
 		z = mb2_mat_mul(__MB2P32__, z);
@@ -25041,14 +25755,14 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	var D: f32 = min(min(len.x, len.y), len.z) / ((*aux).de + __MB2P64__);
 	var colDist: f32 = (*aux).dist;
-	if ((*aux).i >= (__MB2P65__ != 0)
+	if ((*aux).i >= __MB2P65__
 			&& (*aux).i < __MB2P66__)
 		{ (*aux).dist = min((*aux).dist, D); }
 	else
 		{ (*aux).dist = D; }
 
 	if ((__MB2P67__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P68__ != 0)
+			&& (*aux).i >= __MB2P68__
 			&& (*aux).i < __MB2P69__)
 	{
 		var addCol: f32 = __MB2P70__.x + (*aux).i * __MB2P74__;
@@ -25070,7 +25784,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P77__ != 0)
-			&& (*aux).i >= (__MB2P78__ != 0)
+			&& (*aux).i >= __MB2P78__
 			&& (*aux).i < __MB2P79__)
 		{ z = zc; }
 	return z;
@@ -25080,6 +25794,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSBoxV2",
         source: "transf_difs_box_v2.cl",
         param_floats: 27,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.additionConstant111", kind: ParamKind::Float4, offset: 4, default: &[1.0, 1.0, 1.0, 0.0] },
@@ -25107,7 +25824,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P8__ != 0)
-			&& (*aux).i >= (__MB2P9__ != 0)
+			&& (*aux).i >= __MB2P9__
 			&& (*aux).i < __MB2P10__)
 	{
 		var absZZ: f32 = zc.z * zc.z * __MB2P11__;
@@ -25117,7 +25834,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P12__ != 0)
-			&& (*aux).i >= (__MB2P13__ != 0)
+			&& (*aux).i >= __MB2P13__
 			&& (*aux).i < __MB2P14__)
 	{
 		var subZ: f32 = __MB2P15__ * zc.z;
@@ -25135,7 +25852,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).dist = min((*aux).dist, zcd / ((*aux).de + 1.0));
 
 	if ((__MB2P16__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P17__ != 0)
+			&& (*aux).i >= __MB2P17__
 			&& (*aux).i < __MB2P18__)
 	{
 		var addCol: f32 = __MB2P19__.x + (*aux).i * __MB2P23__;
@@ -25172,6 +25889,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSChessboard",
         source: "transf_difs_chessboard.cl",
         param_floats: 20,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 1, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -25225,7 +25945,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		{ rDE = zc.z; } 
 
 	if ((__MB2P16__ != 0)
-			&& (*aux).i >= (__MB2P17__ != 0)
+			&& (*aux).i >= __MB2P17__
 			&& (*aux).i < __MB2P18__)
 		{ z = zc; }
 
@@ -25240,6 +25960,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSClipCustom",
         source: "transf_difs_clip_custom.cl",
         param_floats: 67,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 1000.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledwFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -25417,6 +26140,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSClipPlane",
         source: "transf_difs_clip_plane.cl",
         param_floats: 68,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 1000.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -25619,6 +26345,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSCylinder",
         source: "transf_difs_cylinder.cl",
         param_floats: 19,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledSFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledSwFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -25678,7 +26407,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		(*aux).dist, cylD / ((*aux).de + __MB2P8__) - __MB2P3__);
 
 	if ((__MB2P9__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P10__ != 0)
+			&& (*aux).i >= __MB2P10__
 			&& (*aux).i < __MB2P11__)
 	{
 		var addCol: f32 = __MB2P12__.y + (*aux).i * __MB2P16__;
@@ -25710,6 +26439,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSCylinderV2",
         source: "transf_difs_cylinder_v2.cl",
         param_floats: 58,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -25763,7 +26495,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	z += __MB2P4__;
 
 	if ((__MB2P8__ != 0)
-			&& (*aux).i >= (__MB2P9__ != 0)
+			&& (*aux).i >= __MB2P9__
 			&& (*aux).i < __MB2P10__)
 	{
 		z = mb2_mat_mul(__MB2P11__, z);
@@ -25789,7 +26521,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P26__ != 0)
-			&& (*aux).i >= (__MB2P27__ != 0)
+			&& (*aux).i >= __MB2P27__
 			&& (*aux).i < __MB2P28__)
 	{
 		absH = lengthCyl;
@@ -25797,7 +26529,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P29__ != 0)
-			&& (*aux).i >= (__MB2P30__ != 0)
+			&& (*aux).i >= __MB2P30__
 			&& (*aux).i < __MB2P31__)
 	{
 		absH *= absH;
@@ -25816,7 +26548,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P37__ != 0)
-			&& (*aux).i >= (__MB2P38__ != 0)
+			&& (*aux).i >= __MB2P38__
 			&& (*aux).i < __MB2P39__)
 	{
 		temp = cylR;
@@ -25831,7 +26563,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P40__ != 0)
-			&& (*aux).i >= (__MB2P41__ != 0)
+			&& (*aux).i >= __MB2P41__
 			&& (*aux).i < __MB2P42__)
 	{
 		cylD = sqrt(cylRm * cylRm + cylH * cylH);
@@ -25842,7 +26574,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		(*aux).dist, cylD / ((*aux).de + __MB2P44__) - __MB2P25__);
 
 	if ((__MB2P45__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P46__ != 0)
+			&& (*aux).i >= __MB2P46__
 			&& (*aux).i < __MB2P47__)
 	{
 		var addCol: f32 = __MB2P48__.y + (*aux).i * __MB2P52__;
@@ -25869,7 +26601,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P55__ != 0)
-			&& (*aux).i >= (__MB2P56__ != 0)
+			&& (*aux).i >= __MB2P56__
 			&& (*aux).i < __MB2P57__)
 		{ z = zc; }
 	return z;
@@ -25879,6 +26611,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSDiamond",
         source: "transf_difs_diamond.cl",
         param_floats: 48,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -25920,7 +26655,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var normalBottomB: vec4<f32> = vec4<f32>(0.0, 0.848, -0.53, 0.0);
 
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		
@@ -25994,7 +26729,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	if ((__MB2P37__ != 0)) { z = q; }
 
 	if ((__MB2P38__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P39__ != 0)
+			&& (*aux).i >= __MB2P39__
 			&& (*aux).i < __MB2P40__)
 	{
 		var addCol: f32 = __MB2P41__ + (*aux).i * __MB2P42__;
@@ -26021,6 +26756,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSEllipsoid",
         source: "transf_difs_ellipsoid.cl",
         param_floats: 13,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
             GeneratedParam { path: "foldColor.auxColorEnabledFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -26049,7 +26787,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).dist = min((*aux).dist, ellD / ((*aux).de + 1.0));
 
 	if ((__MB2P4__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P5__ != 0)
+			&& (*aux).i >= __MB2P5__
 			&& (*aux).i < __MB2P6__)
 	{
 		var addCol: f32 = __MB2P7__.w + (*aux).i * __MB2P11__;
@@ -26070,6 +26808,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSGearV1",
         source: "transf_difs_gear_v1.cl",
         param_floats: 61,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.rotation2EnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsT", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -26112,7 +26853,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		z = mb2_mat_mul(__MB2P3__, z);
@@ -26202,7 +26943,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P51__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P52__ != 0)
+			&& (*aux).i >= __MB2P52__
 			&& (*aux).i < __MB2P53__)
 	{
 		var addCol: f32 = __MB2P54__.w + (*aux).i * __MB2P58__;
@@ -26226,6 +26967,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSGrid",
         source: "transf_difs_grid.cl",
         param_floats: 26,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.scaleF1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -26266,7 +27010,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).dist = min((*aux).dist, (grid - __MB2P16__) / ((*aux).de + 1.0));
 
 	if ((__MB2P17__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P18__ != 0)
+			&& (*aux).i >= __MB2P18__
 			&& (*aux).i < __MB2P19__)
 	{
 		var addCol: f32 = __MB2P20__.x + (*aux).i * __MB2P24__;
@@ -26289,6 +27033,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSHeart",
         source: "transf_difs_heart.cl",
         param_floats: 58,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledxFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -26379,7 +27126,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		{ (*aux).dist = (*aux).de0; }
 
 	if ((__MB2P48__ != 0) && (*aux).dist != colDist
-			&& (*aux).i >= (__MB2P49__ != 0)
+			&& (*aux).i >= __MB2P49__
 			&& (*aux).i < __MB2P50__)
 	{
 		var addCol: f32 = __MB2P51__.x + (*aux).i * __MB2P55__;
@@ -26402,6 +27149,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSHelix",
         source: "transf_difs_helix.cl",
         param_floats: 74,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAuxCFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.scale3D111", kind: ParamKind::Float4, offset: 1, default: &[1.0, 1.0, 1.0, 0.0] },
@@ -26466,13 +27216,13 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	zc *= __MB2P1__;
 
 	if ((__MB2P5__ != 0)
-			&& (*aux).i >= (__MB2P6__ != 0)
+			&& (*aux).i >= __MB2P6__
 			&& (*aux).i < __MB2P7__)
 	{
 		zc = mb2_mat_mul(__MB2P8__, zc);
 	}
 
-	if ((*aux).i >= (__MB2P20__ != 0)
+	if ((*aux).i >= __MB2P20__
 			&& (*aux).i < __MB2P21__)
 	{
 		var ang: f32 = sqrt(zc.x * zc.x + zc.y * zc.y) * __MB2P22__
@@ -26506,7 +27256,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P43__ != 0)
-			&& (*aux).i >= (__MB2P44__ != 0)
+			&& (*aux).i >= __MB2P44__
 			&& (*aux).i < __MB2P45__)
 	{
 		absH = lengthCyl;
@@ -26514,7 +27264,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P46__ != 0)
-			&& (*aux).i >= (__MB2P47__ != 0)
+			&& (*aux).i >= __MB2P47__
 			&& (*aux).i < __MB2P48__)
 	{
 		absH *= absH;
@@ -26525,7 +27275,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P50__ != 0)
-			&& (*aux).i >= (__MB2P51__ != 0)
+			&& (*aux).i >= __MB2P51__
 			&& (*aux).i < __MB2P52__)
 	{
 		temp = cylR;
@@ -26540,7 +27290,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P53__ != 0)
-			&& (*aux).i >= (__MB2P54__ != 0)
+			&& (*aux).i >= __MB2P54__
 			&& (*aux).i < __MB2P55__)
 	{
 		cylD = sqrt(cylRm * cylRm + cylH * cylH);
@@ -26555,13 +27305,13 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).dist = min((*aux).dist, cylD);
 
 	if ((__MB2P60__ != 0)
-			&& (*aux).i >= (__MB2P61__ != 0)
+			&& (*aux).i >= __MB2P61__
 			&& (*aux).i < __MB2P62__)
 		{ z = zc; }
 
 	
 	if ((__MB2P63__ != 0) && (*aux).dist != colDist
-			&& (*aux).i >= (__MB2P64__ != 0)
+			&& (*aux).i >= __MB2P64__
 			&& (*aux).i < __MB2P65__)
 	{
 		var colAdd: f32 = __MB2P66__.w + (*aux).i * __MB2P70__;
@@ -26593,6 +27343,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSHexprism",
         source: "transf_difs_hexprism.cl",
         param_floats: 34,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset1", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.offsetA1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -26637,7 +27390,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P4__ != 0)
-			&& (*aux).i >= (__MB2P5__ != 0)
+			&& (*aux).i >= __MB2P5__
 			&& (*aux).i < __MB2P6__)
 	{
 		zc = mb2_mat_mul(__MB2P7__, zc);
@@ -26676,7 +27429,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		(*aux).de0 / ((*aux).de + __MB2P23__) - __MB2P19__);
 
 	if ((__MB2P24__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P25__ != 0)
+			&& (*aux).i >= __MB2P25__
 			&& (*aux).i < __MB2P26__)
 	{
 		var addCol: f32 = __MB2P27__.y + (*aux).i * __MB2P31__;
@@ -26702,6 +27455,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSHexprismV2",
         source: "transf_difs_hexprism_v2.cl",
         param_floats: 63,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -26761,7 +27517,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P8__ != 0)
-			&& (*aux).i >= (__MB2P9__ != 0)
+			&& (*aux).i >= __MB2P9__
 			&& (*aux).i < __MB2P10__)
 	{
 		z.y = abs(z.y);
@@ -26774,7 +27530,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var lenX: f32 = __MB2P12__;
 
 	if ((__MB2P13__ != 0)
-			&& (*aux).i >= (__MB2P14__ != 0)
+			&& (*aux).i >= __MB2P14__
 			&& (*aux).i < __MB2P15__)
 	{
 		z = mb2_mat_mul(__MB2P16__, z);
@@ -26799,25 +27555,25 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	if ((__MB2P30__ != 0))
 	{
 		if ((__MB2P31__ != 0)
-				&& (*aux).i >= (__MB2P32__ != 0)
+				&& (*aux).i >= __MB2P32__
 				&& (*aux).i < __MB2P33__)
 			{ zc.z = z.z; }
 
 		
 		if ((__MB2P34__ != 0)
-				&& (*aux).i >= (__MB2P35__ != 0)
+				&& (*aux).i >= __MB2P35__
 				&& (*aux).i < __MB2P36__)
 			{ zc.z *= zc.z; }
 
-		if ((*aux).i >= (__MB2P37__ != 0)
+		if ((*aux).i >= __MB2P37__
 				&& (*aux).i < __MB2P38__)
 			{ dx += __MB2P39__ * zc.z; }
 
-		if ((*aux).i >= (__MB2P40__ != 0)
+		if ((*aux).i >= __MB2P40__
 				&& (*aux).i < __MB2P41__)
 			{ k.x = __MB2P42__; }
 
-		if ((*aux).i >= (__MB2P43__ != 0)
+		if ((*aux).i >= __MB2P43__
 				&& (*aux).i < __MB2P44__)
 			{ k.y = __MB2P45__; }
 	}
@@ -26841,7 +27597,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		(*aux).de0 / ((*aux).de + __MB2P49__) - __MB2P28__);
 
 	if ((__MB2P50__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P51__ != 0)
+			&& (*aux).i >= __MB2P51__
 			&& (*aux).i < __MB2P52__)
 	{
 		var addCol: f32 = __MB2P53__.y + (*aux).i * __MB2P57__;
@@ -26863,7 +27619,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P60__ != 0)
-			&& (*aux).i >= (__MB2P61__ != 0)
+			&& (*aux).i >= __MB2P61__
 			&& (*aux).i < __MB2P62__)
 		{ z = zc; }
 	return z;
@@ -26873,6 +27629,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSHextgrid2",
         source: "transf_difs_hextgrid2.cl",
         param_floats: 36,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledGFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.scaleA1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -26933,7 +27692,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		(hexD - __MB2P25__) / ((*aux).de + __MB2P26__));
 
 	if ((__MB2P27__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P28__ != 0)
+			&& (*aux).i >= __MB2P28__
 			&& (*aux).i < __MB2P29__)
 	{
 		var addCol: f32 = __MB2P30__.y + (*aux).i * __MB2P34__;
@@ -26954,6 +27713,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSOctahedron",
         source: "transf_difs_octahedron.cl",
         param_floats: 37,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.offsetF000", kind: ParamKind::Float4, offset: 1, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -26993,7 +27755,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).de *= __MB2P5__;
 
 	if ((__MB2P6__ != 0)
-			&& (*aux).i >= (__MB2P7__ != 0)
+			&& (*aux).i >= __MB2P7__
 			&& (*aux).i < __MB2P8__)
 	{
 		z = mb2_mat_mul(__MB2P9__, z);
@@ -27029,7 +27791,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).dist = min((*aux).dist, zcd / (*aux).de);
 
 	if ((__MB2P27__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P28__ != 0)
+			&& (*aux).i >= __MB2P28__
 			&& (*aux).i < __MB2P29__)
 	{
 		var addCol: f32 = __MB2P30__.x + (*aux).i * __MB2P34__;
@@ -27062,6 +27824,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSOctahedronV2",
         source: "transf_difs_octahedron_v2.cl",
         param_floats: 55,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.offsetF000", kind: ParamKind::Float4, offset: 1, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -27114,7 +27879,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).de *= __MB2P5__;
 
 	if ((__MB2P6__ != 0)
-			&& (*aux).i >= (__MB2P7__ != 0)
+			&& (*aux).i >= __MB2P7__
 			&& (*aux).i < __MB2P8__)
 	{
 		z = mb2_mat_mul(__MB2P9__, z);
@@ -27210,7 +27975,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).dist = min((*aux).dist, zcd / (*aux).de);
 
 	if ((__MB2P49__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P50__ != 0)
+			&& (*aux).i >= __MB2P50__
 			&& (*aux).i < __MB2P51__)
 	{
 		addCol += __MB2P31__.x + (*aux).i * __MB2P52__;
@@ -27243,6 +28008,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSPiriform",
         source: "transf_difs_piriform.cl",
         param_floats: 63,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -27287,7 +28055,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         ],
         wgsl: r####" 
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		z.y = abs(z.y);
@@ -27299,7 +28067,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z += __MB2P4__;
 	}
 
-	if ((*aux).i >= (__MB2P8__ != 0)
+	if ((*aux).i >= __MB2P8__
 			&& (*aux).i < __MB2P9__)
 	{
 		if ((__MB2P10__ != 0)) { z.x = abs(z.x); }
@@ -27308,7 +28076,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P13__ != 0)
-			&& (*aux).i >= (__MB2P14__ != 0)
+			&& (*aux).i >= __MB2P14__
 			&& (*aux).i < __MB2P15__)
 	{
 		z = mb2_mat_mul(__MB2P16__, z);
@@ -27360,14 +28128,14 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	var colDist: f32 = (*aux).dist;
 
-	if ((*aux).i >= (__MB2P50__ != 0)
+	if ((*aux).i >= __MB2P50__
 			&& (*aux).i < __MB2P51__)
 		{ t = min((*aux).dist, t / (*aux).de); }
 
 	(*aux).dist = t;
 
 	
-	if ((*aux).i >= (__MB2P52__ != 0) && (*aux).i < (__MB2P53__ != 0)
+	if ((*aux).i >= __MB2P52__ && (*aux).i < __MB2P53__
 			&& colDist != (*aux).dist)
 	{
 		var colAdd: f32 = __MB2P54__.y + (*aux).i * __MB2P58__;
@@ -27381,7 +28149,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P60__ != 0)
-			&& (*aux).i >= (__MB2P61__ != 0)
+			&& (*aux).i >= __MB2P61__
 			&& (*aux).i < __MB2P62__)
 		{ z = zc; }
 	return z;
@@ -27391,6 +28159,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSPrismV2",
         source: "transf_difs_prism_v2.cl",
         param_floats: 32,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledxFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -27474,7 +28245,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).dist = min((*aux).dist, priD / ((*aux).de + __MB2P21__));
 
 	if ((__MB2P22__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P23__ != 0)
+			&& (*aux).i >= __MB2P23__
 			&& (*aux).i < __MB2P24__)
 	{
 		var addCol: f32 = __MB2P25__.y + (*aux).i * __MB2P29__;
@@ -27504,6 +28275,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSSphere",
         source: "transf_difs_sphere.cl",
         param_floats: 12,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabled4dFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.offsetR1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -27533,7 +28307,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).de0 = spD; 
 
 	if ((__MB2P3__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P4__ != 0)
+			&& (*aux).i >= __MB2P4__
 			&& (*aux).i < __MB2P5__)
 	{
 		var addCol: f32 = __MB2P6__.y + (*aux).i * __MB2P10__;
@@ -27556,6 +28330,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSSphereGrid",
         source: "transf_difs_sphere_grid.cl",
         param_floats: 62,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 1, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -27680,7 +28457,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		{ (*aux).dist = min((*aux).dist, (*aux).de0); }
 
 	if ((__MB2P50__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P51__ != 0)
+			&& (*aux).i >= __MB2P51__
 			&& (*aux).i < __MB2P52__)
 	{
 		var colAdd: f32 = __MB2P53__.w + (*aux).i * __MB2P57__;
@@ -27696,7 +28473,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P59__ != 0)
-			&& (*aux).i >= (__MB2P60__ != 0)
+			&& (*aux).i >= __MB2P60__
 			&& (*aux).i < __MB2P61__)
 		{ z = zc; }
 	return z;
@@ -27706,6 +28483,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSSphereGridV2",
         source: "transf_difs_sphere_grid_v2.cl",
         param_floats: 55,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 4, default: &[1.0] },
@@ -27799,7 +28579,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		{ (*aux).dist = (*aux).de0; }
 
 	if ((__MB2P43__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P44__ != 0)
+			&& (*aux).i >= __MB2P44__
 			&& (*aux).i < __MB2P45__)
 	{
 		var colAdd: f32 = __MB2P46__.w + (*aux).i * __MB2P50__;
@@ -27814,7 +28594,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P52__ != 0)
-			&& (*aux).i >= (__MB2P53__ != 0)
+			&& (*aux).i >= __MB2P53__
 			&& (*aux).i < __MB2P54__)
 		{ z = zc; }
 	return z;
@@ -27824,6 +28604,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSSphereGridV3",
         source: "transf_difs_sphere_grid_v3.cl",
         param_floats: 68,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledCx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -27869,7 +28652,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         wgsl: r####"
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		z.y = abs(z.y);
@@ -27881,7 +28664,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P4__ != 0)
-			&& (*aux).i >= (__MB2P5__ != 0)
+			&& (*aux).i >= __MB2P5__
 			&& (*aux).i < __MB2P6__)
 	{
 		z.z = abs(z.z);
@@ -27893,7 +28676,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P8__ != 0)
-			&& (*aux).i >= (__MB2P9__ != 0)
+			&& (*aux).i >= __MB2P9__
 			&& (*aux).i < __MB2P10__)
 	{
 		z.x = abs(z.x);
@@ -27974,7 +28757,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		{ (*aux).dist = (*aux).de0; }
 
 	if ((__MB2P56__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P57__ != 0)
+			&& (*aux).i >= __MB2P57__
 			&& (*aux).i < __MB2P58__)
 	{
 		var colAdd: f32 = __MB2P59__.w + (*aux).i * __MB2P63__;
@@ -27989,7 +28772,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P65__ != 0)
-			&& (*aux).i >= (__MB2P66__ != 0)
+			&& (*aux).i >= __MB2P66__
 			&& (*aux).i < __MB2P67__)
 		{ z = zc; }
 	return z;
@@ -27999,6 +28782,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSSpring",
         source: "transf_difs_spring.cl",
         param_floats: 24,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 1, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -28069,7 +28855,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	if ((__MB2P14__ != 0)) { z = zc; }
 
 	if ((__MB2P15__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P16__ != 0)
+			&& (*aux).i >= __MB2P16__
 			&& (*aux).i < __MB2P17__)
 	{
 		var addCol: f32 = __MB2P18__.w + (*aux).i * __MB2P22__;
@@ -28093,6 +28879,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSSupershape",
         source: "transf_difs_supershape.cl",
         param_floats: 77,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsA", kind: ParamKind::Int, offset: 1, default: &[250.0] },
@@ -28147,14 +28936,14 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledZcFalse", kind: ParamKind::Int, offset: 76, default: &[0.0] },
         ],
         wgsl: r####"
-	if ((*aux).i >= (__MB2P0__ != 0)
+	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
 	{
 		z += __MB2P2__;
 	}
 
 	if ((__MB2P6__ != 0)
-			&& (*aux).i >= (__MB2P7__ != 0)
+			&& (*aux).i >= __MB2P7__
 			&& (*aux).i < __MB2P8__)
 	{
 		if ((__MB2P9__ != 0))
@@ -28172,7 +28961,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P16__ != 0)
-			&& (*aux).i >= (__MB2P17__ != 0)
+			&& (*aux).i >= __MB2P17__
 			&& (*aux).i < __MB2P18__)
 	{
 		z = mb2_mat_mul(__MB2P19__, z);
@@ -28224,7 +29013,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var zc: vec4<f32> = z;
 	var T1: f32;
 
-	if ((*aux).i >= (__MB2P52__ != 0)
+	if ((*aux).i >= __MB2P52__
 			&& (*aux).i < __MB2P53__)
 	{
 		zc.z = (zc.z - __MB2P54__);
@@ -28278,7 +29067,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	T1 = T1 / ((*aux).de + __MB2P65__);
 	(*aux).dist = min(T1, (*aux).dist);
 
-	if ((__MB2P66__ != 0) && (*aux).i >= (__MB2P67__ != 0)
+	if ((__MB2P66__ != 0) && (*aux).i >= __MB2P67__
 			&& (*aux).i < __MB2P68__)
 	{
 		if ((__MB2P69__ != 0) || colDist != (*aux).dist)
@@ -28304,6 +29093,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSSupershapeV2",
         source: "transf_difs_supershape_v2.cl",
         param_floats: 52,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -28345,7 +29137,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		if ((__MB2P3__ != 0))
@@ -28448,7 +29240,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var colDist: f32 = (*aux).dist;
 	(*aux).dist = min((*aux).dist, cylD / ((*aux).de + __MB2P40__));
 
-	if ((__MB2P41__ != 0) && (*aux).i >= (__MB2P42__ != 0)
+	if ((__MB2P41__ != 0) && (*aux).i >= __MB2P42__
 			&& (*aux).i < __MB2P43__)
 	{
 		if ((__MB2P44__ != 0) || colDist != (*aux).dist)
@@ -28479,6 +29271,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSTorus",
         source: "transf_difs_torus.cl",
         param_floats: 19,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledSwFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledSFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -28547,7 +29342,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).dist = min((*aux).dist, torD / ((*aux).de + __MB2P9__));
 
 	if ((__MB2P10__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P11__ != 0)
+			&& (*aux).i >= __MB2P11__
 			&& (*aux).i < __MB2P12__)
 	{
 		var addCol: f32 = __MB2P13__.x + (*aux).i * __MB2P17__;
@@ -28572,6 +29367,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSTorusTwist",
         source: "transf_difs_torus_twist.cl",
         param_floats: 61,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -28617,7 +29415,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		
@@ -28714,12 +29512,12 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		{ (*aux).dist = min((*aux).dist, (*aux).de0); }
 
 	if ((__MB2P50__ != 0)
-			&& (*aux).i >= (__MB2P51__ != 0)
+			&& (*aux).i >= __MB2P51__
 			&& (*aux).i < __MB2P52__)
 		{ z = zc; }
 
 	
-	if ((*aux).i >= (__MB2P53__ != 0) && (*aux).i < (__MB2P54__ != 0)
+	if ((*aux).i >= __MB2P53__ && (*aux).i < __MB2P54__
 			&& (*aux).dist != colDist)
 	{
 		var addCol: f32 = __MB2P55__.x + (*aux).i * __MB2P59__;
@@ -28740,6 +29538,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSTorusV2",
         source: "transf_difs_torus_v2.cl",
         param_floats: 40,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledxFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -28773,7 +29574,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	if ((__MB2P6__ != 0)) { z.z = -abs(z.z); }
 
 	if ((__MB2P7__ != 0)
-			&& (*aux).i >= (__MB2P8__ != 0)
+			&& (*aux).i >= __MB2P8__
 			&& (*aux).i < __MB2P9__)
 	{
 		z = mb2_mat_mul(__MB2P10__, z);
@@ -28818,7 +29619,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).dist = min((*aux).dist, (torD - __MB2P30__) / ((*aux).de + 1.0));
 
 	if ((__MB2P31__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P32__ != 0)
+			&& (*aux).i >= __MB2P32__
 			&& (*aux).i < __MB2P33__)
 	{
 		var addCol: f32 = __MB2P34__.y + (*aux).i * __MB2P38__;
@@ -28840,6 +29641,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSTorusV3",
         source: "transf_difs_torus_v3.cl",
         param_floats: 45,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledxFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -28878,7 +29682,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	if ((__MB2P6__ != 0)) { z.z = -abs(z.z); }
 
 	if ((__MB2P7__ != 0)
-			&& (*aux).i >= (__MB2P8__ != 0)
+			&& (*aux).i >= __MB2P8__
 			&& (*aux).i < __MB2P9__)
 	{
 		z = mb2_mat_mul(__MB2P10__, z);
@@ -28920,7 +29724,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).dist = min((*aux).dist, (streD - __MB2P35__) / ((*aux).de + 1.0));
 
 	if ((__MB2P36__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P37__ != 0)
+			&& (*aux).i >= __MB2P37__
 			&& (*aux).i < __MB2P38__)
 	{
 		var addCol: f32 = __MB2P39__.y + (*aux).i * __MB2P43__;
@@ -28941,6 +29745,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSTorusV4",
         source: "transf_difs_torus_v4.cl",
         param_floats: 47,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledTFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsT", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -28976,13 +29783,13 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         wgsl: r####"
 	var temp: f32;
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		z *= __MB2P3__;
 		(*aux).de = (*aux).de * abs(__MB2P3__);
 
-		if ((*aux).i >= (__MB2P4__ != 0)
+		if ((*aux).i >= __MB2P4__
 				&& (*aux).i < __MB2P5__)
 		{
 			if ((__MB2P6__ != 0))
@@ -28996,7 +29803,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		}
 
 		if ((__MB2P14__ != 0)
-				&& (*aux).i >= (__MB2P15__ != 0)
+				&& (*aux).i >= __MB2P15__
 				&& (*aux).i < __MB2P16__)
 		{
 			z = mb2_mat_mul(__MB2P17__, z);
@@ -29042,7 +29849,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).dist = min((*aux).dist, torD / ((*aux).de + __MB2P37__));
 
 	if ((__MB2P38__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P39__ != 0)
+			&& (*aux).i >= __MB2P39__
 			&& (*aux).i < __MB2P40__)
 	{
 		var addCol: f32 = __MB2P41__.x + __MB2P45__ * (*aux).i;
@@ -29066,6 +29873,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSTriGrid",
         source: "transf_difs_tri_grid.cl",
         param_floats: 52,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAxFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -29111,7 +29921,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P8__ != 0)
-			&& (*aux).i >= (__MB2P9__ != 0)
+			&& (*aux).i >= __MB2P9__
 			&& (*aux).i < __MB2P10__)
 	{
 		z.y = abs(z.y);
@@ -29123,7 +29933,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P12__ != 0)
-			&& (*aux).i >= (__MB2P13__ != 0)
+			&& (*aux).i >= __MB2P13__
 			&& (*aux).i < __MB2P14__)
 		{ z = mb2_mat_mul(__MB2P15__, z); }
 	
@@ -29170,7 +29980,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).dist = min((*aux).dist, (*aux).de0 / ((*aux).de + __MB2P42__));
 
 	if ((__MB2P43__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P44__ != 0)
+			&& (*aux).i >= __MB2P44__
 			&& (*aux).i < __MB2P45__)
 	{
 		var colAdd: f32 = __MB2P46__.x + (*aux).i * __MB2P50__;
@@ -29187,6 +29997,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSTube",
         source: "transf_difs_tube.cl",
         param_floats: 76,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledTFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsT", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -29244,7 +30057,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		z *= __MB2P3__;
@@ -29256,7 +30069,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		z = z - __MB2P7__;
 
 		if ((__MB2P11__ != 0)
-				&& (*aux).i >= (__MB2P12__ != 0)
+				&& (*aux).i >= __MB2P12__
 				&& (*aux).i < __MB2P13__)
 		{
 			z = mb2_mat_mul(__MB2P14__, z);
@@ -29266,7 +30079,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var zc: vec4<f32> = z;
 	
 	if ((__MB2P26__ != 0)
-			&& (*aux).i >= (__MB2P27__ != 0)
+			&& (*aux).i >= __MB2P27__
 			&& (*aux).i < __MB2P28__)
 	{
 		var temp: f32 = zc.x;
@@ -29276,7 +30089,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P29__ != 0)
-			&& (*aux).i >= (__MB2P30__ != 0)
+			&& (*aux).i >= __MB2P30__
 			&& (*aux).i < __MB2P31__)
 	{
 		var temp: f32 = zc.x;
@@ -29285,7 +30098,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P32__ != 0)
-			&& (*aux).i >= (__MB2P33__ != 0)
+			&& (*aux).i >= __MB2P33__
 			&& (*aux).i < __MB2P34__)
 	{
 		if ((__MB2P35__ != 0))
@@ -29364,7 +30177,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	(*aux).dist = min((*aux).dist, cylD / ((*aux).de + __MB2P65__));
 
 	if ((__MB2P66__ != 0) && colDist != (*aux).dist
-			&& (*aux).i >= (__MB2P67__ != 0)
+			&& (*aux).i >= __MB2P67__
 			&& (*aux).i < __MB2P68__)
 	{
 		var addCol: f32 = __MB2P69__.x + (*aux).i * __MB2P73__;
@@ -29391,6 +30204,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDotFold",
         source: "transf_dot_fold.cl",
         param_floats: 26,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.cosA", kind: ParamKind::Float, offset: 1, default: &[0.0] },
@@ -29443,6 +30259,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfFoldingTetra3d",
         source: "transf_folding_tetra3d.cl",
         param_floats: 2,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledy", kind: ParamKind::Int, offset: 1, default: &[1.0] },
@@ -29500,6 +30319,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfGnarl",
         source: "transf_gnarl.cl",
         param_floats: 17,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.scale3D000", kind: ParamKind::Float4, offset: 1, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -29588,6 +30410,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfInitial4d",
         source: "transf_initial4d.cl",
         param_floats: 16,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsD1", kind: ParamKind::Int, offset: 1, default: &[1.0] },
@@ -29601,7 +30426,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 15, default: &[1.0] },
         ],
         wgsl: r####"
-	if ((*aux).i >= (__MB2P0__ != 0)
+	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
 	{
 		if (!(__MB2P2__ != 0))
@@ -29630,6 +30455,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfInvCylindrical",
         source: "transf_inv_cylindrical.cl",
         param_floats: 8,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledzFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -29674,6 +30502,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfIterationWeight",
         source: "transf_iteration_weight.cl",
         param_floats: 5,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.intA", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.intB", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -29695,6 +30526,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfIterationWeight4d",
         source: "transf_iteration_weight4d.cl",
         param_floats: 5,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.intA", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.intB", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -29716,6 +30550,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfJuliabox",
         source: "transf_juliabox.cl",
         param_floats: 46,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.startIterationsB", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsB", kind: ParamKind::Int, offset: 1, default: &[250.0] },
@@ -29748,7 +30585,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var colorAdd: f32 = 0.0;
 
 	var oldZ: vec4<f32> = z;
-	if ((*aux).i >= (__MB2P0__ != 0)
+	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
 	{
 		z.x = abs(z.x + __MB2P2__.x)
@@ -29764,7 +30601,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	
 	var rrCol: f32 = 0.0;
 	var m: f32 = 1.0;
-	if ((*aux).i >= (__MB2P7__ != 0)
+	if ((*aux).i >= __MB2P7__
 			&& (*aux).i < __MB2P8__)
 	{
 		var rr: f32 = dot(z, z);
@@ -29778,7 +30615,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	
-	if ((*aux).i >= (__MB2P12__ != 0)
+	if ((*aux).i >= __MB2P12__
 			&& (*aux).i < __MB2P13__)
 	{
 		z *= __MB2P14__;
@@ -29786,19 +30623,19 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	
-	if ((*aux).i >= (__MB2P16__ != 0)
+	if ((*aux).i >= __MB2P16__
 			&& (*aux).i < __MB2P17__)
 		{ z = mb2_mat_mul(__MB2P18__, z); }
 
 	
-	if ((*aux).i >= (__MB2P30__ != 0)
+	if ((*aux).i >= __MB2P30__
 			&& (*aux).i < __MB2P31__)
 		{ z += __MB2P32__; }
 
 	
 	if ((__MB2P36__ != 0))
 	{
-		if ((*aux).i >= (__MB2P37__ != 0)
+		if ((*aux).i >= __MB2P37__
 				&& (*aux).i < __MB2P38__)
 		{
 			zCol = abs(zCol - oldZ);
@@ -29806,7 +30643,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 			if (zCol.y > 0.0) { colorAdd += __MB2P39__.y * zCol.y; }
 			if (zCol.z > 0.0) { colorAdd += __MB2P39__.z * zCol.z; }
 		}
-	if ((*aux).i >= (__MB2P43__ != 0)
+	if ((*aux).i >= __MB2P43__
 			&& (*aux).i < __MB2P44__)
 	{
 
@@ -29831,6 +30668,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfLinCombineCXYZ",
         source: "transf_lin_combine_cxyz.cl",
         param_floats: 19,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.constantMultiplier100", kind: ParamKind::Float4, offset: 0, default: &[1.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.constantMultiplier010", kind: ParamKind::Float4, offset: 4, default: &[0.0, 1.0, 0.0, 0.0] },
@@ -29919,6 +30759,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfLowResMode",
         source: "transf_low_res_mode.cl",
         param_floats: 9,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.scale25", kind: ParamKind::Float, offset: 0, default: &[25.0] },
             GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 1, default: &[1.0] },
@@ -29953,6 +30796,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfMandalayFold4d",
         source: "transf_mandalay_fold4d.cl",
         param_floats: 9,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offsetp5555", kind: ParamKind::Float4, offset: 0, default: &[0.5, 0.5, 0.5, 0.5] },
             GeneratedParam { path: "transformCommon.offsetA0000", kind: ParamKind::Float4, offset: 4, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -30062,6 +30908,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfMandalayFoldV1",
         source: "transf_mandalay_fold_v1.cl",
         param_floats: 9,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant0555", kind: ParamKind::Float4, offset: 0, default: &[0.5, 0.5, 0.5, 0.0] },
             GeneratedParam { path: "transformCommon.offsetA000", kind: ParamKind::Float4, offset: 4, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -30148,6 +30997,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfMandalayFoldV2",
         source: "transf_mandalay_fold_v2.cl",
         param_floats: 19,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -30169,7 +31021,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	var signZ: f32 = sign(z.z);
 
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		if ((__MB2P3__ != 0)) { z.x = abs(z.x); }
@@ -30256,6 +31108,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfMengerFold",
         source: "transf_menger_fold.cl",
         param_floats: 23,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.additionConstantA000", kind: ParamKind::Float4, offset: 1, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -30299,7 +31154,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 			z.y = temp;
 			col += __MB2P5__.z;
 		}
-		if ((__MB2P9__ != 0) && (*aux).i >= (__MB2P10__ != 0)
+		if ((__MB2P9__ != 0) && (*aux).i >= __MB2P10__
 				&& (*aux).i < __MB2P11__)
 		{
 			(*aux).color += col;
@@ -30336,6 +31191,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfMengerFoldV2",
         source: "transf_menger_fold_v2.cl",
         param_floats: 58,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.rotationEnabledFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -30367,7 +31225,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	z += __MB2P0__;
 
 	if ((__MB2P4__ != 0)
-			&& (*aux).i >= (__MB2P5__ != 0)
+			&& (*aux).i >= __MB2P5__
 			&& (*aux).i < __MB2P6__)
 	{
 		z = mb2_mat_mul(__MB2P7__, z);
@@ -30402,7 +31260,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 		var useScale: f32 = __MB2P39__;
 		if ((__MB2P40__ != 0)
-				&& (*aux).i >= (__MB2P41__ != 0)
+				&& (*aux).i >= __MB2P41__
 				&& (*aux).i < __MB2P42__)
 		{
 			useScale += (*aux).actual_scale_a;
@@ -30440,6 +31298,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfMultipleAngle",
         source: "transf_multiple_angle.cl",
         param_floats: 1,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.multiplication", kind: ParamKind::Float, offset: 0, default: &[2.0] },
         ],
@@ -30457,6 +31318,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfNegAbsAddConstant",
         source: "transf_neg_abs_add_constant.cl",
         param_floats: 7,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 4, default: &[1.0] },
@@ -30479,6 +31343,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfOctoFold",
         source: "transf_octo_fold.cl",
         param_floats: 9,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.scale2", kind: ParamKind::Float, offset: 0, default: &[2.0] },
             GeneratedParam { path: "transformCommon.offset100", kind: ParamKind::Float4, offset: 1, default: &[1.0, 0.0, 0.0, 0.0] },
@@ -30518,6 +31385,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfOffsetSCurve4d",
         source: "transf_offset_s_curve4d.cl",
         param_floats: 15,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant0000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 4, default: &[1.0] },
@@ -30590,6 +31460,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfParabFold",
         source: "transf_parab_fold.cl",
         param_floats: 19,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.constantMultiplier111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.additionConstant000", kind: ParamKind::Float4, offset: 4, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -30718,6 +31591,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfPlatonicSolid",
         source: "transf_platonic_solid.cl",
         param_floats: 14,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "platonicSolid.frequency", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -30791,6 +31667,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfPolyFoldAtan",
         source: "transf_poly_fold_atan.cl",
         param_floats: 33,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledyFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -30876,6 +31755,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfPolyFoldAtan2",
         source: "transf_poly_fold_atan2.cl",
         param_floats: 33,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledyFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -30961,6 +31843,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfPolyFoldAtan2Iter",
         source: "transf_poly_fold_atan2_iter.cl",
         param_floats: 26,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledyFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -30994,7 +31879,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	if ((__MB2P2__ != 0)) { z.z = abs(z.z); }
 
 	if ((__MB2P3__ != 0)
-			&& (*aux).i >= (__MB2P4__ != 0)
+			&& (*aux).i >= __MB2P4__
 			&& (*aux).i < __MB2P5__)
 	{
 		if ((__MB2P6__ != 0) && z.y < 0.0) { z.x = -z.x; }
@@ -31006,7 +31891,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P8__ != 0)
-			&& (*aux).i >= (__MB2P9__ != 0)
+			&& (*aux).i >= __MB2P9__
 			&& (*aux).i < __MB2P10__)
 	{
 		if ((__MB2P11__ != 0) && z.z < 0.0) { z.y = -z.y; }
@@ -31018,7 +31903,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P13__ != 0)
-			&& (*aux).i >= (__MB2P14__ != 0)
+			&& (*aux).i >= __MB2P14__
 			&& (*aux).i < __MB2P15__)
 	{
 		if ((__MB2P16__ != 0) && z.x < 0.0) { z.z = -z.z; }
@@ -31050,6 +31935,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfPolyXYFoldV1",
         source: "transf_poly_xy_fold_v1.cl",
         param_floats: 36,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsD1", kind: ParamKind::Int, offset: 1, default: &[1.0] },
@@ -31072,7 +31960,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "analyticDE.offset0", kind: ParamKind::Float, offset: 35, default: &[0.0] },
         ],
         wgsl: r####"
-	if ((*aux).i >= (__MB2P0__ != 0)
+	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
 	{
 		if ((__MB2P2__ != 0)) { z.x = abs(z.x); }
@@ -31089,13 +31977,13 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P12__ != 0)
-			&& (*aux).i >= (__MB2P13__ != 0)
+			&& (*aux).i >= __MB2P13__
 			&& (*aux).i < __MB2P14__)
 	{
 		z = mb2_mat_mul(__MB2P15__, z);
 	}
 
-	if ((*aux).i >= (__MB2P27__ != 0)
+	if ((*aux).i >= __MB2P27__
 			&& (*aux).i < __MB2P28__)
 	{
 		z += __MB2P29__;
@@ -31113,6 +32001,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfPwr2Polynomial",
         source: "transf_pwr2_polynomial.cl",
         param_floats: 26,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledxFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -31180,6 +32071,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfQuadraticFold4d",
         source: "transf_quadratic_fold4d.cl",
         param_floats: 15,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset1111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 4, default: &[1.0] },
@@ -31237,6 +32131,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfQuaternionFold",
         source: "transf_quaternion_fold.cl",
         param_floats: 20,
+        de_function: DeFunction::Logarithmic,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -31351,6 +32248,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfRPower",
         source: "transf_r_power.cl",
         param_floats: 1,
+        de_function: DeFunction::Logarithmic,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "bulb.power", kind: ParamKind::Float, offset: 0, default: &[9.0] },
         ],
@@ -31365,6 +32265,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfReciprocal3",
         source: "transf_reciprocal3.cl",
         param_floats: 26,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 1, default: &[1.0] },
@@ -31487,6 +32390,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfReciprocal4d",
         source: "transf_reciprocal4d.cl",
         param_floats: 21,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 1, default: &[1.0] },
@@ -31568,6 +32474,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfRotateAboutVec3",
         source: "transf_rotate_about_vec3.cl",
         param_floats: 13,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.angle0", kind: ParamKind::Float, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledEFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -31628,6 +32537,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfRotation",
         source: "transf_rotation.cl",
         param_floats: 12,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 0, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
         ],
@@ -31642,6 +32554,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfRotation4d",
         source: "transf_rotation4d.cl",
         param_floats: 8,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.rotation44a", kind: ParamKind::Float3, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.rotation44b", kind: ParamKind::Float3, offset: 4, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -31699,6 +32614,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfRotationChebyshev",
         source: "transf_rotation_chebyshev.cl",
         param_floats: 19,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -31721,7 +32639,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		
@@ -31765,7 +32683,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P8__ != 0)
-			&& (*aux).i >= (__MB2P9__ != 0)
+			&& (*aux).i >= __MB2P9__
 			&& (*aux).i < __MB2P10__)
 	{
 		var tmp: f32 = 0.0;
@@ -31808,7 +32726,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if ((__MB2P12__ != 0)
-			&& (*aux).i >= (__MB2P13__ != 0)
+			&& (*aux).i >= __MB2P13__
 			&& (*aux).i < __MB2P14__)
 	{
 		var tmp: f32 = 0.0;
@@ -31859,6 +32777,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfRotationFolding",
         source: "transf_rotation_folding.cl",
         param_floats: 47,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.rotationMatrix", kind: ParamKind::Matrix33, offset: 0, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabled", kind: ParamKind::Int, offset: 12, default: &[1.0] },
@@ -31945,6 +32866,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfRotationIterControls",
         source: "transf_rotation_iter_controls.cl",
         param_floats: 10,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.rotation44a", kind: ParamKind::Float3, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.startIterationsA", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -31958,7 +32882,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	
 	var tp: vec4<f32>;
 	if (__MB2P0__.y != 0
-			&& (*aux).i >= (__MB2P4__ != 0)
+			&& (*aux).i >= __MB2P4__
 			&& (*aux).i < __MB2P5__)
 	{
 		tp = z;
@@ -31968,7 +32892,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if (__MB2P0__.z != 0
-			&& (*aux).i >= (__MB2P6__ != 0)
+			&& (*aux).i >= __MB2P6__
 			&& (*aux).i < __MB2P7__)
 	{
 		tp = z;
@@ -31978,7 +32902,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 	}
 
 	if (__MB2P0__.x != 0
-			&& (*aux).i >= (__MB2P8__ != 0)
+			&& (*aux).i >= __MB2P8__
 			&& (*aux).i < __MB2P9__)
 	{
 		tp = z;
@@ -31993,6 +32917,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfRotationM3d",
         source: "transf_rotation_m3d.cl",
         param_floats: 12,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.rotationMatrixXYZ", kind: ParamKind::Matrix33, offset: 0, default: &[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0] },
         ],
@@ -32007,6 +32934,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfRpow3",
         source: "transf_rpow3.cl",
         param_floats: 2,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.scale", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "analyticDE.offset1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -32022,6 +32952,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfScale",
         source: "transf_scale.cl",
         param_floats: 4,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.scale", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -32043,6 +32976,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfScale3d",
         source: "transf_scale3d.cl",
         param_floats: 7,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.scale3D111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -32064,6 +33000,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfScale4d",
         source: "transf_scale4d.cl",
         param_floats: 10,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.scale", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "analyticDE.enabledFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -32088,7 +33027,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
 		{ (*aux).de = (*aux).de * abs(useScale) * __MB2P2__ + __MB2P3__; }
 
 	if ((__MB2P4__ != 0)
-			&& (*aux).i >= (__MB2P5__ != 0)
+			&& (*aux).i >= __MB2P5__
 			&& (*aux).i < __MB2P6__)
 	{
 		
@@ -32106,6 +33045,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfScaleOffset",
         source: "transf_scale_offset.cl",
         param_floats: 8,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstant000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.scale1", kind: ParamKind::Float, offset: 4, default: &[1.0] },
@@ -32129,6 +33071,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfScaleOffsetV2",
         source: "transf_scale_offset_v2.cl",
         param_floats: 19,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.additionConstantA000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledx", kind: ParamKind::Int, offset: 4, default: &[1.0] },
@@ -32164,6 +33109,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfScaleVaryMulti",
         source: "transf_scale_vary_multi.cl",
         param_floats: 15,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterations", kind: ParamKind::Int, offset: 1, default: &[250.0] },
@@ -32182,7 +33130,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledBzFalse", kind: ParamKind::Int, offset: 14, default: &[0.0] },
         ],
         wgsl: r####"
-	if ((*aux).i >= (__MB2P0__ != 0)
+	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
 	{
 		if ((__MB2P2__ != 0))
@@ -32257,6 +33205,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfScaleVaryV212",
         source: "transf_scale_vary_v212.cl",
         param_floats: 10,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterations", kind: ParamKind::Int, offset: 1, default: &[250.0] },
@@ -32270,7 +33221,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
             GeneratedParam { path: "transformCommon.functionEnabledBzFalse", kind: ParamKind::Int, offset: 9, default: &[0.0] },
         ],
         wgsl: r####"
-	if ((*aux).i >= (__MB2P0__ != 0)
+	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
 	{
 		if ((__MB2P2__ != 0))
@@ -32313,6 +33264,9 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfSinAdd",
         source: "transf_sin_add.cl",
         param_floats: 23,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "mandelbulbMulti.orderOfXYZ", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 1, default: &[1.0] },
@@ -32378,6 +33332,9 @@ v = vec4<f32>(z.z, z.y, z.x, z.w); break;
         name: "TransfSinAndCos",
         source: "transf_sin_and_cos.cl",
         param_floats: 16,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.constantMultiplierC111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 4, default: &[1.0] },
@@ -32459,6 +33416,9 @@ z = oldZ * (sinZ * cosZ); break;
         name: "TransfSinAndCosMax",
         source: "transf_sin_and_cos_max.cl",
         param_floats: 21,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.constantMultiplierA111", kind: ParamKind::Float4, offset: 1, default: &[1.0, 1.0, 1.0, 0.0] },
@@ -32559,6 +33519,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSinOrCos",
         source: "transf_sin_or_cos.cl",
         param_floats: 15,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.constantMultiplierC111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 4, default: &[1.0] },
@@ -32621,6 +33584,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSinTan",
         source: "transf_sin_tan.cl",
         param_floats: 22,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 1, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -32660,6 +33626,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSinYM3d",
         source: "transf_sin_y_m3d.cl",
         param_floats: 22,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 1, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -32699,6 +33668,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSincos",
         source: "transf_sincos.cl",
         param_floats: 21,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.rotationEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsR", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -32713,7 +33685,7 @@ maxZ *= abs(oldZ); break;
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		z = mb2_mat_mul(__MB2P3__, z);
@@ -32738,6 +33710,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSincosHelix",
         source: "transf_sincos_helix.cl",
         param_floats: 84,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -32809,7 +33784,7 @@ maxZ *= abs(oldZ); break;
 	var ang: f32;
 	if ((__MB2P0__ != 0))
 	{
-		if ((*aux).i >= (__MB2P1__ != 0)
+		if ((*aux).i >= __MB2P1__
 				&& (*aux).i < __MB2P2__)
 		{
 			
@@ -32838,7 +33813,7 @@ maxZ *= abs(oldZ); break;
 			z += __MB2P9__;
 		}
 
-		if ((*aux).i >= (__MB2P13__ != 0)
+		if ((*aux).i >= __MB2P13__
 				&& (*aux).i < __MB2P14__)
 		{
 			if ((__MB2P15__ != 0))
@@ -32870,7 +33845,7 @@ maxZ *= abs(oldZ); break;
 		}
 
 		
-		if ((*aux).i >= (__MB2P25__ != 0)
+		if ((*aux).i >= __MB2P25__
 				&& (*aux).i < __MB2P26__)
 		{
 			z = mb2_mat_mul(__MB2P27__, z);
@@ -32956,7 +33931,7 @@ maxZ *= abs(oldZ); break;
 
 	
 	if ((__MB2P61__ != 0)
-			&& (*aux).i >= (__MB2P62__ != 0)
+			&& (*aux).i >= __MB2P62__
 			&& (*aux).i < __MB2P63__)
 	{
 		if ((z.z < (__MB2P43__ + 0.5) * __MB2P64__)
@@ -32969,7 +33944,7 @@ maxZ *= abs(oldZ); break;
 
 	
 	if ((__MB2P67__ != 0)
-			&& (*aux).i >= (__MB2P68__ != 0)
+			&& (*aux).i >= __MB2P68__
 			&& (*aux).i < __MB2P69__)
 	{
 		if ((__MB2P70__ != 0))
@@ -33009,6 +33984,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSincosV2",
         source: "transf_sincos_v2.cl",
         param_floats: 35,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledDFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -33034,7 +34012,7 @@ maxZ *= abs(oldZ); break;
         ],
         wgsl: r####"
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		if ((__MB2P3__ != 0)) { z.x = abs(z.x); }
@@ -33043,7 +34021,7 @@ maxZ *= abs(oldZ); break;
 	}
 
 	if ((__MB2P6__ != 0)
-			&& (*aux).i >= (__MB2P7__ != 0)
+			&& (*aux).i >= __MB2P7__
 			&& (*aux).i < __MB2P8__)
 	{
 		z = mb2_mat_mul(__MB2P9__, z);
@@ -33086,6 +34064,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSmooth",
         source: "transf_smooth.cl",
         param_floats: 9,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset0005", kind: ParamKind::Float, offset: 0, default: &[0.005] },
             GeneratedParam { path: "transformCommon.functionEnabledzFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -33140,6 +34121,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSmoothV2",
         source: "transf_smooth_v2.cl",
         param_floats: 16,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset0005", kind: ParamKind::Float, offset: 0, default: &[0.005] },
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 1, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -33193,6 +34177,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalCoordInvs",
         source: "transf_spherical_coord_invs.cl",
         param_floats: 7,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabled", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.functionEnabledAFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -33236,6 +34223,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFold",
         source: "transf_spherical_fold.cl",
         param_floats: 14,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "mandelbox.offset", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.scale", kind: ParamKind::Float, offset: 4, default: &[1.0] },
@@ -33288,6 +34278,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFold4d",
         source: "transf_spherical_fold4d.cl",
         param_floats: 10,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset0000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.minR2p25", kind: ParamKind::Float, offset: 4, default: &[0.25] },
@@ -33330,6 +34323,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFold4dV2",
         source: "transf_spherical_fold4d_v2.cl",
         param_floats: 13,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset0000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledBxFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -33394,6 +34390,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFoldAbox",
         source: "transf_spherical_fold_abox.cl",
         param_floats: 9,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "mandelbox.offset", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.sqtR", kind: ParamKind::Float, offset: 4, default: &[0.0] },
@@ -33432,6 +34431,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFoldCHS",
         source: "transf_spherical_fold_chs.cl",
         param_floats: 15,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset05", kind: ParamKind::Float, offset: 0, default: &[0.5] },
             GeneratedParam { path: "transformCommon.startIterations", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -33449,7 +34451,7 @@ maxZ *= abs(oldZ); break;
         wgsl: r####"
 	var tempZ: f32 = abs(z.z) - __MB2P0__;
 	var rr: f32;
-	if ((*aux).i >= (__MB2P1__ != 0)
+	if ((*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		rr = z.x * z.x + z.y * z.y;
@@ -33492,6 +34494,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFoldCuboid",
         source: "transf_spherical_fold_cuboid.cl",
         param_floats: 18,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.minR2p25", kind: ParamKind::Float, offset: 0, default: &[0.25] },
             GeneratedParam { path: "transformCommon.scaleP222", kind: ParamKind::Float4, offset: 1, default: &[0.0, 0.0, 0.0, 0.0] },
@@ -33516,7 +34521,7 @@ maxZ *= abs(oldZ); break;
 	var rr: f32 = dot(z, z);
 	z += __MB2P6__;
 
-	if ((*aux).i >= (__MB2P10__ != 0)
+	if ((*aux).i >= __MB2P10__
 			&& (*aux).i < __MB2P11__)
 	{
 		if ((__MB2P12__ != 0))
@@ -33580,6 +34585,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFoldParab",
         source: "transf_spherical_fold_parab.cl",
         param_floats: 39,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledSFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsS", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -33621,7 +34629,7 @@ maxZ *= abs(oldZ); break;
 	var colorAdd: f32 = 0.0;
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		rr = dot(z, z);
@@ -33644,7 +34652,7 @@ maxZ *= abs(oldZ); break;
 			colorAdd += __MB2P8__;
 		}
 	}
-	if ((*aux).i >= (__MB2P9__ != 0)
+	if ((*aux).i >= __MB2P9__
 			&& (*aux).i < __MB2P10__)
 	{
 		rr = dot(z, z);
@@ -33686,7 +34694,7 @@ maxZ *= abs(oldZ); break;
 	var useScale: f32 = __MB2P22__;
 	if ((__MB2P23__ != 0))
 	{
-		if ((*aux).i >= (__MB2P24__ != 0)
+		if ((*aux).i >= __MB2P24__
 				&& (*aux).i < __MB2P25__)
 		{
 			useScale += (*aux).actual_scale_a;
@@ -33718,7 +34726,7 @@ maxZ *= abs(oldZ); break;
 		(*aux).de = (*aux).de * abs(useScale) * __MB2P26__ + __MB2P27__;
 	}
 
-	if ((__MB2P32__ != 0) && (*aux).i >= (__MB2P33__ != 0)
+	if ((__MB2P32__ != 0) && (*aux).i >= __MB2P33__
 			&& (*aux).i < __MB2P34__)
 	{
 		colorAdd += __MB2P35__.x * m;
@@ -33731,6 +34739,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFoldPnorm",
         source: "transf_spherical_fold_pnorm.cl",
         param_floats: 18,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.scale2", kind: ParamKind::Float, offset: 0, default: &[2.0] },
             GeneratedParam { path: "transformCommon.scaleA1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -33798,6 +34809,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFoldSmooth",
         source: "transf_spherical_fold_smooth.cl",
         param_floats: 32,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledCxFalse", kind: ParamKind::Int, offset: 4, default: &[0.0] },
@@ -33832,7 +34846,7 @@ maxZ *= abs(oldZ); break;
 	z += __MB2P0__;
 
 	if ((__MB2P4__ != 0)
-			&& (*aux).i >= (__MB2P5__ != 0)
+			&& (*aux).i >= __MB2P5__
 			&& (*aux).i < __MB2P6__)
 	{
 		if (rr < __MB2P7__)
@@ -33844,7 +34858,7 @@ maxZ *= abs(oldZ); break;
 	}
 
 	if ((__MB2P10__ != 0)
-			&& (*aux).i >= (__MB2P11__ != 0)
+			&& (*aux).i >= __MB2P11__
 			&& (*aux).i < __MB2P12__)
 	{
 		rr = dot(z, z);
@@ -33853,7 +34867,7 @@ maxZ *= abs(oldZ); break;
 			rr, __MB2P7__, __MB2P17__);
 		var sm1: f32 = __MB2P8__ * rk1 + 1.0 - rk1;
 		t = 1.0;
-		if ((*aux).i >= (__MB2P18__ != 0)
+		if ((*aux).i >= __MB2P18__
 				&& (*aux).i < __MB2P19__)
 		{
 			var rk2: f32 = SmoothConditionALessB(
@@ -33869,7 +34883,7 @@ maxZ *= abs(oldZ); break;
 
 	z -= __MB2P0__;
 
-	if ((__MB2P21__ != 0) && (*aux).i >= (__MB2P22__ != 0)
+	if ((__MB2P21__ != 0) && (*aux).i >= __MB2P22__
 			&& (*aux).i < __MB2P23__)
 	{
 		var colorAdd: f32 = 0.0;
@@ -33893,6 +34907,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFoldV1",
         source: "transf_spherical_fold_v1.cl",
         param_floats: 8,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "mandelbox.offset", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.minR2p25", kind: ParamKind::Float, offset: 4, default: &[0.25] },
@@ -33927,6 +34944,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFoldV2",
         source: "transf_spherical_fold_v2.cl",
         param_floats: 15,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset000", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.invert0", kind: ParamKind::Float, offset: 4, default: &[0.0] },
@@ -33963,6 +34983,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFoldV3",
         source: "transf_spherical_fold_v3.cl",
         param_floats: 23,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.startIterationsX", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsX", kind: ParamKind::Int, offset: 1, default: &[250.0] },
@@ -33991,13 +35014,13 @@ maxZ *= abs(oldZ); break;
 
 	var out: vec4<f32> = vec4<f32>(0.0, 0.0, 0.0, 0.0);
 	var in: vec4<f32> = out;
-	if ((*aux).i >= (__MB2P0__ != 0)
+	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
 	{
 		out = __MB2P2__;
 		if ((__MB2P6__ != 0)) { out *= signs; }
 	}
-	if ((*aux).i >= (__MB2P7__ != 0)
+	if ((*aux).i >= __MB2P7__
 			&& (*aux).i < __MB2P8__)
 	{
 		in = __MB2P9__;
@@ -34035,6 +35058,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFoldXYZBias",
         source: "transf_spherical_fold_xyz_bias.cl",
         param_floats: 28,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.minR2p25", kind: ParamKind::Float, offset: 0, default: &[0.25] },
             GeneratedParam { path: "transformCommon.maxR2d1", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -34059,7 +35085,7 @@ maxZ *= abs(oldZ); break;
 	var MaxR2: f32 = __MB2P1__;
 	var m: f32 = __MB2P2__;
 
-	if ((*aux).i >= (__MB2P3__ != 0)
+	if ((*aux).i >= __MB2P3__
 			&& (*aux).i < __MB2P4__)
 	{
 		xyzBias = abs((*aux).c) * __MB2P5__;
@@ -34067,7 +35093,7 @@ maxZ *= abs(oldZ); break;
 	}
 
 	if ((__MB2P9__ != 0)
-			&& (*aux).i >= (__MB2P10__ != 0)
+			&& (*aux).i >= __MB2P10__
 			&& (*aux).i < __MB2P11__)
 	{
 		var cSquared: vec4<f32> = (*aux).c * (*aux).c;
@@ -34112,6 +35138,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalInv",
         source: "transf_spherical_inv.cl",
         param_floats: 29,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "mandelbox.offset", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.scale", kind: ParamKind::Float, offset: 4, default: &[1.0] },
@@ -34180,7 +35209,7 @@ maxZ *= abs(oldZ); break;
 	}
 
 	
-	if ((__MB2P22__ != 0) && (*aux).i >= (__MB2P23__ != 0)
+	if ((__MB2P22__ != 0) && (*aux).i >= __MB2P23__
 			&& (*aux).i < __MB2P24__)
 	{
 		var addCol: f32 = 0.0;
@@ -34197,6 +35226,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalInvC",
         source: "transf_spherical_inv_c.cl",
         param_floats: 7,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.constantMultiplier111", kind: ParamKind::Float4, offset: 1, default: &[1.0, 1.0, 1.0, 0.0] },
@@ -34255,6 +35287,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalInvPnorm",
         source: "transf_spherical_inv_pnorm.cl",
         param_floats: 18,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.scale2", kind: ParamKind::Float, offset: 0, default: &[2.0] },
             GeneratedParam { path: "transformCommon.functionEnabledFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -34293,7 +35328,7 @@ maxZ *= abs(oldZ); break;
 	z *= pNorm;
 	(*aux).de *= abs(pNorm);
 
-	if ((__MB2P7__ != 0) && (*aux).i >= (__MB2P8__ != 0)
+	if ((__MB2P7__ != 0) && (*aux).i >= __MB2P8__
 			&& (*aux).i < __MB2P9__)
 	{
 		if (!(__MB2P10__ != 0))
@@ -34315,6 +35350,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalInvV2",
         source: "transf_spherical_inv_v2.cl",
         param_floats: 41,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledCz", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.startIterationsD", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -34354,7 +35392,7 @@ maxZ *= abs(oldZ); break;
 	
 	if ((__MB2P0__ != 0))
 	{
-		if ((*aux).i >= (__MB2P1__ != 0)
+		if ((*aux).i >= __MB2P1__
 				&& (*aux).i < __MB2P2__)
 		{
 			z += __MB2P3__;
@@ -34376,7 +35414,7 @@ maxZ *= abs(oldZ); break;
 
 	
 	if ((__MB2P14__ != 0)
-			&& (*aux).i >= (__MB2P15__ != 0)
+			&& (*aux).i >= __MB2P15__
 			&& (*aux).i < __MB2P16__)
 	{
 		rr = dot(z, z);
@@ -34403,7 +35441,7 @@ maxZ *= abs(oldZ); break;
 
 	
 	if ((__MB2P25__ != 0)
-			&& (*aux).i >= (__MB2P26__ != 0)
+			&& (*aux).i >= __MB2P26__
 			&& (*aux).i < __MB2P27__)
 	{
 		rr = dot(z, z);
@@ -34470,6 +35508,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalInvV3",
         source: "transf_spherical_inv_v3.cl",
         param_floats: 27,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledCFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsC", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -34493,7 +35534,7 @@ maxZ *= abs(oldZ); break;
         wgsl: r####"
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		z += __MB2P3__;
@@ -34502,7 +35543,7 @@ maxZ *= abs(oldZ); break;
 		if ((__MB2P9__ != 0)) { z.z = abs(z.z); }
 	}
 
-	if ((*aux).i >= (__MB2P10__ != 0)
+	if ((*aux).i >= __MB2P10__
 			&& (*aux).i < __MB2P11__)
 	{
 		z += __MB2P12__ + __MB2P16__;
@@ -34533,6 +35574,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalInvV4",
         source: "transf_spherical_inv_v4.cl",
         param_floats: 38,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "mandelbox.offset", kind: ParamKind::Float4, offset: 0, default: &[0.0, 0.0, 0.0, 0.0] },
             GeneratedParam { path: "transformCommon.scale", kind: ParamKind::Float, offset: 4, default: &[1.0] },
@@ -34575,7 +35619,7 @@ maxZ *= abs(oldZ); break;
 	var mde: f32 = RR;
 
 	if ((__MB2P6__ != 0)
-			&& (*aux).i >= (__MB2P7__ != 0)
+			&& (*aux).i >= __MB2P7__
 			&& (*aux).i < __MB2P8__)
 	{
 		mde = 1.0 / mde;
@@ -34584,7 +35628,7 @@ maxZ *= abs(oldZ); break;
 	}
 
 	if ((__MB2P9__ != 0)
-			&& (*aux).i >= (__MB2P10__ != 0)
+			&& (*aux).i >= __MB2P10__
 			&& (*aux).i < __MB2P11__)
 	{
 		z += __MB2P12__;
@@ -34642,7 +35686,7 @@ maxZ *= abs(oldZ); break;
 	}
 
 	
-	if ((__MB2P31__ != 0) && (*aux).i >= (__MB2P32__ != 0)
+	if ((__MB2P31__ != 0) && (*aux).i >= __MB2P32__
 			&& (*aux).i < __MB2P33__)
 	{
 		var addCol: f32 = 0.0;
@@ -34661,6 +35705,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalOffset",
         source: "transf_spherical_offset.cl",
         param_floats: 3,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset", kind: ParamKind::Float, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.scale", kind: ParamKind::Float, offset: 1, default: &[1.0] },
@@ -34678,6 +35725,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalPwrFold",
         source: "transf_spherical_pwr_fold.cl",
         param_floats: 8,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.pwr4", kind: ParamKind::Float, offset: 0, default: &[4.0] },
             GeneratedParam { path: "transformCommon.pwr05", kind: ParamKind::Float, offset: 1, default: &[0.5] },
@@ -34724,6 +35774,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfStepXY",
         source: "transf_step_xy.cl",
         param_floats: 26,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.scale3D111", kind: ParamKind::Float4, offset: 0, default: &[1.0, 1.0, 1.0, 0.0] },
             GeneratedParam { path: "transformCommon.offset05", kind: ParamKind::Float, offset: 4, default: &[0.5] },
@@ -34816,6 +35869,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSupershape",
         source: "transf_supershape.cl",
         param_floats: 41,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.stopIterationsP1", kind: ParamKind::Int, offset: 1, default: &[1.0] },
@@ -34851,7 +35907,7 @@ maxZ *= abs(oldZ); break;
             GeneratedParam { path: "transformCommon.functionEnabledZcFalse", kind: ParamKind::Int, offset: 40, default: &[0.0] },
         ],
         wgsl: r####"
-	if ((*aux).i >= (__MB2P0__ != 0)
+	if ((*aux).i >= __MB2P0__
 			&& (*aux).i < __MB2P1__)
 	{
 		if ((__MB2P2__ != 0))
@@ -34966,6 +36022,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSurfBoxFold",
         source: "transf_surf_box_fold.cl",
         param_floats: 53,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "surfBox.enabledX1", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "surfBox.offset1A111", kind: ParamKind::Float4, offset: 1, default: &[1.0, 1.0, 1.0, 0.0] },
@@ -35105,7 +36164,7 @@ maxZ *= abs(oldZ); break;
 	}
 	(*aux).de = (*aux).de * __MB2P44__ + __MB2P45__; 
 
-	if ((__MB2P46__ != 0) && (*aux).i >= (__MB2P47__ != 0)
+	if ((__MB2P46__ != 0) && (*aux).i >= __MB2P47__
 			&& (*aux).i < __MB2P48__)
 	{
 		var colorAdd: f32 = 0.0;
@@ -35124,6 +36183,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSurfBoxFoldV2",
         source: "transf_surf_box_fold_v2.cl",
         param_floats: 18,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset222", kind: ParamKind::Float4, offset: 0, default: &[2.0, 2.0, 2.0, 0.0] },
             GeneratedParam { path: "transformCommon.additionConstant111", kind: ParamKind::Float4, offset: 4, default: &[1.0, 1.0, 1.0, 0.0] },
@@ -35207,6 +36269,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSurfBoxFoldV24d",
         source: "transf_surf_box_fold_v24d.cl",
         param_floats: 17,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.offset2222", kind: ParamKind::Float4, offset: 0, default: &[2.0, 2.0, 2.0, 2.0] },
             GeneratedParam { path: "transformCommon.offset1111", kind: ParamKind::Float4, offset: 4, default: &[1.0, 1.0, 1.0, 1.0] },
@@ -35283,6 +36348,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfSurfFoldMulti",
         source: "transf_surf_fold_multi.cl",
         param_floats: 21,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledAx", kind: ParamKind::Int, offset: 0, default: &[1.0] },
             GeneratedParam { path: "transformCommon.additionConstant111", kind: ParamKind::Float4, offset: 1, default: &[1.0, 1.0, 1.0, 0.0] },
@@ -35361,7 +36429,7 @@ maxZ *= abs(oldZ); break;
 	}
 	(*aux).de = (*aux).de * __MB2P11__ + __MB2P12__; 
 
-	if ((__MB2P13__ != 0) && (*aux).i >= (__MB2P14__ != 0)
+	if ((__MB2P13__ != 0) && (*aux).i >= __MB2P14__
 			&& (*aux).i < __MB2P15__)
 	{
 		var colorAdd: f32 = 0.0;
@@ -35408,6 +36476,9 @@ maxZ *= abs(oldZ); break;
         name: "TransfZvectorAxisSwap",
         source: "transf_zvector_axis_swap.cl",
         param_floats: 7,
+        de_function: DeFunction::Unsupported,
+        add_c: false,
+        bailout: 100.0,
         params: &[
             GeneratedParam { path: "mandelbulbMulti.orderOfXYZ", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.functionEnabledxFalse", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -35447,7 +36518,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 	if ((__MB2P3__ != 0)) { z.z = -z.z; }
 
 	if ((__MB2P4__ != 0)
-			&& (*aux).i >= (__MB2P5__ != 0)
+			&& (*aux).i >= __MB2P5__
 			&& (*aux).i < __MB2P6__)
 	{
 		var xTemp: f32 = SQRT_1_2_F * (z.x - z.y);
@@ -35461,6 +36532,9 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         name: "Vicsek",
         source: "vicsek.cl",
         param_floats: 49,
+        de_function: DeFunction::Linear,
+        add_c: false,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledxFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsE", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -35508,7 +36582,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 
 	
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		if (z.x + z.y < 0.0) { z = vec4<f32>(-z.y, -z.x, z.z, z.w); }
@@ -35531,7 +36605,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 
 	
 	if ((__MB2P8__ != 0)
-			&& (*aux).i >= (__MB2P9__ != 0)
+			&& (*aux).i >= __MB2P9__
 			&& (*aux).i < __MB2P10__)
 	{
 		var rr: f32 = dot(z, z);
@@ -35558,7 +36632,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 
 	
 	if ((__MB2P17__ != 0)
-			&& (*aux).i >= (__MB2P18__ != 0)
+			&& (*aux).i >= __MB2P18__
 			&& (*aux).i < __MB2P19__)
 	{
 		zCol = z; 
@@ -35594,7 +36668,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 
 	
 	if ((__MB2P27__ != 0)
-			&& (*aux).i >= (__MB2P28__ != 0)
+			&& (*aux).i >= __MB2P28__
 			&& (*aux).i < __MB2P29__)
 	{
 		var xTemp: f32 = SQRT_1_2_F * (z.x - z.y);
@@ -35664,6 +36738,9 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         name: "Xenodreambuie",
         source: "xenodreambuie.cl",
         param_floats: 3,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "bulb.power", kind: ParamKind::Float, offset: 0, default: &[9.0] },
             GeneratedParam { path: "bulb.betaAngleOffset", kind: ParamKind::Float, offset: 1, default: &[0.0] },
@@ -35692,6 +36769,9 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         name: "XenodreambuieV2",
         source: "xenodreambuie_v2.cl",
         param_floats: 32,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -35723,7 +36803,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         wgsl: r####"
 	var t: f32;
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		if ((__MB2P3__ != 0)) { z.x = abs(z.x); }
@@ -35748,7 +36828,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 
 	var rp: f32 = pow((*aux).r, __MB2P13__ - __MB2P17__);
 
-	if ((*aux).i >= (__MB2P18__ != 0)
+	if ((*aux).i >= __MB2P18__
 			&& (*aux).i < __MB2P19__)
 	{
 		if (cos(th) < 0.0) { ph = ph + M_PI_F; }
@@ -35782,6 +36862,9 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         name: "XenodreambuieV3",
         source: "xenodreambuie_v3.cl",
         param_floats: 41,
+        de_function: DeFunction::Logarithmic,
+        add_c: true,
+        bailout: 10.0,
         params: &[
             GeneratedParam { path: "transformCommon.functionEnabledPFalse", kind: ParamKind::Int, offset: 0, default: &[0.0] },
             GeneratedParam { path: "transformCommon.startIterationsP", kind: ParamKind::Int, offset: 1, default: &[0.0] },
@@ -35822,7 +36905,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         wgsl: r####"
 	var t: f32;
 	if ((__MB2P0__ != 0)
-			&& (*aux).i >= (__MB2P1__ != 0)
+			&& (*aux).i >= __MB2P1__
 			&& (*aux).i < __MB2P2__)
 	{
 		if ((__MB2P3__ != 0)) { z.x = abs(z.x); }
@@ -35853,14 +36936,14 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 
 	
 	if ((__MB2P19__ != 0)
-			&& (*aux).i >= (__MB2P20__ != 0)
+			&& (*aux).i >= __MB2P20__
 			&& (*aux).i < __MB2P21__)
 	{
 		if (cos(th) < 0.0) { ph = ph + M_PI_F; }
 	}
 
 	if ((__MB2P22__ != 0)
-			&& (*aux).i >= (__MB2P23__ != 0)
+			&& (*aux).i >= __MB2P23__
 			&& (*aux).i < __MB2P24__)
 	{
 		if (abs(t) > 0.5 * M_PI_F) { t = sign(t) * M_PI_F - t; }
@@ -35935,3 +37018,36 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
 ];
+
+/// Mandelbulber's option enumerators, as WGSL constants. Spliced into the
+/// shader alongside the formula bodies that switch on them.
+pub const ENUMERATORS: &str = concat!(
+    "const multi_acosOrAsinCl_acos: i32 = 0;\n",
+    "const multi_atanOrAtan2Cl_atan: i32 = 0;\n",
+    "const multi_OrderOfXYZCl_xyz: i32 = 0;\n",
+    "const multi_OrderOfXYZCl_xzy: i32 = 1;\n",
+    "const multi_OrderOfXYZCl_yxz: i32 = 2;\n",
+    "const multi_OrderOfXYZCl_yzx: i32 = 3;\n",
+    "const multi_OrderOfXYZCl_zxy: i32 = 4;\n",
+    "const multi_OrderOfXYZCl_zyx: i32 = 5;\n",
+    "const multi_asinOrAcosCl_asin: i32 = 0;\n",
+    "const multi_asinOrAcosCl_acos: i32 = 1;\n",
+    "const multi_atan2OrAtanCl_atan2: i32 = 0;\n",
+    "const multi_atan2OrAtanCl_atan: i32 = 1;\n",
+    "const multi_OrderOfZYXCl_zyx: i32 = 0;\n",
+    "const multi_OrderOfZYXCl_zxy: i32 = 1;\n",
+    "const multi_OrderOfZYXCl_yzx: i32 = 2;\n",
+    "const multi_OrderOfZYXCl_yxz: i32 = 3;\n",
+    "const multi_OrderOfZYXCl_xzy: i32 = 4;\n",
+    "const multi_OrderOfZYXCl_xyz: i32 = 5;\n",
+    "const multi_combo4Cl_type1: i32 = 0;\n",
+    "const multi_combo4Cl_type2: i32 = 1;\n",
+    "const multi_combo4Cl_type3: i32 = 2;\n",
+    "const multi_combo4Cl_type4: i32 = 3;\n",
+    "const multi_combo6Cl_type1: i32 = 0;\n",
+    "const multi_combo6Cl_type2: i32 = 1;\n",
+    "const multi_combo6Cl_type3: i32 = 2;\n",
+    "const multi_combo6Cl_type4: i32 = 3;\n",
+    "const multi_combo6Cl_type5: i32 = 4;\n",
+    "const multi_combo6Cl_type6: i32 = 5;\n",
+);

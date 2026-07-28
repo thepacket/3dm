@@ -4,7 +4,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use crate::camera::Camera;
-use crate::formulas::{DeMode, FormulaKind, FormulaSlot};
+use crate::formulas::{Builtin, DeMode, FormulaKind, FormulaSlot, generated::GENERATED};
 use crate::params::{DebugView, SceneParams};
 use crate::render::{FractalPipeline, Uniforms, callback};
 
@@ -14,6 +14,9 @@ const ORBIT_SENSITIVITY: f32 = 0.007;
 pub struct App {
     camera: Camera,
     params: SceneParams,
+    /// Search text for the transpiled-formula picker. Lives on the app rather
+    /// than in egui's temp state so that it survives the combo box closing.
+    formula_filter: String,
     /// Set when the surface format is linear, so the shader must apply sRGB.
     encode_srgb: bool,
     /// Drop iteration and step counts while the camera is moving, so dragging
@@ -58,6 +61,7 @@ impl App {
         Some(Self {
             camera: Camera::default(),
             params,
+            formula_filter: String::new(),
             encode_srgb,
             adaptive_quality: true,
             interacting: false,
@@ -85,6 +89,7 @@ impl App {
             params,
             camera,
             adaptive_quality,
+            formula_filter,
             ..
         } = self;
         let mut reset_view = false;
@@ -95,7 +100,7 @@ impl App {
 
             egui::CollapsingHeader::new("Formula stack")
                 .default_open(true)
-                .show(ui, |ui| stack_editor(params, ui));
+                .show(ui, |ui| stack_editor(params, formula_filter, ui));
 
             egui::CollapsingHeader::new("Iteration")
                 .default_open(true)
@@ -360,9 +365,50 @@ enum SlotAction {
     MoveDown(usize),
 }
 
+
+/// The formula picker: 3DM's own handful first, then the transpiled
+/// Mandelbulber corpus behind a text filter, because 361 entries in a combo box
+/// is a list nobody can read.
+fn formula_picker(ui: &mut egui::Ui, filter: &mut String, mut choose: impl FnMut(FormulaKind)) {
+    for b in Builtin::ALL {
+        if ui.selectable_label(false, b.name()).clicked() {
+            choose(FormulaKind::Builtin(b));
+        }
+    }
+
+    ui.separator();
+    ui.add(egui::TextEdit::singleline(filter).hint_text("filter Mandelbulber…"));
+
+    let needle = filter.to_lowercase();
+    egui::ScrollArea::vertical()
+        .max_height(240.0)
+        .show(ui, |ui| {
+            let mut shown = 0usize;
+            for (i, f) in GENERATED.iter().enumerate() {
+                if !needle.is_empty() && !f.name.to_lowercase().contains(&needle) {
+                    continue;
+                }
+                // Cap the unfiltered list: scrolling 361 rows to find one is
+                // what the filter is for.
+                shown += 1;
+                if shown > 80 {
+                    ui.label(egui::RichText::new("…keep typing to narrow").small().weak());
+                    break;
+                }
+                if ui
+                    .selectable_label(false, f.name)
+                    .on_hover_text(f.source)
+                    .clicked()
+                {
+                    choose(FormulaKind::Generated(i));
+                }
+            }
+        });
+}
+
 /// The formula stack editor: an ordered list of formulas, each with its own
 /// parameters and the range of iterations over which it applies.
-fn stack_editor(params: &mut SceneParams, ui: &mut egui::Ui) {
+fn stack_editor(params: &mut SceneParams, filter: &mut String, ui: &mut egui::Ui) {
     let max_iter = params.fractal.iterations;
     let stack = &mut params.stack;
     let mut action = None;
@@ -379,21 +425,18 @@ fn stack_editor(params: &mut SceneParams, ui: &mut egui::Ui) {
                         .selected_text(slot.kind.name())
                         .width(120.0)
                         .show_ui(ui, |ui| {
-                            for kind in FormulaKind::ALL {
-                                if ui
-                                    .selectable_label(slot.kind == kind, kind.name())
-                                    .clicked()
-                                    && slot.kind != kind
-                                {
-                                    // Swapping the formula must reset the
-                                    // parameters — slot 1 of a Mandelbox means
-                                    // something different than slot 1 of a bulb.
-                                    let range = (slot.start_iter, slot.end_iter);
-                                    *slot = FormulaSlot::new(kind);
-                                    slot.start_iter = range.0;
-                                    slot.end_iter = range.1;
+                            formula_picker(ui, filter, |kind| {
+                                if slot.kind == kind {
+                                    return;
                                 }
-                            }
+                                // Swapping the formula must reset the
+                                // parameters — slot 1 of a Mandelbox means
+                                // something different than slot 1 of a bulb.
+                                let range = (slot.start_iter, slot.end_iter);
+                                *slot = FormulaSlot::new(kind);
+                                slot.start_iter = range.0;
+                                slot.end_iter = range.1;
+                            });
                         });
 
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
@@ -418,8 +461,24 @@ fn stack_editor(params: &mut SceneParams, ui: &mut egui::Ui) {
                 });
 
                 ui.add_enabled_ui(slot.enabled, |ui| {
-                    for (value, spec) in slot.params.iter_mut().zip(slot.kind.params()) {
-                        ui.add(egui::Slider::new(value, spec.min..=spec.max).text(spec.name));
+                    for control in slot.kind.controls() {
+                        let Some(value) = slot.params.get_mut(control.index) else {
+                            continue;
+                        };
+                        match control.range {
+                            Some((min, max)) => {
+                                ui.add(egui::Slider::new(value, min..=max).text(&control.label));
+                            }
+                            // No known bounds, so a drag value rather than a
+                            // slider with an invented range.
+                            None => {
+                                ui.add(
+                                    egui::DragValue::new(value)
+                                        .speed(0.01)
+                                        .prefix(format!("{}: ", control.label)),
+                                );
+                            }
+                        }
                     }
 
                     ui.horizontal(|ui| {
@@ -463,11 +522,9 @@ fn stack_editor(params: &mut SceneParams, ui: &mut egui::Ui) {
                 .selected_text("+ add formula")
                 .width(150.0)
                 .show_ui(ui, |ui| {
-                    for kind in FormulaKind::ALL {
-                        if ui.selectable_label(false, kind.name()).clicked() {
-                            stack.slots.push(FormulaSlot::new(kind));
-                        }
-                    }
+                    formula_picker(ui, filter, |kind| {
+                        stack.slots.push(FormulaSlot::new(kind));
+                    });
                 });
         });
         if !stack.can_add() {

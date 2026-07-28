@@ -28,10 +28,16 @@ struct Uniforms {
     palette_amp: vec4<f32>,
     // rgb = background, w = fog
     bg: vec4<f32>,
-    // Two vec4s per formula slot: [params 0-3], then [param 4, param 5,
-    // start iteration, end iteration]. Generated code indexes this with
-    // constants, so the layout must match `formulas::VEC4S_PER_SLOT`.
-    slots: array<vec4<f32>, 12>,
+    // One vec4 per formula slot: x = start iteration, y = end iteration.
+    // Kept in a uniform rather than in generated code so that dragging a
+    // formula's iteration range does not rebuild the shader.
+    ranges: array<vec4<f32>, 6>,
+    // Every formula's parameters, one fixed-size block per slot. A transpiled
+    // Mandelbulber formula can carry over a hundred floats — rotation matrices,
+    // 4D offsets — which is why these live in a pool instead of in `ranges`.
+    // Generated code indexes this with constants; the stride must match
+    // `formulas::POOL_VEC4S_PER_SLOT`.
+    pool: array<vec4<f32>, 204>,
 };
 
 @group(0) @binding(0) var<uniform> u: Uniforms;

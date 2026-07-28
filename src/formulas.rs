@@ -6,11 +6,21 @@
 //! rotating between folds, is where the shapes MB3D is known for come from.
 //!
 //! Each formula contributes a WGSL fragment that transforms the running point
-//! `z` and the running derivative `dr`. [`crate::render::codegen`] splices those
+//! `z` and the running derivative. [`crate::render::codegen`] splices those
 //! fragments into one straight-line distance estimator, so there is no
 //! per-iteration branching on the GPU.
+//!
+//! Formulas come from two places — a handful written by hand ([`Builtin`]) and
+//! several hundred transpiled from Mandelbulber2 ([`generated`]) — but they
+//! share one ABI: a 4D `z` the body mutates and returns, plus Mandelbulber's
+//! `Aux` carrying the derivative as `de`. That is what lets the two sit in the
+//! same stack and share one iteration loop. Their parameters share one uniform
+//! pool as well; see [`mb2`] for how a formula's block is laid out in it.
 
 pub mod generated;
+pub mod mb2;
+
+use generated::GENERATED;
 
 /// Type of a transpiled formula's parameter, mirroring Mandelbulber's own.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -48,6 +58,18 @@ pub struct GeneratedParam {
     pub default: &'static [f32],
 }
 
+/// Which closed form a transpiled formula's distance estimate takes, recovered
+/// from Mandelbulber's C++ formula definitions.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum DeFunction {
+    Logarithmic,
+    Linear,
+    /// The formula computes its own distance, or has only a delta (numerical)
+    /// estimate. 3DM's iteration loop cannot render these correctly yet; it
+    /// will draw *something*, which is exactly why they are marked.
+    Unsupported,
+}
+
 /// A formula translated from Mandelbulber2 by `tools/mb2-transpile`.
 #[derive(Debug)]
 pub struct GeneratedFormula {
@@ -55,6 +77,14 @@ pub struct GeneratedFormula {
     /// Originating `.cl` file, for tracing a shape back to its source.
     pub source: &'static str,
     pub param_floats: usize,
+    pub de_function: DeFunction,
+    /// Whether the iteration loop must add the sampled point back after this
+    /// formula runs. Mandelbulber does this in its caller rather than in the
+    /// formula body, so an escape-time formula renders as a bare sphere
+    /// without it.
+    pub add_c: bool,
+    /// Escape radius this formula was designed around.
+    pub bailout: f32,
     pub params: &'static [GeneratedParam],
     /// WGSL body with `__MB2Pn__` placeholders for parameter reads.
     pub wgsl: &'static str,
@@ -67,10 +97,18 @@ pub const MAX_SLOTS: usize = 6;
 /// Tunable parameters exposed per slot.
 pub const MAX_PARAMS: usize = 6;
 
-/// `vec4`s of uniform storage per slot: params 0-3, then params 4-5 plus the
-/// iteration range. Keeping the range in a uniform rather than in generated
-/// code means dragging it does not trigger a shader rebuild.
-pub const VEC4S_PER_SLOT: usize = 2;
+/// `vec4`s of parameter pool reserved per slot.
+///
+/// A fixed stride rather than a packed allocation: it costs a few kilobytes of
+/// uniform space that a tighter packing would save, and in exchange a slot's
+/// parameters sit at the same address no matter what the other slots hold, so
+/// editing one formula cannot disturb another's reads. The widest formula in
+/// the corpus needs 133 floats once its vectors are aligned — see the test
+/// below, which fails if a future Mandelbulber release exceeds this.
+pub const POOL_VEC4S_PER_SLOT: usize = 34;
+
+/// f32 slots reserved per formula in the parameter pool.
+pub const POOL_FLOATS_PER_SLOT: usize = POOL_VEC4S_PER_SLOT * 4;
 
 /// How a formula contributes to the distance estimate.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -120,8 +158,13 @@ const fn p(name: &'static str, min: f32, max: f32, default: f32) -> ParamSpec {
     }
 }
 
+/// 3DM's own formulas, written by hand rather than transpiled.
+///
+/// They are kept because they are the ones worth reaching for first, and
+/// because having a formula whose behaviour is known exactly is what makes it
+/// possible to tell a broken transpile from a broken renderer.
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
-pub enum FormulaKind {
+pub enum Builtin {
     Mandelbulb,
     Juliabulb,
     Mandelbox,
@@ -129,7 +172,7 @@ pub enum FormulaKind {
     Rotate,
 }
 
-impl FormulaKind {
+impl Builtin {
     pub const ALL: [Self; 5] = [
         Self::Mandelbulb,
         Self::Juliabulb,
@@ -214,40 +257,54 @@ impl FormulaKind {
 
     /// The WGSL body for this formula.
     ///
-    /// `z` and `dr` are function pointers, `c` is the point being sampled (the
-    /// `+ c` of the escape-time iteration). `P0`..`P5` are placeholders that
-    /// codegen rewrites into this slot's uniform reads.
+    /// Written against the same ABI as the transpiled formulas — a 4D `z` that
+    /// the body mutates and returns, and Mandelbulber's `Aux` carrying the
+    /// running derivative as `(*aux).de` and the sampled point as
+    /// `(*aux).const_c`. These formulas are 3D and simply leave `z.w` alone.
+    ///
+    /// Sharing one ABI is what lets [`crate::render::codegen`] emit a single
+    /// iteration loop rather than one per formula source, and it means a
+    /// hand-written formula and a transpiled one can sit in the same stack.
+    /// `P0`..`P5` are placeholders that codegen rewrites into this slot's
+    /// uniform reads.
     pub fn wgsl_body(self) -> &'static str {
         match self {
             Self::Mandelbulb => {
                 r#"
-    let r = length(*z);
+    let r = length(z.xyz);
     if (r > 1e-9) {
         let power = P0;
-        let theta = acos(clamp((*z).z / r, -1.0, 1.0)) * power;
-        let phi = atan2((*z).y, (*z).x) * power;
+        let theta = acos(clamp(z.z / r, -1.0, 1.0)) * power;
+        let phi = atan2(z.y, z.x) * power;
         let zr = pow(r, power);
-        *dr = pow(r, power - 1.0) * power * (*dr) + 1.0;
+        (*aux).de = pow(r, power - 1.0) * power * (*aux).de + 1.0;
         let st = sin(theta);
-        *z = zr * vec3<f32>(st * cos(phi), st * sin(phi), cos(theta)) + c;
+        z = vec4<f32>(
+            zr * vec3<f32>(st * cos(phi), st * sin(phi), cos(theta))
+                + (*aux).const_c.xyz,
+            z.w);
     }
+    return z;
 "#
             }
             // Same iteration as the Mandelbulb, but the added constant is fixed
             // instead of being the sample point — the 3D Julia set of the bulb.
             Self::Juliabulb => {
                 r#"
-    let r = length(*z);
+    let r = length(z.xyz);
     if (r > 1e-9) {
         let power = P0;
-        let theta = acos(clamp((*z).z / r, -1.0, 1.0)) * power;
-        let phi = atan2((*z).y, (*z).x) * power;
+        let theta = acos(clamp(z.z / r, -1.0, 1.0)) * power;
+        let phi = atan2(z.y, z.x) * power;
         let zr = pow(r, power);
-        *dr = pow(r, power - 1.0) * power * (*dr) + 1.0;
+        (*aux).de = pow(r, power - 1.0) * power * (*aux).de + 1.0;
         let st = sin(theta);
-        *z = zr * vec3<f32>(st * cos(phi), st * sin(phi), cos(theta))
-             + vec3<f32>(P1, P2, P3);
+        z = vec4<f32>(
+            zr * vec3<f32>(st * cos(phi), st * sin(phi), cos(theta))
+                + vec3<f32>(P1, P2, P3),
+            z.w);
     }
+    return z;
 "#
             }
             // Box fold, then sphere fold, then scale — Tglad's Mandelbox.
@@ -257,22 +314,23 @@ impl FormulaKind {
     let minr = max(P1, 0.01);
     let lim = P2;
 
-    *z = clamp(*z, vec3<f32>(-lim), vec3<f32>(lim)) * 2.0 - *z;
+    var p = clamp(z.xyz, vec3<f32>(-lim), vec3<f32>(lim)) * 2.0 - z.xyz;
 
-    let r2 = dot(*z, *z);
+    let r2 = dot(p, p);
     let minr2 = minr * minr;
     if (r2 < minr2) {
         let f = 1.0 / minr2;
-        *z = *z * f;
-        *dr = *dr * f;
+        p = p * f;
+        (*aux).de = (*aux).de * f;
     } else if (r2 < 1.0) {
         let f = 1.0 / max(r2, 1e-9);
-        *z = *z * f;
-        *dr = *dr * f;
+        p = p * f;
+        (*aux).de = (*aux).de * f;
     }
 
-    *z = *z * scale + c;
-    *dr = *dr * abs(scale) + 1.0;
+    p = p * scale + (*aux).const_c.xyz;
+    (*aux).de = (*aux).de * abs(scale) + 1.0;
+    return vec4<f32>(p, z.w);
 "#
             }
             // Kaleidoscopic IFS: fold into a tetrahedral wedge, then scale out.
@@ -281,15 +339,17 @@ impl FormulaKind {
     let s = P0;
     let o = P1;
 
-    if ((*z).x + (*z).y < 0.0) { *z = vec3<f32>(-(*z).y, -(*z).x, (*z).z); }
-    if ((*z).x + (*z).z < 0.0) { *z = vec3<f32>(-(*z).z, (*z).y, -(*z).x); }
-    if ((*z).y + (*z).z < 0.0) { *z = vec3<f32>((*z).x, -(*z).z, -(*z).y); }
+    var p = z.xyz;
+    if (p.x + p.y < 0.0) { p = vec3<f32>(-p.y, -p.x, p.z); }
+    if (p.x + p.z < 0.0) { p = vec3<f32>(-p.z, p.y, -p.x); }
+    if (p.y + p.z < 0.0) { p = vec3<f32>(p.x, -p.z, -p.y); }
 
-    *z = *z * s - vec3<f32>(o) * (s - 1.0);
-    *dr = *dr * abs(s);
+    p = p * s - vec3<f32>(o) * (s - 1.0);
+    (*aux).de = (*aux).de * abs(s);
+    return vec4<f32>(p, z.w);
 "#
             }
-            // A rigid rotation. `dr` is untouched because rotations preserve
+            // A rigid rotation. `de` is untouched because rotations preserve
             // length, which is exactly what makes them safe to interleave.
             Self::Rotate => {
                 r#"
@@ -310,19 +370,160 @@ impl FormulaKind {
         vec3<f32>(-sz, cz, 0.0),
         vec3<f32>(0.0, 0.0, 1.0));
 
-    *z = rz * (ry * (rx * (*z)));
+    return vec4<f32>(rz * (ry * (rx * z.xyz)), z.w);
 "#
             }
         }
     }
 }
 
+/// One editable parameter of a formula, as the UI needs to show it.
+#[derive(Clone, Debug)]
+pub struct Control {
+    pub label: String,
+    /// Float index into [`FormulaSlot::params`].
+    pub index: usize,
+    /// Slider bounds, where the formula has known ones.
+    pub range: Option<(f32, f32)>,
+}
+
+/// A formula in a stack: either one of 3DM's own or one transpiled from
+/// Mandelbulber2.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub enum FormulaKind {
+    Builtin(Builtin),
+    /// Index into [`generated::GENERATED`].
+    Generated(usize),
+}
+
+impl FormulaKind {
+    pub fn name(self) -> &'static str {
+        match self {
+            Self::Builtin(b) => b.name(),
+            Self::Generated(i) => GENERATED[i].name,
+        }
+    }
+
+    /// Looks up a transpiled formula by its Mandelbulber name.
+    pub fn find(name: &str) -> Option<Self> {
+        GENERATED
+            .iter()
+            .position(|f| f.name.eq_ignore_ascii_case(name))
+            .map(Self::Generated)
+    }
+
+    pub fn de_kind(self) -> DeKind {
+        match self {
+            Self::Builtin(b) => b.de_kind(),
+            Self::Generated(i) => match GENERATED[i].de_function {
+                DeFunction::Logarithmic => DeKind::Escape,
+                DeFunction::Linear => DeKind::Linear,
+                // No estimator of ours applies. Logarithmic is the less wrong
+                // default and `de_mode_override` can force the other.
+                DeFunction::Unsupported => DeKind::Escape,
+            },
+        }
+    }
+
+    pub fn suggested_bounds(self) -> f32 {
+        match self {
+            Self::Builtin(b) => b.suggested_bounds(),
+            Self::Generated(_) => 4.0,
+        }
+    }
+
+    pub fn suggested_bailout(self) -> f32 {
+        match self {
+            Self::Builtin(b) => b.suggested_bailout(),
+            Self::Generated(i) => GENERATED[i].bailout,
+        }
+    }
+
+    /// Whether the iteration loop adds the sampled point back after this
+    /// formula. The hand-written formulas fold `+ c` into their own bodies;
+    /// Mandelbulber's do not.
+    pub fn adds_c(self) -> bool {
+        match self {
+            Self::Builtin(_) => false,
+            Self::Generated(i) => GENERATED[i].add_c,
+        }
+    }
+
+    /// f32 slots this formula needs in the parameter pool.
+    pub fn param_floats(self) -> usize {
+        match self {
+            Self::Builtin(_) => MAX_PARAMS,
+            Self::Generated(i) => mb2::layout(&GENERATED[i]).floats,
+        }
+    }
+
+    /// The editable controls for this formula, in display order.
+    ///
+    /// A hand-written formula names its parameters and bounds them; a
+    /// transpiled one has only Mandelbulber's struct path and no idea of a
+    /// sensible range, so its controls are unbounded and are labelled with the
+    /// path — which is at least searchable against Mandelbulber's own UI.
+    pub fn controls(self) -> Vec<Control> {
+        match self {
+            Self::Builtin(b) => b
+                .params()
+                .iter()
+                .enumerate()
+                .map(|(i, spec)| Control {
+                    label: spec.name.to_owned(),
+                    index: i,
+                    range: Some((spec.min, spec.max)),
+                })
+                .collect(),
+            Self::Generated(i) => mb2::layout(&GENERATED[i])
+                .placements
+                .iter()
+                .flat_map(|p| {
+                    let floats = p.param.kind.floats().min(4);
+                    // A vec4 parameter becomes four controls, suffixed, because
+                    // a single row of four drag values is how these read in
+                    // Mandelbulber too.
+                    (0..floats).map(move |c| Control {
+                        label: if floats > 1 {
+                            format!("{}.{}", p.param.path, ["x", "y", "z", "w"][c])
+                        } else {
+                            p.param.path.to_owned()
+                        },
+                        index: p.index + c,
+                        range: None,
+                    })
+                })
+                .collect(),
+        }
+    }
+
+    /// The starting parameter values for a fresh slot.
+    ///
+    /// A transpiled formula run with zeroed parameters almost always renders
+    /// nothing, so its recovered defaults are not a nicety.
+    pub fn defaults(self) -> Vec<f32> {
+        match self {
+            Self::Builtin(b) => {
+                let mut v = vec![0.0; MAX_PARAMS];
+                for (slot, spec) in v.iter_mut().zip(b.params()) {
+                    *slot = spec.default;
+                }
+                v
+            }
+            Self::Generated(i) => mb2::layout(&GENERATED[i]).defaults(),
+        }
+    }
+}
+
 /// One entry in the stack.
-#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct FormulaSlot {
     pub kind: FormulaKind,
     pub enabled: bool,
-    pub params: [f32; MAX_PARAMS],
+    /// This formula's parameter block, in the layout the shader reads. Sized
+    /// per formula rather than fixed: a hand-written formula uses six floats
+    /// and a transpiled one can need over a hundred.
+    pub params: Vec<f32>,
     /// First iteration (inclusive) at which this formula applies.
     pub start_iter: i32,
     /// Last iteration (exclusive). Restricting a formula to early or late
@@ -333,17 +534,19 @@ pub struct FormulaSlot {
 
 impl FormulaSlot {
     pub fn new(kind: FormulaKind) -> Self {
-        let mut params = [0.0; MAX_PARAMS];
-        for (slot, spec) in params.iter_mut().zip(kind.params()) {
-            *slot = spec.default;
-        }
         Self {
             kind,
             enabled: true,
-            params,
+            params: kind.defaults(),
             start_iter: 0,
             end_iter: 32,
         }
+    }
+
+    /// Convenience for the hand-written formulas, which are named far more
+    /// often than they are indexed.
+    pub fn builtin(kind: Builtin) -> Self {
+        Self::new(FormulaKind::Builtin(kind))
     }
 }
 
@@ -359,7 +562,7 @@ pub struct FormulaStack {
 impl Default for FormulaStack {
     fn default() -> Self {
         Self {
-            slots: vec![FormulaSlot::new(FormulaKind::Mandelbulb)],
+            slots: vec![FormulaSlot::builtin(Builtin::Mandelbulb)],
             de_mode_override: None,
         }
     }
@@ -422,5 +625,59 @@ impl FormulaStack {
 
     pub fn can_add(&self) -> bool {
         self.slots.len() < MAX_SLOTS
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn every_transpiled_formula_fits_its_pool_block() {
+        // The pool stride is a compile-time constant baked into both the
+        // generated WGSL and `fractal.wgsl`, so a formula that outgrew it would
+        // silently read another slot's parameters rather than fail.
+        let widest = GENERATED
+            .iter()
+            .map(|f| (mb2::layout(f).floats, f.name))
+            .max()
+            .unwrap_or((0, ""));
+        assert!(
+            widest.0 <= POOL_FLOATS_PER_SLOT,
+            "{} needs {} floats, pool stride is {POOL_FLOATS_PER_SLOT}",
+            widest.1,
+            widest.0,
+        );
+    }
+
+    #[test]
+    fn aligned_layout_keeps_vectors_on_vec4_boundaries() {
+        // The transpiler packs placeholders densely, so this is exactly the
+        // property `mb2::layout` exists to restore: a `vec4` array can only be
+        // indexed a whole `vec4` at a time.
+        for f in GENERATED {
+            for p in mb2::layout(f).placements {
+                if p.param.kind.floats() >= 4 {
+                    assert_eq!(
+                        p.index % 4,
+                        0,
+                        "{}: {} lands at float {}",
+                        f.name,
+                        p.param.path,
+                        p.index
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn a_slots_defaults_fill_its_own_block_only() {
+        let kind = FormulaKind::find("Mandelbulb").expect("transpiled Mandelbulb");
+        let slot = FormulaSlot::new(kind);
+        assert_eq!(slot.params.len(), kind.param_floats());
+        // bulb.power defaults to 9 in Mandelbulber; a zeroed block renders
+        // nothing, which is why the recovered defaults are load-bearing.
+        assert!(slot.params.contains(&9.0));
     }
 }
