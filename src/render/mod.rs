@@ -34,6 +34,44 @@ const PROBE_FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Rgba32Float;
 /// Two pixels: the cursor ray's landing point, and the clear space ahead.
 const PROBE_WIDTH: u32 = 2;
 
+/// Copies the offscreen fractal into egui's target.
+///
+/// The fractal is not drawn straight into the window. At this display's full
+/// screen size that is 21.5 megapixels of raymarching, which costs about half a
+/// second on empty space and one and a half once the fractal fills the frame —
+/// so the window grows and the app stops being interactive. It is rendered
+/// smaller instead and stretched, at a scale the app picks from how long the
+/// last frames took.
+const BLIT_WGSL: &str = r#"
+@group(0) @binding(0) var src: texture_2d<f32>;
+@group(0) @binding(1) var samp: sampler;
+
+struct VsOut {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) uv: vec2<f32>,
+};
+
+@vertex
+fn vs_blit(@builtin(vertex_index) vi: u32) -> VsOut {
+    var corners = array<vec2<f32>, 3>(
+        vec2<f32>(-1.0, -1.0),
+        vec2<f32>(3.0, -1.0),
+        vec2<f32>(-1.0, 3.0),
+    );
+    let c = corners[vi];
+    var out: VsOut;
+    out.pos = vec4<f32>(c, 0.0, 1.0);
+    // Flip y: clip space is y-up, texture space is y-down.
+    out.uv = vec2<f32>(c.x, -c.y) * 0.5 + 0.5;
+    return out;
+}
+
+@fragment
+fn fs_blit(in: VsOut) -> @location(0) vec4<f32> {
+    return textureSample(src, samp, in.uv);
+}
+"#;
+
 /// GPU-side scene description. Laid out as `vec4`s so that WGSL's `uniform`
 /// address space alignment rules are satisfied without any padding fields.
 #[repr(C)]
@@ -217,6 +255,12 @@ pub struct FractalPipeline {
     probe_target: wgpu::Texture,
     probe_view: wgpu::TextureView,
     probe_readback: wgpu::Buffer,
+    /// Where the fractal is actually drawn, at or below the window's size.
+    offscreen: Option<(wgpu::Texture, wgpu::TextureView, wgpu::BindGroup)>,
+    offscreen_size: [u32; 2],
+    blit: wgpu::RenderPipeline,
+    blit_layout: wgpu::BindGroupLayout,
+    sampler: wgpu::Sampler,
     /// Viewport size the last frame was drawn at. A probe cycle spans three
     /// frames, and a surface reconfigure in the middle of one leaves a copy or
     /// a mapping straddling it.
@@ -282,11 +326,84 @@ impl FractalPipeline {
             mapped_at_creation: false,
         });
 
+        let blit_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            label: Some("3dm.blit.bgl"),
+            entries: &[
+                wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Texture {
+                        sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                        view_dimension: wgpu::TextureViewDimension::D2,
+                        multisampled: false,
+                    },
+                    count: None,
+                },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 1,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                    count: None,
+                },
+            ],
+        });
+        let blit_shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
+            label: Some("3dm.blit.shader"),
+            source: wgpu::ShaderSource::Wgsl(BLIT_WGSL.into()),
+        });
+        let blit_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+            label: Some("3dm.blit.layout"),
+            bind_group_layouts: &[Some(&blit_layout)],
+            immediate_size: 0,
+        });
+        let blit = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+            label: Some("3dm.blit.pipeline"),
+            layout: Some(&blit_pipeline_layout),
+            vertex: wgpu::VertexState {
+                module: &blit_shader,
+                entry_point: Some("vs_blit"),
+                buffers: &[],
+                compilation_options: Default::default(),
+            },
+            fragment: Some(wgpu::FragmentState {
+                module: &blit_shader,
+                entry_point: Some("fs_blit"),
+                targets: &[Some(wgpu::ColorTargetState {
+                    format: target_format,
+                    blend: Some(wgpu::BlendState::REPLACE),
+                    write_mask: wgpu::ColorWrites::ALL,
+                })],
+                compilation_options: Default::default(),
+            }),
+            primitive: wgpu::PrimitiveState {
+                topology: wgpu::PrimitiveTopology::TriangleList,
+                cull_mode: None,
+                ..Default::default()
+            },
+            depth_stencil: None,
+            multisample: wgpu::MultisampleState::default(),
+            multiview_mask: None,
+            cache: None,
+        });
+        // Linear, so a reduced-resolution frame reads as soft rather than
+        // blocky while the camera is moving.
+        let sampler = device.create_sampler(&wgpu::SamplerDescriptor {
+            label: Some("3dm.blit.sampler"),
+            mag_filter: wgpu::FilterMode::Linear,
+            min_filter: wgpu::FilterMode::Linear,
+            ..Default::default()
+        });
+
         Self {
             bind_group_layout,
             bind_group,
             uniform_buffer,
             target_format,
+            offscreen: None,
+            offscreen_size: [0, 0],
+            blit,
+            blit_layout,
+            sampler,
             pipelines: HashMap::new(),
             probes: HashMap::new(),
             probe_target,
@@ -382,6 +499,86 @@ impl FractalPipeline {
 
         self.pipelines.insert(key, pipeline);
         self.probes.insert(key, probe);
+    }
+
+    /// Draws the fractal into the offscreen target, creating it if the size
+    /// changed. Returns false if there is nothing to draw yet.
+    fn render_offscreen(
+        &mut self,
+        device: &wgpu::Device,
+        encoder: &mut wgpu::CommandEncoder,
+        key: u64,
+        size: [u32; 2],
+    ) -> bool {
+        if !self.pipelines.contains_key(&key) {
+            return false;
+        }
+        if self.offscreen.is_none() || self.offscreen_size != size {
+            let texture = device.create_texture(&wgpu::TextureDescriptor {
+                label: Some("3dm.offscreen"),
+                size: wgpu::Extent3d {
+                    width: size[0],
+                    height: size[1],
+                    depth_or_array_layers: 1,
+                },
+                mip_level_count: 1,
+                sample_count: 1,
+                dimension: wgpu::TextureDimension::D2,
+                format: self.target_format,
+                usage: wgpu::TextureUsages::RENDER_ATTACHMENT
+                    | wgpu::TextureUsages::TEXTURE_BINDING,
+                view_formats: &[],
+            });
+            let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+            let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+                label: Some("3dm.blit.bg"),
+                layout: &self.blit_layout,
+                entries: &[
+                    wgpu::BindGroupEntry {
+                        binding: 0,
+                        resource: wgpu::BindingResource::TextureView(&view),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 1,
+                        resource: wgpu::BindingResource::Sampler(&self.sampler),
+                    },
+                ],
+            });
+            self.offscreen = Some((texture, view, bind_group));
+            self.offscreen_size = size;
+        }
+
+        let Some((_, view, _)) = &self.offscreen else {
+            return false;
+        };
+        let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+            label: Some("3dm.offscreen.pass"),
+            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                view,
+                depth_slice: None,
+                resolve_target: None,
+                ops: wgpu::Operations {
+                    load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
+                    store: wgpu::StoreOp::Store,
+                },
+            })],
+            depth_stencil_attachment: None,
+            timestamp_writes: None,
+            occlusion_query_set: None,
+            multiview_mask: None,
+        });
+        self.draw(&mut pass, key);
+        true
+    }
+
+    /// Stretches the offscreen frame across egui's target.
+    fn blit(&self, render_pass: &mut wgpu::RenderPass<'_>) {
+        let Some((_, _, bind_group)) = &self.offscreen else {
+            return;
+        };
+        render_pass.set_pipeline(&self.blit);
+        render_pass.set_bind_group(0, bind_group, &[]);
+        render_pass.draw(0..3, 0..1);
     }
 
     /// Advances the probe one step through its copy/map cycle.
@@ -513,6 +710,8 @@ pub struct FractalCallback {
     pub uniforms: Uniforms,
     /// Viewport size in physical pixels, used to spot a resize.
     pub viewport: [f32; 2],
+    /// Size the fractal is actually rendered at, at or below the viewport.
+    pub render_size: [u32; 2],
     pub shader_key: u64,
     /// Shared with the app so an unchanged stack costs no allocation.
     pub shader_source: Arc<str>,
@@ -533,6 +732,7 @@ impl CallbackTrait for FractalCallback {
             let stable = res.last_viewport == self.viewport;
             res.last_viewport = self.viewport;
             res.step_probe(encoder, self.shader_key, stable);
+            res.render_offscreen(device, encoder, self.shader_key, self.render_size);
         }
         Vec::new()
     }
@@ -548,7 +748,7 @@ impl CallbackTrait for FractalCallback {
         };
         // egui has already set the viewport to our widget's rect, so the
         // fullscreen triangle lands exactly inside the panel.
-        res.draw(render_pass, self.shader_key);
+        res.blit(render_pass);
     }
 }
 
@@ -557,6 +757,7 @@ pub fn callback(
     rect: egui::Rect,
     uniforms: Uniforms,
     viewport: [f32; 2],
+    render_size: [u32; 2],
     shader_key: u64,
     shader_source: Arc<str>,
 ) -> egui::PaintCallback {
@@ -565,6 +766,7 @@ pub fn callback(
         FractalCallback {
             uniforms,
             viewport,
+            render_size,
             shader_key,
             shader_source,
         },

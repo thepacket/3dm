@@ -49,6 +49,16 @@ const KEY_FLY_BLIND: f32 = 0.8;
 /// Screen heights of pan per second.
 const KEY_PAN: f32 = 0.9;
 
+/// Frame time the renderer aims for, in milliseconds. Above this the fractal is
+/// drawn at a smaller size and stretched; below it, the size creeps back up.
+///
+/// A raymarcher's cost is per pixel and varies enormously with what is on
+/// screen: the same fractal that renders a framed view of empty space in half a
+/// second takes nearly three times that once it fills the frame, and a
+/// full-screen window on a Retina display is twenty-one megapixels of it. No
+/// fixed resolution is right for both, so the frame time picks one.
+const TARGET_FRAME_MS: f32 = 33.0;
+
 /// Fraction of the way to the cursor's target that one wheel notch travels.
 ///
 /// Kept well under one so the gesture is repeatable: each notch closes a fifth
@@ -72,6 +82,9 @@ pub struct App {
     elapsed: f32,
     /// Smoothed frame time, for the readout in the top bar.
     frame_ms: f32,
+    /// Linear scale the fractal is rendered at, relative to the viewport.
+    /// Driven by `frame_ms` toward [`TARGET_FRAME_MS`].
+    render_scale: f32,
     /// What the GPU last reported about the cursor ray and the space ahead.
     /// Drives both the zoom-toward-cursor gesture and the flight speed.
     cursor: CursorProbe,
@@ -119,6 +132,7 @@ impl App {
             interacting: false,
             elapsed: 0.0,
             frame_ms: 0.0,
+            render_scale: 1.0,
             shader: (key, source.into()),
         })
     }
@@ -470,11 +484,24 @@ impl App {
             return;
         }
 
+        // Track the frame time toward the target. Easing rather than snapping,
+        // or the resolution oscillates visibly as the cost crosses the target.
         let ppp = ui.ctx().pixels_per_point();
+        let error = TARGET_FRAME_MS / self.frame_ms.max(1.0);
+        self.render_scale = (self.render_scale * error.clamp(0.9, 1.05)).clamp(0.2, 1.0);
+
+        let physical = [rect.width() * ppp, rect.height() * ppp];
+        let render_size = [
+            ((physical[0] * self.render_scale) as u32).max(16),
+            ((physical[1] * self.render_scale) as u32).max(16),
+        ];
+        // The shader sizes its hit threshold from this, so it must be the size
+        // actually rendered — not the window's — or a reduced frame would chase
+        // detail it has no pixels for.
         let uniforms = Uniforms::build(
             &self.camera,
             &self.effective_params(),
-            [rect.width() * ppp, rect.height() * ppp],
+            [render_size[0] as f32, render_size[1] as f32],
             self.elapsed,
             self.encode_srgb,
             self.cursor_ndc,
@@ -482,7 +509,8 @@ impl App {
         ui.painter().add(callback(
             rect,
             uniforms,
-            [rect.width() * ppp, rect.height() * ppp],
+            physical,
+            render_size,
             self.shader.0,
             Arc::clone(&self.shader.1),
         ));
@@ -525,7 +553,19 @@ impl eframe::App for App {
                         egui::RichText::new(format!("{:.1} ms", self.frame_ms))
                             .monospace()
                             .weak(),
-                    );
+                    )
+                    .on_hover_text("Smoothed frame time.");
+                    if self.render_scale < 0.995 {
+                        ui.label(
+                            egui::RichText::new(format!("{:.0}%", self.render_scale * 100.0))
+                                .monospace()
+                                .weak(),
+                        )
+                        .on_hover_text(
+                            "Rendering below the window's resolution to hold the \
+                             frame rate. Stop moving and it climbs back.",
+                        );
+                    }
                 });
             });
         });
