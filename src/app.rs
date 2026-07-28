@@ -474,10 +474,6 @@ impl App {
             return;
         }
 
-        if let Some(pos) = response.hover_pos() {
-            self.draw_crosshair(ui, rect, pos);
-        }
-
         let ppp = ui.ctx().pixels_per_point();
         let uniforms = Uniforms::build(
             &self.camera,
@@ -493,6 +489,13 @@ impl App {
             self.shader.0,
             Arc::clone(&self.shader.1),
         ));
+
+        // After the fractal, not before. egui paints a layer in the order
+        // things were added, so a cross drawn first is a cross the fractal
+        // paints over — present, correct, and invisible.
+        if let Some(pos) = response.hover_pos() {
+            self.draw_crosshair(ui, rect, pos);
+        }
     }
 }
 
