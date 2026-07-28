@@ -2584,6 +2584,7 @@ dependencies = [
  "env_logger",
  "image",
  "log",
+ "naga 30.0.0",
  "pollster 1.0.1",
  "wasm-bindgen",
  "wasm-bindgen-futures",

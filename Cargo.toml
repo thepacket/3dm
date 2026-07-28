@@ -53,4 +53,5 @@ opt-level = 2
 
 [dev-dependencies]
 image = { version = "0.25.10", default-features = false, features = ["png"] }
+naga = { version = "30.0.0", features = ["wgsl-in"] }
 pollster = "1.0.1"

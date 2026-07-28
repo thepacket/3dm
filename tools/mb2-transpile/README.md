@@ -26,6 +26,13 @@ It reads exactly four things:
 | `mandelbulber2/opencl/fractal_cl.h` | parameter types and enumerators |
 | `mandelbulber2/src/fractal.cpp` | struct path → settings name |
 | `mandelbulber2/src/initparameters.cpp` | settings name → default value |
+| `mandelbulber2/formula/definition/fractal_*.cpp` | estimator, bailout, `+ c` flag |
+
+That last one matters more than its size suggests. A `.cl` body says how to
+transform `z` and nothing else — not which closed form turns the result into a
+distance, and not whether the caller has to add the sampled point back each
+iteration. Mandelbulber does that `+ c` outside the formula, so a transpiled
+escape-time formula without the flag renders as a featureless sphere.
 
 ## Running
 
@@ -47,12 +54,32 @@ which is the only practical way to debug a rewrite rule.
 
 ## How coverage is counted
 
-A formula counts only if **naga compiles it**. The rewriter accepting a formula
+A formula counts only if **naga parses it**. The rewriter accepting a formula
 proves nothing: the first run "translated" 375 of 461, of which 33 actually
 compiled. Anything the rewriter is unsure of is rejected with a reason rather
 than emitted, so the report reflects shippable coverage.
 
-Compiling is still a much weaker claim than rendering correctly.
+Parsing is a weaker claim than compiling, which is a weaker claim than
+rendering, and both gaps have bitten. `naga::front::wgsl::parse_str` — what this
+tool's check uses — does not run naga's validator, so it accepted `i32 >= bool`
+and a function with no `return` for as long as nobody looked. Two examples in
+the main crate close the gap and report the honest numbers:
+
+```bash
+cargo run --example mb2_audit -- --errors
+```
+
+Parses *and* validates every emitted formula. Currently 344 of 361.
+
+```bash
+cargo run --release --example mb2_sweep -- /tmp/sweep
+```
+
+Builds a real wgpu pipeline per formula, renders it, and classifies the result
+as fractal detail / smooth blob / empty / shader error — then writes a contact
+sheet, because whether a shape is *right* is not something a number can tell
+you. Currently 262 render with detail, 38 as smooth blobs, 42 empty, 19 fail to
+build.
 
 ## Gotcha
 
