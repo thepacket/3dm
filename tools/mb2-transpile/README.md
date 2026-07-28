@@ -28,6 +28,12 @@ It reads exactly four things:
 | `mandelbulber2/src/initparameters.cpp` | settings name → default value |
 | `mandelbulber2/formula/definition/fractal_*.cpp` | estimator, bailout, `+ c` flag |
 
+The estimator comes from `DEAnalyticFunction`, which is what Mandelbulber's
+engine switches on — not the `DEFunctionType` two lines above it in the same
+constructor. They disagree for much of the corpus, and the constants are spelled
+differently too: `DEFunctionType` carries long-standing typos (`cutomDEFunction`,
+`peudoKleinianDEFunction`) that `DEAnalyticFunction` does not.
+
 That last one matters more than its size suggests. A `.cl` body says how to
 transform `z` and nothing else — not which closed form turns the result into a
 distance, and not whether the caller has to add the sampled point back each
@@ -78,8 +84,12 @@ cargo run --release --example mb2_sweep -- /tmp/sweep
 Builds a real wgpu pipeline per formula, renders it, and classifies the result
 as fractal detail / smooth blob / empty / shader error — then writes a contact
 sheet, because whether a shape is *right* is not something a number can tell
-you. Currently 262 render with detail, 38 as smooth blobs, 42 empty, 19 fail to
+you. Currently 276 render with detail, 29 as smooth blobs, 37 empty, 19 fail to
 build.
+
+Of those 37 empties, 26 are `Transf*` formulas — transforms meant to be composed
+into a hybrid, which genuinely draw nothing on their own. They need a multi-slot
+stack before they can be judged at all.
 
 ## Gotcha
 

@@ -11,12 +11,26 @@ use std::collections::HashMap;
 use std::path::Path;
 
 /// Which closed form turns the running `(r, DE)` into a distance.
+///
+/// These mirror Mandelbulber's `DEAnalyticFunction`, which is what its engine
+/// actually switches on — not the `DEFunctionType` sitting beside it in the
+/// same constructor. The two disagree for a large part of the corpus, and
+/// following the wrong one silently estimates 93 formulas with a closed form
+/// they were never meant to use.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum DeFunction {
+    /// `0.5·r·log(r)/DE`, and zero inside the unit sphere.
     Logarithmic,
+    /// `r/DE`.
     Linear,
-    /// The formula computes its own distance, or has no analytic estimate at
-    /// all. 3DM has no way to honour these yet.
+    /// `(r − 2)/DE` — the offset is what makes an IFS's estimate hold up.
+    Ifs,
+    /// The formula wrote its own distance into `aux.dist`.
+    Custom,
+    /// No analytic estimate. Mandelbulber renders these by delta DE, which
+    /// 3DM does not implement.
+    None,
+    /// Needs `aux.pseudoKleinianDE` / extra parameters 3DM does not carry.
     Unsupported,
 }
 
@@ -26,6 +40,9 @@ impl DeFunction {
         match self {
             Self::Logarithmic => "Logarithmic",
             Self::Linear => "Linear",
+            Self::Ifs => "Ifs",
+            Self::Custom => "Custom",
+            Self::None => "None",
             Self::Unsupported => "Unsupported",
         }
     }
@@ -114,9 +131,17 @@ fn parse_one(src: &str) -> Option<(String, Meta)> {
     let name = value_of("internalName")?.trim_matches('"').to_owned();
 
     let meta = Meta {
-        de_function: match value_of("DEFunctionType").as_deref() {
-            Some("logarithmicDEFunction") => DeFunction::Logarithmic,
-            Some("linearDEFunction") => DeFunction::Linear,
+        // Note these are *not* spelled like the `DEFunctionType` constants
+        // sitting two lines above them in the same constructor, which carry
+        // long-standing typos (`cutomDEFunction`, `peudoKleinianDEFunction`).
+        // Matching those spellings here silently classifies every custom-DE
+        // formula as unsupported.
+        de_function: match value_of("DEAnalyticFunction").as_deref() {
+            Some("analyticFunctionLogarithmic") => DeFunction::Logarithmic,
+            Some("analyticFunctionLinear") => DeFunction::Linear,
+            Some("analyticFunctionIFS") => DeFunction::Ifs,
+            Some("analyticFunctionCustomDE") => DeFunction::Custom,
+            Some("analyticFunctionNone") => DeFunction::None,
             _ => DeFunction::Unsupported,
         },
         // `cpixelAlreadyHa`(ndled) means the body adds it itself.
@@ -126,12 +151,13 @@ fn parse_one(src: &str) -> Option<(String, Meta)> {
             .unwrap_or(10.0),
     };
 
-    // A delta-DE formula has no analytic derivative for 3DM to divide by.
+    // A delta-DE formula has no analytic derivative for 3DM to divide by,
+    // whatever its analytic function says.
     let meta = if value_of("DEType").as_deref() == Some("analyticDEType") {
         meta
     } else {
         Meta {
-            de_function: DeFunction::Unsupported,
+            de_function: DeFunction::None,
             ..meta
         }
     };

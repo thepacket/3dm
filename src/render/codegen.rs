@@ -82,9 +82,15 @@ pub fn generate(stack: &FormulaStack) -> String {
         dispatch.push_str("        // empty stack — nothing to iterate\n");
     }
 
+    // Ported from Mandelbulber's `compute_fractal.cl`, including the parts that
+    // are easy to leave out and wrong to: the logarithmic form is zero inside
+    // the unit sphere rather than negative, the IFS form carries a −2 offset,
+    // and a formula that computed its own distance is simply believed.
     let distance = match stack.de_mode() {
-        DeMode::Log => "0.5 * log(safe_r) * safe_r / max(aux.de, 1e-9)",
-        DeMode::Linear => "safe_r / max(aux.de, 1e-9)",
+        DeMode::Log => "select(0.0, 0.5 * safe_r * log(safe_r) / de, safe_r > 1.0)",
+        DeMode::Linear => "safe_r / de",
+        DeMode::Ifs => "(safe_r - 2.0) / de",
+        DeMode::Custom => "aux.dist",
     };
 
     let de = format!(
@@ -103,24 +109,29 @@ pub fn generate(stack: &FormulaStack) -> String {
     // the distance estimate divides by, and `const_c` is the sampled point that
     // escape-time formulas add back each iteration.
     var aux: Aux;
-    aux.de = 1.0;
-    aux.de0 = 1.0;
+    aux.c = vec4<f32>(pos, 0.0);
+    aux.const_c = vec4<f32>(pos, 0.0);
+    // Seeded to the starting point, then left alone: Mandelbulber's loop never
+    // touches it and the formulas that care manage it themselves.
+    aux.old_z = z;
+    aux.pos_neg = 1.0;
     aux.r = r;
-    aux.i = 0.0;
-    aux.color = 1.0;
+    aux.de = 1.0;
+    aux.de0 = 0.0;
+    // Formulas accumulate their own estimate with `min`, so this has to start
+    // high. Starting it at zero makes every custom-DE formula report a
+    // distance of zero everywhere.
+    aux.dist = 1000.0;
     // Mandelbulber seeds this from the Mandelbox scale, which 3DM has no global
     // equivalent of; formulas that use it overwrite it on their first
     // iteration, so a neutral 1.0 is the safe seed.
     aux.actual_scale = 1.0;
     aux.actual_scale_a = 0.0;
-    aux.c = vec4<f32>(pos, 0.0);
-    aux.const_c = vec4<f32>(pos, 0.0);
-    aux.old_z = vec4<f32>(0.0);
-    aux.last_z = vec4<f32>(0.0);
-    aux.dist = 0.0;
-    aux.pos_neg = 1.0;
-    aux.temp1000 = 1000.0;
+    aux.color = 1.0;
     aux.color_hybrid = 0.0;
+    aux.temp1000 = 1000.0;
+    aux.i = 0.0;
+    aux.last_z = z;
     aux.r_dz = 1.0;
     aux.old_r = 0.0;
 
@@ -132,8 +143,6 @@ pub fn generate(stack: &FormulaStack) -> String {
 
         aux.old_r = aux.r;
         aux.r = r;
-        aux.old_z = aux.last_z;
-        aux.last_z = z;
         aux.i = f32(i);
 {dispatch}
         i = i + 1;
@@ -141,7 +150,11 @@ pub fn generate(stack: &FormulaStack) -> String {
 
     var out: Field;
     let safe_r = max(r, 1e-9);
-    out.dist = {distance};
+    let de = max(aux.de, 1e-9);
+    // Mandelbulber clamps the finished estimate at zero. Without it the
+    // logarithmic form reports negative distances inside the unit sphere and
+    // the marcher walks backwards through the surface.
+    out.dist = max({distance}, 0.0);
     out.trap = trap;
     out.escape = f32(i) / max(f32(max_iter), 1.0);
     return out;
@@ -198,7 +211,42 @@ mod tests {
         stack.slots.push(FormulaSlot::builtin(Builtin::Mandelbox));
         let src = generate(&stack);
         assert!(!src.contains("log(safe_r)"));
-        assert!(src.contains("safe_r / max(aux.de"));
+        assert!(src.contains("safe_r / de"));
+    }
+
+    #[test]
+    fn the_most_specific_estimator_in_the_stack_wins() {
+        use crate::formulas::{DeFunction, DeMode, FormulaKind, generated::GENERATED};
+
+        // A formula that computed its own distance knows more than any closed
+        // form we would pick for it, so it must win over a logarithmic
+        // neighbour rather than being averaged away.
+        let custom = GENERATED
+            .iter()
+            .position(|f| f.de_function == DeFunction::Custom)
+            .map(FormulaKind::Generated)
+            .expect("the corpus has custom-DE formulas");
+
+        let mut stack = FormulaStack::default();
+        assert_eq!(stack.de_mode(), DeMode::Log);
+
+        stack.slots.push(FormulaSlot::new(custom));
+        assert_eq!(stack.de_mode(), DeMode::Custom);
+        assert!(generate(&stack).contains("aux.dist"));
+
+        // Disabling it hands the choice back to the bulb.
+        stack.slots[1].enabled = false;
+        assert_eq!(stack.de_mode(), DeMode::Log);
+    }
+
+    #[test]
+    fn the_estimate_is_never_negative() {
+        // The logarithmic form goes negative inside the unit sphere, which
+        // walks the marcher backwards through the surface. Mandelbulber clamps
+        // it and so must we.
+        let src = generate(&FormulaStack::default());
+        assert!(src.contains("max("), "the estimate must be clamped at zero");
+        assert!(src.contains("safe_r > 1.0"), "log DE is zero inside r = 1");
     }
 
     #[test]

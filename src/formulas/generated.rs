@@ -3118,7 +3118,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "AexionOctopusMod",
         source: "aexion_octopus_mod.cl",
         param_floats: 35,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -5725,7 +5725,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Collatz",
         source: "collatz.cl",
         param_floats: 0,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -5746,7 +5746,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "CollatzMod",
         source: "collatz_mod.cl",
         param_floats: 18,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -5788,7 +5788,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "DIFSAmazingIfs",
         source: "difs_amazing_ifs.cl",
         param_floats: 53,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Linear,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -5921,7 +5921,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "DIFSGreekIfs",
         source: "difs_greek_ifs.cl",
         param_floats: 75,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -6135,7 +6135,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "DIFSHextgrid2",
         source: "difs_hextgrid2.cl",
         param_floats: 62,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -6292,7 +6292,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "DIFSMsltoeDonut",
         source: "difs_msltoe_donut.cl",
         param_floats: 6,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -6621,7 +6621,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Ides",
         source: "ides.cl",
         param_floats: 8,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: true,
         bailout: 10.0,
         params: &[
@@ -6650,7 +6650,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Ides2",
         source: "ides2.cl",
         param_floats: 8,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: true,
         bailout: 10.0,
         params: &[
@@ -7159,7 +7159,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Koch",
         source: "koch.cl",
         param_floats: 28,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -7502,7 +7502,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "KochV5",
         source: "koch_v5.cl",
         param_floats: 113,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -12990,7 +12990,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         name: "MandelbulbTails",
         source: "mandelbulb_tails.cl",
         param_floats: 23,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: true,
         bailout: 10.0,
         params: &[
@@ -13087,7 +13087,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         name: "MandelbulbTailsV2",
         source: "mandelbulb_tails_v2.cl",
         param_floats: 29,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: true,
         bailout: 10.0,
         params: &[
@@ -14006,7 +14006,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Menger3",
         source: "menger3.cl",
         param_floats: 39,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -14074,7 +14074,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Menger3M3d",
         source: "menger3_m3d.cl",
         param_floats: 36,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -14132,7 +14132,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Menger4d",
         source: "menger4d.cl",
         param_floats: 45,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -14323,7 +14323,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Menger4dMod1",
         source: "menger4d_mod1.cl",
         param_floats: 55,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -14553,7 +14553,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Menger4dMod2",
         source: "menger4d_mod2.cl",
         param_floats: 52,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -14752,7 +14752,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MengerChebyshev",
         source: "menger_chebyshev.cl",
         param_floats: 52,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -14895,7 +14895,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MengerCrossKIFS",
         source: "menger_cross_kifs.cl",
         param_floats: 72,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -15057,7 +15057,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MengerCrossMod1",
         source: "menger_cross_mod1.cl",
         param_floats: 56,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -15215,7 +15215,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MengerMiddleMod",
         source: "menger_middle_mod.cl",
         param_floats: 96,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -15466,7 +15466,7 @@ case multi_OrderOfXYZCl_zyx: {
         name: "MengerMod1",
         source: "menger_mod1.cl",
         param_floats: 47,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -15576,7 +15576,7 @@ case multi_OrderOfXYZCl_zyx: {
         name: "MengerPolyFold",
         source: "menger_poly_fold.cl",
         param_floats: 52,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -15714,7 +15714,7 @@ case multi_OrderOfXYZCl_zyx: {
         name: "MengerPrismShape",
         source: "menger_prism_shape.cl",
         param_floats: 91,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -15946,7 +15946,7 @@ case multi_OrderOfXYZCl_zyx: {
         name: "MengerPwr2Poly",
         source: "menger_pwr2_poly.cl",
         param_floats: 60,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -16136,7 +16136,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MengerPyramid",
         source: "menger_pyramid.cl",
         param_floats: 97,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -16468,7 +16468,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MengerSmooth",
         source: "menger_smooth.cl",
         param_floats: 27,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -16546,7 +16546,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MengerSmoothChebyshev",
         source: "menger_smooth_chebyshev.cl",
         param_floats: 65,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -16717,7 +16717,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MengerSmoothMod1",
         source: "menger_smooth_mod1.cl",
         param_floats: 43,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -16824,7 +16824,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MengerSponge",
         source: "menger_sponge.cl",
         param_floats: 8,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -16880,7 +16880,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MengerV4",
         source: "menger_v4.cl",
         param_floats: 85,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -17063,7 +17063,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MengerV5",
         source: "menger_v5.cl",
         param_floats: 87,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -17249,7 +17249,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MixPinski4d",
         source: "mix_pinski4d.cl",
         param_floats: 28,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -17423,7 +17423,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "ModulusMengerSponge",
         source: "modulus_menger_sponge.cl",
         param_floats: 1,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -17470,7 +17470,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "MsltoeDonut",
         source: "msltoe_donut.cl",
         param_floats: 4,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 4.0,
         params: &[
@@ -18530,7 +18530,7 @@ th0 += acos(v1 / sqrT); break;
         name: "NewtonPow3",
         source: "newton_pow3.cl",
         param_floats: 16,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -18629,7 +18629,7 @@ th0 += acos(v1 / sqrT); break;
         name: "PseudoKleinianMod3",
         source: "pseudo_kleinian_mod3.cl",
         param_floats: 82,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -18802,7 +18802,7 @@ th0 += acos(v1 / sqrT); break;
         name: "PseudoKleinianStdDE",
         source: "pseudo_kleinian_std_de.cl",
         param_floats: 104,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -19078,7 +19078,7 @@ th0 += acos(v1 / sqrT); break;
         name: "PseudoKleinianTrigV2",
         source: "pseudo_kleinian_trig_v2.cl",
         param_floats: 66,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -19551,7 +19551,7 @@ th0 += acos(v1 / sqrT); break;
         name: "RiemannBulbMsltoeMod2",
         source: "riemann_bulb_msltoe_mod2.cl",
         param_floats: 17,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 1.5,
         params: &[
@@ -19951,7 +19951,7 @@ th0 += acos(v1 / sqrT); break;
         name: "RiemannSphereMsltoe",
         source: "riemann_sphere_msltoe.cl",
         param_floats: 20,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 1.5,
         params: &[
@@ -20113,7 +20113,7 @@ th0 += acos(v1 / sqrT); break;
         name: "ScatorPower2",
         source: "scator_power2.cl",
         param_floats: 22,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: true,
         bailout: 100.0,
         params: &[
@@ -20291,7 +20291,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "ScatorPower2Imaginary",
         source: "scator_power2_imaginary.cl",
         param_floats: 0,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: true,
         bailout: 10.0,
         params: &[
@@ -20318,7 +20318,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "ScatorPower2Real",
         source: "scator_power2_real.cl",
         param_floats: 0,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: true,
         bailout: 10.0,
         params: &[
@@ -20412,7 +20412,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "ScatorTest",
         source: "scator_test.cl",
         param_floats: 12,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: true,
         bailout: 10.0,
         params: &[
@@ -20459,7 +20459,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Sierpinski3d",
         source: "sierpinski3d.cl",
         param_floats: 27,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -20552,7 +20552,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Sierpinski3dV2",
         source: "sierpinski3d_v2.cl",
         param_floats: 64,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -20690,7 +20690,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Sierpinski3dV3",
         source: "sierpinski3d_v3.cl",
         param_floats: 45,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -20788,7 +20788,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Sierpinski3dV4",
         source: "sierpinski3d_v4.cl",
         param_floats: 50,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -20929,7 +20929,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "Sierpinski4d",
         source: "sierpinski4d.cl",
         param_floats: 21,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -21060,7 +21060,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "SphereClusterV3",
         source: "sphere_cluster_v3.cl",
         param_floats: 58,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -21486,7 +21486,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TestingTransform",
         source: "testing_transform.cl",
         param_floats: 57,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -21630,7 +21630,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TestingTransform2",
         source: "testing_transform2.cl",
         param_floats: 14,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -21691,7 +21691,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAbsAddConditional",
         source: "transf_abs_add_conditional.cl",
         param_floats: 12,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -21732,7 +21732,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAbsAddConditional2",
         source: "transf_abs_add_conditional2.cl",
         param_floats: 13,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -21771,7 +21771,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAbsAddConditional4d",
         source: "transf_abs_add_conditional4d.cl",
         param_floats: 13,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -21819,7 +21819,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAbsAddConstant",
         source: "transf_abs_add_constant.cl",
         param_floats: 14,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -21854,7 +21854,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAbsAddConstant4d",
         source: "transf_abs_add_constant4d.cl",
         param_floats: 12,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -21883,7 +21883,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAbsAddConstantV2",
         source: "transf_abs_add_constant_v2.cl",
         param_floats: 21,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -21928,7 +21928,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAbsAddMulti",
         source: "transf_abs_add_multi.cl",
         param_floats: 25,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -21987,7 +21987,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAbsAddMulti4d",
         source: "transf_abs_add_multi4d.cl",
         param_floats: 26,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -22054,7 +22054,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAbsAddTgladFold",
         source: "transf_abs_add_tglad_fold.cl",
         param_floats: 18,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -22160,7 +22160,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAbsAddTgladFold4d",
         source: "transf_abs_add_tglad_fold4d.cl",
         param_floats: 22,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -22230,7 +22230,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAbsRecFoldXY",
         source: "transf_abs_rec_fold_xy.cl",
         param_floats: 12,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -22283,7 +22283,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAbsSym3",
         source: "transf_abs_sym3.cl",
         param_floats: 76,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -22446,7 +22446,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddConstant",
         source: "transf_add_constant.cl",
         param_floats: 8,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -22465,7 +22465,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddConstant4d",
         source: "transf_add_constant4d.cl",
         param_floats: 4,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -22482,7 +22482,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddConstantMod1",
         source: "transf_add_constant_mod1.cl",
         param_floats: 14,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -22537,7 +22537,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddConstantMod2",
         source: "transf_add_constant_mod2.cl",
         param_floats: 21,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -22617,7 +22617,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddConstantMod3",
         source: "transf_add_constant_mod3.cl",
         param_floats: 20,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -22683,7 +22683,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddConstantRotV1",
         source: "transf_add_constant_rot_v1.cl",
         param_floats: 27,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -22733,7 +22733,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddConstantVaryV1",
         source: "transf_add_constant_vary_v1.cl",
         param_floats: 10,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -22770,7 +22770,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddCpixel",
         source: "transf_add_cpixel.cl",
         param_floats: 4,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -22785,7 +22785,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddCpixel4d",
         source: "transf_add_cpixel4d.cl",
         param_floats: 18,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -22845,7 +22845,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddCpixelAxisSwap",
         source: "transf_add_cpixel_axis_swap.cl",
         param_floats: 6,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -22921,7 +22921,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddCpixelCxCyAxisSwap",
         source: "transf_add_cpixel_cx_cy_axis_swap.cl",
         param_floats: 6,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -22954,7 +22954,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddCpixelInvert",
         source: "transf_add_cpixel_invert.cl",
         param_floats: 19,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -23022,7 +23022,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddCpixelRotated",
         source: "transf_add_cpixel_rotated.cl",
         param_floats: 20,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -23106,7 +23106,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddCpixelScator",
         source: "transf_add_cpixel_scator.cl",
         param_floats: 14,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -23213,7 +23213,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddCpixelSinOrCos",
         source: "transf_add_cpixel_sin_or_cos.cl",
         param_floats: 20,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -23294,7 +23294,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddCpixelSphereFold",
         source: "transf_add_cpixel_sphere_fold.cl",
         param_floats: 24,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -23368,7 +23368,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddCpixelSymmetrical",
         source: "transf_add_cpixel_symmetrical.cl",
         param_floats: 7,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -23395,7 +23395,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddCpixelTile",
         source: "transf_add_cpixel_tile.cl",
         param_floats: 30,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -23489,7 +23489,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddCpixelVaryV1",
         source: "transf_add_cpixel_vary_v1.cl",
         param_floats: 10,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -23527,7 +23527,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddExp2Z",
         source: "transf_add_exp2_z.cl",
         param_floats: 19,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -23651,7 +23651,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddNorm",
         source: "transf_add_norm.cl",
         param_floats: 20,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -23678,7 +23678,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddScaleRotate",
         source: "transf_add_scale_rotate.cl",
         param_floats: 24,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -23711,7 +23711,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfAddSphericalInvert",
         source: "transf_add_spherical_invert.cl",
         param_floats: 10,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -23750,7 +23750,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBenesiCubeSphere",
         source: "transf_benesi_cube_sphere.cl",
         param_floats: 3,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -23801,7 +23801,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBenesiMagBackward",
         source: "transf_benesi_mag_backward.cl",
         param_floats: 0,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -23820,7 +23820,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBenesiMagForward",
         source: "transf_benesi_mag_forward.cl",
         param_floats: 0,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -23839,7 +23839,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBenesiSphereCube",
         source: "transf_benesi_sphere_cube.cl",
         param_floats: 3,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -23883,7 +23883,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBenesiT1",
         source: "transf_benesi_t1.cl",
         param_floats: 21,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -23921,7 +23921,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBenesiT1Mod",
         source: "transf_benesi_t1_mod.cl",
         param_floats: 21,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -23961,7 +23961,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBenesiT2",
         source: "transf_benesi_t2.cl",
         param_floats: 21,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -24004,7 +24004,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBenesiT3",
         source: "transf_benesi_t3.cl",
         param_floats: 24,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -24051,7 +24051,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBenesiT4",
         source: "transf_benesi_t4.cl",
         param_floats: 24,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -24096,7 +24096,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBlockify",
         source: "transf_blockify.cl",
         param_floats: 17,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -24161,7 +24161,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBlockifyV2",
         source: "transf_blockify_v2.cl",
         param_floats: 21,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -24276,7 +24276,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBoxFold",
         source: "transf_box_fold.cl",
         param_floats: 10,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -24379,7 +24379,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBoxFold4d",
         source: "transf_box_fold4d.cl",
         param_floats: 7,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -24436,7 +24436,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBoxFold4dInfy",
         source: "transf_box_fold4d_infy.cl",
         param_floats: 22,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -24529,7 +24529,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBoxFold4dTglad",
         source: "transf_box_fold4d_tglad.cl",
         param_floats: 27,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -24640,7 +24640,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBoxFoldXYZ",
         source: "transf_box_fold_xyz.cl",
         param_floats: 14,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -24693,7 +24693,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBoxOffset",
         source: "transf_box_offset.cl",
         param_floats: 5,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -24720,7 +24720,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBoxTiling4d",
         source: "transf_box_tiling4d.cl",
         param_floats: 22,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -24805,7 +24805,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBoxTilingV2",
         source: "transf_box_tiling_v2.cl",
         param_floats: 25,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -24888,7 +24888,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBoxTilingV3",
         source: "transf_box_tiling_v3.cl",
         param_floats: 50,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -25045,7 +25045,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfBoxWrap4d",
         source: "transf_box_wrap4d.cl",
         param_floats: 23,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -25131,7 +25131,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfCayley2V1",
         source: "transf_cayley2_v1.cl",
         param_floats: 33,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -25198,7 +25198,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfClamp4d",
         source: "transf_clamp4d.cl",
         param_floats: 21,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -25259,7 +25259,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDELinearCube",
         source: "transf_de_linear_cube.cl",
         param_floats: 7,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -25304,7 +25304,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDiagonalFold",
         source: "transf_diagonal_fold.cl",
         param_floats: 13,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -25401,7 +25401,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSAmazingIfs",
         source: "transf_difs_amazing_ifs.cl",
         param_floats: 54,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Linear,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -25543,7 +25543,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSBox",
         source: "transf_difs_box.cl",
         param_floats: 16,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -25603,7 +25603,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSBoxFrame",
         source: "transf_difs_box_frame.cl",
         param_floats: 80,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -25794,7 +25794,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSBoxV2",
         source: "transf_difs_box_v2.cl",
         param_floats: 27,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -25889,7 +25889,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSChessboard",
         source: "transf_difs_chessboard.cl",
         param_floats: 20,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -25960,7 +25960,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSClipCustom",
         source: "transf_difs_clip_custom.cl",
         param_floats: 67,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 1000.0,
         params: &[
@@ -26140,7 +26140,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSClipPlane",
         source: "transf_difs_clip_plane.cl",
         param_floats: 68,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 1000.0,
         params: &[
@@ -26345,7 +26345,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSCylinder",
         source: "transf_difs_cylinder.cl",
         param_floats: 19,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -26439,7 +26439,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSCylinderV2",
         source: "transf_difs_cylinder_v2.cl",
         param_floats: 58,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -26611,7 +26611,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSDiamond",
         source: "transf_difs_diamond.cl",
         param_floats: 48,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -26756,7 +26756,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSEllipsoid",
         source: "transf_difs_ellipsoid.cl",
         param_floats: 13,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -26808,7 +26808,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSGearV1",
         source: "transf_difs_gear_v1.cl",
         param_floats: 61,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -26967,7 +26967,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSGrid",
         source: "transf_difs_grid.cl",
         param_floats: 26,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -27033,7 +27033,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSHeart",
         source: "transf_difs_heart.cl",
         param_floats: 58,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -27149,7 +27149,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSHelix",
         source: "transf_difs_helix.cl",
         param_floats: 74,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -27343,7 +27343,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSHexprism",
         source: "transf_difs_hexprism.cl",
         param_floats: 34,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -27455,7 +27455,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSHexprismV2",
         source: "transf_difs_hexprism_v2.cl",
         param_floats: 63,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -27629,7 +27629,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSHextgrid2",
         source: "transf_difs_hextgrid2.cl",
         param_floats: 36,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -27713,7 +27713,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSOctahedron",
         source: "transf_difs_octahedron.cl",
         param_floats: 37,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -27824,7 +27824,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSOctahedronV2",
         source: "transf_difs_octahedron_v2.cl",
         param_floats: 55,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -28008,7 +28008,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSPiriform",
         source: "transf_difs_piriform.cl",
         param_floats: 63,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -28159,7 +28159,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSPrismV2",
         source: "transf_difs_prism_v2.cl",
         param_floats: 32,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -28275,7 +28275,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSSphere",
         source: "transf_difs_sphere.cl",
         param_floats: 12,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -28330,7 +28330,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSSphereGrid",
         source: "transf_difs_sphere_grid.cl",
         param_floats: 62,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -28483,7 +28483,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSSphereGridV2",
         source: "transf_difs_sphere_grid_v2.cl",
         param_floats: 55,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -28604,7 +28604,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSSphereGridV3",
         source: "transf_difs_sphere_grid_v3.cl",
         param_floats: 68,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -28782,7 +28782,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSSpring",
         source: "transf_difs_spring.cl",
         param_floats: 24,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -28879,7 +28879,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSSupershape",
         source: "transf_difs_supershape.cl",
         param_floats: 77,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -29093,7 +29093,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSSupershapeV2",
         source: "transf_difs_supershape_v2.cl",
         param_floats: 52,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -29271,7 +29271,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSTorus",
         source: "transf_difs_torus.cl",
         param_floats: 19,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -29367,7 +29367,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSTorusTwist",
         source: "transf_difs_torus_twist.cl",
         param_floats: 61,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -29538,7 +29538,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSTorusV2",
         source: "transf_difs_torus_v2.cl",
         param_floats: 40,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -29641,7 +29641,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSTorusV3",
         source: "transf_difs_torus_v3.cl",
         param_floats: 45,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -29745,7 +29745,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSTorusV4",
         source: "transf_difs_torus_v4.cl",
         param_floats: 47,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -29873,7 +29873,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSTriGrid",
         source: "transf_difs_tri_grid.cl",
         param_floats: 52,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -29997,7 +29997,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDIFSTube",
         source: "transf_difs_tube.cl",
         param_floats: 76,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Custom,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -30204,7 +30204,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfDotFold",
         source: "transf_dot_fold.cl",
         param_floats: 26,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -30259,7 +30259,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfFoldingTetra3d",
         source: "transf_folding_tetra3d.cl",
         param_floats: 2,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -30319,7 +30319,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfGnarl",
         source: "transf_gnarl.cl",
         param_floats: 17,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -30410,7 +30410,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfInitial4d",
         source: "transf_initial4d.cl",
         param_floats: 16,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -30455,7 +30455,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfInvCylindrical",
         source: "transf_inv_cylindrical.cl",
         param_floats: 8,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -30502,7 +30502,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfIterationWeight",
         source: "transf_iteration_weight.cl",
         param_floats: 5,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -30526,7 +30526,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfIterationWeight4d",
         source: "transf_iteration_weight4d.cl",
         param_floats: 5,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -30668,7 +30668,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfLinCombineCXYZ",
         source: "transf_lin_combine_cxyz.cl",
         param_floats: 19,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -30759,7 +30759,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfLowResMode",
         source: "transf_low_res_mode.cl",
         param_floats: 9,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -30796,7 +30796,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfMandalayFold4d",
         source: "transf_mandalay_fold4d.cl",
         param_floats: 9,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -30908,7 +30908,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfMandalayFoldV1",
         source: "transf_mandalay_fold_v1.cl",
         param_floats: 9,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -30997,7 +30997,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfMandalayFoldV2",
         source: "transf_mandalay_fold_v2.cl",
         param_floats: 19,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -31108,7 +31108,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfMengerFold",
         source: "transf_menger_fold.cl",
         param_floats: 23,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -31191,7 +31191,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfMengerFoldV2",
         source: "transf_menger_fold_v2.cl",
         param_floats: 58,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -31298,7 +31298,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfMultipleAngle",
         source: "transf_multiple_angle.cl",
         param_floats: 1,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -31318,7 +31318,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfNegAbsAddConstant",
         source: "transf_neg_abs_add_constant.cl",
         param_floats: 7,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -31343,7 +31343,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfOctoFold",
         source: "transf_octo_fold.cl",
         param_floats: 9,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -31385,7 +31385,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfOffsetSCurve4d",
         source: "transf_offset_s_curve4d.cl",
         param_floats: 15,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -31460,7 +31460,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfParabFold",
         source: "transf_parab_fold.cl",
         param_floats: 19,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -31591,7 +31591,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfPlatonicSolid",
         source: "transf_platonic_solid.cl",
         param_floats: 14,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -31667,7 +31667,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfPolyFoldAtan",
         source: "transf_poly_fold_atan.cl",
         param_floats: 33,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -31755,7 +31755,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfPolyFoldAtan2",
         source: "transf_poly_fold_atan2.cl",
         param_floats: 33,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -31843,7 +31843,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfPolyFoldAtan2Iter",
         source: "transf_poly_fold_atan2_iter.cl",
         param_floats: 26,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -31935,7 +31935,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfPolyXYFoldV1",
         source: "transf_poly_xy_fold_v1.cl",
         param_floats: 36,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -32001,7 +32001,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfPwr2Polynomial",
         source: "transf_pwr2_polynomial.cl",
         param_floats: 26,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 10.0,
         params: &[
@@ -32071,7 +32071,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfQuadraticFold4d",
         source: "transf_quadratic_fold4d.cl",
         param_floats: 15,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -32248,7 +32248,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfRPower",
         source: "transf_r_power.cl",
         param_floats: 1,
-        de_function: DeFunction::Logarithmic,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -32265,7 +32265,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfReciprocal3",
         source: "transf_reciprocal3.cl",
         param_floats: 26,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -32390,7 +32390,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfReciprocal4d",
         source: "transf_reciprocal4d.cl",
         param_floats: 21,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -32474,7 +32474,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfRotateAboutVec3",
         source: "transf_rotate_about_vec3.cl",
         param_floats: 13,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -32537,7 +32537,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfRotation",
         source: "transf_rotation.cl",
         param_floats: 12,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -32554,7 +32554,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfRotation4d",
         source: "transf_rotation4d.cl",
         param_floats: 8,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -32614,7 +32614,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfRotationChebyshev",
         source: "transf_rotation_chebyshev.cl",
         param_floats: 19,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -32777,7 +32777,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfRotationFolding",
         source: "transf_rotation_folding.cl",
         param_floats: 47,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -32866,7 +32866,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfRotationIterControls",
         source: "transf_rotation_iter_controls.cl",
         param_floats: 10,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -32917,7 +32917,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfRotationM3d",
         source: "transf_rotation_m3d.cl",
         param_floats: 12,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -32934,7 +32934,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfRpow3",
         source: "transf_rpow3.cl",
         param_floats: 2,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -32952,7 +32952,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfScale",
         source: "transf_scale.cl",
         param_floats: 4,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -32976,7 +32976,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfScale3d",
         source: "transf_scale3d.cl",
         param_floats: 7,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -33000,7 +33000,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfScale4d",
         source: "transf_scale4d.cl",
         param_floats: 10,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -33045,7 +33045,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfScaleOffset",
         source: "transf_scale_offset.cl",
         param_floats: 8,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -33071,7 +33071,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfScaleOffsetV2",
         source: "transf_scale_offset_v2.cl",
         param_floats: 19,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -33109,7 +33109,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfScaleVaryMulti",
         source: "transf_scale_vary_multi.cl",
         param_floats: 15,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -33205,7 +33205,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfScaleVaryV212",
         source: "transf_scale_vary_v212.cl",
         param_floats: 10,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -33264,7 +33264,7 @@ tempC = vec4<f32>(c.z, c.y, c.x, c.w); break;
         name: "TransfSinAdd",
         source: "transf_sin_add.cl",
         param_floats: 23,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -33332,7 +33332,7 @@ v = vec4<f32>(z.z, z.y, z.x, z.w); break;
         name: "TransfSinAndCos",
         source: "transf_sin_and_cos.cl",
         param_floats: 16,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -33416,7 +33416,7 @@ z = oldZ * (sinZ * cosZ); break;
         name: "TransfSinAndCosMax",
         source: "transf_sin_and_cos_max.cl",
         param_floats: 21,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -33519,7 +33519,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSinOrCos",
         source: "transf_sin_or_cos.cl",
         param_floats: 15,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -33584,7 +33584,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSinTan",
         source: "transf_sin_tan.cl",
         param_floats: 22,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -33626,7 +33626,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSinYM3d",
         source: "transf_sin_y_m3d.cl",
         param_floats: 22,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -33668,7 +33668,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSincos",
         source: "transf_sincos.cl",
         param_floats: 21,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -33710,7 +33710,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSincosHelix",
         source: "transf_sincos_helix.cl",
         param_floats: 84,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -33984,7 +33984,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSincosV2",
         source: "transf_sincos_v2.cl",
         param_floats: 35,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -34064,7 +34064,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSmooth",
         source: "transf_smooth.cl",
         param_floats: 9,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -34121,7 +34121,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSmoothV2",
         source: "transf_smooth_v2.cl",
         param_floats: 16,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -34177,7 +34177,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalCoordInvs",
         source: "transf_spherical_coord_invs.cl",
         param_floats: 7,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -34223,7 +34223,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFold",
         source: "transf_spherical_fold.cl",
         param_floats: 14,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -34278,7 +34278,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFold4d",
         source: "transf_spherical_fold4d.cl",
         param_floats: 10,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -34323,7 +34323,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFold4dV2",
         source: "transf_spherical_fold4d_v2.cl",
         param_floats: 13,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -34390,7 +34390,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFoldAbox",
         source: "transf_spherical_fold_abox.cl",
         param_floats: 9,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -34431,7 +34431,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFoldCHS",
         source: "transf_spherical_fold_chs.cl",
         param_floats: 15,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -34494,7 +34494,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFoldCuboid",
         source: "transf_spherical_fold_cuboid.cl",
         param_floats: 18,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -34585,7 +34585,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFoldParab",
         source: "transf_spherical_fold_parab.cl",
         param_floats: 39,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -34739,7 +34739,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFoldPnorm",
         source: "transf_spherical_fold_pnorm.cl",
         param_floats: 18,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -34809,7 +34809,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFoldSmooth",
         source: "transf_spherical_fold_smooth.cl",
         param_floats: 32,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -34907,7 +34907,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFoldV1",
         source: "transf_spherical_fold_v1.cl",
         param_floats: 8,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -34944,7 +34944,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFoldV2",
         source: "transf_spherical_fold_v2.cl",
         param_floats: 15,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -34983,7 +34983,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFoldV3",
         source: "transf_spherical_fold_v3.cl",
         param_floats: 23,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -35058,7 +35058,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalFoldXYZBias",
         source: "transf_spherical_fold_xyz_bias.cl",
         param_floats: 28,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -35138,7 +35138,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalInv",
         source: "transf_spherical_inv.cl",
         param_floats: 29,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -35226,7 +35226,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalInvC",
         source: "transf_spherical_inv_c.cl",
         param_floats: 7,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -35287,7 +35287,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalInvPnorm",
         source: "transf_spherical_inv_pnorm.cl",
         param_floats: 18,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -35350,7 +35350,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalInvV2",
         source: "transf_spherical_inv_v2.cl",
         param_floats: 41,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -35508,7 +35508,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalInvV3",
         source: "transf_spherical_inv_v3.cl",
         param_floats: 27,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -35574,7 +35574,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalInvV4",
         source: "transf_spherical_inv_v4.cl",
         param_floats: 38,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -35705,7 +35705,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalOffset",
         source: "transf_spherical_offset.cl",
         param_floats: 3,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -35725,7 +35725,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSphericalPwrFold",
         source: "transf_spherical_pwr_fold.cl",
         param_floats: 8,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -35774,7 +35774,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfStepXY",
         source: "transf_step_xy.cl",
         param_floats: 26,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -35869,7 +35869,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSupershape",
         source: "transf_supershape.cl",
         param_floats: 41,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -36022,7 +36022,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSurfBoxFold",
         source: "transf_surf_box_fold.cl",
         param_floats: 53,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -36183,7 +36183,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSurfBoxFoldV2",
         source: "transf_surf_box_fold_v2.cl",
         param_floats: 18,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -36269,7 +36269,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSurfBoxFoldV24d",
         source: "transf_surf_box_fold_v24d.cl",
         param_floats: 17,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -36348,7 +36348,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfSurfFoldMulti",
         source: "transf_surf_fold_multi.cl",
         param_floats: 21,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -36476,7 +36476,7 @@ maxZ *= abs(oldZ); break;
         name: "TransfZvectorAxisSwap",
         source: "transf_zvector_axis_swap.cl",
         param_floats: 7,
-        de_function: DeFunction::Unsupported,
+        de_function: DeFunction::None,
         add_c: false,
         bailout: 100.0,
         params: &[
@@ -36532,7 +36532,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         name: "Vicsek",
         source: "vicsek.cl",
         param_floats: 49,
-        de_function: DeFunction::Linear,
+        de_function: DeFunction::Ifs,
         add_c: false,
         bailout: 10.0,
         params: &[

@@ -59,14 +59,22 @@ pub struct GeneratedParam {
 }
 
 /// Which closed form a transpiled formula's distance estimate takes, recovered
-/// from Mandelbulber's C++ formula definitions.
+/// from Mandelbulber's `DEAnalyticFunction` — the field its engine switches on.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum DeFunction {
+    /// `0.5·r·log(r)/de`, and zero inside the unit sphere.
     Logarithmic,
+    /// `r/de`.
     Linear,
-    /// The formula computes its own distance, or has only a delta (numerical)
-    /// estimate. 3DM's iteration loop cannot render these correctly yet; it
-    /// will draw *something*, which is exactly why they are marked.
+    /// `(r − 2)/de`. The offset is what makes an IFS's estimate hold up, and
+    /// dropping it is the difference between a Sierpinski and a blob.
+    Ifs,
+    /// The formula wrote its own distance into `aux.dist`.
+    Custom,
+    /// No analytic estimate at all — Mandelbulber renders these by delta DE,
+    /// stepping the point numerically, which 3DM does not implement.
+    None,
+    /// Needs state 3DM's `Aux` does not carry, such as `pseudoKleinianDE`.
     Unsupported,
 }
 
@@ -125,18 +133,39 @@ pub enum DeKind {
 /// Which closed form turns the running `(r, dr)` into a distance.
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
 pub enum DeMode {
-    /// `0.5·log(r)·r/dr` — correct for escape-time formulas.
+    /// `0.5·r·log(r)/de` — correct for escape-time formulas.
     #[default]
     Log,
-    /// `r/dr` — correct for scaling/folding formulas like the Mandelbox.
+    /// `r/de` — correct for scaling/folding formulas like the Mandelbox.
     Linear,
+    /// `(r − 2)/de` — kaleidoscopic IFS formulas.
+    Ifs,
+    /// The formula wrote its own distance into `aux.dist`.
+    Custom,
 }
 
 impl DeMode {
+    pub const ALL: [Self; 4] = [Self::Log, Self::Linear, Self::Ifs, Self::Custom];
+
     pub fn label(self) -> &'static str {
         match self {
             Self::Log => "logarithmic",
             Self::Linear => "linear",
+            Self::Ifs => "IFS",
+            Self::Custom => "formula's own",
+        }
+    }
+
+    /// How specific this estimator is. A stack mixing formulas takes the most
+    /// specific one present: a formula that computed its own distance knows
+    /// more than any closed form we could pick for it, and the IFS offset and
+    /// the linear form are each wrong for the modes below them.
+    fn specificity(self) -> u8 {
+        match self {
+            Self::Log => 0,
+            Self::Linear => 1,
+            Self::Ifs => 2,
+            Self::Custom => 3,
         }
     }
 }
@@ -416,11 +445,8 @@ impl FormulaKind {
         match self {
             Self::Builtin(b) => b.de_kind(),
             Self::Generated(i) => match GENERATED[i].de_function {
-                DeFunction::Logarithmic => DeKind::Escape,
-                DeFunction::Linear => DeKind::Linear,
-                // No estimator of ours applies. Logarithmic is the less wrong
-                // default and `de_mode_override` can force the other.
-                DeFunction::Unsupported => DeKind::Escape,
+                DeFunction::Linear | DeFunction::Ifs => DeKind::Linear,
+                _ => DeKind::Escape,
             },
         }
     }
@@ -436,6 +462,19 @@ impl FormulaKind {
         match self {
             Self::Builtin(b) => b.suggested_bailout(),
             Self::Generated(i) => GENERATED[i].bailout,
+        }
+    }
+
+    /// The closed form this formula's distance estimate takes.
+    pub fn de_function(self) -> DeFunction {
+        match self {
+            Self::Builtin(b) => match b.de_kind() {
+                DeKind::Escape => DeFunction::Logarithmic,
+                DeKind::Linear => DeFunction::Linear,
+                // An isometry does not constrain the estimator.
+                DeKind::Transform => DeFunction::None,
+            },
+            Self::Generated(i) => GENERATED[i].de_function,
         }
     }
 
@@ -585,14 +624,19 @@ impl FormulaStack {
         if let Some(mode) = self.de_mode_override {
             return mode;
         }
-        if self
-            .active()
-            .any(|(_, s)| s.kind.de_kind() == DeKind::Linear)
-        {
-            DeMode::Linear
-        } else {
-            DeMode::Log
-        }
+        self.active()
+            .filter_map(|(_, s)| match s.kind.de_function() {
+                DeFunction::Logarithmic => Some(DeMode::Log),
+                DeFunction::Linear => Some(DeMode::Linear),
+                DeFunction::Ifs => Some(DeMode::Ifs),
+                DeFunction::Custom => Some(DeMode::Custom),
+                // Neither constrains the choice: an isometry because it leaves
+                // `de` alone, and a delta-DE formula because no closed form we
+                // have is right for it anyway.
+                DeFunction::None | DeFunction::Unsupported => None,
+            })
+            .max_by_key(|m| m.specificity())
+            .unwrap_or_default()
     }
 
     /// Identifies the *shape* of the generated shader. Parameter values and

@@ -548,7 +548,7 @@ fn stack_editor(params: &mut SceneParams, filter: &mut String, ui: &mut egui::Ui
                 if ui.selectable_label(auto, "auto").clicked() {
                     stack.de_mode_override = None;
                 }
-                for mode in [DeMode::Log, DeMode::Linear] {
+                for mode in DeMode::ALL {
                     if ui
                         .selectable_label(stack.de_mode_override == Some(mode), mode.label())
                         .clicked()
