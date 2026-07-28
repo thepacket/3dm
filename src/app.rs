@@ -291,18 +291,14 @@ impl App {
                     );
                 });
 
+            egui::CollapsingHeader::new("Keyboard")
+                .default_open(false)
+                .show(ui, shortcuts);
+
             ui.add_space(8.0);
             ui.separator();
             reset_all = ui.button("Reset everything").clicked();
             ui.add_space(8.0);
-            ui.label(
-                egui::RichText::new(
-                    "drag to orbit · scroll to zoom · right-drag or shift-drag to pan\n\
-                         WASD to move · QE up/down · arrows to orbit · shift faster, alt slower",
-                )
-                .small()
-                .weak(),
-            );
         });
 
         if reset_view || reset_all {
@@ -656,6 +652,74 @@ fn formula_picker(ui: &mut egui::Ui, filter: &mut String, mut choose: impl FnMut
                 }
             }
         });
+}
+
+/// Every binding, in one place.
+///
+/// Navigation here is half keyboard and half mouse, and two of the keys do
+/// nothing on their own — they change what the mouse is doing. That is not
+/// discoverable by pressing things, so it is written down.
+fn shortcuts(ui: &mut egui::Ui) {
+    fn rows(ui: &mut egui::Ui, id: &str, entries: &[(&str, &str)]) {
+        egui::Grid::new(id)
+            .num_columns(2)
+            .spacing([12.0, 2.0])
+            .show(ui, |ui| {
+                for (keys, what) in entries {
+                    ui.label(egui::RichText::new(*keys).monospace());
+                    ui.label(egui::RichText::new(*what).weak());
+                    ui.end_row();
+                }
+            });
+    }
+
+    ui.label(egui::RichText::new("Move").strong());
+    rows(
+        ui,
+        "keys.move",
+        &[
+            ("W  S", "fly forward, back"),
+            ("A  D", "strafe left, right"),
+            ("Q  E", "down, up"),
+            ("← → ↑ ↓", "orbit"),
+        ],
+    );
+
+    ui.add_space(6.0);
+    ui.label(egui::RichText::new("Mouse").strong());
+    rows(
+        ui,
+        "keys.mouse",
+        &[
+            ("drag", "orbit"),
+            ("right-drag", "pan"),
+            ("wheel", "approach the target cross"),
+        ],
+    );
+
+    ui.add_space(6.0);
+    ui.label(egui::RichText::new("Held modifiers").strong());
+    rows(
+        ui,
+        "keys.mods",
+        &[
+            ("shift + drag", "pan, instead of orbit"),
+            ("shift", "move three times faster"),
+            ("alt", "move three times slower"),
+        ],
+    );
+
+    ui.add_space(6.0);
+    ui.label(
+        egui::RichText::new(
+            "The wheel closes a fifth of the way to the cross each notch, so it \
+             never arrives. Off the fractal there is nothing to approach and it \
+             dollies instead.\n\nCamera keys are ignored while a text box has \
+             focus, so typing in the formula filter does not fly the camera.",
+        )
+        .small()
+        .weak(),
+    );
 }
 
 /// The formula stack editor: an ordered list of formulas, each with its own
