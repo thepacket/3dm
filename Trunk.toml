@@ -1,0 +1,10 @@
+[build]
+target = "index.html"
+dist = "dist"
+# Relative asset URLs so a `dist/` can be served from any subpath.
+public_url = "./"
+
+[serve]
+addresses = ["127.0.0.1"]
+port = 8080
+open = false

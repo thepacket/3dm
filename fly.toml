@@ -1,0 +1,36 @@
+app = "3dm"
+primary_region = "yyz"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 8080
+  # WebGPU is only available in a secure context, so plain HTTP is useless here.
+  force_https = true
+  # A static bundle has no state to lose, so let idle machines stop and pay
+  # nothing between visits. Cold start is a container boot plus a Caddy start.
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 200
+    hard_limit = 250
+
+  [[http_service.checks]]
+    grace_period = "5s"
+    interval = "30s"
+    method = "GET"
+    path = "/"
+    protocol = "http"
+    timeout = "5s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  # Caddy handing over precompressed files needs very little; the heavy lifting
+  # is all on the visitor's GPU.
+  memory = "256mb"
+  cpus = 1

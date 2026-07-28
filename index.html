@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <title>3DM</title>
+    <meta name="description" content="3DM — a GPU-raymarched Mandelbulb explorer." />
+    <meta name="color-scheme" content="dark" />
+
+    <!-- Trunk's built-in wasm-opt step fails against Homebrew's binaryen, so
+         release size optimisation is done by ./build-release.sh instead. -->
+    <link data-trunk rel="rust" data-wasm-opt="0" />
+
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background: #0a0d12;
+            color: #c8ccd4;
+            font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, sans-serif;
+        }
+
+        /* eframe drives the canvas size; it just needs to fill the window. */
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            outline: none;
+        }
+
+        #3dm_loading {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-align: center;
+            padding: 24px;
+        }
+
+        #3dm_loading .brand {
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            color: #e6e9ef;
+        }
+
+        #3dm_loading .err {
+            color: #ff8a80;
+            font-weight: 600;
+        }
+
+        #3dm_loading .err-detail {
+            max-width: 52ch;
+            color: #8d94a1;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="3dm_canvas"></canvas>
+    <div id="3dm_loading">
+        <div class="brand">3DM</div>
+        <div>compiling shaders…</div>
+    </div>
+</body>
+
+</html>

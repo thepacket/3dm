@@ -1,0 +1,13 @@
+# Build artefacts — the image builds these itself, and `target` is gigabytes.
+target
+dist
+
+# Not needed to build or serve the app.
+.git
+.claude
+docs
+README.md
+build-release.sh
+fly.toml
+Dockerfile
+.dockerignore

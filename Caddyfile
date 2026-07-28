@@ -1,0 +1,30 @@
+# Fly terminates TLS at the edge and forwards plain HTTP, so Caddy listens on
+# :8080 without doing its own certificate management.
+:8080 {
+	root * /srv
+
+	encode zstd gzip
+
+	# Trunk content-hashes the wasm and JS filenames, so a given URL's bytes can
+	# never change — cache them hard. index.html is what points at the current
+	# hashes, so it must always be revalidated or a deploy is invisible.
+	@hashed path *.wasm *.js *.css
+	header @hashed Cache-Control "public, max-age=31536000, immutable"
+	header /index.html Cache-Control "no-cache"
+	header / Cache-Control "no-cache"
+
+	header {
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	file_server {
+		precompressed br gzip
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}
