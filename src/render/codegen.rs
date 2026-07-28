@@ -16,7 +16,7 @@ const MARKER: &str = "//__GENERATED_DE__";
 const TEMPLATE: &str = include_str!("fractal.wgsl");
 
 /// The pool expression a formula's parameter reads are written against.
-const POOL: &str = "u.pool";
+const POOL: &str = "dm3_u.pool";
 
 /// This slot's WGSL body, with parameter placeholders resolved to pool reads.
 ///
@@ -72,7 +72,7 @@ pub fn generate(stack: &FormulaStack) -> String {
         // The iteration range is a uniform read, so dragging it does not
         // invalidate this pipeline.
         dispatch.push_str(&format!(
-            "        if (aux.i >= u.ranges[{index}].x && aux.i < u.ranges[{index}].y) \
+            "        if (aux.i >= dm3_u.ranges[{index}].x && aux.i < dm3_u.ranges[{index}].y) \
              {{ z = slot_{index}(z, &aux);{add_c} }}\n"
         ));
     }
@@ -119,8 +119,8 @@ pub fn generate(stack: &FormulaStack) -> String {
     let de = format!(
         r#"{ENUMERATORS}
 {functions}fn fractal_de(pos: vec3<f32>) -> Field {{
-    let max_iter = i32(u.fractal.y);
-    let bailout = u.fractal.z;
+    let max_iter = i32(dm3_u.fractal.y);
+    let bailout = dm3_u.fractal.z;
 
     var z = vec4<f32>(pos, 0.0);
     var r = length(pos);
@@ -215,7 +215,7 @@ mod tests {
         // Slot 1 must read its own block, not slot 0's: it starts at
         // `POOL_FLOATS_PER_SLOT`, i.e. vec4 `POOL_VEC4S_PER_SLOT`.
         assert!(src.contains(&format!(
-            "u.pool[{}].x",
+            "dm3_u.pool[{}].x",
             crate::formulas::POOL_VEC4S_PER_SLOT
         )));
         assert!(!src.contains("P0"));

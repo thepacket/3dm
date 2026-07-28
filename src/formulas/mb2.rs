@@ -84,6 +84,68 @@ impl Layout<'_> {
     }
 }
 
+/// Turns a bare parameter used as a `select` condition into a comparison.
+///
+/// The transpiler renders C's ternary as `select(a, b, cond)`, and where `cond`
+/// is a flag parameter it comes through as a bare read — an f32, where WGSL
+/// demands a bool. The rewrite happens before substitution so it can work on
+/// the placeholder and let the normal read fill itself in.
+///
+/// This has to parse rather than pattern-match: `, __MB2Pn__)` also ends plenty
+/// of `min` and `max` calls, where the argument is a number and must stay one.
+fn boolify_select_conditions(src: &str) -> String {
+    let mut out = String::with_capacity(src.len());
+    let mut rest = src;
+
+    while let Some(at) = rest.find("select(") {
+        let open = at + "select(".len() - 1;
+        let Some(close) = matching_paren(rest, open) else {
+            break;
+        };
+        out.push_str(&rest[..close]);
+
+        // The condition is the last top-level argument.
+        let args = &rest[open + 1..close];
+        let last = args
+            .rfind(',')
+            .map(|i| args[i + 1..].trim())
+            .unwrap_or_default();
+        if is_placeholder(last) {
+            out.push_str(" != 0.0");
+        }
+        out.push(')');
+        rest = &rest[close + 1..];
+    }
+
+    out.push_str(rest);
+    out
+}
+
+/// Index of the `)` closing the `(` at `open`.
+fn matching_paren(s: &str, open: usize) -> Option<usize> {
+    let mut depth = 0usize;
+    for (i, c) in s.char_indices().skip(open) {
+        match c {
+            '(' => depth += 1,
+            ')' => {
+                depth -= 1;
+                if depth == 0 {
+                    return Some(i);
+                }
+            }
+            _ => {}
+        }
+    }
+    None
+}
+
+fn is_placeholder(s: &str) -> bool {
+    s.starts_with("__MB2P")
+        && s.ends_with("__")
+        && s[6..s.len() - 2].chars().all(|c| c.is_ascii_digit())
+        && s.len() > 8
+}
+
 /// The formula's WGSL with every `__MB2Pn__` placeholder replaced by a read
 /// from the pool.
 ///
@@ -93,7 +155,7 @@ impl Layout<'_> {
 pub fn substitute(f: &GeneratedFormula, pool: &str, base: usize) -> String {
     debug_assert_eq!(base % 4, 0, "a formula block must start on a vec4");
 
-    let mut body = f.wgsl.to_owned();
+    let mut body = boolify_select_conditions(f.wgsl);
     for p in layout(f).placements {
         let at = base + p.index;
         let (v, c) = (at / 4, ["x", "y", "z", "w"][at % 4]);
@@ -117,12 +179,28 @@ pub fn substitute(f: &GeneratedFormula, pool: &str, base: usize) -> String {
         };
         let placeholder = format!("__MB2P{}__", p.param.offset);
 
-        // A `switch` selector is the one place WGSL insists on a real integer,
-        // so it gets the cast that the general reads deliberately omit.
+        // Everything in the pool is an f32, which is what lets Mandelbulber's
+        // freely-mixed arithmetic survive translation. WGSL is stricter in a
+        // handful of specific places, and each one needs the cast back that the
+        // general reads deliberately omit. These are the only contexts in the
+        // corpus where it matters; a formula that grew a new one would fail the
+        // compile check rather than render wrongly.
+        let int = format!("i32({read})");
+
+        // A `switch` selector must be a scalar integer.
         body = body.replace(
             &format!("switch {placeholder}"),
-            &format!("switch i32({read})"),
+            &format!("switch {int}"),
         );
+
+        // Comparisons against Mandelbulber's option enumerators, which are
+        // `i32` constants.
+        for op in ["==", "!=", "<", ">"] {
+            body = body.replace(
+                &format!("{placeholder} {op} multi_"),
+                &format!("{int} {op} multi_"),
+            );
+        }
 
         // Placeholders are delimited on both sides, so `__MB2P1__` cannot match
         // inside `__MB2P12__` and the replacement order does not matter.

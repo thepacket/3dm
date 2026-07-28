@@ -9,24 +9,22 @@
 //!     cargo run --example mb2_audit [-- --errors]
 
 use three_dm::formulas::generated::GENERATED;
-use three_dm::formulas::mb2;
+use three_dm::formulas::{FormulaKind, FormulaSlot, FormulaStack, mb2};
 
-/// Pool big enough for the largest block, in `vec4`s.
-const POOL_VEC4S: usize = 64;
-
+/// The exact shader the renderer would build for this formula.
+///
+/// Not an approximation of it. Earlier versions of this file assembled their
+/// own harness — their own prelude, their own pool expression — and every
+/// difference from the real thing was a formula that passed here and failed on
+/// the GPU: first because integer parameters were cast differently, then
+/// because a formula whose local was called `u` shadowed a uniform this harness
+/// happened to name something else. Going through `codegen` makes those
+/// divergences impossible rather than merely unlikely.
 fn shader_for(index: usize) -> String {
-    let f = &GENERATED[index];
-    let body = mb2::substitute(f, "pool.v", 0);
-    format!(
-        "{prelude}\n\
-         struct Pool {{ v: array<vec4<f32>, {POOL_VEC4S}> }};\n\
-         @group(0) @binding(0) var<uniform> pool: Pool;\n\
-         {stubs}\n\
-         fn formula(z_in: vec4<f32>, aux: ptr<function, Aux>) -> vec4<f32> {{\n\
-         \x20   var z = z_in;\n{body}\n}}\n",
-        prelude = mb2::PRELUDE,
-        stubs = three_dm::formulas::generated::ENUMERATORS,
-    )
+    three_dm::render::codegen::generate(&FormulaStack {
+        slots: vec![FormulaSlot::new(FormulaKind::Generated(index))],
+        de_mode_override: None,
+    })
 }
 
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
@@ -78,7 +76,33 @@ fn first_error(s: &str) -> String {
 }
 
 fn main() {
-    let show_errors = std::env::args().any(|a| a == "--errors");
+    let args: Vec<String> = std::env::args().collect();
+    let show_errors = args.iter().any(|a| a == "--errors");
+
+    // `--dump <Name>` prints one formula's full diagnostic, or its shader when
+    // it compiles. The summary line is the last label naga emits, which names
+    // the symptom; fixing a rewrite rule needs the whole message.
+    if let Some(name) = args.iter().position(|a| a == "--dump").and_then(|i| args.get(i + 1)) {
+        let Some(index) = GENERATED.iter().position(|f| f.name.eq_ignore_ascii_case(name)) else {
+            eprintln!("no formula called {name}");
+            std::process::exit(2);
+        };
+        let src = shader_for(index);
+        match naga::front::wgsl::parse_str(&src) {
+            Err(e) => println!("{}", e.emit_to_string(&src)),
+            Ok(module) => {
+                let mut v = naga::valid::Validator::new(
+                    naga::valid::ValidationFlags::all(),
+                    naga::valid::Capabilities::all(),
+                );
+                match v.validate(&module) {
+                    Err(e) => println!("{}", e.emit_to_string(&src)),
+                    Ok(_) => println!("{src}"),
+                }
+            }
+        }
+        return;
+    }
 
     let mut ok = 0usize;
     let mut parse = Vec::new();

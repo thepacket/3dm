@@ -40,7 +40,10 @@ struct Uniforms {
     pool: array<vec4<f32>, 240>,
 };
 
-@group(0) @binding(0) var<uniform> u: Uniforms;
+// Deliberately not called `u`: Mandelbulber's formulas declare short lowercase
+// locals, and one called `u` shadowed this binding so that every `u.pool` read
+// in that formula became a field access on an f32.
+@group(0) @binding(0) var<uniform> dm3_u: Uniforms;
 
 struct VsOut {
     @builtin(position) clip_pos: vec4<f32>,
@@ -84,7 +87,7 @@ struct Field {
 //__GENERATED_DE__
 
 fn map(p: vec3<f32>) -> f32 {
-    return fractal_de(p).dist * u.fractal.w;
+    return fractal_de(p).dist * dm3_u.fractal.w;
 }
 
 // Tetrahedral gradient — four taps instead of six.
@@ -107,7 +110,7 @@ fn surface_normal(p: vec3<f32>, h: f32) -> vec3<f32> {
 // Mandelbox six times the size is lit the same way rather than reading as one
 // solid shadow. At bounds = 1.5 this is exactly 1.0, so the bulb is unchanged.
 fn scene_scale() -> f32 {
-    return max(u.march.w, 0.1) / 1.5;
+    return max(dm3_u.march.w, 0.1) / 1.5;
 }
 
 // Marches toward the light; the closest miss along the way widens the penumbra.
@@ -182,9 +185,9 @@ fn ambient_occlusion(p: vec3<f32>, n: vec3<f32>) -> f32 {
 // gradient that sweeps through hue rather than just through brightness;
 // spacing them a third of a turn apart instead washes out to grey.
 fn palette(t: f32) -> vec3<f32> {
-    let phase = vec3<f32>(0.0, 0.10, 0.20) + u.palette_base.w;
-    return u.palette_base.rgb
-        + u.palette_amp.rgb * cos(6.28318530718 * (u.palette_amp.w * t + phase));
+    let phase = vec3<f32>(0.0, 0.10, 0.20) + dm3_u.palette_base.w;
+    return dm3_u.palette_base.rgb
+        + dm3_u.palette_amp.rgb * cos(6.28318530718 * (dm3_u.palette_amp.w * t + phase));
 }
 
 fn linear_to_srgb(c: vec3<f32>) -> vec3<f32> {
@@ -196,7 +199,7 @@ fn linear_to_srgb(c: vec3<f32>) -> vec3<f32> {
 // Applies the output transfer function once, so debug views and the shaded
 // image land in the same colour space.
 fn shade_out(c: vec3<f32>) -> vec4<f32> {
-    if (u.screen.w > 0.5) {
+    if (dm3_u.screen.w > 0.5) {
         return vec4<f32>(linear_to_srgb(c), 1.0);
     }
     return vec4<f32>(c, 1.0);
@@ -214,36 +217,36 @@ fn heat(x: f32) -> vec3<f32> {
 
 @fragment
 fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
-    let aspect = u.screen.x / max(u.screen.y, 1.0);
-    let tan_half = u.cam_pos.w;
+    let aspect = dm3_u.screen.x / max(dm3_u.screen.y, 1.0);
+    let tan_half = dm3_u.cam_pos.w;
 
-    let ro = u.cam_pos.xyz;
+    let ro = dm3_u.cam_pos.xyz;
     let rd = normalize(
-        u.cam_fwd.xyz
-        + u.cam_right.xyz * in.ndc.x * aspect * tan_half
-        + u.cam_up.xyz * in.ndc.y * tan_half
+        dm3_u.cam_fwd.xyz
+        + dm3_u.cam_right.xyz * in.ndc.x * aspect * tan_half
+        + dm3_u.cam_up.xyz * in.ndc.y * tan_half
     );
 
     // Angular size of one pixel, used as the distance-dependent hit threshold
     // so that detail stays exactly at the resolution limit at any zoom.
-    let pixel_angle = 2.0 * tan_half / max(u.screen.y, 1.0);
-    let eps_scale = u.march.z;
+    let pixel_angle = 2.0 * tan_half / max(dm3_u.screen.y, 1.0);
+    let eps_scale = dm3_u.march.z;
 
-    let max_steps = i32(u.march.x);
-    let max_dist = u.march.y;
+    let max_steps = i32(dm3_u.march.x);
+    let max_dist = dm3_u.march.y;
 
     // Skip the empty space outside the fractal's bounding sphere. The radius
     // depends on the formula stack — a Mandelbox reaches far further out than a
     // Mandelbulb — so it comes in as a uniform rather than being baked in.
     var t = 0.0;
     let b = dot(rd, ro);
-    let bounds = max(u.march.w, 0.1);
+    let bounds = max(dm3_u.march.w, 0.1);
     let c = dot(ro, ro) - bounds * bounds;
     let disc = b * b - c;
     if (disc < 0.0) {
         // Ray misses the fractal's bounding sphere entirely.
-        var bg = u.bg.rgb;
-        if (u.screen.w > 0.5) { bg = linear_to_srgb(bg); }
+        var bg = dm3_u.bg.rgb;
+        if (dm3_u.screen.w > 0.5) { bg = linear_to_srgb(bg); }
         return vec4<f32>(bg, 1.0);
     }
     t = max(-b - sqrt(disc), 0.0);
@@ -261,7 +264,7 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
         if (steps >= max_steps) { break; }
         p = ro + rd * t;
         field = fractal_de(p);
-        let d = field.dist * u.fractal.w;
+        let d = field.dist * dm3_u.fractal.w;
         let eps = max(pixel_angle * t * eps_scale, 1e-6);
         if (d < eps) {
             hit = true;
@@ -280,7 +283,7 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
 
     if (hit) {
         let n = surface_normal(p, max(pixel_angle * t, 1e-5));
-        let l = normalize(u.light.xyz);
+        let l = normalize(dm3_u.light.xyz);
 
         let base = palette(field.trap);
         let diffuse = max(dot(n, l), 0.0);
@@ -295,15 +298,15 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
             l,
             surface_eps,
             4.0 * scene_scale(),
-            u.shade.y,
+            dm3_u.shade.y,
             tightness,
         );
-        let occ = mix(1.0, ambient_occlusion(p, n), u.shade.x);
+        let occ = mix(1.0, ambient_occlusion(p, n), dm3_u.shade.x);
 
         // Diagnostics: show one term on its own. Each of these is a factor in
         // the final colour, so a dark image alone cannot tell you which one is
         // responsible — this can.
-        let view = i32(u.fractal.x);
+        let view = i32(dm3_u.fractal.x);
         if (view == 1) { return shade_out(n * 0.5 + 0.5); }
         if (view == 2) { return shade_out(vec3<f32>(shadow)); }
         if (view == 3) { return shade_out(vec3<f32>(occ)); }
@@ -318,12 +321,12 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
         // entirely — invisible on a Mandelbulb, which is lit mostly by the key
         // light, but it blacks out any fractal dense enough to shadow itself.
         let sky = 0.5 + 0.5 * n.y;
-        let peak = max(u.bg.r, max(u.bg.g, u.bg.b));
-        let bg_tint = select(vec3<f32>(1.0), u.bg.rgb / peak, peak > 1e-4);
-        let ambient = u.light.w * sky * mix(vec3<f32>(1.0), bg_tint, 0.5);
+        let peak = max(dm3_u.bg.r, max(dm3_u.bg.g, dm3_u.bg.b));
+        let bg_tint = select(vec3<f32>(1.0), dm3_u.bg.rgb / peak, peak > 1e-4);
+        let ambient = dm3_u.light.w * sky * mix(vec3<f32>(1.0), bg_tint, 0.5);
 
         let h = normalize(l - rd);
-        let spec = pow(max(dot(n, h), 0.0), 32.0) * u.shade.z * diffuse * shadow;
+        let spec = pow(max(dot(n, h), 0.0), 32.0) * dm3_u.shade.z * diffuse * shadow;
 
         // Occlusion attenuates the sky term only. Direct light already has
         // its own shadow term, and multiplying both by `occ` double-darkens —
@@ -333,21 +336,21 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
 
         // Fog toward the background, by depth into the bounding volume.
         let depth = clamp((t - entry_t) / (2.0 * bounds), 0.0, 1.0);
-        color = mix(color, u.bg.rgb, 1.0 - exp(-u.bg.w * depth * 3.0));
+        color = mix(color, dm3_u.bg.rgb, 1.0 - exp(-dm3_u.bg.w * depth * 3.0));
     } else {
-        let view = i32(u.fractal.x);
+        let view = i32(dm3_u.fractal.x);
         if (view == 5) { return shade_out(heat(struggle)); }
         if (view != 0) { return shade_out(vec3<f32>(0.0)); }
-        color = u.bg.rgb;
+        color = dm3_u.bg.rgb;
     }
 
     // Glow applies to hit and miss alike — it is what makes the silhouette wisp.
-    color = color + palette(0.35) * struggle * struggle * u.shade.w;
+    color = color + palette(0.35) * struggle * struggle * dm3_u.shade.w;
 
     // Reinhard-ish tonemap keeps the specular from clipping to flat white.
     color = color / (1.0 + color * 0.35);
 
-    if (u.screen.w > 0.5) {
+    if (dm3_u.screen.w > 0.5) {
         color = linear_to_srgb(color);
     }
     return vec4<f32>(color, 1.0);

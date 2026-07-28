@@ -73,11 +73,19 @@ pub fn translate(
     let body = brace_control_flow(&body);
     let body = rewrite_switch(&body);
 
-    let body = rewrite_ternaries(&body);
+    let mut body = rewrite_ternaries(&body);
     if body.contains('?') {
         // Anything left is nested or spans a construct the scanner declines to
         // guess at; better to reject than to emit subtly wrong arithmetic.
         return Err(Rejected::Unsupported("ternary conditional".into()));
+    }
+
+    // Mandelbulber's formulas mutate `z` in place and a few simply run off the
+    // end of the function; ours return it, so a body that never returns is not
+    // a valid function. Only naga's validator catches this — the parser is
+    // happy with it — which is how one formula shipped in that state.
+    if !body.trim_end().ends_with("return z;") {
+        body.push_str("\n\treturn z;\n");
     }
 
     Ok(Formula {
@@ -434,7 +442,17 @@ fn rewrite_switch(src: &str) -> String {
 
         let cond = s[open_paren + 1..close_paren].trim().to_owned();
         let inner = s[open_brace + 1..close_brace].to_owned();
-        let rebuilt = format!("switch {cond} {{\n{}\n}}", brace_cases(&inner));
+        let mut arms = brace_cases(&inner);
+
+        // C lets a switch fall out when nothing matches; WGSL requires the case
+        // to be spelled. Mandelbulber's enumerated switches usually cover every
+        // value, so an empty default is the faithful translation — but leaving
+        // it out fails validation rather than parsing, which is why it survived
+        // until the compile check grew a validator.
+        if !arms.contains("default:") {
+            arms.push_str("\ndefault: {}\n");
+        }
+        let rebuilt = format!("switch {cond} {{\n{arms}\n}}");
 
         s = format!("{}{rebuilt}{}", &s[..kw], &s[close_brace + 1..]);
         from = kw + rebuilt.len();
@@ -741,7 +759,14 @@ fn rewrite_declarations(body: &str) -> String {
                 continue;
             }
             let decl = line[prefix.len()..].trim_end_matches(';').trim();
-            let wgsl_ty = if ty == "int" { "i32" } else { ty };
+
+            // A C `int` local becomes an f32, not an i32. Every integer
+            // parameter is an f32 in the pool and `Aux::i` is an f32, so an
+            // `i32` local exists only to be compared against one of them and
+            // fail. In this corpus these locals are loop counters and iteration
+            // ranges: none indexes an array and none selects a `switch`, which
+            // are the two places WGSL would insist on a genuine integer.
+            let wgsl_ty = if ty == "int" { "f32" } else { ty };
 
             // Mandelbulber wraps long initialisers across lines. Appending a
             // `;` to the first line of such a declaration silently truncates

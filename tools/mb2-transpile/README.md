@@ -69,14 +69,22 @@ than emitted, so the report reflects shippable coverage.
 Parsing is a weaker claim than compiling, which is a weaker claim than
 rendering, and both gaps have bitten. `naga::front::wgsl::parse_str` — what this
 tool's check uses — does not run naga's validator, so it accepted `i32 >= bool`
-and a function with no `return` for as long as nobody looked. Two examples in
-the main crate close the gap and report the honest numbers:
+and a function with no `return` for as long as nobody looked.
+
+The check also has to substitute parameters *exactly* as the renderer does, or
+it measures a shader nobody builds. It did not, twice: it cast integer
+parameters to `i32` where the renderer keeps f32, and it named its uniform
+differently, hiding a formula whose local `u` shadowed the real binding. Any
+rule added to `validate.rs` belongs in `three_dm::formulas::mb2` too.
+
+Two examples in the main crate close the gap and report the honest numbers:
 
 ```bash
 cargo run --example mb2_audit -- --errors
 ```
 
-Parses *and* validates every emitted formula. Currently 344 of 361.
+Parses *and* validates every emitted formula — going through `codegen`, so it
+is the same shader wgpu gets. Currently 373 of 373.
 
 ```bash
 cargo run --release --example mb2_sweep -- /tmp/sweep
@@ -85,8 +93,8 @@ cargo run --release --example mb2_sweep -- /tmp/sweep
 Builds a real wgpu pipeline per formula, renders it, and classifies the result
 as fractal detail / smooth blob / empty / shader error — then writes a contact
 sheet, because whether a shape is *right* is not something a number can tell
-you. Currently 278 render with detail, 28 as smooth blobs, 36 empty, 19 fail to
-build.
+you. Currently 302 render with detail, 34 as smooth blobs, 37 empty, and none
+fail to build.
 
 Of those 37 empties, 26 are `Transf*` formulas — transforms meant to be composed
 into a hybrid, which genuinely draw nothing on their own:

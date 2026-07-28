@@ -9,4 +9,6 @@ publish = false
 # Deliberately dependency-free: this is a source-to-source rewriter over a very
 # regular corpus, and a hand-written scanner keeps the failure modes legible.
 [dependencies]
-naga = { version = "30.0.0", features = ["wgsl-in"] }
+# Pinned to the version wgpu bundles. A check against a different naga is
+# not a check: two formulas passed naga 30 and failed on the GPU.
+naga = { version = "29.0.4", features = ["wgsl-in"] }

@@ -286,7 +286,16 @@ async fn run(out_dir: Option<&str>, hybrid: bool, rotate: bool, stagger: bool) {
         let scope = device.push_error_scope(wgpu::ErrorFilter::Validation);
         let started = std::time::Instant::now();
         pipeline.ensure(&device, key, &source);
-        let built = scope.pop().await.is_none();
+        let built = match scope.pop().await {
+            None => true,
+            Some(e) => {
+                // The audit validates the formula on its own; this is the only
+                // place the whole shader is built, so its errors are the ones
+                // that count.
+                eprintln!("--- {} failed to build:\n{e}", f.name);
+                false
+            }
+        };
         build_ms.push((started.elapsed().as_secs_f32() * 1000.0, f.name));
 
         let pixels = if built {
