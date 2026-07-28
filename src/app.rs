@@ -15,9 +15,10 @@ const ORBIT_SENSITIVITY: f32 = 0.007;
 /// same distance regardless of frame rate — which matters here, where the frame
 /// rate depends on the fractal.
 const KEY_ORBIT: f32 = 1.6;
-/// E-foldings of distance per second: dollying is multiplicative for the same
-/// reason zooming is, so it feels the same close up and far out.
-const KEY_DOLLY: f32 = 1.4;
+/// Orbit radii of forward travel per second. Flying moves the orbit target
+/// too, so this descends into the fractal rather than converging on its centre
+/// — see [`Camera::advance`].
+const KEY_FLY: f32 = 0.9;
 /// Screen heights of pan per second.
 const KEY_PAN: f32 = 0.9;
 
@@ -116,7 +117,16 @@ impl App {
                 .default_open(true)
                 .show(ui, |ui| {
                     let f = &mut params.fractal;
-                    ui.add(egui::Slider::new(&mut f.iterations, 2..=32).text("iterations"));
+                    ui.add(
+                        egui::Slider::new(&mut f.iterations, 2..=512)
+                            .text("iterations")
+                            .logarithmic(true),
+                    )
+                    .on_hover_text(
+                        "How deep the escape-time loop runs. Detail at a given \
+                         zoom is limited by this before it is limited by \
+                         anything else, so raise it as you descend.",
+                    );
                     ui.add(egui::Slider::new(&mut f.bailout, 1.5..=64.0).text("bailout"));
                     ui.add(
                         egui::Slider::new(&mut f.bounding_radius, 0.5..=20.0)
@@ -443,7 +453,7 @@ impl Nav {
         // dragging right does, so the two controls never disagree.
         camera.orbit(-self.yaw * KEY_ORBIT * step, -self.pitch * KEY_ORBIT * step);
         if self.forward != 0.0 {
-            camera.zoom((-self.forward * KEY_DOLLY * step).exp());
+            camera.advance(self.forward * KEY_FLY * step);
         }
         if self.strafe != 0.0 || self.lift != 0.0 {
             camera.pan(-self.strafe * KEY_PAN * step, self.lift * KEY_PAN * step);
@@ -682,16 +692,31 @@ mod nav_tests {
     }
 
     #[test]
-    fn w_moves_closer_and_s_moves_away() {
+    fn w_flies_forward_rather_than_shrinking_the_orbit() {
+        // Shrinking the orbit radius converges on the target, which starts at
+        // the origin — inside the solid. Flying carries the target along, so
+        // the descent has no floor but the precision of the numbers.
         let mut camera = Camera::default();
-        let start = camera.distance;
+        let (_, _, forward) = camera.basis();
+        let start = camera.target;
+        let radius = camera.distance;
 
         Nav { forward: 1.0, ..nav() }.apply(&mut camera, 0.1);
-        assert!(camera.distance < start, "W should move toward the fractal");
 
-        let near = camera.distance;
+        let travelled: f32 = (0..3)
+            .map(|i| (camera.target[i] - start[i]) * forward[i])
+            .sum();
+        assert!(travelled > 0.0, "W should move along the view direction");
+        assert!(
+            (camera.distance - radius).abs() < 1e-6,
+            "flying must not change the orbit radius"
+        );
+
         Nav { forward: -1.0, ..nav() }.apply(&mut camera, 0.1);
-        assert!(camera.distance > near, "S should move away");
+        let back: f32 = (0..3)
+            .map(|i| (camera.target[i] - start[i]) * forward[i])
+            .sum();
+        assert!(back.abs() < 1e-5, "S should undo W");
     }
 
     #[test]
@@ -738,24 +763,41 @@ mod nav_tests {
     fn motion_does_not_depend_on_the_frame_rate() {
         // Two frames at 30fps must land where one frame at 15fps does, or the
         // fractal's own frame rate would change how far a key press travels.
-        let mut slow = Camera::default();
-        Nav { forward: 1.0, yaw: 1.0, ..nav() }.apply(&mut slow, 0.064);
+        //
+        // Tested one axis at a time on purpose. Flying uses the basis as it is
+        // *now*, so turning while moving traces an arc, and an arc taken in two
+        // steps is legitimately not the arc taken in one. That is real
+        // behaviour, not drift.
+        let travel = |nav: Nav, frames: u32| {
+            let mut camera = Camera::default();
+            for _ in 0..frames {
+                nav.apply(&mut camera, 0.064 / frames as f32);
+            }
+            camera
+        };
 
-        let mut fast = Camera::default();
-        for _ in 0..2 {
-            Nav { forward: 1.0, yaw: 1.0, ..nav() }.apply(&mut fast, 0.032);
+        let (one, two) = (
+            travel(Nav { forward: 1.0, ..nav() }, 1),
+            travel(Nav { forward: 1.0, ..nav() }, 2),
+        );
+        for i in 0..3 {
+            assert!((one.target[i] - two.target[i]).abs() < 1e-5, "{one:?} {two:?}");
         }
 
-        assert!((slow.distance - fast.distance).abs() < 1e-5, "{slow:?} {fast:?}");
-        assert!((slow.yaw - fast.yaw).abs() < 1e-5, "{slow:?} {fast:?}");
+        let (one, two) = (
+            travel(Nav { yaw: 1.0, ..nav() }, 1),
+            travel(Nav { yaw: 1.0, ..nav() }, 2),
+        );
+        assert!((one.yaw - two.yaw).abs() < 1e-5, "{one:?} {two:?}");
     }
 
     #[test]
     fn shift_hurries_and_alt_creeps() {
         let travel = |speed: f32| {
             let mut camera = Camera::default();
+            let (_, _, forward) = camera.basis();
             Nav { forward: 1.0, speed, ..nav() }.apply(&mut camera, 0.1);
-            Camera::default().distance - camera.distance
+            (0..3).map(|i| camera.target[i] * forward[i]).sum::<f32>()
         };
         assert!(travel(3.0) > travel(1.0));
         assert!(travel(0.3) < travel(1.0));

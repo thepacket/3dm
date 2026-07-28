@@ -154,8 +154,28 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
         }
         _ => {}
     }
+    // DM3_ITER and DM3_ZOOM exist to answer "does zooming in reveal more
+    // detail, and what stops it" without driving the UI. DM3_ZOOM multiplies
+    // the framed distance, so 0.02 is a 50x close-up.
+    if let Ok(n) = std::env::var("DM3_ITER").map(|v| v.parse::<i32>()) {
+        params.fractal.iterations = n.expect("DM3_ITER must be a number");
+    }
     let mut camera = Camera::default();
     camera.frame(params.fractal.bounding_radius);
+    // DM3_PAN="dx,dy" moves the orbit target across the view, the way dragging
+    // with the right button does — put it on a surface feature and DM3_ZOOM
+    // then closes in on that feature rather than on the origin.
+    if let Ok(p) = std::env::var("DM3_PAN") {
+        let mut it = p.split(',').map(|v| v.trim().parse::<f32>().expect("DM3_PAN is dx,dy"));
+        camera.pan(it.next().unwrap_or(0.0), it.next().unwrap_or(0.0));
+    }
+    // DM3_FLY descends along the view direction, the way W does in the app.
+    if let Ok(f) = std::env::var("DM3_FLY").map(|v| v.parse::<f32>()) {
+        camera.advance(f.expect("DM3_FLY must be a number"));
+    }
+    if let Ok(z) = std::env::var("DM3_ZOOM").map(|v| v.parse::<f32>()) {
+        camera.zoom(z.expect("DM3_ZOOM must be a number"));
+    }
     let (key, source) = params.shader();
     pipeline.ensure(&device, key, &source);
 

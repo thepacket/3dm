@@ -10,6 +10,12 @@ use std::f32::consts::{FRAC_PI_2, TAU};
 /// Never let the pitch reach straight up/down — the basis degenerates there.
 const PITCH_LIMIT: f32 = FRAC_PI_2 - 0.001;
 
+/// Orbit radius bounds. Wide enough that f32 runs out of significant digits
+/// before these do: the old floor of 0.05 stopped a zoom roughly sixty times
+/// out from the surface, which is nowhere near where the numbers give up.
+const DISTANCE_MIN: f32 = 1e-6;
+const DISTANCE_MAX: f32 = 1e5;
+
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Camera {
     /// Point the camera orbits and looks at.
@@ -67,7 +73,8 @@ impl Camera {
     /// current orientation. The 1.15 leaves a little margin around the shape.
     pub fn frame(&mut self, radius: f32) {
         self.target = [0.0, 0.0, 0.0];
-        self.distance = (radius * 1.15 / self.tan_half_fov().max(1e-3)).clamp(0.05, 100.0);
+        self.distance =
+            (radius * 1.15 / self.tan_half_fov().max(1e-3)).clamp(DISTANCE_MIN, DISTANCE_MAX);
     }
 
     /// Orbit by a screen-space drag, in radians per unit.
@@ -77,8 +84,30 @@ impl Camera {
     }
 
     /// Dolly in/out multiplicatively, so zoom feels the same at every scale.
+    ///
+    /// This shrinks the orbit radius, so it converges on the target and cannot
+    /// pass it. To descend into the fractal, use [`Camera::advance`].
     pub fn zoom(&mut self, factor: f32) {
-        self.distance = (self.distance * factor).clamp(0.05, 100.0);
+        self.distance = (self.distance * factor).clamp(DISTANCE_MIN, DISTANCE_MAX);
+    }
+
+    /// Fly along the view direction, carrying the orbit target along.
+    ///
+    /// This is the difference between inspecting a fractal and exploring one.
+    /// Zooming shrinks the orbit radius, so it converges on the target — and
+    /// the target starts at the origin, which is *inside* the solid, so zooming
+    /// in eventually buries the camera in it. Advancing moves the point being
+    /// orbited too, so a crevice can be descended for as long as f32 has bits
+    /// left, which is where the limit ought to be.
+    ///
+    /// `amount` is a fraction of the current orbit radius, so the step shrinks
+    /// as you close in and the descent stays self-similar.
+    pub fn advance(&mut self, amount: f32) {
+        let (_, _, forward) = self.basis();
+        let step = self.distance * amount;
+        for (target, axis) in self.target.iter_mut().zip(forward) {
+            *target += axis * step;
+        }
     }
 
     /// Pan the target across the view plane. `dx`/`dy` are in screen fractions;
