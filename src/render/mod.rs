@@ -217,6 +217,10 @@ pub struct FractalPipeline {
     probe_target: wgpu::Texture,
     probe_view: wgpu::TextureView,
     probe_readback: wgpu::Buffer,
+    /// Viewport size the last frame was drawn at. A probe cycle spans three
+    /// frames, and a surface reconfigure in the middle of one leaves a copy or
+    /// a mapping straddling it.
+    last_viewport: [f32; 2],
     pub cursor: CursorProbe,
     /// True when the surface format is linear and we must apply the sRGB
     /// transfer function in the shader ourselves.
@@ -288,6 +292,7 @@ impl FractalPipeline {
             probe_target,
             probe_view,
             probe_readback,
+            last_viewport: [0.0, 0.0],
             cursor: CursorProbe::new(),
             encode_srgb: !target_format.is_srgb(),
         }
@@ -384,10 +389,19 @@ impl FractalPipeline {
     /// Encoded into egui's own command encoder, so the copy is submitted with
     /// the frame; the mapping is requested a frame later, once that submission
     /// has certainly happened.
-    pub fn step_probe(&self, device: &wgpu::Device, encoder: &mut wgpu::CommandEncoder, key: u64) {
+    pub fn step_probe(&self, encoder: &mut wgpu::CommandEncoder, key: u64, stable: bool) {
         let probe = &self.cursor;
         match probe.state.load(Ordering::Acquire) {
             probe_state::IDLE => {
+                // Never begin a cycle on a frame where the viewport changed
+                // size. The surface is reconfigured on those frames, and
+                // reconfiguring waits for outstanding GPU work — a copy or a
+                // mapping left in flight across that point is exactly the kind
+                // of thing that waits forever. Skipping costs one stale
+                // reading; the camera does not notice.
+                if !stable {
+                    return;
+                }
                 let Some(pipeline) = self.probes.get(&key) else {
                     return;
                 };
@@ -460,9 +474,11 @@ impl FractalPipeline {
                         state.store(probe_state::IDLE, Ordering::Release);
                     },
                 );
-                // Nudge the driver so the callback is not left waiting for the
-                // next natural poll.
-                let _ = device.poll(wgpu::PollType::Poll);
+                // Deliberately no `device.poll` here. This runs inside egui's
+                // paint callback, with an encoder open, and driving device
+                // maintenance re-entrantly from that point is asking for
+                // trouble — the mapping is serviced by the normal per-frame
+                // maintenance a moment later instead.
             }
             _ => {}
         }
@@ -495,6 +511,8 @@ impl FractalPipeline {
 /// Per-frame payload handed to egui.
 pub struct FractalCallback {
     pub uniforms: Uniforms,
+    /// Viewport size in physical pixels, used to spot a resize.
+    pub viewport: [f32; 2],
     pub shader_key: u64,
     /// Shared with the app so an unchanged stack costs no allocation.
     pub shader_source: Arc<str>,
@@ -512,7 +530,9 @@ impl CallbackTrait for FractalCallback {
         if let Some(res) = resources.get_mut::<FractalPipeline>() {
             res.ensure(device, self.shader_key, &self.shader_source);
             res.upload(queue, &self.uniforms);
-            res.step_probe(device, encoder, self.shader_key);
+            let stable = res.last_viewport == self.viewport;
+            res.last_viewport = self.viewport;
+            res.step_probe(encoder, self.shader_key, stable);
         }
         Vec::new()
     }
@@ -536,6 +556,7 @@ impl CallbackTrait for FractalCallback {
 pub fn callback(
     rect: egui::Rect,
     uniforms: Uniforms,
+    viewport: [f32; 2],
     shader_key: u64,
     shader_source: Arc<str>,
 ) -> egui::PaintCallback {
@@ -543,6 +564,7 @@ pub fn callback(
         rect,
         FractalCallback {
             uniforms,
+            viewport,
             shader_key,
             shader_source,
         },

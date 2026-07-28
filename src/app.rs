@@ -482,6 +482,7 @@ impl App {
         ui.painter().add(callback(
             rect,
             uniforms,
+            [rect.width() * ppp, rect.height() * ppp],
             self.shader.0,
             Arc::clone(&self.shader.1),
         ));

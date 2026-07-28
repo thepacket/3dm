@@ -280,7 +280,7 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
     if std::env::var("DM3_PROBE").is_ok() {
         for _ in 0..8 {
             let mut encoder = device.create_command_encoder(&Default::default());
-            pipeline.step_probe(&device, &mut encoder, key);
+            pipeline.step_probe(&mut encoder, key, true);
             queue.submit([encoder.finish()]);
             device.poll(wgpu::PollType::wait_indefinitely()).ok();
         }
