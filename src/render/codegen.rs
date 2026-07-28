@@ -77,6 +77,28 @@ pub fn generate(stack: &FormulaStack) -> String {
         ));
     }
 
+    // Mandelbulber seeds `actualScale` from the scene's Mandelbox scale before
+    // the first iteration — not from 1.0. Its default is 2.0, and a formula
+    // carrying its own `mandelbox.scale` supplies the value directly. 57
+    // formulas read this field, and seeding it wrong changes their shape from
+    // the first fold onwards rather than failing outright.
+    let actual_scale = stack
+        .active()
+        .next()
+        .and_then(|(index, slot)| {
+            let FormulaKind::Generated(g) = slot.kind else {
+                return None;
+            };
+            let f = &GENERATED[g];
+            let p = mb2::layout(f)
+                .placements
+                .into_iter()
+                .find(|p| p.param.path == "mandelbox.scale")?;
+            let at = index * POOL_FLOATS_PER_SLOT + p.index;
+            Some(format!("{POOL}[{}].{}", at / 4, ["x", "y", "z", "w"][at % 4]))
+        })
+        .unwrap_or_else(|| "2.0".to_owned());
+
     // An empty stack still has to compile and produce something finite.
     if dispatch.is_empty() {
         dispatch.push_str("        // empty stack — nothing to iterate\n");
@@ -218,10 +240,7 @@ fn dm3_iterate(pos: vec3<f32>, max_n: i32, bail: bool) -> Iter {{
     // high. Starting it at zero makes every custom-DE formula report a
     // distance of zero everywhere.
     aux.dist = 1000.0;
-    // Mandelbulber seeds this from the Mandelbox scale, which 3DM has no global
-    // equivalent of; formulas that use it overwrite it on their first
-    // iteration, so a neutral 1.0 is the safe seed.
-    aux.actual_scale = 1.0;
+    aux.actual_scale = {actual_scale};
     aux.actual_scale_a = 0.0;
     aux.color = 1.0;
     aux.color_hybrid = 0.0;
