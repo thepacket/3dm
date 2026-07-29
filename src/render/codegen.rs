@@ -305,6 +305,23 @@ mod tests {
         assert!(src.contains("fn slot_0("));
     }
 
+    /// The lights array is one flat block of bytes with no names attached, so
+    /// a mismatched length here shifts nothing — it silently truncates the
+    /// last lights, or reads past what Rust wrote. Cheaper to assert than to
+    /// debug from a picture.
+    #[test]
+    fn the_shader_declares_exactly_as_many_light_vec4s_as_rust_uploads() {
+        let slots = crate::params::MAX_LIGHTS * crate::render::LIGHT_VEC4S;
+        assert!(
+            TEMPLATE.contains(&format!("lights: array<vec4<f32>, {slots}>")),
+            "fractal.wgsl must declare {slots} light vec4s"
+        );
+        assert!(TEMPLATE.contains(&format!(
+            "const LIGHT_VEC4S: i32 = {};",
+            crate::render::LIGHT_VEC4S
+        )));
+    }
+
     #[test]
     fn params_are_rewritten_to_this_slots_uniforms() {
         let mut stack = FormulaStack::default();

@@ -100,11 +100,180 @@ impl Default for MarchParams {
     }
 }
 
+/// What shape a light is and how its rays reach the surface.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum LightKind {
+    /// Infinitely far away: every ray is parallel and nothing attenuates.
+    #[default]
+    Directional,
+    /// Radiates from a point, falling off with the decay function.
+    Point,
+    /// A point light restricted to a cone about its direction.
+    Cone,
+}
+
+impl LightKind {
+    pub const ALL: [Self; 3] = [Self::Directional, Self::Point, Self::Cone];
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Directional => "directional light",
+            Self::Point => "point light",
+            Self::Cone => "cone light",
+        }
+    }
+}
+
+/// How quickly a positional light thins out with distance.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum LightDecay {
+    /// Cylindrical falloff. Reaches much further than physics allows.
+    InvR,
+    /// The inverse-square law.
+    #[default]
+    InvR2,
+    /// Falls off faster than physics, for a tightly localised pool of light.
+    InvR3,
+}
+
+impl LightDecay {
+    pub const ALL: [Self; 3] = [Self::InvR, Self::InvR2, Self::InvR3];
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::InvR => "1/r",
+            Self::InvR2 => "1/r\u{b2}",
+            Self::InvR3 => "1/r\u{b3}",
+        }
+    }
+
+    /// The exponent the shader raises the distance to.
+    pub fn exponent(self) -> f32 {
+        match self {
+            Self::InvR => 1.0,
+            Self::InvR2 => 2.0,
+            Self::InvR3 => 3.0,
+        }
+    }
+}
+
+/// One light in the scene.
+///
+/// Mandelbulber states a light's orientation as angles and its place as a
+/// position, and derives the direction from whichever of the two the light
+/// actually uses. 3DM keeps `direction` as the stored truth for directional
+/// lights — it is what the shader wants, and it means the default scene's key
+/// light survives verbatim rather than being reconstructed from angles that
+/// only round-trip to six figures.
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct Light {
+    pub enabled: bool,
+    pub kind: LightKind,
+    /// Linear, not sRGB — as everywhere else in this file.
+    pub color: [f32; 3],
+    pub intensity: f32,
+    /// Brightness of the light's own disc where it is visible in the
+    /// background. Zero means the light itself is never drawn.
+    pub visibility: f32,
+    /// Angular size of that disc, and — for positional lights — the radius
+    /// that decides how soft its shadows are.
+    pub size: f32,
+    /// Edge hardness of the visible disc. High is a sharp-edged ball.
+    pub contour_sharpness: f32,
+    pub decay: LightDecay,
+    /// Where the light sits. Ignored by a directional light.
+    pub position: [f32; 3],
+    /// Direction the light travels *from*, toward the scene. Unit length is
+    /// not required; the shader normalises.
+    pub direction: [f32; 3],
+    /// Interpret `position` and `direction` in the camera's frame, so the
+    /// light rides along instead of staying put as the camera moves.
+    pub relative_to_camera: bool,
+    pub cast_shadows: bool,
+    /// Half-angle of the shadow's penumbra, in degrees, for a directional
+    /// light. Positional lights take their penumbra from `size` instead,
+    /// since a lamp's softness is set by how big it is and how far away.
+    pub soft_shadow_cone: f32,
+    /// Fade a shadow by how far along the ray to the light it was cast, so
+    /// distant occluders block less. Mandelbulber's "penetrating light".
+    pub penetrating: bool,
+    /// Full opening angle of a cone light, in degrees.
+    pub cone_angle: f32,
+    /// How much of that opening is a soft edge, in degrees.
+    pub cone_soft_angle: f32,
+}
+
+impl Default for Light {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            kind: LightKind::Directional,
+            color: [1.0, 1.0, 1.0],
+            intensity: 1.0,
+            visibility: 0.0,
+            size: 1.0,
+            contour_sharpness: 1.0,
+            decay: LightDecay::default(),
+            position: [0.0, 0.0, 0.0],
+            direction: [0.6, 0.7, -0.4],
+            relative_to_camera: false,
+            cast_shadows: true,
+            // tan(3.576°) = 1/16, the penumbra constant the shader was tuned
+            // with when there was one hard-coded light. Stated as an angle
+            // here because that is how Mandelbulber states it, and because an
+            // angle keeps its meaning as the scene is scaled.
+            soft_shadow_cone: 3.576,
+            penetrating: false,
+            cone_angle: 30.0,
+            cone_soft_angle: 10.0,
+        }
+    }
+}
+
+impl Light {
+    /// The penumbra constant the soft-shadow march wants: large is sharp.
+    ///
+    /// A directional light's penumbra is an angle, so it is constant with
+    /// distance. A positional light's is the angle its disc subtends, which
+    /// the shader has to work out per pixel — hence the two paths.
+    pub fn shadow_k(&self) -> f32 {
+        let range = self.soft_shadow_cone.to_radians().tan();
+        if range > 1e-6 { 1.0 / range } else { 1.0e6 }
+    }
+}
+
+/// Everything on Mandelbulber's Lights tab that is not one specific light.
+#[derive(Clone, PartialEq, Debug)]
+pub struct LightsParams {
+    /// Tint of the skylight that fills whatever the lights do not reach.
+    /// White leaves the ambient term neutral.
+    pub fill_color: [f32; 3],
+    /// Scales every light's intensity at once.
+    pub all_intensity: f32,
+    /// Scales every light's visible disc, and every positional light's
+    /// shadow softness, at once.
+    pub all_size: f32,
+    pub lights: Vec<Light>,
+}
+
+/// More than this and the uniform grows faster than the panel is usable.
+/// Mandelbulber has no fixed limit; a uniform block does.
+pub const MAX_LIGHTS: usize = 8;
+
+impl Default for LightsParams {
+    fn default() -> Self {
+        Self {
+            fill_color: [1.0, 1.0, 1.0],
+            all_intensity: 1.0,
+            all_size: 1.0,
+            lights: vec![Light::default()],
+        }
+    }
+}
+
 /// Lighting, ambient occlusion and colour.
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct ShadingParams {
-    /// Direction the key light travels *from*, in world space.
-    pub light_dir: [f32; 3],
     /// Fraction of skylight applied where nothing else lights the surface.
     pub ambient: f32,
     /// Strength of the ambient-occlusion darkening in creases.
@@ -113,8 +282,6 @@ pub struct ShadingParams {
     pub ao_color: [f32; 3],
     /// Samples the occlusion term takes along the normal.
     pub ao_quality: i32,
-    /// Penumbra width of the ray-marched shadow. Low = hard, high = soft.
-    pub shadow_softness: f32,
     /// Specular highlight intensity.
     pub specular: f32,
     /// Additive glow proportional to how much the ray struggled to converge.
@@ -153,12 +320,10 @@ pub struct ShadingParams {
 impl Default for ShadingParams {
     fn default() -> Self {
         Self {
-            light_dir: [0.6, 0.7, -0.4],
             ambient: 0.45,
             ao_strength: 0.85,
             ao_color: [1.0, 1.0, 1.0],
             ao_quality: 5,
-            shadow_softness: 16.0,
             specular: 0.35,
             glow: 0.30,
             // Note: all colours here are *linear*, not sRGB — a value of 0.005
@@ -384,6 +549,7 @@ pub struct SceneParams {
     pub stack: crate::formulas::FormulaStack,
     pub march: MarchParams,
     pub shading: ShadingParams,
+    pub lights: LightsParams,
     pub material: Material,
     pub picture: Picture,
     /// Diagnostic override; [`DebugView::Off`] renders normally.

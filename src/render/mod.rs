@@ -21,7 +21,7 @@ use eframe::wgpu;
 
 use crate::camera::Camera;
 use crate::formulas::{MAX_SLOTS, POOL_FLOATS_PER_SLOT, POOL_VEC4S_PER_SLOT};
-use crate::params::{GRADIENT_LUT, SceneParams};
+use crate::params::{GRADIENT_LUT, Light, LightsParams, MAX_LIGHTS, SceneParams};
 
 /// `vec4`s of parameter pool in the uniform block. Must match the array
 /// length declared in `fractal.wgsl`.
@@ -134,7 +134,9 @@ pub struct Uniforms {
     screen: [f32; 4],
     fractal: [f32; 4],
     march: [f32; 4],
+    /// x = AO strength, y = spare, z = specular, w = glow.
     shade: [f32; 4],
+    /// rgb = fill-light tint, w = ambient.
     light: [f32; 4],
     palette_base: [f32; 4],
     palette_amp: [f32; 4],
@@ -178,6 +180,70 @@ pub struct Uniforms {
     /// x = start iteration, y = end iteration, per slot.
     ranges: [[f32; 4]; MAX_SLOTS],
     pool: [[f32; 4]; POOL_VEC4S],
+    /// x = how many of `lights` are live. Disabled lights are dropped on the
+    /// way here rather than branched around per pixel.
+    lights_meta: [f32; 4],
+    /// [`LIGHT_VEC4S`] consecutive vec4s per light — see [`pack_light`].
+    lights: [[f32; 4]; MAX_LIGHTS * LIGHT_VEC4S],
+}
+
+/// How many vec4s one light occupies. Must match `Light` in `fractal.wgsl`.
+pub(crate) const LIGHT_VEC4S: usize = 5;
+
+/// Flattens one light into the layout the shader reads.
+///
+/// `relative_to_camera` is resolved here rather than in the shader: the camera
+/// basis is already to hand, and a light that rides with the camera is still
+/// just a light at a world position once the frame is fixed.
+fn pack_light(light: &Light, common: &LightsParams, camera: &Camera) -> [[f32; 4]; LIGHT_VEC4S] {
+    let (right, up, fwd) = camera.basis();
+    let eye = camera.position();
+    let to_world = |v: [f32; 3], is_point: bool| -> [f32; 3] {
+        if !light.relative_to_camera {
+            return v;
+        }
+        let base = if is_point { eye } else { [0.0; 3] };
+        [
+            base[0] + right[0] * v[0] + up[0] * v[1] + fwd[0] * v[2],
+            base[1] + right[1] * v[0] + up[1] * v[1] + fwd[1] * v[2],
+            base[2] + right[2] * v[0] + up[2] * v[1] + fwd[2] * v[2],
+        ]
+    };
+
+    let position = to_world(light.position, true);
+    let direction = to_world(light.direction, false);
+    // Half-angles: the panel states the full opening, and the soft angle is
+    // the width of the fade outside it rather than a second absolute angle.
+    let inner = (light.cone_angle * 0.5).to_radians();
+    let outer = ((light.cone_angle + light.cone_soft_angle * 2.0) * 0.5).to_radians();
+
+    [
+        [
+            light.color[0],
+            light.color[1],
+            light.color[2],
+            light.intensity * common.all_intensity,
+        ],
+        [position[0], position[1], position[2], light.kind as u32 as f32],
+        [
+            direction[0],
+            direction[1],
+            direction[2],
+            light.decay.exponent(),
+        ],
+        [
+            (light.size * common.all_size).max(1e-4),
+            light.contour_sharpness.max(1e-3),
+            inner.cos(),
+            outer.cos().min(inner.cos() - 1e-4),
+        ],
+        [
+            if light.cast_shadows { 1.0 } else { 0.0 },
+            if light.penetrating { 1.0 } else { 0.0 },
+            light.shadow_k(),
+            light.visibility,
+        ],
+    ]
 }
 
 impl Default for Uniforms {
@@ -227,6 +293,17 @@ impl Uniforms {
             }
         }
 
+        let mut lights = [[0.0f32; 4]; MAX_LIGHTS * LIGHT_VEC4S];
+        let mut live = 0usize;
+        for light in params.lights.lights.iter().filter(|l| l.enabled) {
+            if live >= MAX_LIGHTS {
+                break;
+            }
+            let packed = pack_light(light, &params.lights, camera);
+            lights[live * LIGHT_VEC4S..(live + 1) * LIGHT_VEC4S].copy_from_slice(&packed);
+            live += 1;
+        }
+
         Self {
             cam_pos: [eye[0], eye[1], eye[2], camera.tan_half_fov()],
             // The basis `w` slots were padding; the cursor's normalised
@@ -253,8 +330,16 @@ impl Uniforms {
                 m.epsilon_scale,
                 f.bounding_radius,
             ],
-            shade: [s.ao_strength, s.shadow_softness, s.specular, s.glow],
-            light: [s.light_dir[0], s.light_dir[1], s.light_dir[2], s.ambient],
+            shade: [s.ao_strength, 0.0, s.specular, s.glow],
+            // Shadow softness moved onto the individual lights, so `light`
+            // carries the fill tint the ambient term is coloured with and `y`
+            // above is spare.
+            light: [
+                params.lights.fill_color[0],
+                params.lights.fill_color[1],
+                params.lights.fill_color[2],
+                s.ambient,
+            ],
             palette_base: [
                 s.palette_base[0],
                 s.palette_base[1],
@@ -330,6 +415,8 @@ impl Uniforms {
             gradient: mat.lut(),
             ranges,
             pool,
+            lights_meta: [live as f32, 0.0, 0.0, 0.0],
+            lights,
         }
     }
 }

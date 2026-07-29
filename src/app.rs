@@ -5,7 +5,10 @@ use std::time::Duration;
 
 use crate::camera::Camera;
 use crate::formulas::{Builtin, DeMode, FormulaKind, FormulaSlot, generated::GENERATED};
-use crate::params::{DebugView, Material, Perspective, SceneParams, Stop};
+use crate::params::{
+    DebugView, Light, LightDecay, LightKind, LightsParams, MAX_LIGHTS, Material, Perspective,
+    SceneParams, Stop,
+};
 use crate::render::{CursorProbe, FractalPipeline, Uniforms, callback};
 
 /// Radians of orbit per point of mouse travel.
@@ -171,6 +174,9 @@ pub struct App {
     /// generated from. Regenerated only when the stack's structure changes, so
     /// dragging a parameter never rebuilds a shader.
     shader: (u64, Arc<str>),
+    /// Which light the Lights panel is editing. Mandelbulber gives each one a
+    /// tab; with eight of them a row of tabs is the same idea in less space.
+    selected_light: usize,
 }
 
 impl App {
@@ -221,6 +227,7 @@ impl App {
             device,
             fixed_scale: 0.5,
             shader: (key, source.into()),
+            selected_light: 0,
         })
     }
 
@@ -373,23 +380,12 @@ impl App {
                 .default_open(true)
                 .show(ui, |ui| {
                     let s = &mut params.shading;
-                    ui.label("light direction");
-                    ui.horizontal(|ui| {
-                        for (axis, value) in ["x", "y", "z"].iter().zip(s.light_dir.iter_mut()) {
-                            ui.add(
-                                egui::DragValue::new(value)
-                                    .speed(0.02)
-                                    .prefix(format!("{axis} ")),
-                            );
-                        }
-                    });
-                    ui.add(egui::Slider::new(&mut s.ambient, 0.0..=1.0).text("ambient"));
+                    ui.add(egui::Slider::new(&mut s.ambient, 0.0..=1.0).text("ambient"))
+                        .on_hover_text(
+                            "Skylight filling whatever the lights do not reach. \
+                             The lights themselves live in their own panel.",
+                        );
                     ui.add(egui::Slider::new(&mut s.ao_strength, 0.0..=1.0).text("occlusion"));
-                    ui.add(
-                        egui::Slider::new(&mut s.shadow_softness, 1.0..=64.0)
-                            .text("shadow sharpness")
-                            .logarithmic(true),
-                    );
                     ui.add(egui::Slider::new(&mut s.specular, 0.0..=2.0).text("specular"));
                     ui.add(egui::Slider::new(&mut s.glow, 0.0..=1.5).text("glow"));
                     ui.horizontal(|ui| {
@@ -398,6 +394,10 @@ impl App {
                         ui.label("glow core / edge");
                     });
                 });
+
+            egui::CollapsingHeader::new("Lights")
+                .default_open(false)
+                .show(ui, |ui| lights_editor(&mut params.lights, &mut self.selected_light, ui));
 
             egui::CollapsingHeader::new("Material editor")
                 .default_open(true)
@@ -561,20 +561,31 @@ impl App {
                             .on_hover_text("No shadows, no occlusion")
                             .clicked()
                         {
-                            params.shading.shadow_softness = 1.0e6;
+                            // Shadows are per light now, and turning them off
+                            // is what actually buys the frame time — each one
+                            // costs a second march.
+                            for l in &mut params.lights.lights {
+                                l.cast_shadows = false;
+                            }
                             params.shading.ao_strength = 0.0;
                             params.march.max_steps = 64;
                             params.march.epsilon_scale = 2.0;
                         }
                         if ui.button("Low").on_hover_text("No occlusion").clicked() {
-                            params.shading.shadow_softness = 16.0;
+                            for l in &mut params.lights.lights {
+                                l.cast_shadows = true;
+                                l.soft_shadow_cone = Light::default().soft_shadow_cone;
+                            }
                             params.shading.ao_strength = 0.0;
                             params.march.max_steps = 96;
                             params.march.epsilon_scale = 1.4;
                         }
                         if ui.button("Normal").clicked() {
                             let d = SceneParams::default();
-                            params.shading.shadow_softness = d.shading.shadow_softness;
+                            for l in &mut params.lights.lights {
+                                l.cast_shadows = true;
+                                l.soft_shadow_cone = Light::default().soft_shadow_cone;
+                            }
                             params.shading.ao_strength = d.shading.ao_strength;
                             params.march.max_steps = d.march.max_steps;
                             params.march.epsilon_scale = d.march.epsilon_scale;
@@ -585,7 +596,12 @@ impl App {
                             .on_hover_text("Careful marching, strong occlusion")
                             .clicked()
                         {
-                            params.shading.shadow_softness = 24.0;
+                            for l in &mut params.lights.lights {
+                                l.cast_shadows = true;
+                                // tan(2.386°) = 1/24: a tighter penumbra than
+                                // the default, which costs nothing extra.
+                                l.soft_shadow_cone = 2.386;
+                            }
                             params.shading.ao_strength = 1.0;
                             params.march.max_steps = 320;
                             params.march.epsilon_scale = 0.5;
@@ -1221,6 +1237,168 @@ fn thumb_uv(index: usize) -> egui::Rect {
         egui::pos2(col as f32 * step, row as f32 * step),
         egui::vec2(step, step),
     )
+}
+
+/// Mandelbulber's Lights tab: the settings shared by every light, then one
+/// light at a time.
+///
+/// Left out because they need capability 3DM has not got: projection textures
+/// (a light shaped by an image), volumetric light — the visible beam, which
+/// means integrating along every primary ray rather than shading a point — and
+/// Rayleigh scattering, which is a sky model rather than a light. Placing a
+/// light by clicking in the viewport and the wire-frame preview are both
+/// viewport-picking work rather than lighting work.
+fn lights_editor(lights: &mut LightsParams, selected: &mut usize, ui: &mut egui::Ui) {
+    ui.label(egui::RichText::new("Common").strong());
+    ui.horizontal(|ui| {
+        ui.color_edit_button_rgb(&mut lights.fill_color);
+        ui.label("fill light colour");
+    })
+    .response
+    .on_hover_text(
+        "Tints the ambient skylight. White — not Mandelbulber's black — is the \
+         default here, because black would mean the ambient slider did nothing.",
+    );
+    ui.add(egui::Slider::new(&mut lights.all_intensity, 0.0..=4.0).text("all intensity"));
+    ui.add(egui::Slider::new(&mut lights.all_size, 0.1..=8.0).text("all size").logarithmic(true));
+
+    ui.add_space(6.0);
+    ui.horizontal_wrapped(|ui| {
+        let full = lights.lights.len() >= MAX_LIGHTS;
+        if ui
+            .add_enabled(!full, egui::Button::new("New light"))
+            .on_disabled_hover_text(format!("{MAX_LIGHTS} is the most the uniform holds."))
+            .clicked()
+        {
+            lights.lights.push(Light::default());
+            *selected = lights.lights.len() - 1;
+        }
+        if ui
+            .add_enabled(!full && !lights.lights.is_empty(), egui::Button::new("Duplicate"))
+            .clicked()
+        {
+            let copy = lights.lights[*selected];
+            lights.lights.insert(*selected + 1, copy);
+            *selected += 1;
+        }
+        if ui
+            .add_enabled(lights.lights.len() > 1, egui::Button::new("Delete"))
+            .on_disabled_hover_text("A scene keeps at least one light.")
+            .clicked()
+        {
+            lights.lights.remove(*selected);
+            *selected = selected.saturating_sub(1);
+        }
+    });
+
+    *selected = (*selected).min(lights.lights.len().saturating_sub(1));
+    ui.horizontal_wrapped(|ui| {
+        for i in 0..lights.lights.len() {
+            // The tick doubles as the enable toggle, exactly as Mandelbulber's
+            // per-light tab does.
+            ui.selectable_value(selected, i, format!("Light #{}", i + 1));
+        }
+    });
+    ui.separator();
+
+    let Some(light) = lights.lights.get_mut(*selected) else {
+        return;
+    };
+    ui.checkbox(&mut light.enabled, "enabled");
+
+    egui::ComboBox::from_label("type")
+        .selected_text(light.kind.label())
+        .show_ui(ui, |ui| {
+            for kind in LightKind::ALL {
+                ui.selectable_value(&mut light.kind, kind, kind.label());
+            }
+        });
+    ui.horizontal(|ui| {
+        ui.color_edit_button_rgb(&mut light.color);
+        ui.label("colour");
+    });
+    ui.add(egui::Slider::new(&mut light.intensity, 0.0..=8.0).text("intensity"));
+    ui.add(egui::Slider::new(&mut light.visibility, 0.0..=4.0).text("visibility"))
+        .on_hover_text(
+            "How brightly the light's own disc is drawn where a ray misses \
+             everything. Zero — the default — never draws it, and so does an \
+             intensity of zero: this scales the light, it does not replace it.",
+        );
+    ui.add(
+        egui::Slider::new(&mut light.size, 0.05..=8.0)
+            .text("size")
+            .logarithmic(true),
+    )
+    .on_hover_text(
+        "Angular width of that disc, and — for a positional light — the lamp \
+         radius that decides how soft its shadows are.",
+    );
+    ui.add(egui::Slider::new(&mut light.contour_sharpness, 0.1..=8.0).text("contour sharpness"))
+        .on_hover_text("Edge hardness of the visible disc. High is a solid ball.");
+
+    if light.kind != LightKind::Directional {
+        egui::ComboBox::from_label("decay")
+            .selected_text(light.decay.label())
+            .show_ui(ui, |ui| {
+                for decay in LightDecay::ALL {
+                    ui.selectable_value(&mut light.decay, decay, decay.label());
+                }
+            });
+    }
+
+    ui.add_space(6.0);
+    ui.label(egui::RichText::new("Position").strong());
+    if light.kind == LightKind::Directional {
+        ui.label("direction light travels from");
+        vector_row(ui, &mut light.direction, 0.02);
+    } else {
+        vector_row(ui, &mut light.position, 0.02);
+        if light.kind == LightKind::Cone {
+            ui.label("direction the cone points");
+            vector_row(ui, &mut light.direction, 0.02);
+            ui.add(egui::Slider::new(&mut light.cone_angle, 1.0..=170.0).text("opening angle"));
+            ui.add(egui::Slider::new(&mut light.cone_soft_angle, 0.0..=45.0).text("soft angle"));
+        }
+    }
+    ui.checkbox(&mut light.relative_to_camera, "relative to camera")
+        .on_hover_text(
+            "Read the position and direction in the camera's frame, so the \
+             light rides along instead of staying put as you fly.",
+        );
+
+    ui.add_space(6.0);
+    ui.label(egui::RichText::new("Shadows").strong());
+    ui.checkbox(&mut light.cast_shadows, "cast shadows")
+        .on_hover_text("Each light that casts costs a second march per pixel.");
+    if light.kind == LightKind::Directional {
+        ui.add(
+            egui::Slider::new(&mut light.soft_shadow_cone, 0.05..=20.0)
+                .text("soft shadow cone\u{b0}")
+                .logarithmic(true),
+        )
+        .on_hover_text(
+            "Half-angle of the penumbra. A positional light takes its \
+             softness from its size and distance instead.",
+        );
+    }
+    ui.checkbox(&mut light.penetrating, "penetrating light")
+        .on_hover_text(
+            "Fade a shadow by how far along the ray it was cast, so distant \
+             occluders block less than ones hugging the surface.",
+        );
+}
+
+/// Three drag boxes for an xyz triple, the way the position rows read.
+fn vector_row(ui: &mut egui::Ui, v: &mut [f32; 3], speed: f32) {
+    ui.horizontal(|ui| {
+        for (axis, value) in ["x", "y", "z"].iter().zip(v.iter_mut()) {
+            ui.add(
+                egui::DragValue::new(value)
+                    .speed(speed)
+                    .prefix(format!("{axis} ")),
+            );
+        }
+    });
 }
 
 /// The surface material: how the fractal is coloured and how it takes light.

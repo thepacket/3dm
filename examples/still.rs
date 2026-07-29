@@ -130,8 +130,11 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
         Ok("noao") => params.shading.ao_strength = 0.0,
         Ok("nofog") => params.shading.fog = 0.0,
         Ok("noglow") => params.shading.glow = 0.0,
-        // A very large softness makes k*h/t exceed 1 everywhere, i.e. no shadow.
-        Ok("noshadow") => params.shading.shadow_softness = 1.0e6,
+        Ok("noshadow") => {
+            for l in &mut params.lights.lights {
+                l.cast_shadows = false;
+            }
+        }
         Ok("amb1") => params.shading.ambient = 1.0,
         // Kills the sky term entirely: whatever is left is direct light only.
         Ok("amb0") => params.shading.ambient = 0.0,
@@ -146,11 +149,49 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
         // Flat mid-grey albedo. If the fractal lights up here, the darkness
         // was the palette landing on a near-black colour, not the lighting.
         Ok("grey") => params.shading.palette_amp = [0.0, 0.0, 0.0],
-        // Compensate the penumbra ratio for an underestimating DE.
-        Ok("softk") => params.shading.shadow_softness = 256.0,
+        // Compensate the penumbra ratio for an underestimating DE. A narrow
+        // cone is a large k, which is a hard-edged shadow.
+        Ok("softk") => {
+            for l in &mut params.lights.lights {
+                l.soft_shadow_cone = 0.224;
+            }
+        }
         Ok("light2") => {
             params.shading.ambient = 0.0;
-            params.shading.light_dir = [0.6, 0.7, 0.4];
+            params.lights.lights[0].direction = [0.6, 0.7, 0.4];
+        }
+        // Two more lights, to exercise the loop and the falloff: a red lamp
+        // out to one side and a blue cone aimed back at the origin. The lamp
+        // is given a visibility so its own disc is drawn as well, which is the
+        // only part of the lighting that shows up against the background.
+        Ok("lights3") => {
+            params.lights.lights.push(three_dm::params::Light {
+                kind: three_dm::params::LightKind::Point,
+                color: [1.0, 0.25, 0.15],
+                intensity: 2.0,
+                position: [3.0, 0.5, 0.0],
+                ..Default::default()
+            });
+            // Off the default camera's left shoulder, which is one of the few
+            // directions with open background behind it — a light's own disc
+            // is only drawn where the ray hits nothing.
+            params.lights.lights.push(three_dm::params::Light {
+                kind: three_dm::params::LightKind::Point,
+                color: [1.0, 0.9, 0.6],
+                intensity: 0.3,
+                position: [0.2, -0.6, -2.8],
+                visibility: 1.0,
+                size: 3.0,
+                ..Default::default()
+            });
+            params.lights.lights.push(three_dm::params::Light {
+                kind: three_dm::params::LightKind::Cone,
+                color: [0.2, 0.4, 1.0],
+                intensity: 3.0,
+                position: [-2.5, 2.5, -1.0],
+                direction: [2.5, -2.5, 1.0],
+                ..Default::default()
+            });
         }
         _ => {}
     }

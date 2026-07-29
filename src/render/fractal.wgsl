@@ -18,9 +18,9 @@ struct Uniforms {
     fractal: vec4<f32>,
     // x = max steps, y = max distance, z = epsilon scale, w = bounding radius
     march: vec4<f32>,
-    // x = AO strength, y = shadow softness, z = specular, w = glow
+    // x = AO strength, y = spare, z = specular, w = glow
     shade: vec4<f32>,
-    // xyz = light direction, w = ambient
+    // rgb = fill-light tint, w = ambient
     light: vec4<f32>,
     // rgb = palette base, w = palette phase
     palette_base: vec4<f32>,
@@ -71,7 +71,20 @@ struct Uniforms {
     // Generated code indexes this with constants; the stride must match
     // `formulas::POOL_VEC4S_PER_SLOT`.
     pool: array<vec4<f32>, 240>,
+    // x = how many entries of `lights` are live. Disabled lights are dropped
+    // before upload, so there is nothing to branch around here.
+    lights_meta: vec4<f32>,
+    // Five vec4s per light, flat rather than an array of structs so the
+    // element stride is obvious on both sides. See `light_*` accessors below
+    // and `pack_light` in `render/mod.rs`, which must agree exactly.
+    lights: array<vec4<f32>, 40>,
 };
+
+const LIGHT_VEC4S: i32 = 5;
+// These must match the discriminants of `params::LightKind`, which is what
+// `pack_light` writes into the `w` of the position slot.
+const LIGHT_DIRECTIONAL: f32 = 0.0;
+const LIGHT_CONE: f32 = 2.0;
 
 // Deliberately not called `u`: Mandelbulber's formulas declare short lowercase
 // locals, and one called `u` shadowed this binding so that every `u.pool` read
@@ -170,6 +183,10 @@ fn de_tightness(p: vec3<f32>, n: vec3<f32>, probe: f32) -> f32 {
 // `eps` is the primary ray's hit threshold and `tightness` is the measure
 // above; both the occlusion threshold and the penumbra ratio are expressed in
 // terms of them, so the same constants work for every formula.
+//
+// `penetrate` fades an occluder by how far along the ray it was met, so a
+// caster near the light blocks less than one hugging the surface. Mandelbulber
+// calls this penetrating light and applies exactly this ratio.
 fn soft_shadow(
     ro: vec3<f32>,
     rd: vec3<f32>,
@@ -177,6 +194,7 @@ fn soft_shadow(
     maxt: f32,
     k: f32,
     tightness: f32,
+    penetrate: f32,
 ) -> f32 {
     // Only a hit well inside the surface counts as occlusion. Scaling the
     // threshold by the tightness stops a conservative estimate from reporting
@@ -190,13 +208,123 @@ fn soft_shadow(
     var t = eps * 4.0;
     for (var i = 0; i < 48; i = i + 1) {
         let h = map(ro + rd * t);
-        if (h < thresh) { return 0.0; }
-        res = min(res, k_eff * h / t);
+        // How much of this occluder counts. Unity unless the light penetrates,
+        // in which case it decays to nothing at the light itself.
+        let weight = select(1.0, clamp((maxt - t) / maxt, 0.0, 1.0), penetrate > 0.5);
+        if (h < thresh) { return 1.0 - weight; }
+        res = min(res, 1.0 - (1.0 - clamp(k_eff * h / t, 0.0, 1.0)) * weight);
         // Crawl while hugging the surface, but stride once the field opens up.
         t = t + clamp(h, eps * 2.0, maxt * 0.1);
         if (t > maxt) { break; }
     }
     return clamp(res, 0.0, 1.0);
+}
+
+// One light, resolved at one shading point.
+struct LightSample {
+    // Unit vector from the surface toward the light.
+    dir: vec3<f32>,
+    // Colour times intensity times distance and cone falloff — everything
+    // about the light that does not depend on the surface.
+    radiance: vec3<f32>,
+    // How far a shadow ray may usefully travel: to the light, or to the edge
+    // of the scene for a light that has no position.
+    max_dist: f32,
+    // Penumbra constant. Large is a hard edge.
+    k: f32,
+    cast_shadows: f32,
+    penetrating: f32,
+};
+
+// The penumbra a size-1 light produces at one scene radius, which is the
+// constant the shader was tuned with when there was a single hard-coded light.
+// Every other size and distance is stated relative to it, so the whole family
+// of lights stays consistent as the scene is scaled.
+const REFERENCE_SOFT_RANGE: f32 = 0.0625;
+
+fn light_sample(index: i32, p: vec3<f32>) -> LightSample {
+    let base = index * LIGHT_VEC4S;
+    let color = dm3_u.lights[base];
+    let pos_kind = dm3_u.lights[base + 1];
+    let dir_decay = dm3_u.lights[base + 2];
+    let shape = dm3_u.lights[base + 3];
+    let flags = dm3_u.lights[base + 4];
+
+    var out: LightSample;
+    out.cast_shadows = flags.x;
+    out.penetrating = flags.y;
+
+    let axis = normalize(dir_decay.xyz);
+
+    if (pos_kind.w < LIGHT_DIRECTIONAL + 0.5) {
+        // Directional: parallel rays, no falloff, and a penumbra fixed by the
+        // stated cone angle rather than by how far away anything is.
+        out.dir = axis;
+        out.radiance = color.rgb * color.w;
+        out.max_dist = 4.0 * scene_scale();
+        out.k = flags.z;
+        return out;
+    }
+
+    let to_light = pos_kind.xyz - p;
+    let dist = length(to_light);
+    out.dir = to_light / max(dist, 1e-9);
+    out.max_dist = dist;
+
+    // Distances are measured in scene radii, so a light one radius away is at
+    // full strength whatever the fractal's size. Mandelbulber instead carries
+    // a fixed 100/6 factor tuned to its own default scale.
+    let units = max(dist / scene_scale(), 1e-4);
+    var falloff = 1.0 / pow(units, dir_decay.w);
+
+    if (pos_kind.w > LIGHT_CONE - 0.5) {
+        // Inside the inner cone it is full strength, outside the outer one it
+        // is dark, and the soft angle is the band between them.
+        let axiality = dot(-out.dir, axis);
+        falloff = falloff * smoothstep(shape.w, shape.z, axiality);
+    }
+
+    out.radiance = color.rgb * color.w * falloff;
+    // A bigger or nearer lamp casts a softer shadow, which is the one part of
+    // this that cannot be precomputed: it depends on the shading point.
+    out.k = units / max(shape.x * REFERENCE_SOFT_RANGE, 1e-6);
+    return out;
+}
+
+// The lights themselves, seen head-on against the background.
+//
+// Without this a positional light is invisible until something reflects it,
+// which makes placing one guesswork. Visibility defaults to zero, so a scene
+// that never asks for it renders exactly as it did before.
+fn visible_lights(ro: vec3<f32>, rd: vec3<f32>) -> vec3<f32> {
+    var sum = vec3<f32>(0.0);
+    let count = i32(dm3_u.lights_meta.x);
+    for (var i = 0; i < count; i = i + 1) {
+        let base = i * LIGHT_VEC4S;
+        let color = dm3_u.lights[base];
+        let pos_kind = dm3_u.lights[base + 1];
+        let shape = dm3_u.lights[base + 3];
+        let visibility = dm3_u.lights[base + 4].w;
+        if (visibility <= 0.0) { continue; }
+
+        // Where on the sky the light sits: opposite its travel direction for a
+        // directional light, and at its actual position for the rest.
+        var toward: vec3<f32>;
+        if (pos_kind.w < LIGHT_DIRECTIONAL + 0.5) {
+            toward = normalize(dm3_u.lights[base + 2].xyz);
+        } else {
+            let d = pos_kind.xyz - ro;
+            if (dot(d, rd) <= 0.0) { continue; }
+            toward = normalize(d);
+        }
+
+        // Angular distance from the ray, scaled so `size` reads as a width in
+        // degrees, then rolled off by the contour sharpness.
+        let offset = (1.0 - dot(rd, toward)) * 360.0 / max(shape.x, 1e-4);
+        let disc = 1.0 / (1.0 + pow(max(offset, 0.0), 6.0 * shape.y));
+        sum = sum + color.rgb * (disc * visibility * color.w);
+    }
+    return sum;
 }
 
 // Compares the true distance field against the distance we walked along the
@@ -314,16 +442,22 @@ fn reflected_color(ro: vec3<f32>, rd: vec3<f32>, eps_scale: f32, pixel_angle: f3
         let eps = max(pixel_angle * t * eps_scale, 1e-6);
         if (d < eps) {
             let n = surface_normal(p, max(pixel_angle * t, 1e-5));
-            let l = normalize(dm3_u.light.xyz);
-            let lambert = max(dot(n, l), 0.0);
+            // Every light, but none of their shadows — the whole point of this
+            // function is that a bounce is not worth a second march per light.
+            var lit = vec3<f32>(0.0);
+            let count = i32(dm3_u.lights_meta.x);
+            for (var li = 0; li < count; li = li + 1) {
+                let s = light_sample(li, p);
+                lit = lit + s.radiance * max(dot(n, s.dir), 0.0);
+            }
             let sky = 0.5 + 0.5 * n.y;
-            return palette(field.trap) * (lambert + dm3_u.light.w * sky);
+            return palette(field.trap) * (lit + dm3_u.light.w * sky * dm3_u.light.rgb);
         }
         t = t + d;
         if (t > dm3_u.march.y) { break; }
         steps = steps + 1;
     }
-    return dm3_u.bg.rgb;
+    return dm3_u.bg.rgb + visible_lights(ro, rd);
 }
 
 // The ray through a pixel, under the chosen projection.
@@ -391,8 +525,9 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
     let c = dot(ro, ro) - bounds * bounds;
     let disc = b * b - c;
     if (disc < 0.0) {
-        // Ray misses the fractal's bounding sphere entirely.
-        var bg = dm3_u.bg.rgb;
+        // Ray misses the fractal's bounding sphere entirely. Nothing can be in
+        // the way, so the lights are drawn unconditionally.
+        var bg = dm3_u.bg.rgb + visible_lights(ro, rd);
         if (dm3_u.screen.w > 0.5) { bg = linear_to_srgb(bg); }
         return vec4<f32>(bg, 1.0);
     }
@@ -430,27 +565,63 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
 
     if (hit) {
         let n = surface_normal(p, max(pixel_angle * t, 1e-5));
-        let l = normalize(dm3_u.light.xyz);
 
         let base = palette(field.trap);
-        // Shading strength dials down the angle-of-incidence term toward flat
-        // lighting, which is Mandelbulber's "Shading" control.
-        let lambert = max(dot(n, l), 0.0);
-        let diffuse = mix(1.0, lambert, clamp(dm3_u.surface.w, 0.0, 1.0));
         // Reuse the primary ray's hit threshold so the shadow ray's scale
         // tracks both the zoom level and the size of the fractal.
         let surface_eps = max(pixel_angle * t * eps_scale, 1e-6);
         // Lift the origin off the surface along the normal, or the ray's first
         // samples are inside the geometry it started on.
         let tightness = de_tightness(p, n, surface_eps * 32.0);
-        let shadow = soft_shadow(
-            p + n * surface_eps * 3.0,
-            l,
-            surface_eps,
-            4.0 * scene_scale(),
-            dm3_u.shade.y,
-            tightness,
-        );
+        let shadow_origin = p + n * surface_eps * 3.0;
+        // Highlight width is given as a fraction rather than an exponent: a
+        // small number is a tight glint, which is the way it reads in the UI
+        // and the way Mandelbulber states it.
+        let sharpness = 2.0 / max(dm3_u.material.z * dm3_u.material.z, 1e-5);
+
+        // Every light is gathered here. The diffuse and shadow terms below are
+        // sums, so the diagnostics report the first light alone — the whole
+        // point of those views is to isolate one thing at a time.
+        var direct = vec3<f32>(0.0);
+        var spec_sum = vec3<f32>(0.0);
+        var diffuse = 0.0;
+        var shadow = 1.0;
+        let light_count = i32(dm3_u.lights_meta.x);
+        for (var li = 0; li < light_count; li = li + 1) {
+            let s = light_sample(li, p);
+            // Shading strength dials down the angle-of-incidence term toward
+            // flat lighting, which is Mandelbulber's "Shading" control.
+            let lambert = max(dot(n, s.dir), 0.0);
+            let shade_i = mix(1.0, lambert, clamp(dm3_u.surface.w, 0.0, 1.0));
+
+            var shadow_i = 1.0;
+            // A light too dim to see is not worth a shadow march, and at eight
+            // lights that test is most of what keeps the frame rate.
+            let strength = max(s.radiance.r, max(s.radiance.g, s.radiance.b));
+            if (s.cast_shadows > 0.5 && strength > 1e-4) {
+                shadow_i = soft_shadow(
+                    shadow_origin,
+                    s.dir,
+                    surface_eps,
+                    s.max_dist,
+                    s.k,
+                    tightness,
+                    s.penetrating,
+                );
+            }
+
+            direct = direct + s.radiance * shade_i * shadow_i;
+            let h = normalize(s.dir - rd);
+            spec_sum = spec_sum + s.radiance
+                * pow(max(dot(n, h), 0.0), sharpness)
+                * dm3_u.specular.w * shade_i * shadow_i;
+
+            if (li == 0) {
+                diffuse = shade_i;
+                shadow = shadow_i;
+            }
+        }
+
         let occ = mix(1.0, ambient_occlusion(p, n), dm3_u.shade.x);
         // A tint on the occluded light rather than on the surface: occlusion
         // is light that did not arrive, so colouring it colours the shadowed
@@ -474,25 +645,21 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
         // background meant a near-black backdrop cancelled the ambient term
         // entirely — invisible on a Mandelbulb, which is lit mostly by the key
         // light, but it blacks out any fractal dense enough to shadow itself.
+        //
+        // The fill-light colour tints it on top of that, which is what
+        // Mandelbulber's "Fill light color" does; white leaves it alone.
         let sky = 0.5 + 0.5 * n.y;
         let peak = max(dm3_u.bg.r, max(dm3_u.bg.g, dm3_u.bg.b));
         let bg_tint = select(vec3<f32>(1.0), dm3_u.bg.rgb / peak, peak > 1e-4);
-        let ambient = dm3_u.light.w * sky * mix(vec3<f32>(1.0), bg_tint, 0.5);
-
-        // Highlight width is given as a fraction rather than an exponent: a
-        // small number is a tight glint, which is the way it reads in the UI
-        // and the way Mandelbulber states it.
-        let h = normalize(l - rd);
-        let sharpness = 2.0 / max(dm3_u.material.z * dm3_u.material.z, 1e-5);
-        let spec = pow(max(dot(n, h), 0.0), sharpness)
-            * dm3_u.specular.w * diffuse * shadow;
+        let ambient = dm3_u.light.w * sky * dm3_u.light.rgb
+            * mix(vec3<f32>(1.0), bg_tint, 0.5);
 
         // Occlusion attenuates the sky term only. Direct light already has
         // its own shadow term, and multiplying both by `occ` double-darkens —
         // barely visible on a sparse Mandelbulb, but it crushes a dense
         // Mandelbox to near-black.
-        color = base * (diffuse * shadow + ambient * occ * occ_tint)
-            + dm3_u.specular.rgb * spec
+        color = base * (direct + ambient * occ * occ_tint)
+            + dm3_u.specular.rgb * spec_sum
             // Emission owes nothing to the light or to what shadows it.
             + dm3_u.emission.rgb * dm3_u.emission.w;
 
@@ -528,7 +695,9 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
         let view = i32(dm3_u.fractal.x);
         if (view == 5) { return shade_out(heat(struggle)); }
         if (view != 0) { return shade_out(vec3<f32>(0.0)); }
-        color = dm3_u.bg.rgb;
+        // Any light with a visibility above zero is drawn where the ray misses
+        // everything, so a lamp can be seen rather than only inferred.
+        color = dm3_u.bg.rgb + visible_lights(ro, rd);
     }
 
     // Basic fog: haze closing in over a visibility distance, with its own
