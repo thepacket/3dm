@@ -162,7 +162,9 @@ pub fn generate(stack: &FormulaStack) -> String {
     let n = max(centre.n - 1, 1);
 
     // Large enough to survive f32 cancellation, small enough to be local.
-    let delta = max(length(pos) * 1e-6, dm3_u.march.w * 1e-4);
+    // The relative factor is Mandelbulber's "deltaDE relative delta"; the
+    // floor keeps it usable at the origin, where the radius vanishes.
+    let delta = max(length(pos) * dm3_u.detail.w, dm3_u.march.w * 1e-4);
     let dx0 = length(dm3_iterate(pos + vec3<f32>(delta, 0.0, 0.0), n, false).z);
     let dx1 = length(dm3_iterate(pos - vec3<f32>(delta, 0.0, 0.0), n, false).z);
     let dy0 = length(dm3_iterate(pos + vec3<f32>(0.0, delta, 0.0), n, false).z);

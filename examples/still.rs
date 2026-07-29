@@ -311,6 +311,26 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
     //   hdr        HDR blur, with tone mapping off so highlights can bleed
     //   aberr      chromatic aberration; `aberr-rev` reverses its colours
     //   both       the two together, in the order the blit applies them
+    // DM3_ENGINE exercises the Rendering engine controls, each of which
+    // defaults to a value that leaves the marcher exactly as it was.
+    match std::env::var("DM3_ENGINE").as_deref() {
+        // The shape becomes the set itself rather than the estimate's level
+        // surface, which shows up as sharper edges and iteration banding.
+        Ok("maxiter") => params.engine.stop_at_max_iter = true,
+        // A box narrower than the fractal, so the clipping is unmissable.
+        Ok("limits") => {
+            params.engine.limits = true;
+            params.engine.limits_min = [-1.2, 0.0, -1.2];
+            params.engine.limits_max = [1.2, 1.2, 1.2];
+        }
+        Ok("smooth") => params.engine.smoothness = 6.0,
+        Ok("sharp") => params.engine.smoothness = 0.2,
+        Ok("constdetail") => params.engine.constant_detail = 0.02,
+        // A ceiling low enough that the marcher creeps instead of striding.
+        Ok("capstep") => params.engine.abs_max_step = 0.02,
+        _ => {}
+    }
+
     let post_mode = std::env::var("DM3_POST").unwrap_or_default();
     let through_blit = !post_mode.is_empty();
     if matches!(post_mode.as_str(), "hdr" | "both") {

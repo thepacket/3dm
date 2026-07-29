@@ -307,6 +307,19 @@ pub struct Uniforms {
     /// blit. It rides here because this is the block every renderer already
     /// builds, so `still` and `stress` get them without a second channel.
     post_fx: [f32; 4],
+    /// x = absolute minimum step, y = absolute maximum step, z = minimum step
+    /// as a multiple of the hit threshold, w = maximum. Zero on a maximum
+    /// means no limit; zero on a minimum means no floor.
+    step_limits: [f32; 4],
+    /// x = constant detail size (0 = track the pixel), y = detail ceiling,
+    /// z = detail floor, w = the delta estimator's sampling offset.
+    detail: [f32; 4],
+    /// x = 1 to treat a non-escaping point as solid, y = normal smoothness,
+    /// z = nearest distance a hit counts at, w = 1 when the box clips.
+    engine: [f32; 4],
+    /// The clipping box, when `engine.w` is set.
+    limit_min: [f32; 4],
+    limit_max: [f32; 4],
 }
 
 /// How many vec4s one light occupies. Must match `Light` in `fractal.wgsl`.
@@ -393,6 +406,7 @@ impl Uniforms {
         let pic = &params.picture;
         let bg = &params.background;
         let px = &params.post;
+        let en = &params.engine;
 
         // Each slot's parameters go to the same fixed address the generated
         // shader reads them from; anything the formula does not use stays zero.
@@ -571,6 +585,26 @@ impl Uniforms {
                 px.aberration_blur.max(0.0),
                 if px.aberration_reverse { 1.0 } else { 0.0 },
             ],
+            step_limits: [
+                en.abs_min_step.max(0.0),
+                en.abs_max_step.max(0.0),
+                en.rel_min_step.max(0.0),
+                en.rel_max_step.max(0.0),
+            ],
+            detail: [
+                en.constant_detail.max(0.0),
+                en.max_detail.max(0.0),
+                en.min_detail.max(0.0),
+                en.delta_de_delta.max(1e-12),
+            ],
+            engine: [
+                if en.stop_at_max_iter { 1.0 } else { 0.0 },
+                en.smoothness.max(1e-3),
+                en.min_view_distance.max(0.0),
+                if en.limits { 1.0 } else { 0.0 },
+            ],
+            limit_min: [en.limits_min[0], en.limits_min[1], en.limits_min[2], 0.0],
+            limit_max: [en.limits_max[0], en.limits_max[1], en.limits_max[2], 0.0],
         }
     }
 

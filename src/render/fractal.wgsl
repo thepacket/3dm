@@ -93,6 +93,18 @@ struct Uniforms {
     // anyway: this block is one flat run of bytes, so a field the CPU writes
     // and the shader omits shifts every offset after it.
     post_fx: vec4<f32>,
+    // x = absolute minimum step, y = absolute maximum step, z = minimum step
+    // as a multiple of the hit threshold, w = maximum. A zero maximum means
+    // no limit; a zero minimum means no floor.
+    step_limits: vec4<f32>,
+    // x = constant detail size (0 = track the pixel), y = detail ceiling,
+    // z = detail floor, w = the delta estimator's sampling offset
+    detail: vec4<f32>,
+    // x = 1 to treat a non-escaping point as solid, y = normal smoothness,
+    // z = nearest distance a hit counts at, w = 1 when the box clips
+    engine: vec4<f32>,
+    limit_min: vec4<f32>,
+    limit_max: vec4<f32>,
 };
 
 const LIGHT_VEC4S: i32 = 5;
@@ -155,8 +167,62 @@ struct Field {
 // a `fractal_de` that chains them inside the escape-time loop.
 //__GENERATED_DE__
 
+// The distance the marcher actually walks on, after the shape controls.
+//
+// "Stop at maximum iteration" makes the shape the set itself rather than the
+// estimate's level surface: a point whose orbit never escaped is inside, full
+// stop, and reporting zero there stops the ray on the spot.
+fn shaped_dist(field: Field) -> f32 {
+    let d = field.dist * dm3_u.fractal.w;
+    if (dm3_u.engine.x > 0.5 && field.escape >= 0.999) {
+        return 0.0;
+    }
+    return d;
+}
+
 fn map(p: vec3<f32>) -> f32 {
-    return fractal_de(p).dist * dm3_u.fractal.w;
+    return shaped_dist(fractal_de(p));
+}
+
+// The hit threshold at distance `t` along a ray.
+//
+// Normally this is the pixel's own angular size, so detail lands exactly at
+// the resolution limit however far in you fly — Mandelbulber calls that
+// connecting the detail level to the image resolution. A constant detail size
+// pins it to a fixed distance in the scene instead, which is what you want
+// when rendering a sequence that must not shimmer as the camera moves.
+fn hit_threshold(t: f32, pixel_angle: f32, eps_scale: f32) -> f32 {
+    var eps = pixel_angle * t * eps_scale;
+    if (dm3_u.detail.x > 0.0) {
+        eps = dm3_u.detail.x;
+    }
+    if (dm3_u.detail.y > 0.0) { eps = min(eps, dm3_u.detail.y); }
+    if (dm3_u.detail.z > 0.0) { eps = max(eps, dm3_u.detail.z); }
+    return max(eps, 1e-6);
+}
+
+// One march step, after the absolute and threshold-relative clamps.
+//
+// Mandelbulber offers all four because a distance estimate can fail in either
+// direction: one that overestimates needs a ceiling or the ray tunnels through
+// the surface, and one that collapses to nearly zero needs a floor or the
+// march stalls and burns its whole step budget going nowhere.
+fn march_step(d: f32, eps: f32) -> f32 {
+    var step = d;
+    if (dm3_u.step_limits.y > 0.0) { step = min(step, dm3_u.step_limits.y); }
+    if (dm3_u.step_limits.w > 0.0) { step = min(step, dm3_u.step_limits.w * eps); }
+    step = max(step, dm3_u.step_limits.x);
+    step = max(step, dm3_u.step_limits.z * eps);
+    return step;
+}
+
+// Whether `p` is inside the clipping box. Everything outside it is empty, so
+// a fractal that sprawls can be cut back to the part worth looking at.
+fn within_limits(p: vec3<f32>) -> bool {
+    if (dm3_u.engine.w < 0.5) {
+        return true;
+    }
+    return all(p >= dm3_u.limit_min.xyz) && all(p <= dm3_u.limit_max.xyz);
 }
 
 // Tetrahedral gradient — four taps instead of six.
@@ -552,7 +618,7 @@ fn reflected_color(ro: vec3<f32>, rd: vec3<f32>, eps_scale: f32, pixel_angle: f3
         let d = field.dist * dm3_u.fractal.w;
         let eps = max(pixel_angle * t * eps_scale, 1e-6);
         if (d < eps) {
-            let n = surface_normal(p, max(pixel_angle * t, 1e-5));
+            let n = surface_normal(p, max(pixel_angle * t * dm3_u.engine.y, 1e-7));
             // Every light, but none of their shadows — the whole point of this
             // function is that a bounce is not worth a second march per light.
             var lit = vec3<f32>(0.0);
@@ -657,32 +723,54 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
 
     var hit = false;
     var steps = 0;
+    // Steps that actually tested the fractal. The glow is a count of near
+    // misses, so a ray striding across empty space outside the clipping box
+    // must not add to it — counting those painted the whole bounding sphere
+    // with halo.
+    var probes = 0;
     var field: Field;
     var p = ro;
+
+    // Nothing nearer than this counts, which is how a camera sitting inside
+    // the geometry gets a picture instead of a wall.
+    t = max(t, dm3_u.engine.z);
 
     loop {
         if (steps >= max_steps) { break; }
         p = ro + rd * t;
+        let eps = hit_threshold(t, pixel_angle, eps_scale);
+        if (!within_limits(p)) {
+            // Outside the box there is nothing to hit, so stride rather than
+            // creep — but only up to the box's own scale, or a ray that
+            // re-enters would step straight over it.
+            t = t + max(eps * 4.0, dm3_u.march.w * 0.02);
+            if (t > max_dist) { break; }
+            steps = steps + 1;
+            continue;
+        }
         field = fractal_de(p);
-        let d = field.dist * dm3_u.fractal.w;
-        let eps = max(pixel_angle * t * eps_scale, 1e-6);
+        let d = shaped_dist(field);
         if (d < eps) {
             hit = true;
             break;
         }
-        t = t + d;
+        t = t + march_step(d, eps);
         if (t > max_dist) { break; }
         steps = steps + 1;
+        // Counted alongside `steps`, not at the point of sampling: the glow is
+        // calibrated against this exact count, and moving it by one would
+        // repaint every haloed pixel.
+        probes = probes + 1;
     }
 
     var color: vec3<f32>;
 
     // Rays that grind through many steps without hitting are grazing the
     // surface; that near-miss count is what produces the fractal's halo.
-    let struggle = f32(steps) / max(f32(max_steps), 1.0);
+    let struggle = f32(probes) / max(f32(max_steps), 1.0);
 
     if (hit) {
-        let n = surface_normal(p, max(pixel_angle * t, 1e-5));
+        let n = surface_normal(p, max(pixel_angle * t * dm3_u.engine.y, 1e-7));
 
         let base = palette(field.trap);
         // Reuse the primary ray's hit threshold so the shadow ray's scale

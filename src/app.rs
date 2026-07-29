@@ -4,7 +4,9 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use crate::camera::Camera;
-use crate::formulas::{Builtin, DeMode, FormulaKind, FormulaSlot, generated::GENERATED};
+use crate::formulas::{
+    Builtin, DeMode, FormulaKind, FormulaSlot, FormulaStack, generated::GENERATED,
+};
 use crate::params::{
     BackgroundMap, BackgroundParams, DebugView, Light, LightDecay, LightKind, LightsParams,
     MAX_LIGHTS, Material, Perspective, Post,
@@ -403,6 +405,10 @@ impl App {
                         ui.label("glow core / edge");
                     });
                 });
+
+            egui::CollapsingHeader::new("Rendering engine")
+                .default_open(false)
+                .show(ui, |ui| engine_editor(params, ui));
 
             egui::CollapsingHeader::new("Post effects")
                 .default_open(false)
@@ -1293,6 +1299,228 @@ fn thumb_uv(index: usize) -> egui::Rect {
     )
 }
 
+/// Mandelbulber's Rendering engine panel: how hard the marcher works, and what
+/// counts as a surface.
+///
+/// Its "Fractal formula iterations" group is mostly about how the engine walks
+/// a stack of formulas, which 3DM does its own way — one formula's iteration
+/// range is set on the formula, in the stack editor. What is here is the part
+/// that describes the *marcher*.
+///
+/// Left out: nebula fractals, which accumulate a point cloud rather than
+/// marching a surface and are a whole second renderer; non-DE shading, which
+/// needs a normal derived without the estimator; and the MaxAxis and
+/// JosKleinian estimator functions, which are not among the closed forms 3DM
+/// generates.
+fn engine_editor(params: &mut SceneParams, ui: &mut egui::Ui) {
+    ui.label(egui::RichText::new("Iterations and bailout").strong());
+    ui.add(
+        egui::Slider::new(&mut params.fractal.iterations, 2..=512)
+            .text("maximum iterations")
+            .logarithmic(true),
+    );
+    ui.horizontal(|ui| {
+        let suggested = params.stack.suggested_bailout();
+        let is_default = (params.fractal.bailout - suggested).abs() < 1e-4;
+        ui.add_enabled(
+            !is_default,
+            egui::DragValue::new(&mut params.fractal.bailout)
+                .speed(0.5)
+                .range(1.5..=1000.0)
+                .prefix("bailout: "),
+        );
+        let mut use_default = is_default;
+        if ui
+            .checkbox(&mut use_default, "formula's own")
+            .on_hover_text("Take the escape radius the formula was written for.")
+            .clicked()
+            && use_default
+        {
+            params.fractal.bailout = suggested;
+        }
+    });
+
+    ui.add_space(6.0);
+    ui.label(egui::RichText::new("Distance estimation").strong());
+    ui.add(
+        egui::Slider::new(&mut params.fractal.de_scale, 0.05..=1.0)
+            .text("step multiplier")
+            .step_by(0.01),
+    )
+    .on_hover_text(
+        "Shortens each march step. Lower fixes banding and holes where the \
+         estimate overshoots, at the cost of speed.",
+    );
+    ui.horizontal_wrapped(|ui| {
+        // Mandelbulber's three optimisation buttons, which set the estimator's
+        // step and the marcher's budget together.
+        if ui.button("Low quality").clicked() {
+            params.fractal.de_scale = 1.0;
+            params.march.max_steps = 96;
+            params.march.epsilon_scale = 2.0;
+        }
+        if ui.button("Medium").clicked() {
+            let d = SceneParams::default();
+            params.fractal.de_scale = d.fractal.de_scale;
+            params.march.max_steps = d.march.max_steps;
+            params.march.epsilon_scale = d.march.epsilon_scale;
+        }
+        if ui.button("High quality").clicked() {
+            params.fractal.de_scale = 0.5;
+            params.march.max_steps = 400;
+            params.march.epsilon_scale = 0.6;
+        }
+    });
+    de_mode_picker(&mut params.stack, ui);
+
+    ui.add_space(6.0);
+    let e = &mut params.engine;
+    ui.label(egui::RichText::new("Detail level").strong());
+    ui.add(
+        egui::Slider::new(&mut params.march.epsilon_scale, 0.2..=4.0)
+            .text("detail")
+            .logarithmic(true),
+    )
+    .on_hover_text(
+        "Hit threshold in pixels. Lower is sharper and slower. Because it is \
+         measured in pixels the detail follows the image resolution — which is \
+         the box Mandelbulber leaves you to tick.",
+    );
+    let mut constant = e.constant_detail > 0.0;
+    if ui
+        .checkbox(&mut constant, "constant detail size")
+        .on_hover_text(
+            "Pin the threshold to a fixed distance in the scene instead. What \
+             you want for a sequence that must not shimmer as the camera moves.",
+        )
+        .clicked()
+    {
+        e.constant_detail = if constant { 0.01 } else { 0.0 };
+    }
+    if constant {
+        ui.add(
+            egui::Slider::new(&mut e.constant_detail, 1e-5..=0.1)
+                .text("distance threshold")
+                .logarithmic(true),
+        );
+    }
+
+    ui.add_space(6.0);
+    ui.collapsing("Advanced quality", |ui| {
+        ui.label(
+            egui::RichText::new(
+                "Escape hatches for a formula whose estimate misbehaves. Zero \
+                 on any of these lifts the limit, which is the default.",
+            )
+            .weak(),
+        );
+        ui.add(egui::Slider::new(&mut params.march.max_steps, 32..=2048).text("maximum steps"));
+        ui.add(
+            egui::DragValue::new(&mut e.abs_max_step)
+                .speed(0.01)
+                .range(0.0..=100.0)
+                .prefix("absolute maximum step: "),
+        )
+        .on_hover_text("Stops an overestimating formula tunnelling through its own surface.");
+        ui.add(
+            egui::DragValue::new(&mut e.abs_min_step)
+                .speed(0.0001)
+                .range(0.0..=1.0)
+                .prefix("absolute minimum step: "),
+        )
+        .on_hover_text("Stops a collapsing estimate stalling the march on the spot.");
+        ui.add(
+            egui::DragValue::new(&mut e.rel_max_step)
+                .speed(1.0)
+                .range(0.0..=10000.0)
+                .prefix("relative maximum step: "),
+        )
+        .on_hover_text("The same ceiling, as a multiple of the hit threshold.");
+        ui.add(
+            egui::DragValue::new(&mut e.rel_min_step)
+                .speed(0.01)
+                .range(0.0..=100.0)
+                .prefix("relative minimum step: "),
+        );
+        ui.add(
+            egui::DragValue::new(&mut e.max_detail)
+                .speed(0.001)
+                .range(0.0..=10.0)
+                .prefix("maximum detail size: "),
+        );
+        ui.add(
+            egui::DragValue::new(&mut e.min_detail)
+                .speed(1e-5)
+                .range(0.0..=1.0)
+                .prefix("minimum detail size: "),
+        );
+        ui.add(
+            egui::Slider::new(&mut e.delta_de_delta, 1e-8..=0.05)
+                .text("deltaDE relative delta")
+                .logarithmic(true),
+        )
+        .on_hover_text(
+            "How far apart the delta estimator samples its neighbours. Only \
+             formulas with no analytic derivative use it.",
+        );
+    });
+
+    ui.add_space(6.0);
+    ui.label(egui::RichText::new("Shape control").strong());
+    ui.checkbox(&mut e.stop_at_max_iter, "stop at maximum iteration")
+        .on_hover_text(
+            "Treat any point whose orbit never escaped as solid, so the shape \
+             is the set itself rather than the estimate's level surface. \
+             Sharper, and slower, and it shows the iteration count as banding.",
+        );
+
+    ui.add_space(6.0);
+    ui.label(egui::RichText::new("Surface").strong());
+    ui.add(
+        egui::Slider::new(&mut e.smoothness, 0.1..=8.0)
+            .text("smoothness")
+            .logarithmic(true),
+    )
+    .on_hover_text(
+        "Spacing of the samples the normal is taken from. Above one smooths \
+         the surface and loses fine relief; below one sharpens it and picks \
+         up the estimator's noise.",
+    );
+
+    ui.add_space(6.0);
+    ui.label(egui::RichText::new("View distance limits").strong());
+    ui.add(egui::Slider::new(&mut params.march.max_dist, 2.0..=200.0).text("maximum"));
+    ui.add(
+        egui::DragValue::new(&mut e.min_view_distance)
+            .speed(0.001)
+            .range(0.0..=10.0)
+            .prefix("minimum: "),
+    )
+    .on_hover_text(
+        "Nothing nearer than this counts as a hit — which is how a camera \
+         sitting inside the geometry gets a picture instead of a wall.",
+    );
+
+    ui.add_space(6.0);
+    ui.checkbox(&mut e.limits, "limits (bounding box)")
+        .on_hover_text("Everything outside the box is treated as empty space.");
+    if e.limits {
+        if ui
+            .button("box to bounds")
+            .on_hover_text("Fit the box to the formula's own bounding radius.")
+            .clicked()
+        {
+            let r = params.fractal.bounding_radius;
+            e.limits_min = [-r, -r, -r];
+            e.limits_max = [r, r, r];
+        }
+        ui.label("minimum corner");
+        vector_row(ui, &mut e.limits_min, 0.01);
+        ui.label("maximum corner");
+        vector_row(ui, &mut e.limits_max, 0.01);
+    }
+}
+
 /// Mandelbulber's Post effects tab.
 ///
 /// Both filters read the pixels around the one they produce, so both live in
@@ -1921,27 +2149,94 @@ fn stack_editor(
     });
 
     ui.add_space(4.0);
+    ui.label(
+        egui::RichText::new("Which estimator to use is in Rendering engine.")
+            .small()
+            .weak(),
+    );
+}
+
+/// Which distance estimator to use, split the way Mandelbulber splits it.
+///
+/// It asks two questions: the *method* — is there an analytic derivative to
+/// use, or must the distance be measured by sampling? — and then the closed
+/// *function* that derivative is fed to. 3DM's `DeMode` is one enum covering
+/// both, so this presents the pair and folds them back together.
+fn de_mode_picker(stack: &mut FormulaStack, ui: &mut egui::Ui) {
+    // Delta estimators run the whole iteration at six neighbours as well as
+    // the point, so which half of this list a mode falls in is the expensive
+    // question and the one Mandelbulber asks first.
+    const ANALYTIC: [DeMode; 5] = [
+        DeMode::Log,
+        DeMode::Linear,
+        DeMode::Ifs,
+        DeMode::Custom,
+        DeMode::PseudoKleinian,
+    ];
+    const DELTA: [DeMode; 2] = [DeMode::Delta, DeMode::DeltaLinear];
+
+    let effective = stack.de_mode();
+    let chosen = stack.de_mode_override;
+
     ui.horizontal(|ui| {
-        ui.label("estimator");
-        let auto = stack.de_mode_override.is_none();
-        let current = stack.de_mode();
-        egui::ComboBox::from_id_salt("de_mode")
-            .selected_text(if auto {
-                format!("auto ({})", current.label())
-            } else {
-                current.label().to_owned()
+        ui.label("method");
+        let is_delta = chosen.map(|m| m.is_delta());
+        egui::ComboBox::from_id_salt("de_method")
+            .selected_text(match is_delta {
+                None => "automatic",
+                Some(true) => "force delta DE",
+                Some(false) => "force analytic DE",
             })
-            .width(140.0)
+            .width(170.0)
             .show_ui(ui, |ui| {
-                if ui.selectable_label(auto, "auto").clicked() {
+                if ui.selectable_label(is_delta.is_none(), "automatic").clicked() {
                     stack.de_mode_override = None;
                 }
-                for mode in DeMode::ALL {
-                    if ui
-                        .selectable_label(stack.de_mode_override == Some(mode), mode.label())
-                        .clicked()
-                    {
-                        stack.de_mode_override = Some(mode);
+                if ui
+                    .selectable_label(is_delta == Some(false), "force analytic DE")
+                    .clicked()
+                {
+                    // Keep the closed form and drop only the delta part, so
+                    // switching method does not also reset the function.
+                    stack.de_mode_override = Some(match effective {
+                        DeMode::DeltaLinear => DeMode::Linear,
+                        DeMode::Delta => DeMode::Log,
+                        other => other,
+                    });
+                }
+                if ui
+                    .selectable_label(is_delta == Some(true), "force delta DE")
+                    .clicked()
+                {
+                    stack.de_mode_override = Some(match effective {
+                        DeMode::Linear | DeMode::DeltaLinear => DeMode::DeltaLinear,
+                        _ => DeMode::Delta,
+                    });
+                }
+            });
+    })
+    .response
+    .on_hover_text(
+        "A delta estimate measures the distance by running the iteration at \
+         six neighbours as well as the point — seven times the work, and the \
+         only option for a formula with no derivative.",
+    );
+
+    ui.horizontal(|ui| {
+        ui.label("function");
+        let auto = chosen.is_none();
+        egui::ComboBox::from_id_salt("de_function")
+            .selected_text(if auto { "automatic" } else { effective.label() })
+            .width(170.0)
+            .show_ui(ui, |ui| {
+                if ui.selectable_label(auto, "automatic").clicked() {
+                    stack.de_mode_override = None;
+                }
+                let delta_now = chosen.map(|m| m.is_delta()).unwrap_or(false);
+                let list: &[DeMode] = if delta_now { &DELTA } else { &ANALYTIC };
+                for mode in list {
+                    if ui.selectable_label(chosen == Some(*mode), mode.label()).clicked() {
+                        stack.de_mode_override = Some(*mode);
                     }
                 }
             });
@@ -1949,7 +2244,14 @@ fn stack_editor(
     .response
     .on_hover_text(
         "Scaling formulas like the Mandelbox need a linear distance estimate; \
-         escape-time formulas need the logarithmic one. Auto picks for you.",
+         escape-time formulas need the logarithmic one. Mandelbulber's MaxAxis \
+         and JosKleinian are not among the forms 3DM generates.",
+    );
+
+    ui.label(
+        egui::RichText::new(format!("in use: {}", effective.label()))
+            .small()
+            .weak(),
     );
 }
 

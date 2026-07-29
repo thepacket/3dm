@@ -532,6 +532,72 @@ impl Default for Picture {
     }
 }
 
+/// Mandelbulber's Rendering engine panel: how hard the marcher works and what
+/// counts as a surface.
+///
+/// Every field here defaults to a value that leaves the marcher doing exactly
+/// what it did before this group existed. Mandelbulber puts its own numbers
+/// behind an "Advanced quality settings" tick for the same reason — they are
+/// escape hatches for a formula whose estimate misbehaves, not knobs to reach
+/// for first.
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct Engine {
+    /// Fix the hit threshold at this world-space distance rather than letting
+    /// it track the pixel's angular size. Zero keeps it tracking, which is
+    /// what Mandelbulber calls connecting detail to image resolution.
+    pub constant_detail: f32,
+    /// Ceiling and floor on the hit threshold. Zero on either lifts it.
+    pub max_detail: f32,
+    pub min_detail: f32,
+    /// Clamps on one march step, in world units. Zero on a maximum lifts it.
+    pub abs_min_step: f32,
+    pub abs_max_step: f32,
+    /// The same, as multiples of the hit threshold — so they follow the zoom
+    /// instead of being fixed to the scene.
+    pub rel_min_step: f32,
+    pub rel_max_step: f32,
+    /// Offset the delta estimator samples its neighbours at, relative to the
+    /// point's own radius. Only formulas with no analytic derivative use it.
+    pub delta_de_delta: f32,
+    /// Treat a point that never escaped as solid, so the shape is exactly the
+    /// set rather than the estimate's level surface.
+    pub stop_at_max_iter: bool,
+    /// Scales the spacing of the normal's samples. Above 1 smooths the
+    /// surface and loses fine relief; below 1 sharpens it and picks up noise.
+    pub smoothness: f32,
+    /// Nearest distance a ray may register a hit at. Zero lets it hit
+    /// anything, including geometry the camera is sitting inside.
+    pub min_view_distance: f32,
+    /// Clip the march to an axis-aligned box as well as the bounding sphere.
+    pub limits: bool,
+    pub limits_min: [f32; 3],
+    pub limits_max: [f32; 3],
+}
+
+impl Default for Engine {
+    fn default() -> Self {
+        Self {
+            constant_detail: 0.0,
+            max_detail: 0.0,
+            min_detail: 0.0,
+            abs_min_step: 0.0,
+            abs_max_step: 0.0,
+            rel_min_step: 0.0,
+            rel_max_step: 0.0,
+            // What the generated delta estimator used before this was
+            // adjustable. Mandelbulber's own default is 0.01, against a
+            // differently scaled estimate.
+            delta_de_delta: 1e-6,
+            stop_at_max_iter: false,
+            smoothness: 1.0,
+            min_view_distance: 0.0,
+            limits: false,
+            limits_min: [-1.2, -1.2, -1.2],
+            limits_max: [1.2, 1.2, 1.2],
+        }
+    }
+}
+
 /// Filters run over the finished frame, after everything else.
 ///
 /// These live in the blit rather than the fractal pass because each one needs
@@ -707,6 +773,7 @@ pub struct SceneParams {
     pub lights: LightsParams,
     pub background: BackgroundParams,
     pub post: Post,
+    pub engine: Engine,
     pub material: Material,
     pub picture: Picture,
     /// Diagnostic override; [`DebugView::Off`] renders normally.
