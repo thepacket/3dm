@@ -9,10 +9,12 @@ use crate::formulas::{
 };
 use crate::params::{
     BackgroundMap, BackgroundParams, DebugView, Light, LightDecay, LightKind, LightsParams,
-    MAX_LIGHTS, Material, Perspective, Post,
+    Export, ImageFormat, MAX_EXPORT_PIXELS, MAX_LIGHTS, Material, Perspective, Post,
     SceneParams, Stop,
 };
-use crate::render::{CursorProbe, FractalPipeline, Uniforms, callback};
+use crate::render::{
+    CursorProbe, ExportRequest, ExportSlot, FractalCallback, FractalPipeline, Uniforms, callback,
+};
 
 /// Radians of orbit per point of mouse travel.
 const ORBIT_SENSITIVITY: f32 = 0.007;
@@ -186,6 +188,14 @@ pub struct App {
     /// A decoded image waiting to be handed to the renderer, which can only
     /// happen inside the paint callback where the device and queue exist.
     pending_background: Option<(u32, u32, Vec<u8>)>,
+    /// Where an export is written, and how big.
+    export: Export,
+    /// Set for the one frame that asks the renderer to draw the export.
+    export_requested: bool,
+    /// Where the finished pixels land, filled on a wgpu mapping callback.
+    export_slot: ExportSlot,
+    /// What to tell the user about the last export.
+    export_status: Option<String>,
 }
 
 impl App {
@@ -239,6 +249,10 @@ impl App {
             selected_light: 0,
             background_image: None,
             pending_background: None,
+            export: Export::default(),
+            export_requested: false,
+            export_slot: ExportSlot::default(),
+            export_status: None,
         })
     }
 
@@ -267,6 +281,10 @@ impl App {
             fps_cap,
             cursor,
             last_render_size,
+            export,
+            export_requested,
+            export_slot,
+            export_status,
             ..
         } = self;
         let mut reset_view = false;
@@ -404,6 +422,20 @@ impl App {
                         ui.color_edit_button_rgb(&mut s.glow_far);
                         ui.label("glow core / edge");
                     });
+                });
+
+            egui::CollapsingHeader::new("Export")
+                .default_open(false)
+                .show(ui, |ui| {
+                    if export_editor(
+                        export,
+                        export_slot.in_flight(),
+                        export_status.as_deref(),
+                        ui,
+                    ) {
+                        *export_requested = true;
+                        *export_status = None;
+                    }
                 });
 
             egui::CollapsingHeader::new("Rendering engine")
@@ -770,6 +802,40 @@ impl App {
         }
     }
 
+    /// Encodes and saves an export once its pixels have been read back.
+    ///
+    /// Called every frame; does nothing until the GPU's mapping callback has
+    /// left something in the slot, which is a frame or two after the request.
+    fn collect_export(&mut self) {
+        let Some((width, height, rgba)) = self.export_slot.take() else {
+            return;
+        };
+        let Some(image) = image::RgbaImage::from_raw(width, height, rgba) else {
+            self.export_status = Some("the readback was the wrong size".to_owned());
+            return;
+        };
+
+        let mut encoded = std::io::Cursor::new(Vec::new());
+        let written = match self.export.format {
+            ImageFormat::Png => image.write_to(&mut encoded, image::ImageFormat::Png),
+            // JPEG has no alpha, and ours carries the circle of confusion
+            // rather than opacity — writing it would be meaningless anyway.
+            ImageFormat::Jpeg => image::DynamicImage::ImageRgba8(image)
+                .to_rgb8()
+                .write_to(&mut encoded, image::ImageFormat::Jpeg),
+        };
+        if let Err(e) = written {
+            self.export_status = Some(format!("could not encode: {e}"));
+            return;
+        }
+
+        let name = self.export.file_name();
+        self.export_status = Some(match save_bytes(&name, encoded.into_inner()) {
+            Ok(where_to) => format!("saved {width}x{height} to {where_to}"),
+            Err(e) => format!("could not save {name}: {e}"),
+        });
+    }
+
     /// Takes an image dropped on the window as the background panorama.
     ///
     /// Drag and drop rather than a file dialog because egui hands over the
@@ -1009,14 +1075,44 @@ impl App {
             self.encode_srgb,
             self.cursor_ndc,
         );
+        // The export is rendered from the same camera but at its own size, so
+        // it needs its own uniforms: the hit threshold is derived from the
+        // pixel's angular size, and building it from the window's dimensions
+        // would give a 4K image the detail of a preview.
+        let export = self.export_requested.then(|| {
+            self.export_requested = false;
+            let size = [
+                self.export.width.clamp(16, MAX_EXPORT_PIXELS),
+                self.export.height.clamp(16, MAX_EXPORT_PIXELS),
+            ];
+            let uniforms = Uniforms::build(
+                &self.camera,
+                // The scene as authored, never the reduced-quality version a
+                // moving camera is drawn with.
+                &self.params,
+                [size[0] as f32, size[1] as f32],
+                self.elapsed,
+                self.encode_srgb,
+                [0.0, 0.0],
+            );
+            ExportRequest {
+                size,
+                uniforms: Box::new(uniforms),
+                slot: self.export_slot.clone(),
+            }
+        });
+
         ui.painter().add(callback(
             rect,
-            uniforms,
-            physical,
-            render_size,
-            self.shader.0,
-            Arc::clone(&self.shader.1),
-            self.pending_background.take(),
+            FractalCallback {
+                uniforms,
+                viewport: physical,
+                render_size,
+                shader_key: self.shader.0,
+                shader_source: Arc::clone(&self.shader.1),
+                background: self.pending_background.take(),
+                export,
+            },
         ));
 
         // After the fractal, not before. egui paints a layer in the order
@@ -1046,6 +1142,7 @@ impl eframe::App for App {
 
         self.frame_start = Some(std::time::Instant::now());
         self.accept_dropped_background(ui.ctx());
+        self.collect_export();
         self.service_gpu();
         let dt = ui.input(|i| i.stable_dt).min(0.1);
         self.elapsed += dt;
@@ -1297,6 +1394,130 @@ fn thumb_uv(index: usize) -> egui::Rect {
         egui::pos2(col as f32 * step, row as f32 * step),
         egui::vec2(step, step),
     )
+}
+
+/// Writes an exported image, and says where it went.
+///
+/// The two platforms have nothing in common here: a desktop build owns a
+/// filesystem, and a web build can only hand the bytes to the browser and let
+/// it do what it does with a download.
+#[cfg(not(target_arch = "wasm32"))]
+fn save_bytes(name: &str, bytes: Vec<u8>) -> Result<String, String> {
+    let path = std::path::Path::new(name);
+    // A bare name lands next to wherever the app was started from, which is
+    // the least surprising place for it and the only one we can name.
+    let full = if path.is_absolute() {
+        path.to_path_buf()
+    } else {
+        std::env::current_dir()
+            .map_err(|e| e.to_string())?
+            .join(path)
+    };
+    std::fs::write(&full, bytes).map_err(|e| e.to_string())?;
+    Ok(full.display().to_string())
+}
+
+/// Hands the bytes to the browser as a download.
+///
+/// An object URL wrapping a blob, clicked through a detached anchor — the
+/// standard trick, and the only route to the user's disk that does not need a
+/// server to send the file back.
+#[cfg(target_arch = "wasm32")]
+fn save_bytes(name: &str, bytes: Vec<u8>) -> Result<String, String> {
+    use wasm_bindgen::{JsCast, JsValue};
+
+    let array = js_sys::Uint8Array::from(bytes.as_slice());
+    let parts = js_sys::Array::of1(&array);
+    let blob = web_sys::Blob::new_with_u8_array_sequence(&JsValue::from(parts))
+        .map_err(|_| "could not build the blob".to_owned())?;
+    let url = web_sys::Url::create_object_url_with_blob(&blob)
+        .map_err(|_| "could not build the object URL".to_owned())?;
+
+    let document = web_sys::window()
+        .and_then(|w| w.document())
+        .ok_or_else(|| "no document".to_owned())?;
+    let anchor = document
+        .create_element("a")
+        .map_err(|_| "could not create the anchor".to_owned())?
+        .dyn_into::<web_sys::HtmlAnchorElement>()
+        .map_err(|_| "not an anchor".to_owned())?;
+    anchor.set_href(&url);
+    anchor.set_download(name);
+    anchor.click();
+    // The blob is held alive by the browser until the download starts; the URL
+    // itself can go straight away.
+    let _ = web_sys::Url::revoke_object_url(&url);
+    Ok("your downloads".to_owned())
+}
+
+/// Name, format and resolution for the exported image.
+fn export_editor(
+    export: &mut Export,
+    busy: bool,
+    status: Option<&str>,
+    ui: &mut egui::Ui,
+) -> bool {
+    ui.horizontal(|ui| {
+        ui.label("name");
+        ui.text_edit_singleline(&mut export.name);
+    });
+    ui.horizontal(|ui| {
+        ui.label("format");
+        egui::ComboBox::from_id_salt("export_format")
+            .selected_text(export.format.label())
+            .width(90.0)
+            .show_ui(ui, |ui| {
+                for format in ImageFormat::ALL {
+                    ui.selectable_value(&mut export.format, format, format.label());
+                }
+            });
+        ui.label(egui::RichText::new(export.file_name()).weak());
+    });
+
+    ui.horizontal(|ui| {
+        ui.label("size");
+        ui.add(
+            egui::DragValue::new(&mut export.width)
+                .speed(16)
+                .range(16..=MAX_EXPORT_PIXELS),
+        );
+        ui.label("x");
+        ui.add(
+            egui::DragValue::new(&mut export.height)
+                .speed(16)
+                .range(16..=MAX_EXPORT_PIXELS),
+        );
+    });
+    ui.horizontal_wrapped(|ui| {
+        for (label, w, h) in [
+            ("720p", 1280, 720),
+            ("1080p", 1920, 1080),
+            ("4K", 3840, 2160),
+            ("square", 2048, 2048),
+        ] {
+            if ui.small_button(label).clicked() {
+                export.width = w;
+                export.height = h;
+            }
+        }
+    });
+
+    let start = ui
+        .add_enabled(!busy, egui::Button::new("Export image"))
+        .on_hover_text(
+            "Rendered at the size above from the current camera, at the \
+             scene's full quality however reduced the preview is — and through \
+             the same blit as the window, so depth of field, the HDR blur and \
+             chromatic aberration are all in the file.",
+        )
+        .clicked();
+    if busy {
+        ui.label(egui::RichText::new("rendering\u{2026}").weak());
+    }
+    if let Some(status) = status {
+        ui.label(egui::RichText::new(status).weak());
+    }
+    start
 }
 
 /// Mandelbulber's Rendering engine panel: how hard the marcher works, and what

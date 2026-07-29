@@ -368,6 +368,38 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
     });
 
 
+    // DM3_EXPORT drives the app's real export path instead of this example's
+    // own readback: same pipeline call the Export button makes, same slot, same
+    // mapping. Rendered at the same size it should be pixel-identical to
+    // DM3_POST=1, which is the check worth having — the export is only useful
+    // if it produces the picture the window shows.
+    if std::env::var("DM3_EXPORT").is_ok() {
+        let slot = three_dm::render::ExportSlot::default();
+        assert!(
+            pipeline.export_frame(&device, &queue, key, [width, height], &uniforms, &slot),
+            "export_frame refused the request"
+        );
+        // The app services this from its per-frame maintenance; here there is
+        // no frame loop, so drive it directly until the mapping lands.
+        let mut pixels = None;
+        for _ in 0..1000 {
+            device
+                .poll(wgpu::PollType::wait_indefinitely())
+                .expect("GPU poll failed");
+            if let Some(got) = slot.take() {
+                pixels = Some(got);
+                break;
+            }
+        }
+        let (w, h, mut rgba) = pixels.expect("the export never landed");
+        assert_eq!((w, h), (width, height), "export came back the wrong size");
+        for pixel in rgba.chunks_exact_mut(4) {
+            pixel[3] = 255;
+        }
+        image::save_buffer(path, &rgba, w, h, image::ColorType::Rgba8).expect("could not write PNG");
+        return;
+    }
+
     let mut encoder = device.create_command_encoder(&Default::default());
     if through_blit {
         pipeline.render_offscreen(

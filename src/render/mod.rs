@@ -646,6 +646,34 @@ mod probe_state {
 /// zoom somewhere the user chose rather than at the middle of the scene. The
 /// clear space at the camera is what keeps forward flight from crossing a
 /// surface, and it follows the view axis, which the cursor usually does not.
+/// A finished export, waiting for the app to encode and save it.
+///
+/// The pixels arrive on a wgpu mapping callback, which is not the frame that
+/// asked for them, so they land here and the app collects them next time it
+/// looks. Same shape as [`CursorProbe`] and for the same reason.
+/// An exported frame: width, height, and tightly packed RGBA.
+pub type ExportImage = (u32, u32, Vec<u8>);
+
+#[derive(Clone, Default)]
+pub struct ExportSlot {
+    inner: Arc<std::sync::Mutex<Option<ExportImage>>>,
+    /// Set while a render is in flight, so a second click cannot start one on
+    /// top of it and leave two mappings open.
+    busy: Arc<AtomicU8>,
+}
+
+impl ExportSlot {
+    /// Whether an export is still being rendered or read back.
+    pub fn in_flight(&self) -> bool {
+        self.busy.load(Ordering::Acquire) != 0
+    }
+
+    /// Takes the finished image, if one has landed: width, height, RGBA.
+    pub fn take(&self) -> Option<ExportImage> {
+        self.inner.lock().ok()?.take()
+    }
+}
+
 #[derive(Clone)]
 pub struct CursorProbe {
     /// World position under the cursor, then the ray distance to it. A
@@ -1373,6 +1401,193 @@ impl FractalPipeline {
         }
     }
 
+    /// Renders one frame at an arbitrary size and reads it back.
+    ///
+    /// Everything here is its own: its own textures, sized to the export
+    /// rather than the window, and — crucially — **its own submission**. The
+    /// uniform, region and post buffers are shared with the live frame, and a
+    /// `write_buffer` is applied once per submit, so recording the export into
+    /// egui's encoder would leave both passes reading whichever set of
+    /// uniforms was written last. Submitting separately, before the caller
+    /// re-uploads the live scene, keeps the two frames from overwriting each
+    /// other.
+    ///
+    /// The readback is mapped without polling here, exactly as the cursor
+    /// probe does: the app's per-frame device maintenance services it a moment
+    /// later. Polling from inside a paint callback with an encoder open is
+    /// what an earlier version of the probe did, and it stalled the app.
+    pub fn export_frame(
+        &self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        key: u64,
+        size: [u32; 2],
+        uniforms: &Uniforms,
+        slot: &ExportSlot,
+    ) -> bool {
+        if !self.pipelines.contains_key(&key) || slot.in_flight() {
+            return false;
+        }
+        let [width, height] = size;
+        if width == 0 || height == 0 {
+            return false;
+        }
+        slot.busy.store(1, Ordering::Release);
+
+        let descriptor = |label, usage| wgpu::TextureDescriptor {
+            label: Some(label),
+            size: wgpu::Extent3d {
+                width,
+                height,
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: self.target_format,
+            usage,
+            view_formats: &[],
+        };
+        // The fractal is drawn here, then the blit reads it — which is what
+        // puts depth of field, chromatic aberration and the HDR blur into an
+        // exported image rather than only on screen.
+        let scene = device.create_texture(&descriptor(
+            "3dm.export.scene",
+            wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TEXTURE_BINDING,
+        ));
+        let out = device.create_texture(&descriptor(
+            "3dm.export.out",
+            wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,
+        ));
+        let scene_view = scene.create_view(&wgpu::TextureViewDescriptor::default());
+        let out_view = out.create_view(&wgpu::TextureViewDescriptor::default());
+
+        let blit_bind = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("3dm.export.blit.bg"),
+            layout: &self.blit_layout,
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: wgpu::BindingResource::TextureView(&scene_view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: wgpu::BindingResource::Sampler(&self.sampler),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 2,
+                    resource: self.blit_uniform.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 3,
+                    resource: self.post_uniform.as_entire_binding(),
+                },
+            ],
+        });
+
+        self.upload(queue, uniforms);
+        // The whole texture is drawn, so the region is the whole texture.
+        queue.write_buffer(
+            &self.blit_uniform,
+            0,
+            bytemuck::cast_slice(&[1.0f32, 1.0, 0.5 / width as f32, 0.5 / height as f32]),
+        );
+        queue.write_buffer(&self.post_uniform, 0, bytemuck::cast_slice(&uniforms.post()));
+
+        let padded = (width * 4).div_ceil(wgpu::COPY_BYTES_PER_ROW_ALIGNMENT)
+            * wgpu::COPY_BYTES_PER_ROW_ALIGNMENT;
+        let readback = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("3dm.export.readback"),
+            size: (padded as u64) * (height as u64),
+            usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
+            mapped_at_creation: false,
+        });
+
+        let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("3dm.export.encoder"),
+        });
+        {
+            let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("3dm.export.scene.pass"),
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: &scene_view,
+                    depth_slice: None,
+                    resolve_target: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
+                        store: wgpu::StoreOp::Store,
+                    },
+                })],
+                depth_stencil_attachment: None,
+                timestamp_writes: None,
+                occlusion_query_set: None,
+                multiview_mask: None,
+            });
+            self.draw(&mut pass, key);
+        }
+        {
+            let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("3dm.export.blit.pass"),
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: &out_view,
+                    depth_slice: None,
+                    resolve_target: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
+                        store: wgpu::StoreOp::Store,
+                    },
+                })],
+                depth_stencil_attachment: None,
+                timestamp_writes: None,
+                occlusion_query_set: None,
+                multiview_mask: None,
+            });
+            pass.set_pipeline(&self.blit);
+            pass.set_bind_group(0, &blit_bind, &[]);
+            pass.draw(0..3, 0..1);
+        }
+        encoder.copy_texture_to_buffer(
+            out.as_image_copy(),
+            wgpu::TexelCopyBufferInfo {
+                buffer: &readback,
+                layout: wgpu::TexelCopyBufferLayout {
+                    offset: 0,
+                    bytes_per_row: Some(padded),
+                    rows_per_image: Some(height),
+                },
+            },
+            wgpu::Extent3d {
+                width,
+                height,
+                depth_or_array_layers: 1,
+            },
+        );
+        queue.submit([encoder.finish()]);
+
+        let result = Arc::clone(&slot.inner);
+        let busy = Arc::clone(&slot.busy);
+        let buffer = readback.clone();
+        readback.slice(..).map_async(wgpu::MapMode::Read, move |r| {
+            if r.is_ok() {
+                let raw = buffer.slice(..).get_mapped_range();
+                // Drop the row padding the copy alignment forced on us.
+                let row = (width * 4) as usize;
+                let mut rgba = Vec::with_capacity(row * height as usize);
+                for y in 0..height as usize {
+                    let start = y * padded as usize;
+                    rgba.extend_from_slice(&raw[start..start + row]);
+                }
+                drop(raw);
+                buffer.unmap();
+                if let Ok(mut slot) = result.lock() {
+                    *slot = Some((width, height, rgba));
+                }
+            }
+            busy.store(0, Ordering::Release);
+        });
+        true
+    }
+
     /// Push a new scene to the GPU. Cheap enough to do every frame.
     pub fn upload(&self, queue: &wgpu::Queue, uniforms: &Uniforms) {
         let mut uniforms = *uniforms;
@@ -1425,6 +1640,19 @@ pub struct FractalCallback {
     /// A newly dropped background image, as tightly packed RGBA. Present on
     /// exactly the one frame that follows the drop.
     pub background: Option<(u32, u32, Vec<u8>)>,
+    /// An export to render this frame, if the button was pressed.
+    pub export: Option<ExportRequest>,
+}
+
+/// One frame to render at its own size and read back.
+///
+/// The uniforms are built separately from the live frame's because the hit
+/// threshold comes from a pixel's angular size: reusing the window's would
+/// give a 4K export the detail of a preview.
+pub struct ExportRequest {
+    pub size: [u32; 2],
+    pub uniforms: Box<Uniforms>,
+    pub slot: ExportSlot,
 }
 
 impl CallbackTrait for FractalCallback {
@@ -1442,6 +1670,19 @@ impl CallbackTrait for FractalCallback {
             // decide whether the shader may sample it.
             if let Some((w, h, rgba)) = &self.background {
                 res.set_background_image(device, queue, *w, *h, rgba);
+            }
+            // Also before, and in its own submission: it writes the same
+            // uniform buffers this frame is about to, so it has to be finished
+            // with them before the live scene goes up.
+            if let Some(export) = &self.export {
+                res.export_frame(
+                    device,
+                    queue,
+                    self.shader_key,
+                    export.size,
+                    &export.uniforms,
+                    &export.slot,
+                );
             }
             res.upload(queue, &self.uniforms);
             let stable = res.last_viewport == self.viewport;
@@ -1477,24 +1718,6 @@ impl CallbackTrait for FractalCallback {
 }
 
 /// Convenience wrapper matching egui's paint-callback shape.
-pub fn callback(
-    rect: egui::Rect,
-    uniforms: Uniforms,
-    viewport: [f32; 2],
-    render_size: [u32; 2],
-    shader_key: u64,
-    shader_source: Arc<str>,
-    background: Option<(u32, u32, Vec<u8>)>,
-) -> egui::PaintCallback {
-    egui_wgpu::Callback::new_paint_callback(
-        rect,
-        FractalCallback {
-            uniforms,
-            viewport,
-            render_size,
-            shader_key,
-            shader_source,
-            background,
-        },
-    )
+pub fn callback(rect: egui::Rect, frame: FractalCallback) -> egui::PaintCallback {
+    egui_wgpu::Callback::new_paint_callback(rect, frame)
 }

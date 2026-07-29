@@ -532,6 +532,82 @@ impl Default for Picture {
     }
 }
 
+/// File format for an exported image.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum ImageFormat {
+    /// Lossless, and the only one of the two that keeps a clean gradient in a
+    /// dark background without banding.
+    #[default]
+    Png,
+    Jpeg,
+}
+
+impl ImageFormat {
+    pub const ALL: [Self; 2] = [Self::Png, Self::Jpeg];
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Png => "PNG",
+            Self::Jpeg => "JPEG",
+        }
+    }
+
+    pub fn extension(self) -> &'static str {
+        match self {
+            Self::Png => "png",
+            Self::Jpeg => "jpg",
+        }
+    }
+}
+
+/// What to write when the picture is exported.
+///
+/// Separate from the scene: none of it changes what is rendered on screen, it
+/// describes a file to produce. Mandelbulber keeps the resolution here for the
+/// same reason.
+#[derive(Clone, PartialEq, Debug)]
+pub struct Export {
+    /// Base name, without the extension — that comes from `format`.
+    pub name: String,
+    pub format: ImageFormat,
+    pub width: u32,
+    pub height: u32,
+}
+
+/// Beyond this an export is likely to exceed what the GPU will allocate for a
+/// single texture, and the failure arrives as a device loss rather than an
+/// error worth reporting.
+pub const MAX_EXPORT_PIXELS: u32 = 16384;
+
+impl Default for Export {
+    fn default() -> Self {
+        Self {
+            name: "3dm".to_owned(),
+            format: ImageFormat::default(),
+            width: 1920,
+            height: 1080,
+        }
+    }
+}
+
+impl Export {
+    /// The name the file is written under.
+    pub fn file_name(&self) -> String {
+        let stem = self.name.trim();
+        let stem = if stem.is_empty() { "3dm" } else { stem };
+        // A name that already carries the right extension should not gain a
+        // second one, but a name ending in some *other* extension is a stem
+        // the user typed and keeps.
+        if stem
+            .rsplit_once('.')
+            .is_some_and(|(_, ext)| ext.eq_ignore_ascii_case(self.format.extension()))
+        {
+            return stem.to_owned();
+        }
+        format!("{stem}.{}", self.format.extension())
+    }
+}
+
 /// Mandelbulber's Rendering engine panel: how hard the marcher works and what
 /// counts as a surface.
 ///
@@ -799,6 +875,45 @@ impl SceneParams {
             self.stack.signature(),
             crate::render::codegen::generate(&self.stack),
         )
+    }
+}
+
+#[cfg(test)]
+mod export_tests {
+    use super::*;
+
+    fn named(name: &str, format: ImageFormat) -> String {
+        Export {
+            name: name.to_owned(),
+            format,
+            ..Default::default()
+        }
+        .file_name()
+    }
+
+    #[test]
+    fn the_extension_follows_the_chosen_format() {
+        assert_eq!(named("bulb", ImageFormat::Png), "bulb.png");
+        assert_eq!(named("bulb", ImageFormat::Jpeg), "bulb.jpg");
+    }
+
+    #[test]
+    fn a_name_that_already_ends_in_the_right_extension_keeps_just_the_one() {
+        assert_eq!(named("bulb.png", ImageFormat::Png), "bulb.png");
+        assert_eq!(named("bulb.PNG", ImageFormat::Png), "bulb.PNG");
+    }
+
+    /// A dot in the name is not necessarily an extension — "bulb.v2" is a
+    /// stem, and appending to it is right where replacing it would lose work.
+    #[test]
+    fn some_other_suffix_is_part_of_the_name() {
+        assert_eq!(named("bulb.v2", ImageFormat::Png), "bulb.v2.png");
+        assert_eq!(named("bulb.png", ImageFormat::Jpeg), "bulb.png.jpg");
+    }
+
+    #[test]
+    fn an_empty_name_still_produces_a_file() {
+        assert_eq!(named("   ", ImageFormat::Png), "3dm.png");
     }
 }
 
