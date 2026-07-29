@@ -138,6 +138,9 @@ pub struct App {
     /// When the current frame began, so the next can be scheduled a fixed
     /// interval after it.
     frame_start: Option<std::time::Instant>,
+    /// Kept so the device can be polled once a frame from outside the paint
+    /// callback — see [`App::service_gpu`].
+    device: eframe::wgpu::Device,
     /// The scale used in [`Resolution::Fixed`].
     fixed_scale: f32,
     /// What the GPU last reported about the cursor ray and the space ahead.
@@ -158,6 +161,7 @@ impl App {
         // `wgpu_render_state` is None if eframe fell back to another backend.
         let render_state = cc.wgpu_render_state.as_ref()?;
 
+        let device = render_state.device.clone();
         let pipeline = FractalPipeline::new(&render_state.device, render_state.target_format);
         let encode_srgb = pipeline.encode_srgb;
         let cursor = pipeline.cursor.clone();
@@ -194,6 +198,7 @@ impl App {
             resolution: Resolution::default(),
             fps_cap: DEFAULT_FPS_CAP,
             frame_start: None,
+            device,
             fixed_scale: 0.5,
             shader: (key, source.into()),
         })
@@ -489,6 +494,23 @@ impl App {
         }
     }
 
+    /// Lets wgpu finish what it has been asked to do.
+    ///
+    /// The distance probe reads a buffer back by mapping it, and a mapping
+    /// completes only when the device is polled. Nothing else here polls it, so
+    /// without this the probe stalls mid-cycle — and a mapping left open stops
+    /// wgpu retiring the submissions behind it, so every frame's resources are
+    /// held. That is a slowdown that builds while memory grows and then falls
+    /// off a cliff, which is exactly what was reported, with `probe state`
+    /// reading `mapping` and resident memory at more than twice its usual size.
+    ///
+    /// Called from the frame, not from inside the paint callback: driving
+    /// device maintenance with an encoder already open is what made the
+    /// full-screen transition hang.
+    fn service_gpu(&self) {
+        let _ = self.device.poll(eframe::wgpu::PollType::Poll);
+    }
+
     /// Schedules the next frame, no sooner than the frame-rate cap allows.
     ///
     /// Asking for a repaint immediately is what pegs the GPU: it will start the
@@ -738,6 +760,7 @@ impl eframe::App for App {
         }
 
         self.frame_start = Some(std::time::Instant::now());
+        self.service_gpu();
         let dt = ui.input(|i| i.stable_dt).min(0.1);
         self.elapsed += dt;
         self.frame_ms += (dt * 1000.0 - self.frame_ms) * 0.1;

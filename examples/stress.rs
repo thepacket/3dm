@@ -7,6 +7,11 @@
 //! cannot be driven from a test, but everything the window does each frame can
 //! be: move the camera, step the distance probe, render offscreen, blit,
 //! submit. If something accumulates per frame, it accumulates here too.
+//!
+//! The `readbacks` and `state` columns are the probe. A healthy run completes
+//! one readback every two frames and never sits in state 2 — that is the
+//! mapping state, and staying there means a buffer mapping is open, which stops
+//! wgpu retiring anything queued behind it.
 
 use eframe::wgpu;
 use three_dm::{
@@ -156,6 +161,8 @@ async fn run(frames: u32) {
             let ms = now.duration_since(last).as_secs_f32() * 1000.0 / 25.0;
             last = now;
             let rss = rss_mb();
+            let (readbacks, state) = pipeline.cursor.progress();
+            print!("readbacks {readbacks:>5} state {state}  ");
             println!(
                 "{:>6}  {:>6.1}s  {:>8.2}   {:>6.1}  {:+.1}",
                 i + 1,
