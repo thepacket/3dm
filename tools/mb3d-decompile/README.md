@@ -50,10 +50,21 @@ description.
 
 ## State
 
-Done: extraction, the ABI table, a corpus survey, annotated disassembly.
+`--decompile` runs a formula symbolically and prints its assignments;
+`--decompile` with no name reports coverage across the corpus.
 
-Not done: the symbolic x87 executor that turns a decode into an expression
-tree, control flow for the 282 formulas with branches, the SSE2 path, and the
+```
+straight-line formulas:  173
+fully recovered:         156
+ran but assigned nothing:6
+bailed:                  11
+```
+
+Done: extraction, the ABI table, a corpus survey, annotated disassembly, and a
+symbolic x87 executor for straight-line code.
+
+Not done: control flow for the 282 formulas with branches, the SSE2 path, a
+handful of integer-load instructions (`fild`, `fimul`, `fistp`), and the
 mapping from a `PVar` slot back to a name in `[OPTIONS]`.
 
 That last one is unsolved and worth stating plainly. Parameters live at
@@ -66,12 +77,32 @@ mathematics with unnamed parameters.
 
 ## Verified
 
-`ABoxMod1` decodes, by hand against this tool's output, to
+Against formulas that published their own mathematics, in
+`tests/against_shipped_maths.rs`. This is the only check that can catch the
+failure that matters: a subtly wrong decode produces arithmetic every bit as
+plausible as a correct one, with no crash and no way to tell by reading it.
+
+`Kalisets1` recovers as
 
 ```
-Fold - abs(abs(x + FoldXMod) - Fold) - abs(FoldXMod)
+x = abs(x) * p1 / (abs(x) * abs(x) + abs(y) * abs(y) + abs(z) * abs(z) + p2) + J1
 ```
 
-which is exactly what its shipped description says. The approach produces the
-real formula, not a plausible-looking one — which is the only failure mode that
-matters at 454 formulas, because nothing about the output would look wrong.
+against a description of `m = Scale/(x*x + y*y + z*z + Fix)` then
+`x = x*m + Cx`, after `x = abs(x)`.
+
+`BenesiPine1` reproduces all eight lines of "Benesi fold 1", including the
+reused temporary, with `k1` = sqrt(2/3), `k2` = sqrt(1/3), `k3` = sqrt(1/2)
+recovered from the constant pool.
+
+## What the output looks like, and why
+
+Assignments in sequence, keeping the compiler's spill slots as named
+temporaries, rather than one folded expression per output variable.
+
+Substituting each stored value into its uses is arithmetically identical and
+useless. MB3D's formulas reuse temporaries heavily, and inlining turns
+`BenesiPine1`'s eight readable lines into a single expression of some ten
+thousand characters. The slots the compiler spilled to *are* the temporaries
+the original Pascal declared, so keeping them recovers its shape as well as
+its value.

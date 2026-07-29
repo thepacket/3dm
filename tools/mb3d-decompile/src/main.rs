@@ -14,8 +14,7 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
-mod abi;
-mod extract;
+use mb3d_decompile::{abi, exec, expr, extract};
 
 fn main() {
     let mut args = std::env::args().skip(1);
@@ -25,10 +24,15 @@ fn main() {
     });
     let mut only: Option<String> = None;
     let mut dump_asm = false;
+    let mut decompile = false;
     while let Some(arg) = args.next() {
         match arg.as_str() {
             "--asm" => {
                 dump_asm = true;
+                only = args.next();
+            }
+            "--decompile" => {
+                decompile = true;
                 only = args.next();
             }
             other => only = Some(other.to_owned()),
@@ -80,7 +84,86 @@ fn main() {
         return;
     }
 
+    if decompile {
+        match only {
+            Some(name) => {
+                let Some(f) = formulas.iter().find(|f| f.name.eq_ignore_ascii_case(&name)) else {
+                    eprintln!("no formula called {name}");
+                    std::process::exit(1);
+                };
+                print_decompiled(f);
+            }
+            None => decompile_all(&formulas),
+        }
+        return;
+    }
+
     survey(&formulas);
+}
+
+fn print_decompiled(f: &extract::Formula) {
+    println!("{} — {} bytes", f.name, f.code.len());
+    if exec::has_branches(&f.code) {
+        println!("  (has control flow; the executor handles straight-line code only)");
+    }
+    let result = exec::run(&f.code);
+    for (place, value) in exec::final_stores(&result.stores) {
+        println!("  {place} = {}", expr::render(&value));
+    }
+    if let Some(reason) = &result.bailed {
+        println!("  ... stopped: {reason}");
+    }
+    if !f.description.trim().is_empty() {
+        println!("\n  ---- as shipped ----");
+        for line in f.description.lines().filter(|l| !l.trim().is_empty()) {
+            println!("  {line}");
+        }
+    }
+}
+
+/// How much of the corpus the executor can actually account for.
+///
+/// Reported as three separate numbers because they mean different things: a
+/// formula that bails names an instruction still to implement, while one that
+/// finishes but assigns nothing has been misunderstood in a way no error will
+/// announce. The second kind is the dangerous one.
+fn decompile_all(formulas: &[extract::Formula]) {
+    let mut straight = 0usize;
+    let mut recovered = 0usize;
+    let mut empty = 0usize;
+    let mut reasons: BTreeMap<String, usize> = BTreeMap::new();
+
+    for f in formulas {
+        if exec::has_branches(&f.code) {
+            continue;
+        }
+        straight += 1;
+        let result = exec::run(&f.code);
+        if let Some(reason) = &result.bailed {
+            // Keep the mnemonic, drop the address, so the tally counts causes.
+            let cause = reason.split(" at ").next().unwrap_or(reason).to_owned();
+            *reasons.entry(cause).or_default() += 1;
+            continue;
+        }
+        if exec::final_stores(&result.stores).is_empty() {
+            empty += 1;
+            continue;
+        }
+        recovered += 1;
+    }
+
+    println!("straight-line formulas:  {straight}");
+    println!("fully recovered:         {recovered}");
+    println!("ran but assigned nothing:{empty}");
+    println!("bailed:                  {}", straight - recovered - empty);
+    if !reasons.is_empty() {
+        println!("\nwhy they bailed:");
+        let mut by_count: Vec<_> = reasons.into_iter().collect();
+        by_count.sort_by_key(|(_, count)| std::cmp::Reverse(*count));
+        for (cause, count) in by_count.iter().take(20) {
+            println!("  {count:5}  {cause}");
+        }
+    }
 }
 
 /// Decodes one blob to `(offset, text)` pairs.

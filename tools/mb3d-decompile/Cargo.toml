@@ -6,6 +6,14 @@ description = "Recovers readable formulas from Mandelbulb 3D's compiled x87 .m3f
 license = "GPL-3.0-or-later"
 publish = false
 
+[lib]
+name = "mb3d_decompile"
+path = "src/lib.rs"
+
+[[bin]]
+name = "mb3d-decompile"
+path = "src/main.rs"
+
 [dependencies]
 # A real x86 decoder rather than a hand-rolled one. The corpus is 454 blobs of
 # someone else's compiler output; guessing at encodings would produce plausible

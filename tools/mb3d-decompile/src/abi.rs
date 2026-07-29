@@ -73,6 +73,11 @@ const FIELDS: &[(i64, &str)] = &[
 /// reachable with a signed byte displacement.
 pub const RECORD_REBASE: i64 = 0x80;
 
+/// Where `PVar` sits in the record. Loading it is how a formula reaches its
+/// own parameters, so recognising this one load is what makes every parameter
+/// reference nameable.
+pub const PVAR_OFFSET: i64 = 48;
+
 /// Names the record field at `offset` from the record's zero, if one starts
 /// exactly there. An offset landing inside an array or matrix reports the
 /// field and the distance into it.
@@ -99,5 +104,15 @@ pub fn parameter(offset: i64) -> String {
         o if o < 0 => format!("param[{}]", (-o - 8) / 8),
         0 => "const[0]".to_owned(),
         o => format!("const[{}]", o / 8),
+    }
+}
+
+/// The same, as a structured place for the symbolic executor.
+pub fn parameter_place(offset: i64) -> crate::expr::Place {
+    use crate::expr::Place;
+    match offset {
+        -8 => Place::Const(0),
+        o if o < 0 => Place::Param(((-o - 8) / 8) as usize),
+        o => Place::Const((o / 8) as usize + 1),
     }
 }
