@@ -10,7 +10,7 @@ pub mod options;
 /// Decompiles one `.m3f` to `place = expression` lines.
 pub fn decompile_file(path: &std::path::Path) -> Result<Vec<String>, String> {
     let formula = extract::parse(path).ok_or("no [CODE] block")?;
-    let result = exec::run(&formula.code);
+    let result = exec::run_with_constants(&formula.code, &formula.constants);
     if let Some(reason) = result.bailed {
         return Err(reason);
     }

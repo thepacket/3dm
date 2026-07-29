@@ -117,7 +117,7 @@ fn main() {
 
 fn print_decompiled(f: &extract::Formula) {
     println!("{} — {} bytes", f.name, f.code.len());
-    let result = exec::run(&f.code);
+    let result = exec::run_with_constants(&f.code, &f.constants);
     for (place, value) in exec::final_stores(&result.stores) {
         println!("  {place} = {}", expr::render(&value));
     }
@@ -146,7 +146,7 @@ fn decompile_all(formulas: &[extract::Formula]) {
 
     for f in formulas {
         straight += 1;
-        let result = exec::run(&f.code);
+        let result = exec::run_with_constants(&f.code, &f.constants);
         if let Some(reason) = &result.bailed {
             // Keep the mnemonic, drop the address, so the tally counts causes.
             let cause = reason.split(" at ").next().unwrap_or(reason).to_owned();
@@ -421,7 +421,7 @@ fn run_audit(formulas: &[extract::Formula]) {
         if !audit::states_its_maths(&f.description) {
             continue;
         }
-        let result = exec::run(&f.code);
+        let result = exec::run_with_constants(&f.code, &f.constants);
         if result.bailed.is_some() {
             continue;
         }

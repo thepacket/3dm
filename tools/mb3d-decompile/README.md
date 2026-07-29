@@ -11,6 +11,21 @@ Only about 40 formulas (the JIT ones, in `EM_JIT_M3Formulas/`) carry real
 MB3D's source is at `github.com/thargor6/mb3d` under **LGPL-2.1**, which §3
 permits relicensing to GPL, so 3DM may use what this recovers.
 
+## What an `.m3f` carries
+
+`[OPTIONS]` — parameter declarations with their defaults and the engine
+settings — then `[CONSTANTS]`, `[CODE]` and free prose after `[END]`. Across
+the corpus: 457 have options, 454 have compiled code, **195 have constants**,
+and 3 carry `[SOURCE]` instead.
+
+The constants matter more than their number suggests. They sit at `PVar + 0`
+upwards in declaration order, so a formula reading the third of them is reading
+`PVar + 16`, and resolving that turns an opaque `k2` into `0.7071067811865475`.
+`BenesiPine1`'s three are sqrt(2/3), sqrt(1/3) and sqrt(1/2) — exactly the
+values its description names, in exactly its order. Nothing in the decode
+consults the block and nothing in the block knows about the decode, so their
+agreement is evidence for both.
+
 ## Why this is tractable
 
 Not because decompilation is easy in general, but because of what this code

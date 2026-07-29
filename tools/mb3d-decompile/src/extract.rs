@@ -17,6 +17,10 @@ pub struct Formula {
     /// defaults. The order matters — it is the order the compiled code reads
     /// them from the parameter block.
     pub options: Vec<(String, String)>,
+    /// The `[CONSTANTS]` block, in declaration order — which is the order the
+    /// compiled code reads them, counting up from `PVar + 0`. Recovering these
+    /// is what turns a `k0` in an expression into the number it stands for.
+    pub constants: Vec<f64>,
     /// Everything after `[END]`. Around a fifth of the corpus states its
     /// mathematics here in prose, which is the only ground truth there is.
     pub description: String,
@@ -50,6 +54,7 @@ pub fn parse(path: &Path) -> Option<Formula> {
     let mut section = Section::None;
     let mut hex = String::new();
     let mut options = Vec::new();
+    let mut constants = Vec::new();
     let mut description = String::new();
 
     for line in text.lines() {
@@ -58,6 +63,7 @@ pub fn parse(path: &Path) -> Option<Formula> {
             section = match trimmed[1..trimmed.len() - 1].to_ascii_uppercase().as_str() {
                 "OPTIONS" => Section::Options,
                 "CODE" => Section::Code,
+                "CONSTANTS" => Section::Constants,
                 // A JIT formula: it has real Pascal and is not our problem.
                 "SOURCE" => return None,
                 "END" => Section::Description,
@@ -78,6 +84,16 @@ pub fn parse(path: &Path) -> Option<Formula> {
                 }
             }
             Section::Code => hex.extend(trimmed.chars().filter(|c| c.is_ascii_hexdigit())),
+            Section::Constants => {
+                // `Double = 0.816496580927726`. The datatype word is present
+                // but every one in the corpus is a Double, and a wrong guess
+                // here would shift every later constant.
+                if let Some((_, value)) = trimmed.split_once('=')
+                    && let Ok(number) = value.trim().parse::<f64>()
+                {
+                    constants.push(number);
+                }
+            }
             Section::Description => {
                 description.push_str(line);
                 description.push('\n');
@@ -93,6 +109,7 @@ pub fn parse(path: &Path) -> Option<Formula> {
         name: path.file_stem()?.to_string_lossy().into_owned(),
         code: from_hex(&hex),
         options,
+        constants,
         description,
     })
 }
@@ -101,6 +118,7 @@ enum Section {
     None,
     Options,
     Code,
+    Constants,
     Description,
 }
 

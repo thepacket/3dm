@@ -56,8 +56,10 @@ fn kalisets1_matches_its_description() {
 /// z=-tx*sqrt(1/3)+z*sqrt(2/3);
 /// ```
 ///
-/// with `k0` = sqrt(2/3), `k1` = sqrt(1/3) and `k2` = sqrt(1/2) read from the
-/// constant pool, which counts up from `PVar + 0`. The compiler reordered the assignments and factored the two
+/// The three constants come from the file's own `[CONSTANTS]` block, which the
+/// compiled code reads counting up from `PVar + 0`. They are
+/// 0.816496580927726, 0.5773502691896258 and 0.7071067811865475 — sqrt(2/3),
+/// sqrt(1/3) and sqrt(1/2), exactly the description's, in exactly its order. The compiler reordered the assignments and factored the two
 /// `sqrt(1/2)` products, both of which preserve the value.
 #[test]
 fn benesipine1_reproduces_the_benesi_fold() {
@@ -66,14 +68,14 @@ fn benesipine1_reproduces_the_benesi_fold() {
     assert_eq!(
         fold,
         [
-            "t8 = (x * k0 + -(z * k1)) * k2",
-            "y = abs(t8 + y * k2)",
-            "x = abs(t8 + -(y * k2))",
-            "z = abs(x * k1 + z * k0)",
-            "t8 = (x + y) * k2",
-            "z = -(t8 * k1) + z * k0",
-            "x = t8 * k0 + z * k1",
-            "y = (-x + y) * k2",
+            "t8 = (x * 0.816496580927726 + -(z * 0.5773502691896258)) * 0.7071067811865475",
+            "y = abs(t8 + y * 0.7071067811865475)",
+            "x = abs(t8 + -(y * 0.7071067811865475))",
+            "z = abs(x * 0.5773502691896258 + z * 0.816496580927726)",
+            "t8 = (x + y) * 0.7071067811865475",
+            "z = -(t8 * 0.5773502691896258) + z * 0.816496580927726",
+            "x = t8 * 0.816496580927726 + z * 0.5773502691896258",
+            "y = (-x + y) * 0.7071067811865475",
         ]
     );
 }
@@ -219,4 +221,32 @@ fn aboxmodkali_recovers_from_packed_sse2() {
     assert!(joined.contains("< p2 then p1 else"));
     assert!(lines.iter().any(|l| l.starts_with("x = ")));
     assert!(lines.iter().any(|l| l.starts_with("z = ")));
+}
+
+
+/// The `[CONSTANTS]` block resolves to the numbers the description names.
+///
+/// Independent of the decode: the block is read from the file and the decode
+/// works out which slot each instruction reaches, and the two only agree if
+/// both are right. Getting the order wrong would substitute plausible numbers
+/// into the wrong places — a fold about the wrong axis, rendering happily.
+#[test]
+fn the_constants_block_supplies_the_expected_roots() {
+    use mb3d_decompile::extract;
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/data/BenesiPine1.m3f");
+    let formula = extract::parse(&path).expect("fixture should parse");
+
+    let expected = [
+        (2.0f64 / 3.0).sqrt(),
+        (1.0f64 / 3.0).sqrt(),
+        (1.0f64 / 2.0).sqrt(),
+    ];
+    assert_eq!(formula.constants.len(), 3);
+    for (got, want) in formula.constants.iter().zip(expected) {
+        assert!(
+            (got - want).abs() < 1e-15,
+            "constant {got} should be {want}"
+        );
+    }
 }

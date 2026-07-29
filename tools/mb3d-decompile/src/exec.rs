@@ -38,8 +38,21 @@ pub struct Decompiled {
 
 /// Runs `code` symbolically, following both sides of any branch.
 pub fn run(code: &[u8]) -> Decompiled {
+    run_with_constants(code, &[])
+}
+
+/// The same, with the `[CONSTANTS]` block resolved to numbers.
+///
+/// They sit at `PVar + 0` upwards, in declaration order, so a formula reading
+/// `k2` is reading the third of them. Substituting turns `k2` into
+/// `0.7071067811865475` — and that in turn lets the constant folding see that
+/// two of them multiply to something simpler.
+pub fn run_with_constants(code: &[u8], constants: &[f64]) -> Decompiled {
     let program = Program::decode(code);
-    let mut machine = Machine::default();
+    let mut machine = Machine {
+        constants: constants.to_vec(),
+        ..Machine::default()
+    };
     let result = machine.run_range(&program, 0, program.instructions.len());
     if let Err(reason) = result {
         machine.bailed = Some(reason);
@@ -122,6 +135,8 @@ struct Machine {
     /// what makes the output readable. It exists only to answer "what does
     /// this place hold?" when two paths rejoin and have to be reconciled.
     env: HashMap<Place, E>,
+    /// The `[CONSTANTS]` block, indexed as the constant pool is.
+    constants: Vec<f64>,
     /// The SSE2 registers, each a pair of doubles: low lane then high. MB3D
     /// compiles some formulas this way instead of to x87, working on (x, y)
     /// and (z, w) as packed pairs.
@@ -283,6 +298,7 @@ impl Machine {
     fn fork(&self) -> Machine {
         Machine {
             fpu: self.fpu.clone(),
+            constants: self.constants.clone(),
             regs: self.regs.clone(),
             xmm: self.xmm.clone(),
             env: self.env.clone(),
@@ -871,7 +887,7 @@ impl Machine {
             }
             OpKind::Memory => {
                 let place = self.place(ins)?;
-                self.push(expr::load(place))
+                self.push(self.value_of(place))
             }
             other => Err(format!("fld {other:?}")),
         }
@@ -947,7 +963,7 @@ impl Machine {
         // Form 1: against memory. Always `st0 = st0 op mem`.
         if ins.op_count() > 0 && ins.op0_kind() == OpKind::Memory {
             let place = self.place(ins)?;
-            let operand = expr::load(place);
+            let operand = self.value_of(place);
             let top = self.st(0)?;
             let (a, b) = if reversed { (operand, top) } else { (top, operand) };
             return self.set_st(0, expr::bin(op, a, b));
@@ -1008,6 +1024,17 @@ impl Machine {
             return None;
         }
         Some((ptr, ins.memory_displacement64() as i32 as i64))
+    }
+
+    /// A load of `place`, resolved to a number where it names a constant the
+    /// file supplies.
+    fn value_of(&self, place: Place) -> E {
+        if let Place::Const(index) = place
+            && let Some(value) = self.constants.get(index)
+        {
+            return expr::num(*value);
+        }
+        expr::load(place)
     }
 
     /// The place `extra` bytes past this operand's address — the upper lane of
