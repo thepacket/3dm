@@ -61,6 +61,33 @@
             color: #8d94a1;
             font-size: 13px;
         }
+
+        /* The running diagnostic log. Deliberately just past the bottom of the
+           viewport: it must stay part of the rendered document so it can be
+           read as text, while never appearing over the picture. */
+        #3dm_diag {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin: 0;
+            white-space: pre;
+            font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+            color: #8d94a1;
+        }
+
+        /* Only ever created when something has actually gone wrong, so it can
+           afford to cover the canvas — behind it there is nothing to see. */
+        #3dm_error {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            padding: 24px;
+            overflow: auto;
+            white-space: pre-wrap;
+            background: rgba(10, 13, 18, 0.94);
+            color: #ff8a80;
+            font: 14px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
+        }
     </style>
 </head>
 

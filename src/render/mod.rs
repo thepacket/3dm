@@ -128,7 +128,7 @@ fn hdr_blur(uv: vec2<f32>, limit: vec2<f32>, color: vec3<f32>) -> vec3<f32> {
         let tap = min(
             max(uv + vec2<f32>(cos(a), sin(a)) * r * texel, vec2<f32>(0.0)),
             limit);
-        sum = sum + textureSample(src, samp, tap).rgb * w;
+        sum = sum + textureSampleLevel(src, samp, tap, 0.0).rgb * w;
         weight = weight + w;
     }
     return sum / weight;
@@ -163,7 +163,7 @@ fn aberration(uv: vec2<f32>, limit: vec2<f32>, color: vec3<f32>) -> vec3<f32> {
         let tap = min(
             max(uv + radial * along * texel, vec2<f32>(0.0)),
             limit);
-        let s = textureSample(src, samp, tap).rgb;
+        let s = textureSampleLevel(src, samp, tap, 0.0).rgb;
 
         // Red is picked from further out along the radius than blue — or the
         // other way round with the order reversed. Each channel's weight is a
@@ -181,6 +181,16 @@ fn aberration(uv: vec2<f32>, limit: vec2<f32>, color: vec3<f32>) -> vec3<f32> {
     return select(color, sum / max(weight, vec3<f32>(1e-6)), weight > vec3<f32>(1e-6));
 }
 
+// Every sample in this shader is `textureSampleLevel`, never `textureSample`,
+// and that is load-bearing rather than a style choice. `textureSample` computes
+// its own derivatives, so WGSL only permits it in uniform control flow — and
+// the depth-of-field branch below is entered per pixel, on the alpha the
+// fractal pass wrote. naga accepts it anyway, so a native build renders
+// perfectly; the browser's validator rejects the whole module, the blit
+// pipeline never builds, nothing reaches the canvas, and the page is black with
+// an empty console. That was the production bug. `src` is a non-mipmapped
+// render target, so explicitly sampling level 0 is what the implicit lookup
+// already did — same pixels, minus the rule violation.
 @fragment
 fn fs_blit(in: VsOut) -> @location(0) vec4<f32> {
     // Clamped just inside the drawn region: without it the sampler's filter
@@ -188,7 +198,7 @@ fn fs_blit(in: VsOut) -> @location(0) vec4<f32> {
     let limit = region.xy - region.zw;
     let uv = min(in.uv * region.xy, limit);
 
-    var color = textureSample(src, samp, uv);
+    var color = textureSampleLevel(src, samp, uv, 0.0);
 
     // Depth of field. The fractal pass wrote each pixel's circle of confusion
     // into alpha, so the blur radius is already known here and costs one disc
@@ -203,7 +213,7 @@ fn fs_blit(in: VsOut) -> @location(0) vec4<f32> {
             let a = f32(i) * 2.39996;
             let r = radius * sqrt(f32(i + 1) / 12.0);
             let tap = min(max(uv + vec2<f32>(cos(a), sin(a)) * r, vec2<f32>(0.0)), limit);
-            let s = textureSample(src, samp, tap);
+            let s = textureSampleLevel(src, samp, tap, 0.0);
             // Weighted by the tap's own blur, so a sharp foreground does not
             // smear itself across a background that is meant to be soft.
             let w = max(s.a, 0.05);
@@ -1109,6 +1119,11 @@ impl FractalPipeline {
             return;
         }
 
+        // Every formula stack generates a new module, so this is where a WGSL
+        // rule the browser enforces and naga does not would first bite — and it
+        // would bite silently, leaving the last good pipeline on screen or
+        // nothing at all. Cheap to watch: the scope only reports on a miss.
+        let scope = device.push_error_scope(wgpu::ErrorFilter::Validation);
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("3dm.fractal.shader"),
             source: wgpu::ShaderSource::Wgsl(source.into()),
@@ -1184,6 +1199,8 @@ impl FractalPipeline {
             multiview_mask: None,
             cache: None,
         });
+
+        crate::diag::watch_error_scope("a formula shader", scope.pop());
 
         self.pipelines.insert(key, pipeline);
         self.probes.insert(key, probe);

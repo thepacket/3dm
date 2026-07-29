@@ -6,6 +6,7 @@
 
 pub mod app;
 pub mod camera;
+pub mod diag;
 pub mod formulas;
 pub mod params;
 pub mod render;

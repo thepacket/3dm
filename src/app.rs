@@ -227,6 +227,10 @@ pub struct App {
     export_slot: ExportSlot,
     /// What to tell the user about the last export.
     export_status: Option<String>,
+    /// Frames painted since start. Only the first few are interesting: they are
+    /// what separates "the app started" from "the app is drawing", which a
+    /// black page cannot tell you on its own.
+    frames: u64,
 }
 
 impl App {
@@ -237,16 +241,20 @@ impl App {
         let device = render_state.device.clone();
         // Read before `device` is moved into the struct below.
         let max_texture_dim = device.limits().max_texture_dimension_2d;
-        let pipeline = FractalPipeline::new(&render_state.device, render_state.target_format);
+
+        crate::diag::report_device(&render_state.adapter, &device);
+        // Without this, a validation or out-of-memory error is delivered to
+        // nobody: the frame silently produces nothing and the page stays the
+        // colour of the body behind the canvas. Report rather than panic — the
+        // point is that the user sees the reason instead of a dead window.
+        device.on_uncaptured_error(std::sync::Arc::new(|e| {
+            crate::diag::error("The GPU reported an error.", &e.to_string());
+        }));
+        let scope = device.push_error_scope(eframe::wgpu::ErrorFilter::Validation);
+        let mut pipeline = FractalPipeline::new(&render_state.device, render_state.target_format);
+        crate::diag::watch_error_scope("the blit shader", scope.pop());
         let encode_srgb = pipeline.encode_srgb;
         let cursor = pipeline.cursor.clone();
-
-        // egui hands these resources back to us inside the paint callback.
-        render_state
-            .renderer
-            .write()
-            .callback_resources
-            .insert(pipeline);
 
         cc.egui_ctx.set_visuals(egui::Visuals::dark());
         cc.egui_ctx.all_styles_mut(|style| {
@@ -258,6 +266,20 @@ impl App {
         let mut params = SceneParams::default();
         params.retune_for_stack();
         let (key, source) = params.shader();
+
+        // Compile the opening formula here rather than leaving it to the first
+        // paint. Same work either way, but it happens while the page still says
+        // "compiling shaders", and — the reason it is worth the move — a shader
+        // the browser refuses is then reported during startup instead of inside
+        // a paint callback that a backgrounded tab may never run.
+        pipeline.ensure(&device, key, &source);
+
+        // egui hands these resources back to us inside the paint callback.
+        render_state
+            .renderer
+            .write()
+            .callback_resources
+            .insert(pipeline);
 
         Some(Self {
             thumbs,
@@ -288,6 +310,7 @@ impl App {
             max_texture_dim,
             export_slot: ExportSlot::default(),
             export_status: None,
+            frames: 0,
         })
     }
 
@@ -1188,6 +1211,13 @@ impl eframe::App for App {
             // Swapping a bulb for a box changes the scene's scale by several
             // times over; without reframing the camera ends up inside it.
             self.camera.frame(self.params.fractal.bounding_radius);
+        }
+
+        self.frames += 1;
+        // First frame proves the loop runs at all; the later one proves it kept
+        // running rather than dying after a single paint.
+        if matches!(self.frames, 1 | 60) {
+            crate::diag::note(&format!("frames painted: {}", self.frames));
         }
 
         self.frame_start = Some(std::time::Instant::now());

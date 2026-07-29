@@ -32,8 +32,14 @@ fn main() -> eframe::Result {
 fn main() {
     use eframe::wasm_bindgen::JsCast as _;
 
-    console_error_panic_hook::set_once();
+    three_dm::diag::install_panic_hook();
     eframe::WebLogger::init(log::LevelFilter::Info).ok();
+    three_dm::diag::note(&format!(
+        "3DM starting | user agent: {}",
+        web_sys::window()
+            .and_then(|w| w.navigator().user_agent().ok())
+            .unwrap_or_else(|| "unknown".into())
+    ));
 
     wasm_bindgen_futures::spawn_local(async {
         let document = web_sys::window()
@@ -62,6 +68,11 @@ fn main() {
                      Chrome, Edge, or Safari 26+.</p>"
                 )),
             }
+        }
+
+        match &result {
+            Ok(()) => three_dm::diag::note("eframe start: ok"),
+            Err(e) => three_dm::diag::error("3DM failed to start.", &format!("{e:?}")),
         }
     });
 }

@@ -3,8 +3,11 @@
   "configurations": [
     {
       "name": "3dm-web",
-      "runtimeExecutable": "trunk",
-      "runtimeArgs": ["serve"],
+      "runtimeExecutable": "/bin/zsh",
+      "runtimeArgs": [
+        "-c",
+        "export PATH=\"/opt/homebrew/Cellar/rustup/1.29.0_2/bin:$PATH\"; exec trunk serve"
+      ],
       "port": 8080
     }
   ]
