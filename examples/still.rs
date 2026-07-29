@@ -177,6 +177,19 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
             params.picture.saturation = n[3];
         }
     }
+    if let Ok(v) = std::env::var("DM3_REFLECT").map(|v| v.parse::<f32>()) {
+        params.material.reflectance = v.expect("DM3_REFLECT must be a number");
+    }
+    // "focus,aperture,maxblur,opacity"
+    if let Ok(v) = std::env::var("DM3_DOF") {
+        let n: Vec<f32> = v.split(',').filter_map(|x| x.trim().parse().ok()).collect();
+        if n.len() == 4 {
+            params.picture.focus_distance = n[0];
+            params.picture.aperture = n[1];
+            params.picture.max_blur = n[2];
+            params.picture.blur_opacity = n[3];
+        }
+    }
     let mut camera = Camera::default();
     camera.frame(params.fractal.bounding_radius);
     // DM3_PAN="dx,dy" moves the orbit target across the view, the way dragging
@@ -286,6 +299,21 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
     for row in 0..height {
         let start = (row * padded_bytes_per_row) as usize;
         pixels.extend_from_slice(&mapped[start..start + unpadded_bytes_per_row as usize]);
+    }
+    // The shader puts the depth-of-field blur amount in alpha, which the blit
+    // consumes. Nothing consumes it here, and a PNG would read it as opacity.
+    //
+    // DM3_COC writes it into the colour instead: the blur itself happens in the
+    // blit, which only the windowed app runs, so this is the only way to check
+    // the amount is right without a window.
+    let show_coc = std::env::var("DM3_COC").is_ok();
+    for pixel in pixels.chunks_exact_mut(4) {
+        if show_coc {
+            pixel[0] = pixel[3];
+            pixel[1] = pixel[3];
+            pixel[2] = pixel[3];
+        }
+        pixel[3] = 255;
     }
     drop(mapped);
     readback.unmap();

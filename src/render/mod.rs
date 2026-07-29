@@ -48,7 +48,11 @@ const BLIT_WGSL: &str = r#"
 // xy = the fraction of the texture actually drawn this frame. The texture is
 // allocated once at the window's size and a smaller frame occupies its
 // top-left corner, so nothing is reallocated when the scale changes.
+// xy = the fraction of the texture drawn, zw = half a texel of inset.
 @group(0) @binding(2) var<uniform> region: vec4<f32>;
+// x = chromatic aberration, y = max blur as a fraction of height,
+// z = blur opacity. The per-pixel blur amount rides in the source alpha.
+@group(0) @binding(3) var<uniform> post: vec4<f32>;
 
 struct VsOut {
     @builtin(position) pos: vec4<f32>,
@@ -75,7 +79,46 @@ fn fs_blit(in: VsOut) -> @location(0) vec4<f32> {
     // Clamped just inside the drawn region: without it the sampler's filter
     // reaches past the edge into whatever the rest of the texture holds.
     let limit = region.xy - region.zw;
-    return textureSample(src, samp, min(in.uv * region.xy, limit));
+    let uv = min(in.uv * region.xy, limit);
+
+    var color = textureSample(src, samp, uv);
+
+    // Depth of field. The fractal pass wrote each pixel's circle of confusion
+    // into alpha, so the blur radius is already known here and costs one disc
+    // of taps rather than a second march.
+    if (post.z > 0.0001 && color.a > 0.001) {
+        let radius = color.a * post.y;
+        var sum = color.rgb;
+        var weight = 1.0;
+        // A twelve-tap spiral: enough to read as defocus rather than as a
+        // pattern, cheap enough to run every frame.
+        for (var i = 0; i < 12; i = i + 1) {
+            let a = f32(i) * 2.39996;
+            let r = radius * sqrt(f32(i + 1) / 12.0);
+            let tap = min(max(uv + vec2<f32>(cos(a), sin(a)) * r, vec2<f32>(0.0)), limit);
+            let s = textureSample(src, samp, tap);
+            // Weighted by the tap's own blur, so a sharp foreground does not
+            // smear itself across a background that is meant to be soft.
+            let w = max(s.a, 0.05);
+            sum += s.rgb * w;
+            weight += w;
+        }
+        color = vec4<f32>(mix(color.rgb, sum / weight, post.z), color.a);
+    }
+
+    if (post.x <= 0.0001) {
+        return vec4<f32>(color.rgb, 1.0);
+    }
+
+    // A lens disperses more the further from its axis, so the channels are
+    // spread radially from the centre rather than by a constant offset.
+    let centre = region.xy * 0.5;
+    let offset = (uv - centre) * post.x * 0.02;
+    return vec4<f32>(
+        textureSample(src, samp, min(uv + offset, limit)).r,
+        color.g,
+        textureSample(src, samp, min(max(uv - offset, vec2<f32>(0.0)), limit)).b,
+        1.0);
 }
 "#;
 
@@ -98,8 +141,15 @@ pub struct Uniforms {
     bg: [f32; 4],
     /// x = brightness, y = contrast, z = gamma, w = saturation.
     picture: [f32; 4],
-    /// x = perspective type, y = 1 when tone mapping is skipped.
+    /// x = perspective type, y = 1 when tone mapping is skipped,
+    /// z = chromatic aberration, w = occlusion samples.
     view: [f32; 4],
+    /// rgb = reflection tint, w = how much of the view reflects.
+    reflection: [f32; 4],
+    /// rgb = occlusion tint.
+    ao_tint: [f32; 4],
+    /// x = focus distance, y = aperture, z = max blur, w = blur opacity.
+    dof: [f32; 4],
     // Field order from here down must match `fractal.wgsl` exactly. It is a
     // flat block of bytes with no names attached, so inserting a field on one
     // side and not the other silently shifts every offset past it — which
@@ -212,8 +262,21 @@ impl Uniforms {
             view: [
                 pic.perspective as u32 as f32,
                 if pic.hdr { 1.0 } else { 0.0 },
-                0.0,
-                0.0,
+                pic.chromatic_aberration,
+                s.ao_quality.clamp(1, 16) as f32,
+            ],
+            reflection: [
+                mat.reflection_color[0],
+                mat.reflection_color[1],
+                mat.reflection_color[2],
+                mat.reflectance,
+            ],
+            ao_tint: [s.ao_color[0], s.ao_color[1], s.ao_color[2], 0.0],
+            dof: [
+                pic.focus_distance,
+                pic.aperture,
+                pic.max_blur,
+                pic.blur_opacity,
             ],
             surface: [
                 mat.single_color[0],
@@ -333,6 +396,7 @@ pub struct FractalPipeline {
     blit: wgpu::RenderPipeline,
     blit_layout: wgpu::BindGroupLayout,
     blit_uniform: wgpu::Buffer,
+    post_uniform: wgpu::Buffer,
     sampler: wgpu::Sampler,
     /// Viewport size the last frame was drawn at. A probe cycle spans three
     /// frames, and a surface reconfigure in the middle of one leaves a copy or
@@ -428,10 +492,26 @@ impl FractalPipeline {
                     },
                     count: None,
                 },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 3,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Buffer {
+                        ty: wgpu::BufferBindingType::Uniform,
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    count: None,
+                },
             ],
         });
         let blit_uniform = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("3dm.blit.region"),
+            size: 16,
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        });
+        let post_uniform = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("3dm.blit.post"),
             size: 16,
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
@@ -493,6 +573,7 @@ impl FractalPipeline {
             blit,
             blit_layout,
             blit_uniform,
+            post_uniform,
             sampler,
             pipelines: HashMap::new(),
             probes: HashMap::new(),
@@ -595,13 +676,15 @@ impl FractalPipeline {
     /// changed. Returns false if there is nothing to draw yet.
     pub fn render_offscreen(
         &mut self,
-        device: &wgpu::Device,
-        queue: &wgpu::Queue,
+        gpu: (&wgpu::Device, &wgpu::Queue),
         encoder: &mut wgpu::CommandEncoder,
         key: u64,
-        full: [u32; 2],
-        size: [u32; 2],
+        // Texture size, then the part of it this frame draws into.
+        size: ([u32; 2], [u32; 2]),
+        post: [f32; 4],
     ) -> bool {
+        let (device, queue) = gpu;
+        let (full, size) = size;
         if !self.pipelines.contains_key(&key) {
             return false;
         }
@@ -644,6 +727,10 @@ impl FractalPipeline {
                         binding: 2,
                         resource: self.blit_uniform.as_entire_binding(),
                     },
+                    wgpu::BindGroupEntry {
+                        binding: 3,
+                        resource: self.post_uniform.as_entire_binding(),
+                    },
                 ],
             });
             self.offscreen = Some((texture, view, bind_group));
@@ -656,6 +743,11 @@ impl FractalPipeline {
             size[0] as f32 / full[0] as f32,
             size[1] as f32 / full[1] as f32,
         ];
+        queue.write_buffer(
+            &self.post_uniform,
+            0,
+            bytemuck::cast_slice(&post),
+        );
         queue.write_buffer(
             &self.blit_uniform,
             0,
@@ -863,12 +955,20 @@ impl CallbackTrait for FractalCallback {
             res.last_viewport = self.viewport;
             res.step_probe(encoder, self.shader_key, stable);
             res.render_offscreen(
-                device,
-                queue,
+                (device, queue),
                 encoder,
                 self.shader_key,
-                [self.viewport[0] as u32, self.viewport[1] as u32],
-                self.render_size,
+                (
+                    [self.viewport[0] as u32, self.viewport[1] as u32],
+                    self.render_size,
+                ),
+                [
+                    self.uniforms.view[2],
+                    self.uniforms.dof[2],
+                    // Off entirely unless a focus distance was set.
+                    if self.uniforms.dof[0] > 0.0 { self.uniforms.dof[3] } else { 0.0 },
+                    0.0,
+                ],
             );
         }
         Vec::new()

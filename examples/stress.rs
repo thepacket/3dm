@@ -129,7 +129,13 @@ async fn run(frames: u32) {
 
         let mut encoder = device.create_command_encoder(&Default::default());
         pipeline.step_probe(&mut encoder, key, true);
-        pipeline.render_offscreen(&device, &queue, &mut encoder, key, size(), render_size);
+        pipeline.render_offscreen(
+            (&device, &queue),
+            &mut encoder,
+            key,
+            (size(), render_size),
+            [0.0; 4],
+        );
         {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("3dm.stress.blit"),

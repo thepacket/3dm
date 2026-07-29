@@ -398,6 +398,70 @@ impl App {
                 .default_open(true)
                 .show(ui, |ui| material_editor(&mut params.material, ui));
 
+            egui::CollapsingHeader::new("Effects")
+                .default_open(false)
+                .show(ui, |ui| {
+                    let m = &mut params.material;
+                    ui.label(egui::RichText::new("Reflections").strong());
+                    ui.add(egui::Slider::new(&mut m.reflectance, 0.0..=1.0).text("reflectance"))
+                        .on_hover_text(
+                            "One bounce. The reflected ray is shaded plainly — no \
+                             shadow, occlusion or fog on it — because three more \
+                             marches per pixel is not worth it at twenty percent \
+                             strength.",
+                        );
+                    ui.horizontal(|ui| {
+                        ui.color_edit_button_rgb(&mut m.reflection_color);
+                        ui.label("reflection tint");
+                    });
+
+                    ui.add_space(6.0);
+                    let s = &mut params.shading;
+                    ui.label(egui::RichText::new("Ambient occlusion").strong());
+                    ui.add(egui::Slider::new(&mut s.ao_strength, 0.0..=1.0).text("intensity"));
+                    ui.add(egui::Slider::new(&mut s.ao_quality, 1..=16).text("quality"))
+                        .on_hover_text("Samples taken along the normal.");
+                    ui.horizontal(|ui| {
+                        ui.color_edit_button_rgb(&mut s.ao_color);
+                        ui.label("occlusion tint");
+                    });
+
+                    ui.add_space(6.0);
+                    let p = &mut params.picture;
+                    ui.label(egui::RichText::new("Depth of field").strong());
+                    ui.add(
+                        egui::DragValue::new(&mut p.focus_distance)
+                            .speed(0.01)
+                            .range(0.0..=100.0)
+                            .prefix("focus distance: "),
+                    )
+                    .on_hover_text(
+                        "Distance from the camera that stays sharp. Zero turns \
+                         the effect off. The target cross reports the distance \
+                         to whatever it is over, which is the number to put here.",
+                    );
+                    ui.add(egui::Slider::new(&mut p.aperture, 0.1..=8.0).text("aperture"))
+                        .on_hover_text("How quickly things blur either side of focus.");
+                    ui.add(
+                        egui::Slider::new(&mut p.max_blur, 0.002..=0.08)
+                            .text("max blur")
+                            .logarithmic(true),
+                    );
+                    ui.add(egui::Slider::new(&mut p.blur_opacity, 0.0..=1.0).text("blur opacity"));
+
+                    ui.add_space(6.0);
+                    ui.label(egui::RichText::new("Post effects").strong());
+                    ui.add(
+                        egui::Slider::new(
+                            &mut params.picture.chromatic_aberration,
+                            0.0..=2.0,
+                        )
+                        .text("chromatic aberration"),
+                    )
+                    .on_hover_text("Spreads the channels radially, as a lens does.");
+                    ui.add(egui::Slider::new(&mut s.glow, 0.0..=1.5).text("glow"));
+                });
+
             egui::CollapsingHeader::new("Image adjustments")
                 .default_open(false)
                 .show(ui, |ui| {

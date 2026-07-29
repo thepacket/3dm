@@ -30,8 +30,15 @@ struct Uniforms {
     bg: vec4<f32>,
     // x = brightness, y = contrast, z = gamma, w = saturation
     picture: vec4<f32>,
-    // x = perspective type, y = 1 when tone mapping is skipped
+    // x = perspective type, y = 1 when tone mapping is skipped,
+    // z = chromatic aberration, w = occlusion samples
     view: vec4<f32>,
+    // rgb = reflection tint, w = how much of the view reflects
+    reflection: vec4<f32>,
+    // rgb = occlusion tint
+    ao_tint: vec4<f32>,
+    // x = focus distance, y = aperture, z = max blur, w = blur opacity
+    dof: vec4<f32>,
     // rgb = flat surface colour, w = shading strength
     surface: vec4<f32>,
     // rgb = specular colour, w = brightness
@@ -186,14 +193,19 @@ fn soft_shadow(
 // normal; where the field lags behind, geometry is nearby and occluding.
 fn ambient_occlusion(p: vec3<f32>, n: vec3<f32>) -> f32 {
     let s = scene_scale();
+    let samples = i32(dm3_u.view.w);
     var occ = 0.0;
     var weight = 1.0;
-    for (var i = 0; i < 5; i = i + 1) {
-        let h = (0.008 + 0.09 * f32(i)) * s;
+    // The step spacing is normalised by the sample count, so raising the
+    // quality refines the same span rather than reaching further out and
+    // darkening everything.
+    let span = 0.45 / f32(max(samples, 1));
+    for (var i = 0; i < samples; i = i + 1) {
+        let h = (0.008 + span * f32(i)) * s;
         occ = occ + (h - map(p + n * h)) * weight / s;
         weight = weight * 0.82;
     }
-    return clamp(1.0 - 2.6 * occ, 0.0, 1.0);
+    return clamp(1.0 - 2.6 * occ * (5.0 / f32(max(samples, 1))), 0.0, 1.0);
 }
 
 // The surface colour for an orbit-trap value, read from the baked gradient.
@@ -214,6 +226,21 @@ fn palette(t: f32) -> vec3<f32> {
         dm3_u.gradient[clamp(i, 0, 63)].rgb,
         dm3_u.gradient[clamp(i + 1, 0, 63)].rgb,
         fract(x));
+}
+
+// How defocused a pixel at distance `t` is, 0..1.
+//
+// Distance from the focal plane, divided by it, so the falloff is proportional
+// — an aperture that reads well on a fractal an arm's length away still reads
+// well on one across the scene. Rays that hit nothing are treated as far away,
+// which puts the background at maximum blur where that is what is wanted.
+fn circle_of_confusion(t: f32, hit: bool) -> f32 {
+    let focus = dm3_u.dof.x;
+    if (focus <= 0.0) {
+        return 1.0;
+    }
+    let depth = select(dm3_u.march.y, t, hit);
+    return clamp(abs(depth - focus) / focus * dm3_u.dof.y, 0.0, 1.0);
 }
 
 // Brightness, contrast, saturation and gamma, in that order.
@@ -250,6 +277,43 @@ fn shade_out(c: vec3<f32>) -> vec4<f32> {
 fn heat(x: f32) -> vec3<f32> {
     let v = clamp(x, 0.0, 1.0);
     return vec3<f32>(v, 1.0 - abs(v - 0.5) * 2.0, 1.0 - v);
+}
+
+// Colour along a secondary ray: one bounce, shaded plainly.
+//
+// No shadow, occlusion or fog on the bounce. Those cost their own marches and
+// a reflection is already a mix of what it hits — spending three more marches
+// per pixel to refine something at twenty percent strength is not a trade
+// worth making at interactive rates.
+fn reflected_color(ro: vec3<f32>, rd: vec3<f32>, eps_scale: f32, pixel_angle: f32) -> vec3<f32> {
+    let bounds = max(dm3_u.march.w, 0.1);
+    let b = dot(rd, ro);
+    let disc = b * b - (dot(ro, ro) - bounds * bounds);
+    if (disc < 0.0) {
+        return dm3_u.bg.rgb;
+    }
+
+    var t = max(-b - sqrt(disc), 0.0);
+    let max_steps = i32(dm3_u.march.x);
+    var steps = 0;
+    loop {
+        if (steps >= max_steps) { break; }
+        let p = ro + rd * t;
+        let field = fractal_de(p);
+        let d = field.dist * dm3_u.fractal.w;
+        let eps = max(pixel_angle * t * eps_scale, 1e-6);
+        if (d < eps) {
+            let n = surface_normal(p, max(pixel_angle * t, 1e-5));
+            let l = normalize(dm3_u.light.xyz);
+            let lambert = max(dot(n, l), 0.0);
+            let sky = 0.5 + 0.5 * n.y;
+            return palette(field.trap) * (lambert + dm3_u.light.w * sky);
+        }
+        t = t + d;
+        if (t > dm3_u.march.y) { break; }
+        steps = steps + 1;
+    }
+    return dm3_u.bg.rgb;
 }
 
 // The ray through a pixel, under the chosen projection.
@@ -378,6 +442,10 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
             tightness,
         );
         let occ = mix(1.0, ambient_occlusion(p, n), dm3_u.shade.x);
+        // A tint on the occluded light rather than on the surface: occlusion
+        // is light that did not arrive, so colouring it colours the shadowed
+        // side without touching what is lit.
+        let occ_tint = mix(dm3_u.ao_tint.rgb, vec3<f32>(1.0), occ);
 
         // Diagnostics: show one term on its own. Each of these is a factor in
         // the final colour, so a dark image alone cannot tell you which one is
@@ -413,10 +481,23 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
         // its own shadow term, and multiplying both by `occ` double-darkens —
         // barely visible on a sparse Mandelbulb, but it crushes a dense
         // Mandelbox to near-black.
-        color = base * (diffuse * shadow + ambient * occ)
+        color = base * (diffuse * shadow + ambient * occ * occ_tint)
             + dm3_u.specular.rgb * spec
             // Emission owes nothing to the light or to what shadows it.
             + dm3_u.emission.rgb * dm3_u.emission.w;
+
+        // One reflected bounce, off the surface along the normal so the ray
+        // does not immediately hit what it started on.
+        if (dm3_u.reflection.w > 0.001) {
+            let surface_offset = max(pixel_angle * t * eps_scale, 1e-6) * 3.0;
+            let bounce = reflect(rd, n);
+            let reflected = reflected_color(
+                p + n * surface_offset,
+                bounce,
+                eps_scale,
+                pixel_angle);
+            color = mix(color, reflected * dm3_u.reflection.rgb, dm3_u.reflection.w);
+        }
 
         // Fog toward the background, by depth into the bounding volume.
         let depth = clamp((t - entry_t) / (2.0 * bounds), 0.0, 1.0);
@@ -442,7 +523,10 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
     if (dm3_u.screen.w > 0.5) {
         color = linear_to_srgb(color);
     }
-    return vec4<f32>(color, 1.0);
+    // Alpha carries this pixel's circle of confusion, not opacity. The blit
+    // reads it to blur by the right amount without marching anything again.
+    // Zero focus distance disables the effect, and then alpha is a plain 1.
+    return vec4<f32>(color, circle_of_confusion(t, hit));
 }
 
 // ---------------------------------------------------------------------------

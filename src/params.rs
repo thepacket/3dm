@@ -109,6 +109,10 @@ pub struct ShadingParams {
     pub ambient: f32,
     /// Strength of the ambient-occlusion darkening in creases.
     pub ao_strength: f32,
+    /// Tint of the occluded light. White leaves occlusion neutral.
+    pub ao_color: [f32; 3],
+    /// Samples the occlusion term takes along the normal.
+    pub ao_quality: i32,
     /// Penumbra width of the ray-marched shadow. Low = hard, high = soft.
     pub shadow_softness: f32,
     /// Specular highlight intensity.
@@ -135,6 +139,8 @@ impl Default for ShadingParams {
             light_dir: [0.6, 0.7, -0.4],
             ambient: 0.45,
             ao_strength: 0.85,
+            ao_color: [1.0, 1.0, 1.0],
+            ao_quality: 5,
             shadow_softness: 16.0,
             specular: 0.35,
             glow: 0.30,
@@ -197,6 +203,16 @@ pub struct Picture {
     /// Skip the tone mapping and let bright values run past white.
     pub hdr: bool,
     pub perspective: Perspective,
+    /// Splits the channels radially, as a lens does.
+    pub chromatic_aberration: f32,
+    /// Distance from the camera that stays sharp. Zero disables the effect.
+    pub focus_distance: f32,
+    /// Aperture: how fast blur grows either side of the focus distance.
+    pub aperture: f32,
+    /// Ceiling on the blur, as a fraction of the frame height.
+    pub max_blur: f32,
+    /// How much of the blurred image is mixed in.
+    pub blur_opacity: f32,
 }
 
 impl Default for Picture {
@@ -208,6 +224,11 @@ impl Default for Picture {
             saturation: 1.0,
             hdr: false,
             perspective: Perspective::default(),
+            chromatic_aberration: 0.0,
+            focus_distance: 0.0,
+            aperture: 1.0,
+            max_blur: 0.02,
+            blur_opacity: 1.0,
         }
     }
 }
@@ -256,6 +277,9 @@ pub struct Material {
     /// Light the surface emits regardless of what reaches it.
     pub luminosity: f32,
     pub luminosity_color: [f32; 3],
+    /// How much of the view reflects off the surface. One bounce only.
+    pub reflectance: f32,
+    pub reflection_color: [f32; 3],
 }
 
 impl Default for Material {
@@ -285,6 +309,8 @@ impl Default for Material {
             specular_width: 0.15,
             luminosity: 0.0,
             luminosity_color: [1.0, 1.0, 1.0],
+            reflectance: 0.0,
+            reflection_color: [1.0, 1.0, 1.0],
         }
     }
 }
