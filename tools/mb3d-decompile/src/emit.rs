@@ -119,11 +119,11 @@ pub fn body(stores: &[(Place, crate::expr::E)]) -> Result<String, String> {
     for (place, value) in stores {
         let target = place_wgsl(place)?;
         let rendered = expression(value)?;
-        if let Place::Local(_) = place {
-            if declared.insert(target.clone()) {
-                out.push_str(&format!("\t\tvar {target}: f32 = {rendered};\n"));
-                continue;
-            }
+        if let Place::Local(_) = place
+            && declared.insert(target.clone())
+        {
+            out.push_str(&format!("\t\tvar {target}: f32 = {rendered};\n"));
+            continue;
         }
         out.push_str(&format!("\t\t{target} = {rendered};\n"));
     }
