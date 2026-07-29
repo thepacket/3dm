@@ -483,7 +483,13 @@ impl Builtin {
 /// One editable parameter of a formula, as the UI needs to show it.
 #[derive(Clone, Debug)]
 pub struct Control {
+    /// Short name for the widget: Mandelbulber's path with its struct prefix
+    /// dropped, since every parameter in a formula shares that prefix and it
+    /// only crowds the panel.
     pub label: String,
+    /// The full path, kept for the tooltip — it is what Mandelbulber's own UI
+    /// and its settings files call this parameter.
+    pub path: String,
     /// Float index into [`FormulaSlot::params`].
     pub index: usize,
     /// Slider bounds, where the formula has known ones.
@@ -584,6 +590,7 @@ impl FormulaKind {
                 .enumerate()
                 .map(|(i, spec)| Control {
                     label: spec.name.to_owned(),
+                    path: spec.name.to_owned(),
                     index: i,
                     range: Some((spec.min, spec.max)),
                 })
@@ -607,14 +614,18 @@ impl FormulaKind {
                     // A vec4 parameter becomes four controls, suffixed, because
                     // a single row of four drag values is how these read in
                     // Mandelbulber too.
-                    (0..floats).map(move |c| Control {
-                        label: if floats > 1 {
-                            format!("{}.{}", p.param.path, ["x", "y", "z", "w"][c])
-                        } else {
-                            p.param.path.to_owned()
-                        },
-                        index: p.index + c,
-                        range: None,
+                    (0..floats).map(move |c| {
+                        let short = p.param.path.rsplit('.').next().unwrap_or(p.param.path);
+                        Control {
+                            label: if floats > 1 {
+                                format!("{short}.{}", ["x", "y", "z", "w"][c])
+                            } else {
+                                short.to_owned()
+                            },
+                            path: p.param.path.to_owned(),
+                            index: p.index + c,
+                            range: None,
+                        }
                     })
                 })
                 .collect(),
