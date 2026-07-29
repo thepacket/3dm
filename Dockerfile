@@ -39,17 +39,23 @@ WORKDIR /app
 # often than they change. The dummy sources are replaced by the real COPY below.
 # Every workspace member's manifest has to be present or cargo cannot load the
 # workspace at all, even to build one binary from the root package — and every
-# package needs at least one target to exist, hence the stub sources. The
-# transpiler is never compiled here; it is a developer tool that does not ship.
+# package needs at least one target to exist, hence the stub sources. Neither
+# tool is ever compiled here; both are developer tools that do not ship.
+#
+# Adding a workspace member means adding it here too, or this stage fails with
+# "failed to load manifest for workspace member" before it compiles anything.
 COPY Cargo.toml Cargo.lock ./
 COPY tools/mb2-transpile/Cargo.toml tools/mb2-transpile/
-RUN mkdir -p src examples tools/mb2-transpile/src \
+COPY tools/mb3d-decompile/Cargo.toml tools/mb3d-decompile/
+RUN mkdir -p src examples tools/mb2-transpile/src tools/mb3d-decompile/src \
  && echo 'fn main() {}' > src/main.rs \
  && echo '' > src/lib.rs \
  && echo 'fn main() {}' > examples/still.rs \
  && echo 'fn main() {}' > tools/mb2-transpile/src/main.rs \
+ && echo 'fn main() {}' > tools/mb3d-decompile/src/main.rs \
+ && echo '' > tools/mb3d-decompile/src/lib.rs \
  && cargo build --release --target wasm32-unknown-unknown --bin 3dm \
- && rm -rf src examples tools/mb2-transpile/src
+ && rm -rf src examples tools/mb2-transpile/src tools/mb3d-decompile/src
 
 COPY . .
 # Trunk fingerprints its output, so cargo must not reuse the dummy build's
