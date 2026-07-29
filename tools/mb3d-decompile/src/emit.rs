@@ -111,22 +111,56 @@ fn format_number(v: f64) -> String {
     }
 }
 
-/// The whole body: the assignments in order, with locals declared on first use.
+/// Collects every stack slot an expression reads.
+fn locals_in(e: &Expr, into: &mut BTreeSet<i64>) {
+    match e {
+        Expr::Load(Place::Local(at)) => {
+            into.insert(*at);
+        }
+        Expr::Load(_) | Expr::Num(_) => {}
+        Expr::Neg(i) | Expr::Abs(i) | Expr::Sqrt(i) => locals_in(i, into),
+        Expr::Bin(_, a, b) | Expr::Test(_, a, b) => {
+            locals_in(a, into);
+            locals_in(b, into);
+        }
+        Expr::Select(c, a, b) => {
+            locals_in(c, into);
+            locals_in(a, into);
+            locals_in(b, into);
+        }
+        Expr::Fun(_, args) => args.iter().for_each(|a| locals_in(a, into)),
+    }
+}
+
+/// The whole body: every stack slot declared up front, then the assignments.
+///
+/// Declaring on first *store* is not enough. A formula can read a slot the
+/// decoded path never wrote — one written on a branch that was folded away, or
+/// left over from before the call — and that reads as an undeclared name,
+/// which is a shader that will not compile rather than one that is wrong.
+/// Zero is what the frame held anyway.
 pub fn body(stores: &[(Place, crate::expr::E)]) -> Result<String, String> {
     let mut out = String::new();
-    let mut declared: BTreeSet<String> = BTreeSet::new();
+    let mut slots: BTreeSet<i64> = BTreeSet::new();
+    for (place, value) in stores {
+        if let Place::Local(at) = place {
+            slots.insert(*at);
+        }
+        locals_in(value, &mut slots);
+    }
+    for at in &slots {
+        out.push_str(&format!("\t\tvar t{}: f32 = 0.0;\n", at.unsigned_abs()));
+    }
 
     for (place, value) in stores {
         let target = place_wgsl(place)?;
         let rendered = expression(value)?;
-        if let Place::Local(_) = place
-            && declared.insert(target.clone())
-        {
-            out.push_str(&format!("\t\tvar {target}: f32 = {rendered};\n"));
-            continue;
-        }
         out.push_str(&format!("\t\t{target} = {rendered};\n"));
     }
+    // 3DM wraps a body in a function returning the transformed vector, so the
+    // body has to hand it back. Mandelbulber's transpiled bodies end the same
+    // way; without it every formula fails validation on its return type.
+    out.push_str("\treturn z;\n");
     Ok(out)
 }
 

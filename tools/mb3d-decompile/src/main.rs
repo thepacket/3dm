@@ -28,6 +28,7 @@ fn main() {
     let mut params_report = false;
     let mut audit_report = false;
     let mut wgsl = false;
+    let mut generate: Option<String> = None;
     while let Some(arg) = args.next() {
         match arg.as_str() {
             "--asm" => {
@@ -44,6 +45,7 @@ fn main() {
                 wgsl = true;
                 only = args.next();
             }
+            "--generate" => generate = args.next(),
             other => only = Some(other.to_owned()),
         }
     }
@@ -90,6 +92,11 @@ fn main() {
                 println!("; {line}");
             }
         }
+        return;
+    }
+
+    if let Some(out) = generate {
+        generate_file(&formulas, std::path::Path::new(&out));
         return;
     }
 
@@ -615,4 +622,87 @@ fn wgsl_all(formulas: &[extract::Formula]) {
             println!("  {count:5}  {cause}");
         }
     }
+}
+
+
+/// Writes every emittable formula as entries for `GENERATED`.
+///
+/// Entries only — no array wrapper — because this is `include!`d into the one
+/// Mandelbulber's transpiler emits. The two corpora are additive: 3DM keeps
+/// all of Mandelbulber's formulas and gains MB3D's beside them.
+fn generate_file(formulas: &[extract::Formula], out: &std::path::Path) {
+    let mut text = String::new();
+    let mut written = 0usize;
+
+    for f in formulas {
+        let result = exec::run_with_constants(&f.code, &f.constants);
+        if result.bailed.is_some() {
+            continue;
+        }
+        let stores = exec::final_stores(&result.stores);
+        if stores.is_empty() {
+            continue;
+        }
+        let Ok(body) = emit::body(&stores) else { continue };
+        let Ok(declared) = options::declared(&f.options) else {
+            continue;
+        };
+        let slots = options::slots(&declared);
+        // A formula whose parameters this tool cannot account for would be
+        // handed someone else's values by an `.m3p`, so it is left out. That
+        // covers both having no slot table at all and reading past the end of
+        // one — the case `--params` reports as an overrun.
+        let highest_used = body
+            .match_indices("__MB2P")
+            .filter_map(|(at, _)| body[at + 6..].split("__").next())
+            .filter_map(|n| n.parse::<usize>().ok())
+            .max();
+        if let Some(highest) = highest_used
+            && highest >= slots.len()
+        {
+            continue;
+        }
+        let de_option: i32 = f
+            .options
+            .iter()
+            .find(|(k, _)| k.eq_ignore_ascii_case("DEoption"))
+            .and_then(|(_, v)| v.trim().parse().ok())
+            .unwrap_or(0);
+        // Until the analytic case is settled by rendering, everything takes
+        // the delta estimator: it measures the distance by sampling and needs
+        // no derivative from the formula at all, so it is right for the -1
+        // formulas and safe for the rest.
+        let _ = de_option;
+
+        text.push_str("    GeneratedFormula {\n");
+        text.push_str(&format!("        name: {:?},\n", f.name));
+        text.push_str(&format!("        source: {:?},\n", format!("{}.m3f", f.name)));
+        text.push_str(&format!("        param_floats: {},\n", slots.len().max(1)));
+        text.push_str("        de_function: DeFunction::Delta,\n");
+        text.push_str("        add_c: false,\n");
+        let bailout: f32 = f
+            .options
+            .iter()
+            .find(|(k, _)| k.eq_ignore_ascii_case("RStop"))
+            .and_then(|(_, v)| v.trim().parse().ok())
+            .unwrap_or(1024.0);
+        text.push_str(&format!("        bailout: {bailout:?},\n"));
+        text.push_str("        params: &[\n");
+        for (i, (name, default)) in slots.iter().enumerate() {
+            text.push_str(&format!(
+                "            GeneratedParam {{ path: {name:?}, kind: ParamKind::Float, offset: {i}, default: &[{default:?}] }},\n"
+            ));
+        }
+        text.push_str("        ],\n        derivations: &[],\n");
+        text.push_str("        wgsl: r####\"\n");
+        text.push_str(&body);
+        text.push_str("\"####,\n    },\n");
+        written += 1;
+    }
+
+    if let Err(e) = std::fs::write(out, &text) {
+        eprintln!("could not write {}: {e}", out.display());
+        std::process::exit(1);
+    }
+    println!("wrote {written} formulas to {}", out.display());
 }

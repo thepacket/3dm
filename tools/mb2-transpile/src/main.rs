@@ -326,6 +326,19 @@ fn emit(
         s.push_str("\"####,\n    },\n");
     }
 
+    // Mandelbulb 3D's formulas join the same array, emitted separately by
+    // `tools/mb3d-decompile`. Included rather than appended so that
+    // regenerating this file from Mandelbulber's sources cannot drop them —
+    // the two corpora are additive and neither owns the other.
+    s.push_str("    // Mandelbulb 3D formulas, recovered by tools/mb3d-decompile.\n");
+    // Inlined rather than `include!`d: the macro wants a single expression and
+    // these are a list of entries. Read from the file that tool writes, so
+    // regenerating from Mandelbulber's sources cannot drop them — the two
+    // corpora are additive and neither owns the other.
+    match std::fs::read_to_string("src/formulas/mb3d_generated.rs") {
+        Ok(mb3d) => s.push_str(&mb3d),
+        Err(e) => eprintln!("note: no Mandelbulb 3D formulas inlined ({e})"),
+    }
     s.push_str("];\n");
     s
 }

@@ -257,6 +257,21 @@ handed zeros renders nothing.
 `add_c` is false and must be. MB3D formulas add their own `J1`..`J3`, where
 Mandelbulber leaves `+ c` to the caller; setting it true adds the point twice.
 
+`--generate` writes them all to `src/formulas/mb3d_generated.rs`, which
+`tools/mb2-transpile` inlines into the one `GENERATED` array. The two corpora
+are **additive**: 3DM keeps all 425 of Mandelbulber's formulas and gains MB3D's
+beside them, and regenerating either cannot drop the other.
+
+**168 formulas are in the build, and all 593 compile.** They render.
+`Kalisets1` comes out as a Kaliset and `ABoxModKali` as an Amazing Box, which
+is the strongest evidence available — far beyond comparing vocabularies.
+
+The distance estimate is not right yet. Every imported formula is given the
+delta estimator, which measures by sampling and so needs nothing from the
+formula, but a positive `DEoption` means the author's own derivative is sitting
+in `w` unused. The shapes are right and heavily banded, which is what an
+estimate that overshoots looks like.
+
 169 of the 304 decompiled formulas emit. What stops the rest is 110 with a
 memory location this model cannot name, 22 reaching a record field with no
 established meaning, and 3 whose file has no `[CONSTANTS]` block to resolve a
