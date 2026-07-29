@@ -10,7 +10,8 @@
 //! ```text
 //! .DOUBLE.SINGLE.INTEGER.DOUBLEANGLE.SINGLEANGLE.3DOUBLEANGLES.3SINGLEANGLES
 //! .BOXSCALE.FOLDING.DSQUARE.NOVARIABLE.FOLDING16.6SINGLEANGLES.DRECIPRO
-//! .2DOUBLES.DSQRRECI.2SINGLES.4SINGLES.3SCALESANGLES.SCALESROT.
+//! .2DOUBLES..DSQRRECI..2SINGLES..4SINGLES..3SCALESANGLES.SCALESROT.2INTEGER.
+//! .SRECI2....DRECI2.
 //! ```
 //!
 //! and some of them stand for more than one value: the parser expands the
@@ -41,10 +42,20 @@ fn slots_for(keyword: &str) -> Option<usize> {
         // postdate it. Two slots is not a guess from the name: at two the
         // corpus check agrees on 254 formulas, at one it agrees on 247, and
         // the seven that move are exactly the ones declaring them.
-        "BOXSCALE" | "2DOUBLES" | "2SINGLES" | "DRECI2" | "SRECI2" => 2,
-        "3DOUBLEANGLES" | "3SINGLEANGLES" | "3SCALESANGLES" => 3,
+        "BOXSCALE" | "2DOUBLES" | "2SINGLES" | "DRECI2" | "SRECI2" | "2INTEGER" => 2,
+        // An angle is not stored as an angle: MB3D precomputes its sine and
+        // cosine, so three angles occupy six slots. Measured rather than
+        // assumed — at three the corpus check agrees on 258 formulas with 30
+        // reading past their declarations, at six on 284 with 4, and the
+        // formulas that move are exactly the ones declaring these.
+        "3SINGLEANGLES" | "3SCALESANGLES" => 6,
+        "6SINGLEANGLES" => 12,
+        // No formula in the corpus declares this one, so there is nothing to
+        // measure against and the literal reading is what it keeps. If one
+        // ever appears, `--params` will say so rather than quietly misplacing
+        // every parameter after it.
+        "3DOUBLEANGLES" => 3,
         "4SINGLES" | "FOLDING16" => 4,
-        "6SINGLEANGLES" => 6,
         // Deliberately not guessed. An unknown keyword shifts every slot after
         // it, so reporting it is worth far more than assuming one.
         _ => return None,
@@ -101,12 +112,13 @@ pub fn slot_names(declared: &[Declared]) -> Vec<String> {
             names.push(d.name.clone());
             continue;
         }
-        // Three- and six-part angles are per-axis; anything else compound gets
-        // an index, which is honest about not knowing what the parts mean.
-        const AXES: [&str; 6] = ["X", "Y", "Z", "A", "B", "C"];
+        // Angle sets are named for the plane each rotates in, not for an
+        // axis. MB3D's own suffix list is `sra` in `CustomFormulas.pas`; the
+        // three-part types take its first three.
+        const PLANES: [&str; 6] = ["YZ", "XZ", "XY", "XW", "YW", "ZW"];
         for i in 0..d.slots {
             let suffix = if d.keyword.contains("ANGLE") {
-                AXES[i.min(5)].to_owned()
+                PLANES[i.min(5)].to_owned()
             } else {
                 format!("{}", i + 1)
             };

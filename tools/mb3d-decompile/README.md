@@ -169,9 +169,9 @@ of them plain `Double`, and its compiled code reads eight slots — so `Fold` is
 the highest slot the code actually reads, then compares them:
 
 ```
-slot table agrees:       254
-  (of which unused tail: 79)
-reads past declarations: 34
+slot table agrees:       284
+  (of which unused tail: 120)
+reads past declarations: 4
 unknown datatypes:       0
 ```
 
@@ -181,8 +181,18 @@ rather than a tautology, and a disagreement names the formula. That is how
 were sized at two slots each: at two the check agrees on 254 formulas, at one
 on 247, and the seven that move are exactly the ones declaring them.
 
-The 34 that still read past their declarations are mostly IFS formulas
-overrunning by one to three slots. Those datatypes are still wrong.
+An angle is the interesting case. MB3D does not store one: it precomputes the
+sine and cosine, so `.3SingleAngles` occupies **six** slots rather than three.
+That was found by asking which datatypes the overrunning formulas were enriched
+for — `.3SingleAngles` appeared 22 times across 15 of them against 117 times
+across all 457 — and then measuring. At three the check agrees on 258 with 30
+overruns; at six, 284 with 4.
+
+`.3DoubleAngles` is left at the literal three. No formula in the corpus
+declares it, so there is nothing to measure against and a matching guess would
+only look like knowledge. `--params` will say so if one ever turns up.
+
+Four formulas still overrun, all of them transforms rather than fractals.
 
 ## Auditing the whole corpus
 
