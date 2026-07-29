@@ -7,7 +7,7 @@ use crate::camera::Camera;
 use crate::formulas::{Builtin, DeMode, FormulaKind, FormulaSlot, generated::GENERATED};
 use crate::params::{
     BackgroundMap, BackgroundParams, DebugView, Light, LightDecay, LightKind, LightsParams,
-    MAX_LIGHTS, Material, Perspective,
+    MAX_LIGHTS, Material, Perspective, Post,
     SceneParams, Stop,
 };
 use crate::render::{CursorProbe, FractalPipeline, Uniforms, callback};
@@ -404,6 +404,10 @@ impl App {
                     });
                 });
 
+            egui::CollapsingHeader::new("Post effects")
+                .default_open(false)
+                .show(ui, |ui| post_editor(&mut params.post, ui));
+
             egui::CollapsingHeader::new("Lights")
                 .default_open(false)
                 .show(ui, |ui| lights_editor(&mut params.lights, &mut self.selected_light, ui));
@@ -502,15 +506,7 @@ impl App {
                     }
 
                     ui.add_space(6.0);
-                    ui.label(egui::RichText::new("Post effects").strong());
-                    ui.add(
-                        egui::Slider::new(
-                            &mut params.picture.chromatic_aberration,
-                            0.0..=2.0,
-                        )
-                        .text("chromatic aberration"),
-                    )
-                    .on_hover_text("Spreads the channels radially, as a lens does.");
+                    ui.label(egui::RichText::new("Glow").strong());
                     ui.add(egui::Slider::new(&mut s.glow, 0.0..=1.5).text("glow"));
                     ui.horizontal(|ui| {
                         ui.color_edit_button_rgb(&mut s.glow_near);
@@ -1295,6 +1291,45 @@ fn thumb_uv(index: usize) -> egui::Rect {
         egui::pos2(col as f32 * step, row as f32 * step),
         egui::vec2(step, step),
     )
+}
+
+/// Mandelbulber's Post effects tab.
+///
+/// Both filters read the pixels around the one they produce, so both live in
+/// the blit rather than the fractal pass. That is also why they show up in the
+/// window but not in a direct headless render — `still` has to be asked for
+/// the blit with `DM3_POST=1`.
+fn post_editor(p: &mut Post, ui: &mut egui::Ui) {
+    ui.checkbox(&mut p.hdr_blur, "HDR blur")
+        .on_hover_text(
+            "Bright areas bleeding into their surroundings. Mandelbulber runs \
+             this before tone mapping, where a highlight is genuinely brighter \
+             than white; here the tone map has already been applied, so the \
+             effect is milder unless HDR is on in Image adjustments.",
+        );
+    if p.hdr_blur {
+        ui.add(egui::Slider::new(&mut p.hdr_blur_radius, 0.5..=40.0).text("blur radius"))
+            .on_hover_text("In Mandelbulber's units: a thousandth of width plus height.");
+        ui.add(
+            egui::Slider::new(&mut p.hdr_blur_intensity, 0.005..=2.0)
+                .text("intensity")
+                .logarithmic(true),
+        )
+        .on_hover_text(
+            "The limiter in the weight's denominator, so small is subtle: the \
+             centre pixel is worth 1/intensity and drowns the rest out.",
+        );
+    }
+
+    ui.add_space(6.0);
+    ui.checkbox(&mut p.aberration, "chromatic aberration")
+        .on_hover_text("Spreads the channels radially, as a lens does.");
+    if p.aberration {
+        ui.add(egui::Slider::new(&mut p.aberration_blur, 0.0..=20.0).text("blur radius"));
+        ui.add(egui::Slider::new(&mut p.aberration_intensity, 0.0..=20.0).text("intensity"));
+        ui.checkbox(&mut p.aberration_reverse, "reverse colour order")
+            .on_hover_text("Throws blue outward and red inward instead.");
+    }
 }
 
 /// Mandelbulber's Background tab: a colour or gradient, or a panorama.

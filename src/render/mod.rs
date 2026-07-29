@@ -50,9 +50,16 @@ const BLIT_WGSL: &str = r#"
 // top-left corner, so nothing is reallocated when the scale changes.
 // xy = the fraction of the texture drawn, zw = half a texel of inset.
 @group(0) @binding(2) var<uniform> region: vec4<f32>;
-// x = chromatic aberration, y = max blur as a fraction of height,
-// z = blur opacity. The per-pixel blur amount rides in the source alpha.
-@group(0) @binding(3) var<uniform> post: vec4<f32>;
+struct Post {
+    // x = chromatic aberration, y = max blur as a fraction of height,
+    // z = blur opacity. The per-pixel blur amount rides in the source alpha.
+    // w = the aberration's smear along the radius, in pixels.
+    a: vec4<f32>,
+    // x = HDR blur radius (Mandelbulber's units), y = its intensity,
+    // z = 1 to reverse the aberration's colour order.
+    b: vec4<f32>,
+};
+@group(0) @binding(3) var<uniform> post: Post;
 
 struct VsOut {
     @builtin(position) pos: vec4<f32>,
@@ -74,6 +81,106 @@ fn vs_blit(@builtin(vertex_index) vi: u32) -> VsOut {
     return out;
 }
 
+// One texel of the offscreen texture, in uv. `region.zw` is half of it.
+fn texel_size() -> vec2<f32> {
+    return 2.0 * region.zw;
+}
+
+// The drawn frame's size in pixels, which the two filters below state their
+// radii in. Derived rather than passed: `region` already carries both the
+// fraction drawn and the texel size, and their ratio is exactly this.
+fn drawn_pixels() -> vec2<f32> {
+    return region.xy / max(texel_size(), vec2<f32>(1e-9));
+}
+
+// Bright areas bleeding into their surroundings.
+//
+// Mandelbulber weights every pixel within the radius by
+// `1 / (r^2 / (0.2 * radius) + intensity)` and renormalises — so the centre
+// tap is worth `1/intensity` and a low intensity leaves the pixel almost
+// untouched. That weighting is reproduced exactly; what is not is the tap
+// count. Mandelbulber walks the whole square, which at its default radius is
+// some five hundred texture reads per pixel — fine for a still that renders
+// for a minute, not for something redrawn while the camera moves. A Fibonacci
+// spiral samples the same disc with a fixed budget, and because the weight
+// falls off as 1/r^2 the taps that are skipped are the ones contributing
+// least.
+fn hdr_blur(uv: vec2<f32>, limit: vec2<f32>, color: vec3<f32>) -> vec3<f32> {
+    let pixels = drawn_pixels();
+    let radius = post.b.x * (pixels.x + pixels.y) * 0.001;
+    if (radius < 0.5) {
+        return color;
+    }
+    let intensity = max(post.b.y, 1e-4);
+    let texel = texel_size();
+
+    // The centre tap, at r = 0.
+    var weight = 1.0 / intensity;
+    var sum = color * weight;
+
+    let taps = 48;
+    for (var i = 0; i < taps; i = i + 1) {
+        // Golden-angle spiral: even coverage of the disc with no ring
+        // structure to alias against the fractal's own detail.
+        let a = f32(i) * 2.39996;
+        let r = radius * sqrt((f32(i) + 0.5) / f32(taps));
+        let w = 1.0 / (r * r / (0.2 * radius) + intensity);
+        let tap = min(
+            max(uv + vec2<f32>(cos(a), sin(a)) * r * texel, vec2<f32>(0.0)),
+            limit);
+        sum = sum + textureSample(src, samp, tap).rgb * w;
+        weight = weight + w;
+    }
+    return sum / weight;
+}
+
+// A lens disperses more the further from its axis, so the channels are spread
+// radially from the centre rather than by a constant offset.
+//
+// Mandelbulber picks each channel from a different point along the radius and
+// smears it over a blur radius; both are reproduced here by walking the radial
+// line rather than its whole neighbourhood, which is where the cost was.
+fn aberration(uv: vec2<f32>, limit: vec2<f32>, color: vec3<f32>) -> vec3<f32> {
+    let centre = region.xy * 0.5;
+    let from_centre = uv - centre;
+    let pixels = drawn_pixels();
+    let texel = texel_size();
+
+    // Zero at the axis and growing outward, which is what makes the corners
+    // fringe while the middle of the frame stays clean.
+    let radial = from_centre / max(length(from_centre), 1e-6);
+    let spread = post.a.x * length(from_centre / region.xy) * pixels.x * 0.007;
+    let smear = max(post.a.w, 0.0) * 0.5;
+    let reverse = select(1.0, -1.0, post.b.z > 0.5);
+
+    var sum = vec3<f32>(0.0);
+    var weight = vec3<f32>(0.0);
+    let taps = 15;
+    for (var i = 0; i < taps; i = i + 1) {
+        // -1..1 along the radius, so the centre tap lands on the pixel itself.
+        let t = (f32(i) / f32(taps - 1)) * 2.0 - 1.0;
+        let along = t * (spread + smear);
+        let tap = min(
+            max(uv + radial * along * texel, vec2<f32>(0.0)),
+            limit);
+        let s = textureSample(src, samp, tap).rgb;
+
+        // Red is picked from further out along the radius than blue — or the
+        // other way round with the order reversed. Each channel's weight is a
+        // triangle centred on its own offset.
+        let width = max(spread * 0.5, 0.75);
+        let w = vec3<f32>(
+            max(1.0 - abs(along - spread * 0.5 * reverse) / width, 0.0),
+            max(1.0 - abs(along) / width, 0.0),
+            max(1.0 - abs(along + spread * 0.5 * reverse) / width, 0.0));
+        sum = sum + s * w;
+        weight = weight + w;
+    }
+    // A weight can fall to zero where the spread is smaller than one tap's
+    // step; the untouched pixel is the right answer there.
+    return select(color, sum / max(weight, vec3<f32>(1e-6)), weight > vec3<f32>(1e-6));
+}
+
 @fragment
 fn fs_blit(in: VsOut) -> @location(0) vec4<f32> {
     // Clamped just inside the drawn region: without it the sampler's filter
@@ -86,8 +193,8 @@ fn fs_blit(in: VsOut) -> @location(0) vec4<f32> {
     // Depth of field. The fractal pass wrote each pixel's circle of confusion
     // into alpha, so the blur radius is already known here and costs one disc
     // of taps rather than a second march.
-    if (post.z > 0.0001 && color.a > 0.001) {
-        let radius = color.a * post.y;
+    if (post.a.z > 0.0001 && color.a > 0.001) {
+        let radius = color.a * post.a.y;
         var sum = color.rgb;
         var weight = 1.0;
         // A twelve-tap spiral: enough to read as defocus rather than as a
@@ -103,22 +210,19 @@ fn fs_blit(in: VsOut) -> @location(0) vec4<f32> {
             sum += s.rgb * w;
             weight += w;
         }
-        color = vec4<f32>(mix(color.rgb, sum / weight, post.z), color.a);
+        color = vec4<f32>(mix(color.rgb, sum / weight, post.a.z), color.a);
     }
 
-    if (post.x <= 0.0001) {
-        return vec4<f32>(color.rgb, 1.0);
+    // Post effects, in Mandelbulber's own order: the bleed first, then the
+    // lens. Swapping them would fringe the bloom rather than the picture.
+    var rgb = color.rgb;
+    if (post.b.x > 0.0001) {
+        rgb = hdr_blur(uv, limit, rgb);
     }
-
-    // A lens disperses more the further from its axis, so the channels are
-    // spread radially from the centre rather than by a constant offset.
-    let centre = region.xy * 0.5;
-    let offset = (uv - centre) * post.x * 0.02;
-    return vec4<f32>(
-        textureSample(src, samp, min(uv + offset, limit)).r,
-        color.g,
-        textureSample(src, samp, min(max(uv - offset, vec2<f32>(0.0)), limit)).b,
-        1.0);
+    if (post.a.x > 0.0001) {
+        rgb = aberration(uv, limit, rgb);
+    }
+    return vec4<f32>(rgb, 1.0);
 }
 "#;
 
@@ -196,6 +300,13 @@ pub struct Uniforms {
     bg_tex: [f32; 4],
     /// Rows of the rotation applied to a ray before it samples the image.
     bg_rot: [[f32; 4]; 3],
+    /// x = HDR blur radius, y = its intensity, z = the aberration's smear,
+    /// w = 1 to reverse the aberration's colour order.
+    ///
+    /// The fractal pass never reads this — the post effects happen in the
+    /// blit. It rides here because this is the block every renderer already
+    /// builds, so `still` and `stress` get them without a second channel.
+    post_fx: [f32; 4],
 }
 
 /// How many vec4s one light occupies. Must match `Light` in `fractal.wgsl`.
@@ -281,6 +392,7 @@ impl Uniforms {
         let mat = &params.material;
         let pic = &params.picture;
         let bg = &params.background;
+        let px = &params.post;
 
         // Each slot's parameters go to the same fixed address the generated
         // shader reads them from; anything the formula does not use stays zero.
@@ -372,7 +484,7 @@ impl Uniforms {
             view: [
                 pic.perspective as u32 as f32,
                 if pic.hdr { 1.0 } else { 0.0 },
-                pic.chromatic_aberration,
+                if px.aberration { px.aberration_intensity } else { 0.0 },
                 s.ao_quality.clamp(1, 16) as f32,
             ],
             reflection: [
@@ -453,7 +565,31 @@ impl Uniforms {
                 0.0,
             ],
             bg_rot: bg.rotation_rows(),
+            post_fx: [
+                if px.hdr_blur { px.hdr_blur_radius.max(0.0) } else { 0.0 },
+                px.hdr_blur_intensity.max(1e-4),
+                px.aberration_blur.max(0.0),
+                if px.aberration_reverse { 1.0 } else { 0.0 },
+            ],
         }
+    }
+
+    /// The eight floats the blit's post-effect uniform wants.
+    ///
+    /// Assembled here rather than at each call site so that `still`, `stress`
+    /// and the app cannot disagree about the order.
+    pub fn post(&self) -> [f32; 8] {
+        [
+            self.view[2],
+            self.dof[2],
+            // Depth of field is off entirely unless a focus distance was set.
+            if self.dof[0] > 0.0 { self.dof[3] } else { 0.0 },
+            self.post_fx[2],
+            self.post_fx[0],
+            self.post_fx[1],
+            self.post_fx[3],
+            0.0,
+        ]
     }
 }
 
@@ -747,7 +883,7 @@ impl FractalPipeline {
         });
         let post_uniform = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("3dm.blit.post"),
-            size: 16,
+            size: 32,
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
@@ -988,7 +1124,7 @@ impl FractalPipeline {
         key: u64,
         // Texture size, then the part of it this frame draws into.
         size: ([u32; 2], [u32; 2]),
-        post: [f32; 4],
+        post: [f32; 8],
     ) -> bool {
         let (device, queue) = gpu;
         let (full, size) = size;
@@ -1285,13 +1421,7 @@ impl CallbackTrait for FractalCallback {
                     [self.viewport[0] as u32, self.viewport[1] as u32],
                     self.render_size,
                 ),
-                [
-                    self.uniforms.view[2],
-                    self.uniforms.dof[2],
-                    // Off entirely unless a focus distance was set.
-                    if self.uniforms.dof[0] > 0.0 { self.uniforms.dof[3] } else { 0.0 },
-                    0.0,
-                ],
+                self.uniforms.post(),
             );
         }
         Vec::new()

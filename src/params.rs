@@ -505,8 +505,6 @@ pub struct Picture {
     /// Skip the tone mapping and let bright values run past white.
     pub hdr: bool,
     pub perspective: Perspective,
-    /// Splits the channels radially, as a lens does.
-    pub chromatic_aberration: f32,
     /// Distance from the camera that stays sharp. Zero disables the effect.
     pub focus_distance: f32,
     /// Aperture: how fast blur grows either side of the focus distance.
@@ -526,11 +524,60 @@ impl Default for Picture {
             saturation: 1.0,
             hdr: false,
             perspective: Perspective::default(),
-            chromatic_aberration: 0.0,
             focus_distance: 0.0,
             aperture: 1.0,
             max_blur: 0.02,
             blur_opacity: 1.0,
+        }
+    }
+}
+
+/// Filters run over the finished frame, after everything else.
+///
+/// These live in the blit rather than the fractal pass because each one needs
+/// to read pixels *around* the one it is producing, which a shader marching a
+/// single ray cannot do. That is also why they only appear once the frame has
+/// been drawn to the offscreen texture — see `render_offscreen`.
+/// Each effect keeps its settings while switched off, so turning one back on
+/// returns to what it was rather than to zero — which is why the enables are
+/// separate flags rather than a radius of zero.
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct Post {
+    /// Bright areas bleeding into their surroundings.
+    ///
+    /// Mandelbulber runs this on the image *before* tone mapping, where a
+    /// specular highlight is genuinely brighter than white and so bleeds hard.
+    /// 3DM tone maps in the fractal pass, so the effect is milder here unless
+    /// HDR is on — which is the setting that leaves those values intact.
+    pub hdr_blur: bool,
+    /// How far the bleed reaches, as Mandelbulber states it: the radius in
+    /// pixels is this times a thousandth of the frame's width plus height.
+    pub hdr_blur_radius: f32,
+    /// How much of the surroundings gets in. This is the limiter in the
+    /// weight's denominator, so *small* is subtle — the centre tap is worth
+    /// `1/intensity` and drowns everything else out.
+    pub hdr_blur_intensity: f32,
+    /// Splits the channels radially, as a lens does.
+    pub aberration: bool,
+    pub aberration_intensity: f32,
+    /// How far each channel is smeared along the radius.
+    pub aberration_blur: f32,
+    /// Swap which way the channels are thrown — red outward or blue outward.
+    pub aberration_reverse: bool,
+}
+
+impl Default for Post {
+    fn default() -> Self {
+        Self {
+            hdr_blur: false,
+            // Mandelbulber's own defaults, so that ticking a box gives what
+            // ticking it there gives.
+            hdr_blur_radius: 10.0,
+            hdr_blur_intensity: 0.1,
+            aberration: false,
+            aberration_intensity: 5.0,
+            aberration_blur: 5.0,
+            aberration_reverse: false,
         }
     }
 }
@@ -659,6 +706,7 @@ pub struct SceneParams {
     pub shading: ShadingParams,
     pub lights: LightsParams,
     pub background: BackgroundParams,
+    pub post: Post,
     pub material: Material,
     pub picture: Picture,
     /// Diagnostic override; [`DebugView::Off`] renders normally.

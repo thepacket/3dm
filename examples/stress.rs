@@ -134,7 +134,7 @@ async fn run(frames: u32) {
             &mut encoder,
             key,
             (size(), render_size),
-            [0.0; 4],
+            [0.0; 8],
         );
         {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {

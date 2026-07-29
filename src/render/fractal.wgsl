@@ -89,6 +89,10 @@ struct Uniforms {
     bg_tex: vec4<f32>,
     // Rows of the rotation applied to a ray before it samples the image.
     bg_rot: array<vec4<f32>, 3>,
+    // Post effects, which happen in the blit and are never read here. Declared
+    // anyway: this block is one flat run of bytes, so a field the CPU writes
+    // and the shader omits shifts every offset after it.
+    post_fx: vec4<f32>,
 };
 
 const LIGHT_VEC4S: i32 = 5;

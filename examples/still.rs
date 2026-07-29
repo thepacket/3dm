@@ -301,18 +301,40 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
         _ => {}
     }
 
-    pipeline.upload(
-        &queue,
-        &Uniforms::build(
-            &camera,
-            &params,
-            [width as f32, height as f32],
-            0.0,
-            // The target is sRGB, so the hardware does the encoding for us.
-            !format.is_srgb(),
-            [0.0, 0.0],
-        ),
+    // DM3_POST renders the way the window does: to an offscreen texture and
+    // then through the blit, which is the only place depth of field, chromatic
+    // aberration and the HDR blur happen. Absent, the direct render every
+    // other diagnostic here compares against is what you get — and this path
+    // is the seed of a real image export.
+    //
+    //   1          the blit alone, which should be a lossless copy
+    //   hdr        HDR blur, with tone mapping off so highlights can bleed
+    //   aberr      chromatic aberration; `aberr-rev` reverses its colours
+    //   both       the two together, in the order the blit applies them
+    let post_mode = std::env::var("DM3_POST").unwrap_or_default();
+    let through_blit = !post_mode.is_empty();
+    if matches!(post_mode.as_str(), "hdr" | "both") {
+        params.post.hdr_blur = true;
+        // Mandelbulber blurs the image before tone mapping, where a highlight
+        // is genuinely brighter than white. This is the setting that leaves
+        // those values intact, and without it the effect is far weaker.
+        params.picture.hdr = true;
+    }
+    if matches!(post_mode.as_str(), "aberr" | "aberr-rev" | "both") {
+        params.post.aberration = true;
+        params.post.aberration_reverse = post_mode == "aberr-rev";
+    }
+
+    let uniforms = Uniforms::build(
+        &camera,
+        &params,
+        [width as f32, height as f32],
+        0.0,
+        // The target is sRGB, so the hardware does the encoding for us.
+        !format.is_srgb(),
+        [0.0, 0.0],
     );
+    pipeline.upload(&queue, &uniforms);
 
     // Round each row up to the copy alignment; we trim the padding on readback.
     let unpadded_bytes_per_row = width * 4;
@@ -325,8 +347,34 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
         mapped_at_creation: false,
     });
 
+
     let mut encoder = device.create_command_encoder(&Default::default());
-    {
+    if through_blit {
+        pipeline.render_offscreen(
+            (&device, &queue),
+            &mut encoder,
+            key,
+            ([width, height], [width, height]),
+            uniforms.post(),
+        );
+        let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+            label: Some("3dm.still.blit"),
+            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                view: &view,
+                depth_slice: None,
+                resolve_target: None,
+                ops: wgpu::Operations {
+                    load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
+                    store: wgpu::StoreOp::Store,
+                },
+            })],
+            depth_stencil_attachment: None,
+            timestamp_writes: None,
+            occlusion_query_set: None,
+            multiview_mask: None,
+        });
+        pipeline.blit(&mut pass);
+    } else {
         let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
             label: Some("3dm.still.pass"),
             color_attachments: &[Some(wgpu::RenderPassColorAttachment {
