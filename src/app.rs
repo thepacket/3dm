@@ -135,6 +135,9 @@ pub struct App {
     resolution: Resolution,
     /// Upper bound on frames per second; 0 lifts it entirely.
     fps_cap: u32,
+    /// When the current frame began, so the next can be scheduled a fixed
+    /// interval after it.
+    frame_start: Option<std::time::Instant>,
     /// The scale used in [`Resolution::Fixed`].
     fixed_scale: f32,
     /// What the GPU last reported about the cursor ray and the space ahead.
@@ -190,6 +193,7 @@ impl App {
             render_scale: 1.0,
             resolution: Resolution::default(),
             fps_cap: DEFAULT_FPS_CAP,
+            frame_start: None,
             fixed_scale: 0.5,
             shader: (key, source.into()),
         })
@@ -494,9 +498,13 @@ impl App {
         match self.fps_cap {
             0 => ctx.request_repaint(),
             cap => {
-                let budget = 1000.0 / cap as f32;
-                let remaining = (budget - self.frame_ms).max(0.0);
-                ctx.request_repaint_after(Duration::from_secs_f32(remaining / 1000.0));
+                // Measured from when this frame started, not from `frame_ms`.
+                // That is wall-clock between frames and so includes the wait
+                // this schedules, which meant it converged on the budget, left
+                // nothing to wait for, and quietly stopped capping anything.
+                let budget = Duration::from_secs_f32(1.0 / cap as f32);
+                let spent = self.frame_start.map(|t| t.elapsed()).unwrap_or_default();
+                ctx.request_repaint_after(budget.saturating_sub(spent));
             }
         }
     }
@@ -729,6 +737,7 @@ impl eframe::App for App {
             self.camera.frame(self.params.fractal.bounding_radius);
         }
 
+        self.frame_start = Some(std::time::Instant::now());
         let dt = ui.input(|i| i.stable_dt).min(0.1);
         self.elapsed += dt;
         self.frame_ms += (dt * 1000.0 - self.frame_ms) * 0.1;
@@ -886,20 +895,39 @@ fn formula_picker(ui: &mut egui::Ui, filter: &mut String, mut choose: impl FnMut
         });
 }
 
-/// This process's resident memory, in megabytes.
+/// This process's resident memory, in megabytes, sampled at most once a second.
 ///
-/// Shelling out to `ps` rather than linking a platform crate: it is a
-/// diagnostic readout, refreshed only while the Diagnostics section is open.
+/// It shells out to `ps`, which is fine once a second and ruinous every frame:
+/// spawning a process on the UI thread blocks it, and doing so on every frame
+/// of a live render buries the event loop under fork and exec while the mouse
+/// is still producing events. The whole point of this readout was to diagnose a
+/// slowdown, and measuring it that way caused one.
 #[cfg(not(target_arch = "wasm32"))]
 fn resident_mb() -> f32 {
-    std::process::Command::new("ps")
+    use std::sync::Mutex;
+    use std::time::Instant;
+
+    static CACHE: Mutex<Option<(Instant, f32)>> = Mutex::new(None);
+    let mut cache = match CACHE.lock() {
+        Ok(c) => c,
+        Err(poisoned) => poisoned.into_inner(),
+    };
+    if let Some((when, value)) = *cache
+        && when.elapsed() < Duration::from_secs(1)
+    {
+        return value;
+    }
+
+    let value = std::process::Command::new("ps")
         .args(["-o", "rss=", "-p", &std::process::id().to_string()])
         .output()
         .ok()
         .and_then(|o| String::from_utf8(o.stdout).ok())
         .and_then(|s| s.trim().parse::<f32>().ok())
         .map(|kb| kb / 1024.0)
-        .unwrap_or(0.0)
+        .unwrap_or(0.0);
+    *cache = Some((Instant::now(), value));
+    value
 }
 
 #[cfg(target_arch = "wasm32")]
