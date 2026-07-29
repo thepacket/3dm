@@ -78,6 +78,16 @@ impl Program {
     fn position(&self, address: u64) -> Option<usize> {
         self.index_of.get(&address).copied()
     }
+
+    /// Where the subroutine starting at `from` ends — just past its `ret`.
+    fn subroutine_end(&self, from: usize) -> usize {
+        for (at, ins) in self.instructions.iter().enumerate().skip(from) {
+            if ins.mnemonic() == Mnemonic::Ret {
+                return at + 1;
+            }
+        }
+        self.instructions.len()
+    }
 }
 
 /// The comparison a conditional jump tests, given the operands it was set up
@@ -156,11 +166,44 @@ impl Machine {
                 continue;
             }
 
+            // A formula that folds the same way several times factors the fold
+            // out and calls it. The helpers live between the prologue and the
+            // body, which jumps over them on the way in.
+            if ins.mnemonic() == Mnemonic::Call {
+                self.call(program, &ins)?;
+                at += 1;
+                continue;
+            }
+
+            // Returning ends this range. Without this a helper would run on
+            // into whatever was laid out after it.
+            if ins.mnemonic() == Mnemonic::Ret {
+                return Ok(());
+            }
+
             self.step(&ins)
                 .map_err(|e| format!("{e} [{:?} at {:04x}]", ins.mnemonic(), ins.ip()))?;
             at += 1;
         }
         Ok(())
+    }
+
+    /// Runs an internal subroutine in place.
+    ///
+    /// The x87 stack is how these helpers take their argument and leave their
+    /// result, so the callee runs against this machine's own state rather than
+    /// a fresh one — inlining it is the whole of the "calling convention".
+    fn call(&mut self, program: &Program, ins: &Instruction) -> Result<(), String> {
+        if !ins.is_call_near() {
+            // Through a pointer in the record — `PMapFunc` and its like, which
+            // are MB3D's own routines and not in this blob at all.
+            return Err(format!("indirect call at {:04x}", ins.ip()));
+        }
+        let target = program
+            .position(ins.near_branch_target())
+            .ok_or_else(|| format!("call outside the blob at {:04x}", ins.ip()))?;
+        let end = program.subroutine_end(target);
+        self.run_range(program, target, end)
     }
 
     /// Handles one conditional jump, returning where execution continues.

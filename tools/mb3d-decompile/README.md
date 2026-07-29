@@ -55,9 +55,9 @@ description.
 
 ```
 formulas attempted:      457
-fully recovered:         299
+fully recovered:         304
 ran but assigned nothing:7
-bailed:                  151
+bailed:                  146
 ```
 
 Done: extraction, the ABI table, a corpus survey, annotated disassembly, a
@@ -74,9 +74,36 @@ the four consecutively, and is why `[eax+8]` is `y`. SSE has no float negate or
 absolute value, so those are bitwise operations against sign masks that MB3D
 keeps in the same constant pool as the formula's own parameters.
 
-Not done: a handful of integer-load instructions, 21 formulas that call out to
-something, 13 with a backward jump, 32 whose branch has no comparison this
-model captured, and reading `.m3p` parameter files.
+## Calls, measured
+
+A formula that folds the same way several times factors the fold out and calls
+it. The helpers sit between the prologue and the body, which jumps over them on
+the way in. Across the corpus:
+
+| | sites |
+|---|---|
+| direct, target inside the blob | 54 |
+| direct, target outside | 12 |
+| indirect, through a pointer | 66 |
+| backward jumps (all inside helpers) | 8 |
+
+The internal ones are inlined: the x87 stack is how a helper takes its argument
+and leaves its result, so it runs against the caller's own state and that is
+the whole of the calling convention. The indirect ones go through `PMapFunc`
+and its like — MB3D's own routines, not in the blob at all — and cannot be
+recovered as arithmetic.
+
+The backward jumps are all one idiom: an integer power by repeated squaring,
+`shr eax,1` walking the exponent while `fmul st0` squares. Executing that needs
+an exponent known at decompile time, which it is not.
+
+Not done: a handful of integer-load instructions, the branches whose comparison
+this model does not capture, and reading `.m3p` parameter files.
+
+Recognising idioms would also help readability more than coverage. An inlined
+helper currently comes back as its instruction sequence — `f2xm1`, `fscale` and
+`fyl2x` against ln 2 and log2(e) — which is arithmetically right and is really
+just `pow`.
 
 ## Why the parameter slots matter
 
