@@ -5,7 +5,7 @@ use std::time::Duration;
 
 use crate::camera::Camera;
 use crate::formulas::{Builtin, DeMode, FormulaKind, FormulaSlot, generated::GENERATED};
-use crate::params::{DebugView, SceneParams};
+use crate::params::{DebugView, Material, SceneParams, Stop};
 use crate::render::{CursorProbe, FractalPipeline, Uniforms, callback};
 
 /// Radians of orbit per point of mouse travel.
@@ -394,21 +394,14 @@ impl App {
                     ui.add(egui::Slider::new(&mut s.glow, 0.0..=1.5).text("glow"));
                 });
 
-            egui::CollapsingHeader::new("Palette")
+            egui::CollapsingHeader::new("Material editor")
                 .default_open(true)
+                .show(ui, |ui| material_editor(&mut params.material, ui));
+
+            egui::CollapsingHeader::new("Background")
+                .default_open(false)
                 .show(ui, |ui| {
                     let s = &mut params.shading;
-                    ui.horizontal(|ui| {
-                        ui.color_edit_button_rgb(&mut s.palette_base);
-                        ui.label("base");
-                    });
-                    ui.horizontal(|ui| {
-                        ui.color_edit_button_rgb(&mut s.palette_amp);
-                        ui.label("range");
-                    });
-                    ui.add(egui::Slider::new(&mut s.palette_phase, 0.0..=1.0).text("hue shift"));
-                    ui.add(egui::Slider::new(&mut s.palette_freq, 0.0..=6.0).text("banding"));
-                    ui.separator();
                     ui.horizontal(|ui| {
                         ui.color_edit_button_rgb(&mut s.background);
                         ui.label("background");
@@ -1032,6 +1025,144 @@ fn thumb_uv(index: usize) -> egui::Rect {
         egui::pos2(col as f32 * step, row as f32 * step),
         egui::vec2(step, step),
     )
+}
+
+/// The surface material: how the fractal is coloured and how it takes light.
+///
+/// Mandelbulber's own material editor is far larger — reflections, refraction,
+/// transparency, textures, perlin noise, displacement, per-material assignment.
+/// Each of those needs renderer capability 3DM has not got: a second ray bounce,
+/// rays that continue through a surface, UV coordinates on a fractal. What is
+/// here is the part the current renderer can express honestly.
+fn material_editor(m: &mut Material, ui: &mut egui::Ui) {
+    ui.checkbox(&mut m.use_gradient, "Use colours from a gradient")
+        .on_hover_text("Off uses one flat colour and ignores the orbit trap.");
+
+    if m.use_gradient {
+        gradient_editor(m, ui);
+        ui.add(
+            egui::Slider::new(&mut m.palette_offset, 0.0..=1.0)
+                .text("palette offset"),
+        )
+        .on_hover_text("Slides the whole gradient along the surface.");
+        ui.add(
+            egui::Slider::new(&mut m.color_speed, 0.0..=8.0)
+                .text("colour speed")
+                .logarithmic(true),
+        )
+        .on_hover_text("How many times the gradient repeats across the shape.");
+    } else {
+        ui.horizontal(|ui| {
+            ui.color_edit_button_rgb(&mut m.single_color);
+            ui.label("surface colour");
+        });
+    }
+
+    ui.separator();
+    ui.add(egui::Slider::new(&mut m.shading, 0.0..=1.0).text("shading"))
+        .on_hover_text("How much the angle of the light matters. Zero is flat.");
+
+    ui.horizontal(|ui| {
+        ui.color_edit_button_rgb(&mut m.specular_color);
+        ui.label("specular");
+    });
+    ui.add(egui::Slider::new(&mut m.specular_brightness, 0.0..=4.0).text("brightness"));
+    ui.add(
+        egui::Slider::new(&mut m.specular_width, 0.01..=1.0)
+            .text("width")
+            .logarithmic(true),
+    )
+    .on_hover_text("Small is a tight glint; large is a broad sheen.");
+
+    ui.separator();
+    ui.horizontal(|ui| {
+        ui.color_edit_button_rgb(&mut m.luminosity_color);
+        ui.label("luminosity");
+    });
+    ui.add(egui::Slider::new(&mut m.luminosity, 0.0..=1.0).text("emission"))
+        .on_hover_text("Light the surface gives off regardless of the scene.");
+
+    if ui.button("Reset material").clicked() {
+        *m = Material::default();
+    }
+}
+
+/// The gradient bar and its stops.
+///
+/// Stops are edited as a list rather than dragged along the bar: dragging is
+/// what Mandelbulber does and is nicer, but a list is unambiguous, keyboard
+/// reachable, and does not need hit-testing against a painted widget. The bar
+/// above it is the preview.
+fn gradient_editor(m: &mut Material, ui: &mut egui::Ui) {
+    let baked = m.lut();
+    let (rect, _) = ui.allocate_exact_size(
+        egui::vec2(ui.available_width(), 22.0),
+        egui::Sense::hover(),
+    );
+    let painter = ui.painter_at(rect);
+    // One thin rectangle per table entry: the table is what the shader reads,
+    // so the preview cannot drift from the render.
+    let step = rect.width() / baked.len() as f32;
+    for (i, entry) in baked.iter().enumerate() {
+        let x = rect.left() + i as f32 * step;
+        painter.rect_filled(
+            egui::Rect::from_min_size(egui::pos2(x, rect.top()), egui::vec2(step + 1.0, rect.height())),
+            0.0,
+            // The table is linear light; the screen wants sRGB.
+            egui::Color32::from_rgb(
+                (entry[0].clamp(0.0, 1.0).powf(1.0 / 2.2) * 255.0) as u8,
+                (entry[1].clamp(0.0, 1.0).powf(1.0 / 2.2) * 255.0) as u8,
+                (entry[2].clamp(0.0, 1.0).powf(1.0 / 2.2) * 255.0) as u8,
+            ),
+        );
+    }
+
+    let mut remove = None;
+    for (i, stop) in m.gradient.iter_mut().enumerate() {
+        ui.horizontal(|ui| {
+            ui.color_edit_button_rgb(&mut stop.color);
+            ui.add(
+                egui::DragValue::new(&mut stop.at)
+                    .range(0.0..=1.0)
+                    .speed(0.005)
+                    .fixed_decimals(3),
+            );
+            // A gradient needs two stops to be a gradient.
+            if ui
+                .add_enabled(true, egui::Button::new("✕").small())
+                .on_hover_text("Remove this stop")
+                .clicked()
+            {
+                remove = Some(i);
+            }
+        });
+    }
+    if let Some(i) = remove
+        && m.gradient.len() > 2
+    {
+        m.gradient.remove(i);
+    }
+
+    if ui.button("Add stop").clicked() {
+        // Halfway into the largest gap, so a new stop lands somewhere useful
+        // rather than on top of an existing one.
+        let mut sorted = m.gradient.clone();
+        sorted.sort_by(|a, b| a.at.total_cmp(&b.at));
+        let (mut at, mut widest) = (0.5, 0.0);
+        for pair in sorted.windows(2) {
+            let gap = pair[1].at - pair[0].at;
+            if gap > widest {
+                widest = gap;
+                at = pair[0].at + gap * 0.5;
+            }
+        }
+        let color = {
+            let baked = m.lut();
+            let i = ((at * (baked.len() - 1) as f32) as usize).min(baked.len() - 1);
+            [baked[i][0], baked[i][1], baked[i][2]]
+        };
+        m.gradient.push(Stop { at, color });
+    }
 }
 
 /// Every binding, in one place.

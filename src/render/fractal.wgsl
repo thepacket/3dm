@@ -28,6 +28,18 @@ struct Uniforms {
     palette_amp: vec4<f32>,
     // rgb = background, w = fog
     bg: vec4<f32>,
+    // rgb = flat surface colour, w = shading strength
+    surface: vec4<f32>,
+    // rgb = specular colour, w = brightness
+    specular: vec4<f32>,
+    // rgb = emitted colour, w = luminosity
+    emission: vec4<f32>,
+    // x = palette offset, y = colour speed, z = specular width,
+    // w = 1 when the gradient is in use
+    material: vec4<f32>,
+    // The surface gradient, baked to a table so the shader does one read
+    // rather than walking a list of stops per pixel.
+    gradient: array<vec4<f32>, 64>,
     // One vec4 per formula slot: x = start iteration, y = end iteration.
     // Kept in a uniform rather than in generated code so that dragging a
     // formula's iteration range does not rebuild the shader.
@@ -180,14 +192,24 @@ fn ambient_occlusion(p: vec3<f32>, n: vec3<f32>) -> f32 {
     return clamp(1.0 - 2.6 * occ, 0.0, 1.0);
 }
 
-// Cosine palette (Iñigo Quílez's formulation) driven by the orbit trap.
-// The small per-channel phase offsets are what turn a single scalar into a
-// gradient that sweeps through hue rather than just through brightness;
-// spacing them a third of a turn apart instead washes out to grey.
+// The surface colour for an orbit-trap value, read from the baked gradient.
+//
+// Wrapped rather than clamped, so raising the colour speed sweeps the gradient
+// repeatedly across the shape instead of flattening everything past the end
+// into the last stop.
 fn palette(t: f32) -> vec3<f32> {
-    let phase = vec3<f32>(0.0, 0.10, 0.20) + dm3_u.palette_base.w;
-    return dm3_u.palette_base.rgb
-        + dm3_u.palette_amp.rgb * cos(6.28318530718 * (dm3_u.palette_amp.w * t + phase));
+    if (dm3_u.material.w < 0.5) {
+        return dm3_u.surface.rgb;
+    }
+    let at = fract(t * dm3_u.material.y + dm3_u.material.x);
+    let x = at * 63.0;
+    let i = i32(floor(x));
+    // Interpolated between entries: 64 steps are visible as banding on a
+    // smooth surface otherwise.
+    return mix(
+        dm3_u.gradient[clamp(i, 0, 63)].rgb,
+        dm3_u.gradient[clamp(i + 1, 0, 63)].rgb,
+        fract(x));
 }
 
 fn linear_to_srgb(c: vec3<f32>) -> vec3<f32> {
@@ -286,7 +308,10 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
         let l = normalize(dm3_u.light.xyz);
 
         let base = palette(field.trap);
-        let diffuse = max(dot(n, l), 0.0);
+        // Shading strength dials down the angle-of-incidence term toward flat
+        // lighting, which is Mandelbulber's "Shading" control.
+        let lambert = max(dot(n, l), 0.0);
+        let diffuse = mix(1.0, lambert, clamp(dm3_u.surface.w, 0.0, 1.0));
         // Reuse the primary ray's hit threshold so the shadow ray's scale
         // tracks both the zoom level and the size of the fractal.
         let surface_eps = max(pixel_angle * t * eps_scale, 1e-6);
@@ -325,14 +350,22 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
         let bg_tint = select(vec3<f32>(1.0), dm3_u.bg.rgb / peak, peak > 1e-4);
         let ambient = dm3_u.light.w * sky * mix(vec3<f32>(1.0), bg_tint, 0.5);
 
+        // Highlight width is given as a fraction rather than an exponent: a
+        // small number is a tight glint, which is the way it reads in the UI
+        // and the way Mandelbulber states it.
         let h = normalize(l - rd);
-        let spec = pow(max(dot(n, h), 0.0), 32.0) * dm3_u.shade.z * diffuse * shadow;
+        let sharpness = 2.0 / max(dm3_u.material.z * dm3_u.material.z, 1e-5);
+        let spec = pow(max(dot(n, h), 0.0), sharpness)
+            * dm3_u.specular.w * diffuse * shadow;
 
         // Occlusion attenuates the sky term only. Direct light already has
         // its own shadow term, and multiplying both by `occ` double-darkens —
         // barely visible on a sparse Mandelbulb, but it crushes a dense
         // Mandelbox to near-black.
-        color = base * (diffuse * shadow + ambient * occ) + vec3<f32>(spec);
+        color = base * (diffuse * shadow + ambient * occ)
+            + dm3_u.specular.rgb * spec
+            // Emission owes nothing to the light or to what shadows it.
+            + dm3_u.emission.rgb * dm3_u.emission.w;
 
         // Fog toward the background, by depth into the bounding volume.
         let depth = clamp((t - entry_t) / (2.0 * bounds), 0.0, 1.0);

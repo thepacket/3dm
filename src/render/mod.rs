@@ -21,7 +21,7 @@ use eframe::wgpu;
 
 use crate::camera::Camera;
 use crate::formulas::{MAX_SLOTS, POOL_FLOATS_PER_SLOT, POOL_VEC4S_PER_SLOT};
-use crate::params::SceneParams;
+use crate::params::{GRADIENT_LUT, SceneParams};
 
 /// `vec4`s of parameter pool in the uniform block. Must match the array
 /// length declared in `fractal.wgsl`.
@@ -96,6 +96,21 @@ pub struct Uniforms {
     palette_base: [f32; 4],
     palette_amp: [f32; 4],
     bg: [f32; 4],
+    // Field order from here down must match `fractal.wgsl` exactly. It is a
+    // flat block of bytes with no names attached, so inserting a field on one
+    // side and not the other silently shifts every offset past it — which
+    // renders as a plausible-looking picture of the wrong thing, not an error.
+    /// rgb = surface colour when the gradient is off, w = shading strength.
+    surface: [f32; 4],
+    /// rgb = specular colour, w = its brightness.
+    specular: [f32; 4],
+    /// rgb = emitted colour, w = how much of it.
+    emission: [f32; 4],
+    /// x = palette offset, y = colour speed, z = specular width,
+    /// w = 1 when the gradient is in use.
+    material: [f32; 4],
+    /// The surface gradient, baked flat.
+    gradient: [[f32; 4]; GRADIENT_LUT],
     /// x = start iteration, y = end iteration, per slot.
     ranges: [[f32; 4]; MAX_SLOTS],
     pool: [[f32; 4]; POOL_VEC4S],
@@ -122,6 +137,7 @@ impl Uniforms {
         let f = &params.fractal;
         let m = &params.march;
         let s = &params.shading;
+        let mat = &params.material;
 
         // Each slot's parameters go to the same fixed address the generated
         // shader reads them from; anything the formula does not use stays zero.
@@ -187,6 +203,31 @@ impl Uniforms {
                 s.palette_freq,
             ],
             bg: [s.background[0], s.background[1], s.background[2], s.fog],
+            surface: [
+                mat.single_color[0],
+                mat.single_color[1],
+                mat.single_color[2],
+                mat.shading,
+            ],
+            specular: [
+                mat.specular_color[0],
+                mat.specular_color[1],
+                mat.specular_color[2],
+                mat.specular_brightness,
+            ],
+            emission: [
+                mat.luminosity_color[0],
+                mat.luminosity_color[1],
+                mat.luminosity_color[2],
+                mat.luminosity,
+            ],
+            material: [
+                mat.palette_offset,
+                mat.color_speed,
+                mat.specular_width.max(1e-3),
+                if mat.use_gradient { 1.0 } else { 0.0 },
+            ],
+            gradient: mat.lut(),
             ranges,
             pool,
         }

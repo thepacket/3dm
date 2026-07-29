@@ -151,6 +151,114 @@ impl Default for ShadingParams {
     }
 }
 
+/// A colour stop in the surface gradient.
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct Stop {
+    /// Position along the gradient, 0..1.
+    pub at: f32,
+    /// Linear RGB.
+    pub color: [f32; 3],
+}
+
+/// Entries in the gradient lookup handed to the shader.
+///
+/// The gradient is edited as a handful of stops and baked into a table, so the
+/// shader does one array read rather than walking a list of stops per pixel —
+/// and the table size is fixed, so the uniform layout never changes.
+pub const GRADIENT_LUT: usize = 64;
+
+/// How the surface is coloured.
+///
+/// Mandelbulber calls this the material, and its own version is far larger:
+/// reflections, refraction, transparency, textures, perlin noise, displacement.
+/// Those need renderer capability 3DM does not have — a second ray bounce, rays
+/// that continue through a surface, UV mapping on a fractal — so what is here is
+/// the part the current renderer can honestly express.
+#[derive(Clone, PartialEq, Debug)]
+pub struct Material {
+    /// Colour the surface from the gradient rather than from one flat colour.
+    pub use_gradient: bool,
+    /// Stops, in ascending position. Sampled by the orbit trap.
+    pub gradient: Vec<Stop>,
+    /// Used when `use_gradient` is off.
+    pub single_color: [f32; 3],
+    /// Shifts the whole gradient along the trap value.
+    pub palette_offset: f32,
+    /// How quickly the gradient repeats across the trap range.
+    pub color_speed: f32,
+    /// Strength of the angle-of-incidence term.
+    pub shading: f32,
+    pub specular_color: [f32; 3],
+    pub specular_brightness: f32,
+    /// Tightness of the highlight; small is a sharp glint.
+    pub specular_width: f32,
+    /// Light the surface emits regardless of what reaches it.
+    pub luminosity: f32,
+    pub luminosity_color: [f32; 3],
+}
+
+impl Default for Material {
+    fn default() -> Self {
+        Self {
+            use_gradient: true,
+            // The cosine palette this replaces, sampled — so the default scene
+            // looks as it always did while now being editable stop by stop.
+            gradient: (0..6)
+                .map(|i| {
+                    let at = i as f32 / 5.0;
+                    let wave = |phase: f32| {
+                        0.5 + 0.45 * (std::f32::consts::TAU * (at + phase)).cos()
+                    };
+                    Stop {
+                        at,
+                        color: [wave(0.0), wave(0.10), wave(0.20)],
+                    }
+                })
+                .collect(),
+            single_color: [0.55, 0.50, 0.45],
+            palette_offset: 0.0,
+            color_speed: 1.0,
+            shading: 1.0,
+            specular_color: [1.0, 1.0, 1.0],
+            specular_brightness: 0.35,
+            specular_width: 0.15,
+            luminosity: 0.0,
+            luminosity_color: [1.0, 1.0, 1.0],
+        }
+    }
+}
+
+impl Material {
+    /// Bakes the stops into the fixed-size table the shader reads.
+    pub fn lut(&self) -> [[f32; 4]; GRADIENT_LUT] {
+        let mut table = [[0.0f32; 4]; GRADIENT_LUT];
+        if self.gradient.is_empty() {
+            return table;
+        }
+
+        let mut stops = self.gradient.clone();
+        stops.sort_by(|a, b| a.at.total_cmp(&b.at));
+
+        for (i, entry) in table.iter_mut().enumerate() {
+            let at = i as f32 / (GRADIENT_LUT - 1) as f32;
+            // Before the first stop and after the last, hold the end colour
+            // rather than fading to black.
+            let color = match stops.iter().position(|s| s.at >= at) {
+                None => stops[stops.len() - 1].color,
+                Some(0) => stops[0].color,
+                Some(next) => {
+                    let (a, b) = (stops[next - 1], stops[next]);
+                    let span = (b.at - a.at).max(1e-6);
+                    let k = ((at - a.at) / span).clamp(0.0, 1.0);
+                    std::array::from_fn(|c| a.color[c] + (b.color[c] - a.color[c]) * k)
+                }
+            };
+            *entry = [color[0], color[1], color[2], 1.0];
+        }
+        table
+    }
+}
+
 /// The complete scene.
 #[derive(Clone, PartialEq, Debug, Default)]
 pub struct SceneParams {
@@ -160,6 +268,7 @@ pub struct SceneParams {
     pub stack: crate::formulas::FormulaStack,
     pub march: MarchParams,
     pub shading: ShadingParams,
+    pub material: Material,
     /// Diagnostic override; [`DebugView::Off`] renders normally.
     pub debug_view: DebugView,
 }
@@ -183,5 +292,62 @@ impl SceneParams {
             self.stack.signature(),
             crate::render::codegen::generate(&self.stack),
         )
+    }
+}
+
+#[cfg(test)]
+mod material_tests {
+    use super::*;
+
+    fn stops(v: &[(f32, f32)]) -> Material {
+        Material {
+            gradient: v
+                .iter()
+                .map(|(at, g)| Stop {
+                    at: *at,
+                    color: [*g, *g, *g],
+                })
+                .collect(),
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn the_table_runs_between_the_stops() {
+        let lut = stops(&[(0.0, 0.0), (1.0, 1.0)]).lut();
+        assert!(lut[0][0] < 0.01, "starts at the first stop");
+        assert!(lut[GRADIENT_LUT - 1][0] > 0.99, "ends at the last");
+        // Monotonic in between, since the stops are.
+        for pair in lut.windows(2) {
+            assert!(pair[1][0] >= pair[0][0] - 1e-6, "{pair:?}");
+        }
+    }
+
+    #[test]
+    fn outside_the_stops_the_end_colours_hold() {
+        // Otherwise a gradient that does not span 0..1 fades to black at the
+        // edges, which reads as a shadow that is not there.
+        let lut = stops(&[(0.25, 1.0), (0.75, 1.0)]).lut();
+        assert!(lut[0][0] > 0.99, "before the first stop");
+        assert!(lut[GRADIENT_LUT - 1][0] > 0.99, "after the last");
+    }
+
+    #[test]
+    fn stops_need_not_be_given_in_order() {
+        // The editor lets a stop be dragged past its neighbour, so the order in
+        // the list means nothing.
+        let jumbled = stops(&[(1.0, 1.0), (0.0, 0.0), (0.5, 0.5)]).lut();
+        let ordered = stops(&[(0.0, 0.0), (0.5, 0.5), (1.0, 1.0)]).lut();
+        assert_eq!(jumbled, ordered);
+    }
+
+    #[test]
+    fn an_empty_gradient_does_not_panic() {
+        let lut = Material {
+            gradient: vec![],
+            ..Default::default()
+        }
+        .lut();
+        assert_eq!(lut[0], [0.0; 4]);
     }
 }
