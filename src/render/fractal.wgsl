@@ -28,6 +28,10 @@ struct Uniforms {
     palette_amp: vec4<f32>,
     // rgb = background, w = fog
     bg: vec4<f32>,
+    // x = brightness, y = contrast, z = gamma, w = saturation
+    picture: vec4<f32>,
+    // x = perspective type, y = 1 when tone mapping is skipped
+    view: vec4<f32>,
     // rgb = flat surface colour, w = shading strength
     surface: vec4<f32>,
     // rgb = specular colour, w = brightness
@@ -212,6 +216,21 @@ fn palette(t: f32) -> vec3<f32> {
         fract(x));
 }
 
+// Brightness, contrast, saturation and gamma, in that order.
+//
+// Applied to the finished image and nowhere else — none of this touches the
+// geometry or the lighting, so a scene can be re-graded without re-deciding
+// how it was lit. Contrast pivots about mid-grey; saturation blends toward
+// luminance using the usual Rec. 709 weights.
+fn adjust(c: vec3<f32>) -> vec3<f32> {
+    var v = c * dm3_u.picture.x;
+    v = (v - 0.5) * dm3_u.picture.y + 0.5;
+    let luma = dot(max(v, vec3<f32>(0.0)), vec3<f32>(0.2126, 0.7152, 0.0722));
+    v = mix(vec3<f32>(luma), v, dm3_u.picture.w);
+    v = max(v, vec3<f32>(0.0));
+    return pow(v, vec3<f32>(1.0 / dm3_u.picture.z));
+}
+
 fn linear_to_srgb(c: vec3<f32>) -> vec3<f32> {
     let lo = c * 12.92;
     let hi = 1.055 * pow(max(c, vec3<f32>(0.0)), vec3<f32>(1.0 / 2.4)) - 0.055;
@@ -233,6 +252,42 @@ fn heat(x: f32) -> vec3<f32> {
     return vec3<f32>(v, 1.0 - abs(v - 0.5) * 2.0, 1.0 - v);
 }
 
+// The ray through a pixel, under the chosen projection.
+//
+// Only the three-point case has a flat image plane; the others map the frame
+// onto angles, which is what lets one render cover a whole sphere or a dome.
+fn camera_ray(ndc: vec2<f32>, aspect: f32, tan_half: f32) -> vec3<f32> {
+    let fwd = dm3_u.cam_fwd.xyz;
+    let right = dm3_u.cam_right.xyz;
+    let up = dm3_u.cam_up.xyz;
+    let mode = i32(dm3_u.view.x);
+
+    // Equirectangular: longitude across the frame, latitude up it.
+    if (mode == 2) {
+        let lon = ndc.x * M_PI_F;
+        let lat = ndc.y * M_PI_F * 0.5;
+        return normalize(
+            fwd * (cos(lat) * cos(lon))
+            + right * (cos(lat) * sin(lon))
+            + up * sin(lat));
+    }
+
+    // Fish eye and fulldome both sweep an angle outwards from the centre; they
+    // differ only in how far the edge of the frame reaches.
+    if (mode == 1 || mode == 3) {
+        let v = vec2<f32>(ndc.x * aspect, ndc.y);
+        let r = length(v);
+        let edge = select(atan(tan_half) * 2.0, M_PI_F * 0.5, mode == 3);
+        let theta = min(r, 1.0) * edge;
+        let phi = atan2(v.y, v.x);
+        return normalize(
+            fwd * cos(theta)
+            + (right * cos(phi) + up * sin(phi)) * sin(theta));
+    }
+
+    return normalize(fwd + right * ndc.x * aspect * tan_half + up * ndc.y * tan_half);
+}
+
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
@@ -243,11 +298,7 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
     let tan_half = dm3_u.cam_pos.w;
 
     let ro = dm3_u.cam_pos.xyz;
-    let rd = normalize(
-        dm3_u.cam_fwd.xyz
-        + dm3_u.cam_right.xyz * in.ndc.x * aspect * tan_half
-        + dm3_u.cam_up.xyz * in.ndc.y * tan_half
-    );
+    let rd = camera_ray(in.ndc, aspect, tan_half);
 
     // Angular size of one pixel, used as the distance-dependent hit threshold
     // so that detail stays exactly at the resolution limit at any zoom.
@@ -381,7 +432,12 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
     color = color + palette(0.35) * struggle * struggle * dm3_u.shade.w;
 
     // Reinhard-ish tonemap keeps the specular from clipping to flat white.
-    color = color / (1.0 + color * 0.35);
+    // Skipped in HDR, where the point is to let highlights run past it.
+    if (dm3_u.view.y < 0.5) {
+        color = color / (1.0 + color * 0.35);
+    }
+
+    color = adjust(color);
 
     if (dm3_u.screen.w > 0.5) {
         color = linear_to_srgb(color);
@@ -414,11 +470,9 @@ fn fs_probe(in: VsOut) -> @location(0) vec4<f32> {
     // the spare w slots of the camera basis, which were padding.
     let aspect = dm3_u.screen.x / max(dm3_u.screen.y, 1.0);
     let tan_half = dm3_u.cam_pos.w;
-    let rd = normalize(
-        dm3_u.cam_fwd.xyz
-        + dm3_u.cam_right.xyz * dm3_u.cam_right.w * aspect * tan_half
-        + dm3_u.cam_up.xyz * dm3_u.cam_up.w * tan_half
-    );
+    // The same projection the image uses, or the cross would point somewhere
+    // the picture does not.
+    let rd = camera_ray(vec2<f32>(dm3_u.cam_right.w, dm3_u.cam_up.w), aspect, tan_half);
 
     let pixel_angle = 2.0 * tan_half / max(dm3_u.screen.y, 1.0);
     let bounds = max(dm3_u.march.w, 0.1);

@@ -151,6 +151,67 @@ impl Default for ShadingParams {
     }
 }
 
+/// How camera rays are laid out across the frame.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum Perspective {
+    /// A flat image plane. What every ordinary camera does.
+    #[default]
+    ThreePoint,
+    /// Angle grows with distance from centre, so the frame bends outwards.
+    FishEye,
+    /// The whole sphere in one frame — longitude across, latitude up.
+    Equirectangular,
+    /// The upward hemisphere, for a planetarium dome.
+    Fulldome,
+}
+
+impl Perspective {
+    pub const ALL: [Self; 4] = [
+        Self::ThreePoint,
+        Self::FishEye,
+        Self::Equirectangular,
+        Self::Fulldome,
+    ];
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::ThreePoint => "three-point",
+            Self::FishEye => "fish eye",
+            Self::Equirectangular => "equirectangular",
+            Self::Fulldome => "fulldome",
+        }
+    }
+}
+
+/// Adjustments applied to the finished image.
+///
+/// These are the last thing that happens, after the fractal is shaded and tone
+/// mapped, which is why they are their own group: nothing here changes the
+/// geometry or the lighting, only how the result is presented.
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct Picture {
+    pub brightness: f32,
+    pub contrast: f32,
+    pub gamma: f32,
+    pub saturation: f32,
+    /// Skip the tone mapping and let bright values run past white.
+    pub hdr: bool,
+    pub perspective: Perspective,
+}
+
+impl Default for Picture {
+    fn default() -> Self {
+        Self {
+            brightness: 1.0,
+            contrast: 1.0,
+            gamma: 1.0,
+            saturation: 1.0,
+            hdr: false,
+            perspective: Perspective::default(),
+        }
+    }
+}
+
 /// A colour stop in the surface gradient.
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Stop {
@@ -269,6 +330,7 @@ pub struct SceneParams {
     pub march: MarchParams,
     pub shading: ShadingParams,
     pub material: Material,
+    pub picture: Picture,
     /// Diagnostic override; [`DebugView::Off`] renders normally.
     pub debug_view: DebugView,
 }

@@ -96,6 +96,10 @@ pub struct Uniforms {
     palette_base: [f32; 4],
     palette_amp: [f32; 4],
     bg: [f32; 4],
+    /// x = brightness, y = contrast, z = gamma, w = saturation.
+    picture: [f32; 4],
+    /// x = perspective type, y = 1 when tone mapping is skipped.
+    view: [f32; 4],
     // Field order from here down must match `fractal.wgsl` exactly. It is a
     // flat block of bytes with no names attached, so inserting a field on one
     // side and not the other silently shifts every offset past it — which
@@ -138,6 +142,7 @@ impl Uniforms {
         let m = &params.march;
         let s = &params.shading;
         let mat = &params.material;
+        let pic = &params.picture;
 
         // Each slot's parameters go to the same fixed address the generated
         // shader reads them from; anything the formula does not use stays zero.
@@ -203,6 +208,13 @@ impl Uniforms {
                 s.palette_freq,
             ],
             bg: [s.background[0], s.background[1], s.background[2], s.fog],
+            picture: [pic.brightness, pic.contrast, pic.gamma.max(1e-3), pic.saturation],
+            view: [
+                pic.perspective as u32 as f32,
+                if pic.hdr { 1.0 } else { 0.0 },
+                0.0,
+                0.0,
+            ],
             surface: [
                 mat.single_color[0],
                 mat.single_color[1],

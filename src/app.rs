@@ -5,7 +5,7 @@ use std::time::Duration;
 
 use crate::camera::Camera;
 use crate::formulas::{Builtin, DeMode, FormulaKind, FormulaSlot, generated::GENERATED};
-use crate::params::{DebugView, Material, SceneParams, Stop};
+use crate::params::{DebugView, Material, Perspective, SceneParams, Stop};
 use crate::render::{CursorProbe, FractalPipeline, Uniforms, callback};
 
 /// Radians of orbit per point of mouse travel.
@@ -397,6 +397,90 @@ impl App {
             egui::CollapsingHeader::new("Material editor")
                 .default_open(true)
                 .show(ui, |ui| material_editor(&mut params.material, ui));
+
+            egui::CollapsingHeader::new("Image adjustments")
+                .default_open(false)
+                .show(ui, |ui| {
+                    let p = &mut params.picture;
+                    ui.label(egui::RichText::new("Picture").strong());
+                    ui.add(egui::Slider::new(&mut p.brightness, 0.0..=4.0).text("brightness"));
+                    ui.add(egui::Slider::new(&mut p.contrast, 0.0..=3.0).text("contrast"));
+                    ui.add(egui::Slider::new(&mut p.gamma, 0.2..=3.0).text("gamma"));
+                    ui.add(egui::Slider::new(&mut p.saturation, 0.0..=3.0).text("saturation"));
+                    ui.checkbox(&mut p.hdr, "High dynamic range")
+                        .on_hover_text(
+                            "Skip the tone mapping and let highlights run past \
+                             white, rather than being rolled off into it.",
+                        );
+
+                    ui.add_space(6.0);
+                    ui.label(egui::RichText::new("Camera").strong());
+                    ui.horizontal(|ui| {
+                        ui.label("perspective");
+                        egui::ComboBox::from_id_salt("perspective")
+                            .selected_text(p.perspective.label())
+                            .width(160.0)
+                            .show_ui(ui, |ui| {
+                                for mode in Perspective::ALL {
+                                    if ui
+                                        .selectable_label(p.perspective == mode, mode.label())
+                                        .clicked()
+                                    {
+                                        p.perspective = mode;
+                                    }
+                                }
+                            });
+                    })
+                    .response
+                    .on_hover_text(
+                        "Only three-point has a flat image plane. The others map \
+                         the frame onto angles, so one render can cover a whole \
+                         sphere or a dome.",
+                    );
+
+                    ui.add_space(6.0);
+                    ui.label(egui::RichText::new("Quality presets").strong());
+                    ui.horizontal_wrapped(|ui| {
+                        // Each sets the handful of controls that actually cost
+                        // time, so a slow scene can be made interactive without
+                        // hunting through three sections for them.
+                        if ui
+                            .button("Very low")
+                            .on_hover_text("No shadows, no occlusion")
+                            .clicked()
+                        {
+                            params.shading.shadow_softness = 1.0e6;
+                            params.shading.ao_strength = 0.0;
+                            params.march.max_steps = 64;
+                            params.march.epsilon_scale = 2.0;
+                        }
+                        if ui.button("Low").on_hover_text("No occlusion").clicked() {
+                            params.shading.shadow_softness = 16.0;
+                            params.shading.ao_strength = 0.0;
+                            params.march.max_steps = 96;
+                            params.march.epsilon_scale = 1.4;
+                        }
+                        if ui.button("Normal").clicked() {
+                            let d = SceneParams::default();
+                            params.shading.shadow_softness = d.shading.shadow_softness;
+                            params.shading.ao_strength = d.shading.ao_strength;
+                            params.march.max_steps = d.march.max_steps;
+                            params.march.epsilon_scale = d.march.epsilon_scale;
+                            params.fractal.de_scale = d.fractal.de_scale;
+                        }
+                        if ui
+                            .button("High")
+                            .on_hover_text("Careful marching, strong occlusion")
+                            .clicked()
+                        {
+                            params.shading.shadow_softness = 24.0;
+                            params.shading.ao_strength = 1.0;
+                            params.march.max_steps = 320;
+                            params.march.epsilon_scale = 0.5;
+                            params.fractal.de_scale = 0.6;
+                        }
+                    });
+                });
 
             egui::CollapsingHeader::new("Background")
                 .default_open(false)

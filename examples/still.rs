@@ -160,6 +160,23 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
     if let Ok(n) = std::env::var("DM3_ITER").map(|v| v.parse::<i32>()) {
         params.fractal.iterations = n.expect("DM3_ITER must be a number");
     }
+    // DM3_PERSPECTIVE and DM3_PICTURE exist so the projections and the grading
+    // can be checked without driving the UI.
+    params.picture.perspective = match std::env::var("DM3_PERSPECTIVE").as_deref() {
+        Ok("fisheye") => three_dm::params::Perspective::FishEye,
+        Ok("equirect") => three_dm::params::Perspective::Equirectangular,
+        Ok("fulldome") => three_dm::params::Perspective::Fulldome,
+        _ => three_dm::params::Perspective::ThreePoint,
+    };
+    if let Ok(v) = std::env::var("DM3_PICTURE") {
+        let n: Vec<f32> = v.split(',').filter_map(|x| x.trim().parse().ok()).collect();
+        if n.len() == 4 {
+            params.picture.brightness = n[0];
+            params.picture.contrast = n[1];
+            params.picture.gamma = n[2];
+            params.picture.saturation = n[3];
+        }
+    }
     let mut camera = Camera::default();
     camera.frame(params.fractal.bounding_radius);
     // DM3_PAN="dx,dy" moves the orbit target across the view, the way dragging
