@@ -45,6 +45,10 @@ const PROBE_WIDTH: u32 = 2;
 const BLIT_WGSL: &str = r#"
 @group(0) @binding(0) var src: texture_2d<f32>;
 @group(0) @binding(1) var samp: sampler;
+// xy = the fraction of the texture actually drawn this frame. The texture is
+// allocated once at the window's size and a smaller frame occupies its
+// top-left corner, so nothing is reallocated when the scale changes.
+@group(0) @binding(2) var<uniform> region: vec4<f32>;
 
 struct VsOut {
     @builtin(position) pos: vec4<f32>,
@@ -68,7 +72,10 @@ fn vs_blit(@builtin(vertex_index) vi: u32) -> VsOut {
 
 @fragment
 fn fs_blit(in: VsOut) -> @location(0) vec4<f32> {
-    return textureSample(src, samp, in.uv);
+    // Clamped just inside the drawn region: without it the sampler's filter
+    // reaches past the edge into whatever the rest of the texture holds.
+    let limit = region.xy - region.zw;
+    return textureSample(src, samp, min(in.uv * region.xy, limit));
 }
 "#;
 
@@ -260,6 +267,7 @@ pub struct FractalPipeline {
     offscreen_size: [u32; 2],
     blit: wgpu::RenderPipeline,
     blit_layout: wgpu::BindGroupLayout,
+    blit_uniform: wgpu::Buffer,
     sampler: wgpu::Sampler,
     /// Viewport size the last frame was drawn at. A probe cycle spans three
     /// frames, and a surface reconfigure in the middle of one leaves a copy or
@@ -345,7 +353,23 @@ impl FractalPipeline {
                     ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
                     count: None,
                 },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 2,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Buffer {
+                        ty: wgpu::BufferBindingType::Uniform,
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    count: None,
+                },
             ],
+        });
+        let blit_uniform = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("3dm.blit.region"),
+            size: 16,
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
         });
         let blit_shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("3dm.blit.shader"),
@@ -403,6 +427,7 @@ impl FractalPipeline {
             offscreen_size: [0, 0],
             blit,
             blit_layout,
+            blit_uniform,
             sampler,
             pipelines: HashMap::new(),
             probes: HashMap::new(),
@@ -506,19 +531,27 @@ impl FractalPipeline {
     fn render_offscreen(
         &mut self,
         device: &wgpu::Device,
+        queue: &wgpu::Queue,
         encoder: &mut wgpu::CommandEncoder,
         key: u64,
+        full: [u32; 2],
         size: [u32; 2],
     ) -> bool {
         if !self.pipelines.contains_key(&key) {
             return false;
         }
-        if self.offscreen.is_none() || self.offscreen_size != size {
+        // Allocated at the window's size and only when *that* changes. Sizing
+        // it to the reduced frame instead meant a new texture, view and bind
+        // group on every frame the scale moved — which is every frame while the
+        // camera is moving. Creating and destroying a multi-megapixel texture
+        // that often costs far more than the pixels it saves, which is why
+        // reducing the resolution could make the app slower rather than faster.
+        if self.offscreen.is_none() || self.offscreen_size != full {
             let texture = device.create_texture(&wgpu::TextureDescriptor {
                 label: Some("3dm.offscreen"),
                 size: wgpu::Extent3d {
-                    width: size[0],
-                    height: size[1],
+                    width: full[0],
+                    height: full[1],
                     depth_or_array_layers: 1,
                 },
                 mip_level_count: 1,
@@ -542,11 +575,32 @@ impl FractalPipeline {
                         binding: 1,
                         resource: wgpu::BindingResource::Sampler(&self.sampler),
                     },
+                    wgpu::BindGroupEntry {
+                        binding: 2,
+                        resource: self.blit_uniform.as_entire_binding(),
+                    },
                 ],
             });
             self.offscreen = Some((texture, view, bind_group));
-            self.offscreen_size = size;
+            self.offscreen_size = full;
         }
+
+        // Which corner of the texture this frame occupies, and half a texel of
+        // inset for the sampler to stay inside it.
+        let fraction = [
+            size[0] as f32 / full[0] as f32,
+            size[1] as f32 / full[1] as f32,
+        ];
+        queue.write_buffer(
+            &self.blit_uniform,
+            0,
+            bytemuck::cast_slice(&[
+                fraction[0],
+                fraction[1],
+                0.5 / full[0] as f32,
+                0.5 / full[1] as f32,
+            ]),
+        );
 
         let Some((_, view, _)) = &self.offscreen else {
             return false;
@@ -567,6 +621,8 @@ impl FractalPipeline {
             occlusion_query_set: None,
             multiview_mask: None,
         });
+        // Draw only into the corner the reduced frame occupies.
+        pass.set_viewport(0.0, 0.0, size[0] as f32, size[1] as f32, 0.0, 1.0);
         self.draw(&mut pass, key);
         true
     }
@@ -732,7 +788,14 @@ impl CallbackTrait for FractalCallback {
             let stable = res.last_viewport == self.viewport;
             res.last_viewport = self.viewport;
             res.step_probe(encoder, self.shader_key, stable);
-            res.render_offscreen(device, encoder, self.shader_key, self.render_size);
+            res.render_offscreen(
+                device,
+                queue,
+                encoder,
+                self.shader_key,
+                [self.viewport[0] as u32, self.viewport[1] as u32],
+                self.render_size,
+            );
         }
         Vec::new()
     }

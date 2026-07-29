@@ -57,9 +57,13 @@ pub enum Resolution {
     /// Only while *moving* on purpose. An earlier version adapted on every
     /// frame, which meant a pixel of mouse movement could repaint at a
     /// different size and visibly change the whole surface.
-    #[default]
     WhileMoving,
     /// Always the window's own resolution, however long that takes.
+    ///
+    /// The default, on the evidence: with the fast preview doing the work of
+    /// keeping movement responsive, drawing every pixel is both sharper and,
+    /// in practice, no slower.
+    #[default]
     Full,
     /// A fixed fraction of it, chosen by the user.
     Fixed,
@@ -572,8 +576,8 @@ impl App {
 
         let physical = [rect.width() * ppp, rect.height() * ppp];
         let render_size = [
-            ((physical[0] * self.render_scale) as u32).max(16),
-            ((physical[1] * self.render_scale) as u32).max(16),
+            ((physical[0] * self.render_scale) as u32).clamp(16, physical[0].max(16.0) as u32),
+            ((physical[1] * self.render_scale) as u32).clamp(16, physical[1].max(16.0) as u32),
         ];
         // The shader sizes its hit threshold from this, so it must be the size
         // actually rendered — not the window's — or a reduced frame would chase
