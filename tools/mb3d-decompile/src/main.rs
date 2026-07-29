@@ -14,7 +14,7 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
-use mb3d_decompile::{abi, audit, exec, expr, extract, options};
+use mb3d_decompile::{abi, audit, emit, exec, expr, extract, options};
 
 fn main() {
     let mut args = std::env::args().skip(1);
@@ -27,6 +27,7 @@ fn main() {
     let mut decompile = false;
     let mut params_report = false;
     let mut audit_report = false;
+    let mut wgsl = false;
     while let Some(arg) = args.next() {
         match arg.as_str() {
             "--asm" => {
@@ -39,6 +40,10 @@ fn main() {
             }
             "--params" => params_report = true,
             "--audit" => audit_report = true,
+            "--wgsl" => {
+                wgsl = true;
+                only = args.next();
+            }
             other => only = Some(other.to_owned()),
         }
     }
@@ -84,6 +89,20 @@ fn main() {
             for line in f.description.lines() {
                 println!("; {line}");
             }
+        }
+        return;
+    }
+
+    if wgsl {
+        match only {
+            Some(name) => match formulas.iter().find(|f| f.name.eq_ignore_ascii_case(&name)) {
+                Some(f) => print_wgsl(f),
+                None => {
+                    eprintln!("no formula called {name}");
+                    std::process::exit(1);
+                }
+            },
+            None => wgsl_all(&formulas),
         }
         return;
     }
@@ -498,6 +517,102 @@ fn run_audit(formulas: &[extract::Formula]) {
         }
         if list.len() > 12 {
             println!("  ... and {} more", list.len() - 12);
+        }
+    }
+}
+
+
+/// Emits one formula as a `GeneratedFormula` entry.
+fn print_wgsl(f: &extract::Formula) {
+    let result = exec::run_with_constants(&f.code, &f.constants);
+    if let Some(reason) = result.bailed {
+        eprintln!("{}: did not decompile — {reason}", f.name);
+        std::process::exit(1);
+    }
+    let stores = exec::final_stores(&result.stores);
+    let body = match emit::body(&stores) {
+        Ok(body) => body,
+        Err(reason) => {
+            eprintln!("{}: cannot be emitted — {reason}", f.name);
+            std::process::exit(1);
+        }
+    };
+
+    let declared = options::declared(&f.options).unwrap_or_default();
+    let slots = options::slots(&declared);
+    let de_option: i32 = f
+        .options
+        .iter()
+        .find(|(k, _)| k.eq_ignore_ascii_case("DEoption"))
+        .and_then(|(_, v)| v.trim().parse().ok())
+        .unwrap_or(0);
+    let bailout: f32 = f
+        .options
+        .iter()
+        .find(|(k, _)| k.eq_ignore_ascii_case("RStop"))
+        .and_then(|(_, v)| v.trim().parse().ok())
+        .unwrap_or(1024.0);
+
+    println!("    GeneratedFormula {{");
+    println!("        name: {:?},", f.name);
+    println!("        source: {:?},", format!("{}.m3f", f.name));
+    println!("        param_floats: {},", slots.len());
+    match emit::de_function(de_option) {
+        Ok(de) => println!("        de_function: {de},"),
+        Err(reason) => println!("        // UNRESOLVED de_function: {reason}"),
+    }
+    // MB3D formulas add their own J1..J3, where Mandelbulber leaves `+ c` to
+    // the caller. Setting this true would add it twice.
+    println!("        add_c: false,");
+    println!("        bailout: {bailout:?},");
+    println!("        params: &[");
+    for (i, (name, default)) in slots.iter().enumerate() {
+        println!(
+            "            GeneratedParam {{ path: {name:?}, kind: ParamKind::Float, offset: {i}, default: &[{default:?}] }},"
+        );
+    }
+    println!("        ],");
+    println!("        derivations: &[],");
+    println!("        wgsl: r####\"");
+    print!("{body}");
+    println!("\"####,");
+    println!("    }},");
+}
+
+/// How much of the corpus could be emitted, and what stops the rest.
+fn wgsl_all(formulas: &[extract::Formula]) {
+    let mut emitted = 0usize;
+    let mut reasons: BTreeMap<String, usize> = BTreeMap::new();
+
+    for f in formulas {
+        let result = exec::run_with_constants(&f.code, &f.constants);
+        if result.bailed.is_some() {
+            continue;
+        }
+        let stores = exec::final_stores(&result.stores);
+        if stores.is_empty() {
+            continue;
+        }
+        match emit::body(&stores) {
+            Ok(_) => emitted += 1,
+            Err(reason) => {
+                let cause = reason
+                    .split_whitespace()
+                    .take(2)
+                    .collect::<Vec<_>>()
+                    .join(" ");
+                *reasons.entry(cause).or_default() += 1;
+            }
+        }
+    }
+
+    println!("decompiled and emittable as WGSL: {emitted}");
+    if !reasons.is_empty() {
+        println!("\nwhat stops the rest:");
+        let mut by_count: Vec<_> = reasons.into_iter().collect();
+        by_count.sort_by_key(|(_, count)| std::cmp::Reverse(*count));
+        for (cause, count) in by_count.iter().take(12) {
+            println!("  {count:5}  {cause}");
         }
     }
 }

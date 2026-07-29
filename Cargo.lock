@@ -1442,6 +1442,7 @@ name = "mb3d-decompile"
 version = "0.1.0"
 dependencies = [
  "iced-x86",
+ "naga",
 ]
 
 [[package]]

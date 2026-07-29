@@ -229,6 +229,42 @@ description of what the formula does — `ABoxMod1` says
 applied to a constant folds away, so an author writing `sqrt(2)` leaves no
 square root for the audit to find.
 
+## Emitting a 3DM formula
+
+`--wgsl NAME` produces a `GeneratedFormula` entry — the same shape
+`mb2-transpile` emits from Mandelbulber's OpenCL, so an `.m3f` lands in the
+pipeline the rest of 3DM already understands. `Kalisets1` comes out as
+
+```rust
+GeneratedFormula {
+    name: "Kalisets1",
+    param_floats: 2,
+    add_c: false,
+    bailout: 2.0,
+    params: &[
+        GeneratedParam { path: "Scale", offset: 0, default: &[1.0] },
+        GeneratedParam { path: "Fix",   offset: 1, default: &[1e-60] },
+    ],
+    wgsl: /* z.x = abs(z.x) * (Scale / (|z|^2 + Fix)) + const_c.x, ... */
+}
+```
+
+The parameters are *named*, which is the whole point of the slot table: those
+came from `[OPTIONS]` and had to survive the compound-datatype expansion to
+land on the right slots. Defaults come from the same place, since a formula
+handed zeros renders nothing.
+
+`add_c` is false and must be. MB3D formulas add their own `J1`..`J3`, where
+Mandelbulber leaves `+ c` to the caller; setting it true adds the point twice.
+
+169 of the 304 decompiled formulas emit. What stops the rest is 110 with a
+memory location this model cannot name, 22 reaching a record field with no
+established meaning, and 3 whose file has no `[CONSTANTS]` block to resolve a
+constant from.
+
+The bodies are checked against naga — pinned to the version wgpu bundles,
+because a check against a different one is not a check.
+
 ## Verified
 
 Against formulas that published their own mathematics, in

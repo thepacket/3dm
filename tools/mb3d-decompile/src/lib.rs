@@ -2,6 +2,7 @@
 
 pub mod abi;
 pub mod audit;
+pub mod emit;
 pub mod exec;
 pub mod expr;
 pub mod extract;

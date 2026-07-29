@@ -24,3 +24,7 @@ iced-x86 = { version = "1.21", default-features = false, features = [
     "nasm",
     "std",
 ] }
+
+[dev-dependencies]
+# Validates emitted WGSL against the same compiler wgpu bundles.
+naga = { version = "29.0.4", features = ["wgsl-in"] }

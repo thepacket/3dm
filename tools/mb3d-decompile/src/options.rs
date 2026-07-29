@@ -25,6 +25,9 @@ pub struct Declared {
     pub name: String,
     pub keyword: String,
     pub slots: usize,
+    /// The value the author shipped. A formula given zeros instead renders
+    /// nothing at all, so this is not decoration.
+    pub default: f64,
 }
 
 /// Slots each datatype keyword occupies.
@@ -81,7 +84,7 @@ const ENGINE_KEYS: &[&str] = &[
 /// a guess there would misalign everything after it.
 pub fn declared(options: &[(String, String)]) -> Result<Vec<Declared>, String> {
     let mut out = Vec::new();
-    for (key, _) in options {
+    for (key, value) in options {
         let mut words = key.split_whitespace();
         let Some(first) = words.next() else { continue };
         let keyword = first.to_ascii_uppercase();
@@ -99,9 +102,25 @@ pub fn declared(options: &[(String, String)]) -> Result<Vec<Declared>, String> {
             name,
             keyword,
             slots,
+            default: value.trim().parse().unwrap_or(0.0),
         });
     }
     Ok(out)
+}
+
+/// The name and default for each slot, expanding compound declarations.
+///
+/// A compound declaration ships one value for all its parts, which is what
+/// MB3D's own parser does when it fans a three-angle entry out into three.
+pub fn slots(declared: &[Declared]) -> Vec<(String, f64)> {
+    slot_names(declared)
+        .into_iter()
+        .zip(
+            declared
+                .iter()
+                .flat_map(|d| std::iter::repeat_n(d.default, d.slots)),
+        )
+        .collect()
 }
 
 /// The name for each slot, expanding compound declarations.
