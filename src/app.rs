@@ -1,7 +1,9 @@
 //! Application state and UI.
 
 use std::sync::Arc;
-use std::time::Duration;
+
+// Not std::time: Instant::now() panics unconditionally on wasm32-unknown-unknown.
+use web_time::{Duration, Instant};
 
 use crate::camera::Camera;
 use crate::formulas::{
@@ -230,7 +232,7 @@ pub struct App {
     fps_cap: u32,
     /// When the current frame began, so the next can be scheduled a fixed
     /// interval after it.
-    frame_start: Option<std::time::Instant>,
+    frame_start: Option<Instant>,
     /// Kept so the device can be polled once a frame from outside the paint
     /// callback — see [`App::service_gpu`].
     device: eframe::wgpu::Device,
@@ -1265,7 +1267,7 @@ impl eframe::App for App {
             crate::diag::note(&format!("frames painted: {}", self.frames));
         }
 
-        self.frame_start = Some(std::time::Instant::now());
+        self.frame_start = Some(Instant::now());
         self.accept_dropped_background(ui.ctx());
         self.collect_export();
         self.service_gpu();
