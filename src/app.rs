@@ -74,7 +74,26 @@ const THUMB_COLS: usize = crate::formulas::atlas_cols(GENERATED.len());
 const THUMB_ROWS: usize = crate::formulas::atlas_rows(GENERATED.len());
 
 /// Side of a thumbnail as drawn in the picker.
-const THUMB_SIZE: f32 = 44.0;
+///
+/// Icon-sized rather than a preview: the picker's job is to let you scan a
+/// column of shapes, and a taller row means fewer of them on screen at once.
+const THUMB_SIZE: f32 = 30.0;
+
+/// Formulas the picker aims to show without scrolling.
+///
+/// Mandelbulber manages fourteen. A popup that shows one is a list you have to
+/// already know your way around, which defeats having pictures at all.
+const PICKER_ROWS: f32 = 14.0;
+
+/// Height of one row: the thumbnail plus egui's default item spacing.
+const PICKER_ROW: f32 = THUMB_SIZE + 6.0;
+
+/// How tall the whole popup may be — the rows, plus the built-in list, the
+/// separator and the filter box above them.
+const PICKER_HEIGHT: f32 = PICKER_ROWS * PICKER_ROW + 190.0;
+
+/// How wide, which the longest formula names decide.
+const PICKER_WIDTH: f32 = 320.0;
 
 /// How the fractal's render resolution is chosen.
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
@@ -1301,6 +1320,11 @@ fn formula_picker(
     thumbs: Option<&egui::TextureHandle>,
     mut choose: impl FnMut(FormulaKind),
 ) {
+    // A popup is only as wide as the button that opened it unless told
+    // otherwise, and the button is sized for a label, not for a picture and a
+    // name like `MandelbulbAtan2Power2`.
+    ui.set_min_width(PICKER_WIDTH);
+
     for b in Builtin::ALL {
         if ui.selectable_label(false, b.name()).clicked() {
             choose(FormulaKind::Builtin(b));
@@ -1308,7 +1332,12 @@ fn formula_picker(
     }
 
     ui.separator();
-    ui.add(egui::TextEdit::singleline(filter).hint_text("filter Mandelbulber…"));
+    ui.add(egui::TextEdit::singleline(filter).hint_text("filter by name, or M3D…"))
+        .on_hover_text(
+            "Both corpora are in this list: Mandelbulber's under their own \
+             names, and Mandelbulb 3D's prefixed `M3D`. Typing that prefix \
+             narrows it to the MB3D formulas.",
+        );
 
     let needle = filter.to_lowercase();
     egui::ScrollArea::vertical()
@@ -2309,6 +2338,10 @@ fn stack_editor(
                     egui::ComboBox::from_id_salt("kind")
                         .selected_text(slot.kind.name())
                         .width(120.0)
+                        // egui caps a popup at `Spacing::combo_height`, which
+                        // is 200 — about one formula once the filter box and
+                        // the built-ins have had their share.
+                        .height(PICKER_HEIGHT)
                         .show_ui(ui, |ui| {
                             formula_picker(ui, filter, thumbs, |kind| {
                                 if slot.kind == kind {
@@ -2510,6 +2543,7 @@ fn stack_editor(
             egui::ComboBox::from_id_salt("add_formula")
                 .selected_text("+ add formula")
                 .width(150.0)
+                .height(PICKER_HEIGHT)
                 .show_ui(ui, |ui| {
                     formula_picker(ui, filter, thumbs, |kind| {
                         stack.slots.push(FormulaSlot::new(kind));
