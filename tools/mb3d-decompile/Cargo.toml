@@ -1,0 +1,18 @@
+[package]
+name = "mb3d-decompile"
+version = "0.1.0"
+edition = "2024"
+description = "Recovers readable formulas from Mandelbulb 3D's compiled x87 .m3f blobs"
+license = "GPL-3.0-or-later"
+publish = false
+
+[dependencies]
+# A real x86 decoder rather than a hand-rolled one. The corpus is 454 blobs of
+# someone else's compiler output; guessing at encodings would produce plausible
+# nonsense, which is the one failure mode there is no way to notice at scale.
+iced-x86 = { version = "1.21", default-features = false, features = [
+    "decoder",
+    "instr_info",
+    "nasm",
+    "std",
+] }

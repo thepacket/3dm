@@ -7,7 +7,7 @@ license = "GPL-3.0-or-later"
 repository = "https://github.com/thepacket/3dm"
 
 [workspace]
-members = [".", "tools/mb2-transpile"]
+members = [".", "tools/mb2-transpile", "tools/mb3d-decompile"]
 
 [[bin]]
 name = "3dm"
