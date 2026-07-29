@@ -26,15 +26,17 @@ fn decompile(name: &str) -> Vec<String> {
 /// x = x*m + Cx
 /// ```
 ///
-/// so with the absolute values substituted in, and `p1` = Scale, `p2` = Fix,
-/// `J1` = Cx — the Julia constant the ABI calls `J1`.
+/// so with the absolute values substituted in. It declares exactly two
+/// parameters — `Scale` then `Fix` — and reads them from `PVar-16` and
+/// `PVar-24`, which is MB3D's documented slot rule and makes them `p0` and
+/// `p1`. `J1` is the Julia constant the ABI names.
 #[test]
 fn kalisets1_matches_its_description() {
     let lines = decompile("Kalisets1");
     let expected = [
-        "x = abs(x) * p1 / (abs(x) * abs(x) + abs(y) * abs(y) + abs(z) * abs(z) + p2) + J1",
-        "y = abs(y) * p1 / (abs(x) * abs(x) + abs(y) * abs(y) + abs(z) * abs(z) + p2) + J2",
-        "z = abs(z) * p1 / (abs(x) * abs(x) + abs(y) * abs(y) + abs(z) * abs(z) + p2) + J3",
+        "x = abs(x) * p0 / (abs(x) * abs(x) + abs(y) * abs(y) + abs(z) * abs(z) + p1) + J1",
+        "y = abs(y) * p0 / (abs(x) * abs(x) + abs(y) * abs(y) + abs(z) * abs(z) + p1) + J2",
+        "z = abs(z) * p0 / (abs(x) * abs(x) + abs(y) * abs(y) + abs(z) * abs(z) + p1) + J3",
     ];
     assert_eq!(lines, expected);
 }
@@ -54,8 +56,8 @@ fn kalisets1_matches_its_description() {
 /// z=-tx*sqrt(1/3)+z*sqrt(2/3);
 /// ```
 ///
-/// with `k1` = sqrt(2/3), `k2` = sqrt(1/3) and `k3` = sqrt(1/2) from the
-/// constant pool. The compiler reordered the assignments and factored the two
+/// with `k0` = sqrt(2/3), `k1` = sqrt(1/3) and `k2` = sqrt(1/2) read from the
+/// constant pool, which counts up from `PVar + 0`. The compiler reordered the assignments and factored the two
 /// `sqrt(1/2)` products, both of which preserve the value.
 #[test]
 fn benesipine1_reproduces_the_benesi_fold() {
@@ -64,14 +66,14 @@ fn benesipine1_reproduces_the_benesi_fold() {
     assert_eq!(
         fold,
         [
-            "t8 = (x * k1 + -(z * k2)) * k3",
-            "y = abs(t8 + y * k3)",
-            "x = abs(t8 + -(y * k3))",
-            "z = abs(x * k2 + z * k1)",
-            "t8 = (x + y) * k3",
-            "z = -(t8 * k2) + z * k1",
-            "x = t8 * k1 + z * k2",
-            "y = (-x + y) * k3",
+            "t8 = (x * k0 + -(z * k1)) * k2",
+            "y = abs(t8 + y * k2)",
+            "x = abs(t8 + -(y * k2))",
+            "z = abs(x * k1 + z * k0)",
+            "t8 = (x + y) * k2",
+            "z = -(t8 * k1) + z * k0",
+            "x = t8 * k0 + z * k1",
+            "y = (-x + y) * k2",
         ]
     );
 }
@@ -88,4 +90,20 @@ fn temporaries_are_kept_rather_than_inlined() {
         "an inlined expression got through: {:?}",
         lines.iter().max_by_key(|l| l.len())
     );
+}
+
+/// The slot rule from MB3D's `FormulaCompiler.pas`. Getting this wrong maps a
+/// community `.m3p`'s values onto the wrong parameters — which produces a
+/// picture, just not the one whoever shared it made.
+#[test]
+fn parameter_slots_follow_mb3ds_own_rule() {
+    use mb3d_decompile::abi::parameter_slot;
+    assert_eq!(parameter_slot(-16), Some(0), "first parameter sits at PVar-16");
+    assert_eq!(parameter_slot(-24), Some(1));
+    assert_eq!(parameter_slot(-72), Some(7));
+    // At and above PVar is the constant pool, not parameters.
+    assert_eq!(parameter_slot(0), None);
+    assert_eq!(parameter_slot(-8), None);
+    // Half a Double is not a slot.
+    assert_eq!(parameter_slot(-20), None);
 }

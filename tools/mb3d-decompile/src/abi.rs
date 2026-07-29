@@ -91,28 +91,54 @@ pub fn field(offset: i64) -> Option<String> {
     Some(format!("{name}+{}", offset - at))
 }
 
-/// Names a user parameter at `offset` from `PVar`.
+/// Where the first user parameter sits, relative to `PVar`.
 ///
-/// Only the anchor is documented — MB3D's own comment says the user values run
-/// at *decreasing* offsets and that `PVar-8` is always the constant 0.5. The
-/// mapping from a given offset back to a name in `[OPTIONS]` is not a fixed
-/// stride, so this reports the slot and leaves the naming to whatever can
-/// actually establish it.
+/// From MB3D's own `FormulaCompiler.pas`, which emits every declared value's
+/// accessor: constants count up from `PVar + 0`, parameters count *down* from
+/// `PVar - 16`, and each step is the size of that value's datatype.
+///
+/// ```pascal
+/// COffset := 0;
+/// VOffset := 16;
+/// ...
+/// Name := PDouble(Integer(PIteration3D^.PVar) - VOffset)^;
+/// Inc(VOffset, JITValueDatatypeSize(Pair.Datatype));
+/// ```
+///
+/// This is the rule that lets a recovered formula's `p0`, `p1` be matched back
+/// to names in `[OPTIONS]` — and so lets a community `.m3p` parameter file be
+/// read against it, which is the whole point of recovering them.
+pub const FIRST_PARAM_OFFSET: i64 = 16;
+
+/// Slot size for a `Double`, which is what nearly every parameter is.
+const DOUBLE: i64 = 8;
+
+/// Names a user parameter at `offset` from `PVar`.
 pub fn parameter(offset: i64) -> String {
-    match offset {
-        -8 => "const_0.5".to_owned(),
-        o if o < 0 => format!("param[{}]", (-o - 8) / 8),
-        0 => "const[0]".to_owned(),
-        o => format!("const[{}]", o / 8),
+    match parameter_slot(offset) {
+        Some(n) => format!("p{n}"),
+        None if offset >= 0 => format!("k{}", offset / DOUBLE),
+        None => format!("pvar{offset}"),
     }
+}
+
+/// The parameter slot a `PVar`-relative offset names, if it is one.
+pub fn parameter_slot(offset: i64) -> Option<usize> {
+    if offset > -FIRST_PARAM_OFFSET {
+        return None;
+    }
+    let from_first = -offset - FIRST_PARAM_OFFSET;
+    // A misaligned read is a formula treating a Double as two halves, which
+    // is not a parameter slot and should not be given a slot's name.
+    (from_first % DOUBLE == 0).then_some((from_first / DOUBLE) as usize)
 }
 
 /// The same, as a structured place for the symbolic executor.
 pub fn parameter_place(offset: i64) -> crate::expr::Place {
     use crate::expr::Place;
-    match offset {
-        -8 => Place::Const(0),
-        o if o < 0 => Place::Param(((-o - 8) / 8) as usize),
-        o => Place::Const((o / 8) as usize + 1),
+    match parameter_slot(offset) {
+        Some(n) => Place::Param(n),
+        None if offset >= 0 => Place::Const((offset / DOUBLE) as usize),
+        None => Place::Unknown(format!("pvar{offset}")),
     }
 }

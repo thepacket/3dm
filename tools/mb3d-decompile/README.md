@@ -64,16 +64,39 @@ Done: extraction, the ABI table, a corpus survey, annotated disassembly, and a
 symbolic x87 executor for straight-line code.
 
 Not done: control flow for the 282 formulas with branches, the SSE2 path, a
-handful of integer-load instructions (`fild`, `fimul`, `fistp`), and the
-mapping from a `PVar` slot back to a name in `[OPTIONS]`.
+handful of integer-load instructions (`fild`, `fimul`, `fistp`), and reading
+`.m3p` parameter files.
 
-That last one is unsolved and worth stating plainly. Parameters live at
-decreasing offsets from `PVar` and MB3D's comment says `PVar-8` is always the
-constant `0.5`, so slot *n* sits at `-(8n+8)`. But the slots a formula uses are
-**not** its `[OPTIONS]` entries in order — `ABoxMod1` declares seven and uses
-slots 1, 4, 5, 6, 7, 8, skipping 2 and 3. The rule is in MB3D's loader and has
-not been read yet. Until it is, recovered formulas would have correct
-mathematics with unnamed parameters.
+## Why the parameter slots matter
+
+Recovering the mathematics is only half of it. The reason to want MB3D's
+formulas at all is the body of work its community has already made, shared as
+`.m3p` parameter files — and a `.m3p` names an MB3D formula and carries values
+in MB3D's own slot order. Map the slots wrongly and the file still renders;
+it just renders something nobody made.
+
+So a formula we skip because Mandelbulber already has an equivalent is not a
+saving. It breaks every `.m3p` that references it.
+
+The rule is `FormulaCompiler.pas`, which emits the accessor for every declared
+value:
+
+```pascal
+COffset := 0;
+VOffset := 16;
+... := PDouble(Integer(PIteration3D^.PVar) + COffset)^;   // constants
+... := PDouble(Integer(PIteration3D^.PVar) - VOffset)^;   // parameters
+Inc(VOffset, JITValueDatatypeSize(Pair.Datatype));
+```
+
+Constants count up from `PVar + 0`; parameters count down from `PVar - 16`;
+each steps by its datatype's size. `Kalisets1` confirms it exactly — two
+declared parameters, `Scale` then `Fix`, read from `-16` and `-24`.
+
+One loose end: `ABoxMod1` declares seven parameters but its slots skip two.
+The suspect is `.Boxscale Min R`, the only user parameter in that file
+declared without a `Double` type word, which suggests the `[OPTIONS]` parser
+recognises datatypes this tool does not yet.
 
 ## Verified
 
