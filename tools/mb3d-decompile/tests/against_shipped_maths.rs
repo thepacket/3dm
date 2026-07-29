@@ -182,3 +182,41 @@ fn aboxmod1_recovers_its_folds_and_its_conditional() {
     );
     assert!(joined.contains("VaryScale / ("), "inner arm divides by rr");
 }
+
+/// An SSE2 formula. MB3D compiles some of its corpus to packed doubles rather
+/// than x87, working on (x, y) and (z, w) as pairs — which only works because
+/// `TIteration3Dext` stores the four consecutively.
+///
+/// Its description gives
+///
+/// ```text
+/// x = X_add - abs(x)
+/// y = Y_add - abs(y)
+/// z = Z_add - abs(z)
+/// rr = x*x + y*y + z*z
+/// if rr < sqr(Min_R) then m = Scale/sqr(Min_R) else ...
+/// ```
+///
+/// It declares `Scale`, `Boxscale Min R`, `2Doubles Z add`, `Y add`, `X add`,
+/// which the slot table expands to eight — so `X add` is `p6`, `Y add` is
+/// `p5`, and the second half of `Z add` is `p4`. That the recovered arithmetic
+/// pairs each of those with the matching axis is independent confirmation of
+/// the table, since nothing about the decode consults it.
+#[test]
+fn aboxmodkali_recovers_from_packed_sse2() {
+    let lines = decompile("ABoxModKali");
+    let joined = lines.join("\n");
+
+    for (axis, param) in [('x', "p6"), ('y', "p5"), ('z', "p4")] {
+        assert!(
+            joined.contains(&format!("({param} - abs({axis}))")),
+            "{axis} should fold against {param}"
+        );
+    }
+    // The sign mask read as an absolute value rather than a bitwise `and`.
+    assert!(!joined.contains('&'), "no bitwise operation should survive");
+    // Same box-scale conditional as ABoxMod1, from a different instruction set.
+    assert!(joined.contains("< p2 then p1 else"));
+    assert!(lines.iter().any(|l| l.starts_with("x = ")));
+    assert!(lines.iter().any(|l| l.starts_with("z = ")));
+}

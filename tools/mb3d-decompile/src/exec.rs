@@ -112,6 +112,10 @@ struct Machine {
     /// what makes the output readable. It exists only to answer "what does
     /// this place hold?" when two paths rejoin and have to be reconciled.
     env: HashMap<Place, E>,
+    /// The SSE2 registers, each a pair of doubles: low lane then high. MB3D
+    /// compiles some formulas this way instead of to x87, working on (x, y)
+    /// and (z, w) as packed pairs.
+    xmm: HashMap<Register, [E; 2]>,
     /// The operands of the last comparison, waiting for the jump that reads
     /// its flags. x87 compares and branches are several instructions apart,
     /// with `fnstsw`/`sahf` shuttling the flags between them.
@@ -237,6 +241,7 @@ impl Machine {
         Machine {
             fpu: self.fpu.clone(),
             regs: self.regs.clone(),
+            xmm: self.xmm.clone(),
             env: self.env.clone(),
             stores: Vec::new(),
             pending_cmp: None,
@@ -284,6 +289,18 @@ impl Machine {
             let merged = expr::select(condition.clone(), taken_value, other_value);
             self.env.insert(place.clone(), merged.clone());
             self.stores.push((place, merged));
+        }
+        // Registers that differ between the arms are reconciled the same way
+        // the stack is.
+        for (reg, taken) in &then_branch.xmm {
+            let other = else_branch.xmm.get(reg).cloned().unwrap_or(taken.clone());
+            self.xmm.insert(
+                *reg,
+                [
+                    expr::select(condition.clone(), taken[0].clone(), other[0].clone()),
+                    expr::select(condition.clone(), taken[1].clone(), other[1].clone()),
+                ],
+            );
         }
         self.regs = then_branch.regs;
         self.pending_cmp = None;
@@ -388,8 +405,255 @@ impl Machine {
                 self.set_st(0, expr::call("tan", vec![top]))?;
                 self.push(expr::num(1.0))
             }
+            // ---- SSE2 -------------------------------------------------
+            Movupd | Movapd | Movdqa | Movdqu => self.sse_move(ins),
+            Movsd => self.sse_move_scalar(ins, 0),
+            Movlpd => self.sse_move_scalar(ins, 0),
+            Movhpd => self.sse_move_scalar(ins, 1),
+            Addpd => self.sse_arith(ins, Op::Add, true),
+            Subpd => self.sse_arith(ins, Op::Sub, true),
+            Mulpd => self.sse_arith(ins, Op::Mul, true),
+            Divpd => self.sse_arith(ins, Op::Div, true),
+            Addsd => self.sse_arith(ins, Op::Add, false),
+            Subsd => self.sse_arith(ins, Op::Sub, false),
+            Mulsd => self.sse_arith(ins, Op::Mul, false),
+            Divsd => self.sse_arith(ins, Op::Div, false),
+            Sqrtpd => self.sse_map(ins, true, expr::sqrt),
+            Sqrtsd => self.sse_map(ins, false, expr::sqrt),
+            Maxpd => self.sse_call(ins, true, "max"),
+            Minpd => self.sse_call(ins, true, "min"),
+            Maxsd => self.sse_call(ins, false, "max"),
+            Minsd => self.sse_call(ins, false, "min"),
+            // The sign-mask idioms. SSE has no float negate or absolute value
+            // instruction: everything clears or flips the sign bit with a
+            // bitwise operation against a constant, and MB3D keeps those
+            // constants in the same pool as the formula's own.
+            Andpd | Andps => self.sse_map(ins, true, expr::abs),
+            Xorpd | Xorps => self.sse_xor(ins),
+            Unpcklpd => self.sse_unpack(ins, false),
+            Unpckhpd => self.sse_unpack(ins, true),
+            Shufpd | Pshufd => self.sse_shuffle(ins),
+            Haddpd => self.sse_hadd(ins),
+            Ucomisd | Comisd => self.sse_compare(ins),
             other => Err(format!("{other:?} at {:04x}", ins.ip())),
         }
+    }
+
+    // ---- SSE2 ----------------------------------------------------------
+
+    /// The pair a register or memory operand holds.
+    fn sse_operand(&mut self, ins: &Instruction, which: u32) -> Result<[E; 2], String> {
+        let kind = if which == 0 { ins.op0_kind() } else { ins.op1_kind() };
+        match kind {
+            OpKind::Register => {
+                let reg = if which == 0 {
+                    ins.op0_register()
+                } else {
+                    ins.op1_register()
+                };
+                Ok(self.xmm.get(&reg).cloned().unwrap_or([
+                    expr::load(Place::Unknown(format!("{reg:?}.lo"))),
+                    expr::load(Place::Unknown(format!("{reg:?}.hi"))),
+                ]))
+            }
+            OpKind::Memory => {
+                let low = self.place(ins)?;
+                let high = self.place_at(ins, 8)?;
+                Ok([expr::load(low), expr::load(high)])
+            }
+            other => Err(format!("SSE operand {other:?}")),
+        }
+    }
+
+    fn sse_write(&mut self, ins: &Instruction, value: [E; 2], packed: bool) -> Result<(), String> {
+        match ins.op0_kind() {
+            OpKind::Register => {
+                let reg = ins.op0_register();
+                let mut pair = value;
+                if !packed {
+                    // A scalar operation leaves the upper lane alone.
+                    if let Some(existing) = self.xmm.get(&reg) {
+                        pair[1] = existing[1].clone();
+                    }
+                }
+                self.xmm.insert(reg, pair);
+                Ok(())
+            }
+            OpKind::Memory => {
+                let low = self.place(ins)?;
+                self.env.insert(low.clone(), value[0].clone());
+                self.stores.push((low, value[0].clone()));
+                if packed {
+                    let high = self.place_at(ins, 8)?;
+                    self.env.insert(high.clone(), value[1].clone());
+                    self.stores.push((high, value[1].clone()));
+                }
+                Ok(())
+            }
+            other => Err(format!("SSE destination {other:?}")),
+        }
+    }
+
+    fn sse_move(&mut self, ins: &Instruction) -> Result<(), String> {
+        let value = self.sse_operand(ins, 1)?;
+        self.sse_write(ins, value, true)
+    }
+
+    /// `movsd`, `movlpd` and `movhpd` move one lane.
+    fn sse_move_scalar(&mut self, ins: &Instruction, lane: usize) -> Result<(), String> {
+        if ins.op0_kind() == OpKind::Memory {
+            let place = if lane == 0 {
+                self.place(ins)?
+            } else {
+                self.place_at(ins, 8)?
+            };
+            let value = self.sse_operand(ins, 1)?[lane].clone();
+            self.env.insert(place.clone(), value.clone());
+            self.stores.push((place, value));
+            return Ok(());
+        }
+        let source = self.sse_operand(ins, 1)?;
+        let reg = ins.op0_register();
+        let mut pair = self.xmm.get(&reg).cloned().unwrap_or([
+            expr::num(0.0),
+            expr::num(0.0),
+        ]);
+        // Loading a scalar from memory clears the upper lane; from another
+        // register it leaves it.
+        if ins.op1_kind() == OpKind::Memory && lane == 0 {
+            pair[1] = expr::num(0.0);
+        }
+        pair[lane] = source[0].clone();
+        self.xmm.insert(reg, pair);
+        Ok(())
+    }
+
+    fn sse_arith(&mut self, ins: &Instruction, op: Op, packed: bool) -> Result<(), String> {
+        let left = self.sse_operand(ins, 0)?;
+        let right = self.sse_operand(ins, 1)?;
+        let value = [
+            expr::bin(op, left[0].clone(), right[0].clone()),
+            if packed {
+                expr::bin(op, left[1].clone(), right[1].clone())
+            } else {
+                left[1].clone()
+            },
+        ];
+        self.sse_write(ins, value, packed)
+    }
+
+    fn sse_map(
+        &mut self,
+        ins: &Instruction,
+        packed: bool,
+        f: impl Fn(E) -> E,
+    ) -> Result<(), String> {
+        // `sqrtsd` and friends take their input from the second operand;
+        // `andpd` masks the destination in place.
+        let source = if ins.op_count() > 1 {
+            self.sse_operand(ins, 1)?
+        } else {
+            self.sse_operand(ins, 0)?
+        };
+        let base = self.sse_operand(ins, 0)?;
+        let value = [
+            f(if matches!(ins.mnemonic(), Mnemonic::Andpd | Mnemonic::Andps) {
+                base[0].clone()
+            } else {
+                source[0].clone()
+            }),
+            if packed {
+                f(if matches!(ins.mnemonic(), Mnemonic::Andpd | Mnemonic::Andps) {
+                    base[1].clone()
+                } else {
+                    source[1].clone()
+                })
+            } else {
+                base[1].clone()
+            },
+        ];
+        self.sse_write(ins, value, packed)
+    }
+
+    fn sse_call(&mut self, ins: &Instruction, packed: bool, name: &'static str) -> Result<(), String> {
+        let left = self.sse_operand(ins, 0)?;
+        let right = self.sse_operand(ins, 1)?;
+        let value = [
+            expr::call(name, vec![left[0].clone(), right[0].clone()]),
+            if packed {
+                expr::call(name, vec![left[1].clone(), right[1].clone()])
+            } else {
+                left[1].clone()
+            },
+        ];
+        self.sse_write(ins, value, packed)
+    }
+
+    /// `xorpd` against itself is zero; against a constant it flips the sign.
+    fn sse_xor(&mut self, ins: &Instruction) -> Result<(), String> {
+        if ins.op0_kind() == OpKind::Register
+            && ins.op1_kind() == OpKind::Register
+            && ins.op0_register() == ins.op1_register()
+        {
+            self.xmm
+                .insert(ins.op0_register(), [expr::num(0.0), expr::num(0.0)]);
+            return Ok(());
+        }
+        self.sse_map(ins, true, expr::neg)
+    }
+
+    fn sse_unpack(&mut self, ins: &Instruction, high: bool) -> Result<(), String> {
+        let left = self.sse_operand(ins, 0)?;
+        let right = self.sse_operand(ins, 1)?;
+        let lane = usize::from(high);
+        self.sse_write(ins, [left[lane].clone(), right[lane].clone()], true)
+    }
+
+    /// Lane selection.
+    ///
+    /// `shufpd` takes its low lane from the destination and its high lane from
+    /// the source, one bit of the immediate choosing which half of each — so
+    /// with both operands the same register, an immediate of 1 is the swap
+    /// that sets up a horizontal sum. `pshufd` shuffles four 32-bit lanes, of
+    /// which only the three arrangements that keep doubles intact appear here.
+    fn sse_shuffle(&mut self, ins: &Instruction) -> Result<(), String> {
+        let selector = ins.immediate8();
+        let source = self.sse_operand(ins, 1)?;
+
+        if ins.mnemonic() == Mnemonic::Pshufd {
+            let pair = match selector {
+                0x4E => [source[1].clone(), source[0].clone()],
+                0x44 => [source[0].clone(), source[0].clone()],
+                0xEE => [source[1].clone(), source[1].clone()],
+                other => return Err(format!("pshufd {other:#x} at {:04x}", ins.ip())),
+            };
+            return self.sse_write(ins, pair, true);
+        }
+
+        let destination = self.sse_operand(ins, 0)?;
+        let low = destination[usize::from(selector & 1 != 0)].clone();
+        let high = source[usize::from(selector & 2 != 0)].clone();
+        self.sse_write(ins, [low, high], true)
+    }
+
+    fn sse_hadd(&mut self, ins: &Instruction) -> Result<(), String> {
+        let left = self.sse_operand(ins, 0)?;
+        let right = self.sse_operand(ins, 1)?;
+        self.sse_write(
+            ins,
+            [
+                expr::bin(Op::Add, left[0].clone(), left[1].clone()),
+                expr::bin(Op::Add, right[0].clone(), right[1].clone()),
+            ],
+            true,
+        )
+    }
+
+    fn sse_compare(&mut self, ins: &Instruction) -> Result<(), String> {
+        let left = self.sse_operand(ins, 0)?;
+        let right = self.sse_operand(ins, 1)?;
+        self.pending_cmp = Some((left[0].clone(), right[0].clone()));
+        Ok(())
     }
 
     // ---- the FPU stack -------------------------------------------------
@@ -695,6 +959,31 @@ impl Machine {
         Some((ptr, ins.memory_displacement64() as i32 as i64))
     }
 
+    /// The place `extra` bytes past this operand's address — the upper lane of
+    /// a packed access.
+    fn place_at(&self, ins: &Instruction, extra: i64) -> Result<Place, String> {
+        let base = ins.memory_base();
+        let displacement = ins.memory_displacement64() as i32 as i64 + extra;
+        if (base == Register::EBP && displacement < 0) || base == Register::ESP {
+            return Ok(Place::Local(displacement));
+        }
+        let Some((ptr, base_offset)) = self.pointer(ins) else {
+            return Ok(Place::Unknown(format!("{:04x}+{extra}", ins.ip())));
+        };
+        let _ = base_offset;
+        Ok(match ptr {
+            Ptr::Var('x') if displacement == 8 => Place::Var('y'),
+            Ptr::Var('z') if displacement == 8 => Place::Var('w'),
+            Ptr::Var(c) => Place::Unknown(format!("{c}+{displacement}")),
+            Ptr::PVar => abi::parameter_place(displacement),
+            Ptr::Record(rebase) => match abi::field(rebase + displacement) {
+                Some(name) => Place::Field(name),
+                None => Place::Unknown(format!("rec{:+}", rebase + displacement)),
+            },
+            Ptr::Unknown => Place::Unknown(format!("{:04x}", ins.ip())),
+        })
+    }
+
     fn place(&self, ins: &Instruction) -> Result<Place, String> {
         // An indexed access is a table lookup, not a named field, and this
         // model has nothing useful to say about it.
@@ -715,6 +1004,15 @@ impl Machine {
         };
         Ok(match ptr {
             Ptr::Var(c) if displacement == 0 => Place::Var(c),
+            // `TIteration3Dext` stores x, y, z and w as consecutive doubles,
+            // so the pointer to x also reaches y and the pointer to z reaches
+            // w. That adjacency is the whole reason the SSE2 formulas can work
+            // on packed pairs.
+            Ptr::Var(c) if displacement == 8 => match c {
+                'x' => Place::Var('y'),
+                'z' => Place::Var('w'),
+                other => Place::Unknown(format!("{other}+8")),
+            },
             Ptr::Var(c) => Place::Unknown(format!("{c}+{displacement}")),
             Ptr::PVar => abi::parameter_place(displacement),
             Ptr::Record(base) => match abi::field(base + displacement) {

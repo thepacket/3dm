@@ -55,22 +55,28 @@ description.
 
 ```
 formulas attempted:      457
-fully recovered:         262
+fully recovered:         299
 ran but assigned nothing:7
-bailed:                  188
+bailed:                  151
 ```
 
 Done: extraction, the ABI table, a corpus survey, annotated disassembly, a
-symbolic x87 executor, and control flow.
+symbolic x87 executor, control flow, and the SSE2 backend.
 
 Branches are followed on both sides and reconciled where they meet, so a
 conditional comes out as one. The corpus is forward-only — no formula loops
 inside itself, the iteration loop is outside — which makes that a recursive
 walk over nested intervals rather than general control-flow reconstruction.
 
-Not done: the SSE2 path (`Movupd` alone accounts for 82 of the failures), a
-handful of integer-load instructions, sixteen formulas that call out to
-something, thirteen with a backward jump, and reading `.m3p` parameter files.
+Some formulas are compiled to packed doubles instead of x87, working on
+(x, y) and (z, w) as pairs — which only works because `TIteration3Dext` stores
+the four consecutively, and is why `[eax+8]` is `y`. SSE has no float negate or
+absolute value, so those are bitwise operations against sign masks that MB3D
+keeps in the same constant pool as the formula's own parameters.
+
+Not done: a handful of integer-load instructions, 21 formulas that call out to
+something, 13 with a backward jump, 32 whose branch has no comparison this
+model captured, and reading `.m3p` parameter files.
 
 ## Why the parameter slots matter
 
