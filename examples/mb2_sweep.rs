@@ -77,8 +77,17 @@ fn main() {
     // in either. A real hybrid interleaves them over different parts of the
     // loop, the way MB3D always did.
     let stagger = args.iter().any(|a| a == "--stagger");
+    // `--de log` overrides the estimator every formula declares. The decompiled
+    // MB3D formulas do not record which one they want, so sweeping the corpus
+    // under each and comparing the classifications is the evidence.
+    let de = match args.iter().find_map(|a| a.strip_prefix("--de=")) {
+        Some("log") => Some(DeMode::Log),
+        Some("linear") => Some(DeMode::Linear),
+        Some(other) => panic!("unknown --de={other}, want log or linear"),
+        None => None,
+    };
     let out_dir = args.into_iter().find(|a| !a.starts_with("--"));
-    pollster::block_on(run(out_dir.as_deref(), hybrid, rotate, stagger));
+    pollster::block_on(run(out_dir.as_deref(), hybrid, rotate, stagger, de));
 }
 
 /// The scene for one sweep entry.
@@ -141,6 +150,10 @@ fn scene(
             .slots
             .push(FormulaSlot::new(FormulaKind::Generated(index.unwrap())));
         params.retune_for_stack();
+        // Solo sweeps honour a forced estimator too. Which estimator a
+        // decompiled MB3D formula should use is not recorded in its `.m3f`, so
+        // sweeping the corpus twice and comparing is how that gets settled.
+        params.stack.de_mode_override = force;
     }
 
     // A sweep is about coverage, not beauty; a small budget keeps 361
@@ -187,7 +200,13 @@ fn difference(a: &[u8], b: &[u8]) -> f32 {
     differing as f32 / (W * H) as f32
 }
 
-async fn run(out_dir: Option<&str>, hybrid: bool, rotate: bool, stagger: bool) {
+async fn run(
+    out_dir: Option<&str>,
+    hybrid: bool,
+    rotate: bool,
+    stagger: bool,
+    de: Option<DeMode>,
+) {
     if let Some(d) = out_dir {
         std::fs::create_dir_all(d).expect("cannot create output directory");
     }
@@ -281,7 +300,7 @@ async fn run(out_dir: Option<&str>, hybrid: bool, rotate: bool, stagger: bool) {
     let mut inert = Vec::new();
 
     for (index, f) in GENERATED.iter().enumerate() {
-        let params = scene(Some(index), hybrid, None, rotate, stagger);
+        let params = scene(Some(index), hybrid, de, rotate, stagger);
 
         let mut camera = Camera::default();
         camera.frame(params.fractal.bounding_radius);
