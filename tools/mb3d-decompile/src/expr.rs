@@ -151,6 +151,50 @@ pub fn bin(op: Op, a: E, b: E) -> E {
         };
         return num(folded);
     }
+    // `2^x - 1` then `+ 1` is how x87 spells `2^x`: `f2xm1` only covers a
+    // narrow range, so the compiler always follows it with `fld1; faddp`.
+    // Undoing that pair is the difference between a readable exponent and a
+    // page of scaffolding.
+    if op == Op::Add {
+        if let (Expr::Fun("exp2m1", args), Expr::Num(one)) = (&*a, &*b)
+            && *one == 1.0
+            && args.len() == 1
+        {
+            return call("exp2", vec![args[0].clone()]);
+        }
+        if let (Expr::Num(one), Expr::Fun("exp2m1", args)) = (&*a, &*b)
+            && *one == 1.0
+            && args.len() == 1
+        {
+            return call("exp2", vec![args[0].clone()]);
+        }
+    }
+    // Delphi has no `pow`: it open-codes `x^n` as `exp(n * ln x)`, and the
+    // FPU has neither `exp` nor `ln` either, so both are in turn built from
+    // `fldln2`, `fldl2e` and a base-2 exponent. Undoing that chain is three
+    // exact identities, and it is the difference between a formula that reads
+    // as a power and one that reads as a page of logarithms.
+    if op == Op::Mul {
+        // ln 2 * log2(x) is ln x.
+        for (constant, other) in [(&a, &b), (&b, &a)] {
+            if let (Expr::Num(v), Expr::Fun("log2", args)) = (&**constant, &**other)
+                && *v == std::f64::consts::LN_2
+                && args.len() == 1
+            {
+                return call("ln", vec![args[0].clone()]);
+            }
+        }
+    }
+    // `2^a * 2^b` is `2^(a+b)`, which is what `fscale` reassembles after
+    // `frndint` split the exponent into its whole and fractional parts.
+    if op == Op::Mul
+        && let (Expr::Fun("exp2", left), Expr::Fun("exp2", right)) = (&*a, &*b)
+        && left.len() == 1
+        && right.len() == 1
+    {
+        return call("exp2", vec![bin(Op::Add, left[0].clone(), right[0].clone())]);
+    }
+
     match (op, &*a, &*b) {
         (Op::Add, Expr::Num(z), _) if *z == 0.0 => return b,
         (Op::Add | Op::Sub, _, Expr::Num(z)) if *z == 0.0 => return a,
@@ -188,7 +232,56 @@ pub fn sqrt(e: E) -> E {
     Rc::new(Expr::Sqrt(e))
 }
 
+/// Builds `name(args)`, folding it away where the answer is already known.
+///
+/// Compiler output is full of these. Delphi's `Exp` and `Power` are open-coded
+/// against `ln 2` and `log2 e`, so a decode that does not fold leaves
+/// `log2(0.6931471805599453)` sitting in the middle of an expression — a
+/// constant, spelled as a computation, obscuring the shape of everything
+/// around it.
 pub fn call(name: &'static str, args: Vec<E>) -> E {
+    // 2^(x * log2 e) is e^x, and e^(n * ln x) is x^n. Applied in that order
+    // they turn the whole open-coded sequence back into a single power.
+    if name == "exp2" && args.len() == 1 && let Expr::Bin(Op::Mul, left, right) = &*args[0] {
+        {
+            for (constant, other) in [(left, right), (right, left)] {
+                if let Expr::Num(v) = &**constant
+                    && *v == std::f64::consts::LOG2_E
+                {
+                    return call("exp", vec![other.clone()]);
+                }
+            }
+        }
+    }
+    if name == "exp" && args.len() == 1 && let Expr::Bin(Op::Mul, left, right) = &*args[0] {
+        {
+            for (exponent, base) in [(left, right), (right, left)] {
+                if let Expr::Fun("ln", inner) = &**base
+                    && inner.len() == 1
+                {
+                    return Rc::new(Expr::Fun("pow", vec![inner[0].clone(), exponent.clone()]));
+                }
+            }
+        }
+    }
+    if let [Expr::Num(v)] = args.iter().map(|a| (**a).clone()).collect::<Vec<_>>()[..] {
+        let folded = match name {
+            "sqrt" if v >= 0.0 => Some(v.sqrt()),
+            "log2" if v > 0.0 => Some(v.log2()),
+            "exp2" => Some(v.exp2()),
+            "exp2m1" => Some(v.exp2() - 1.0),
+            "ln" if v > 0.0 => Some(v.ln()),
+            "exp" => Some(v.exp()),
+            "sin" => Some(v.sin()),
+            "cos" => Some(v.cos()),
+            "tan" => Some(v.tan()),
+            "round" => Some(v.round()),
+            _ => None,
+        };
+        if let Some(value) = folded {
+            return num(value);
+        }
+    }
     Rc::new(Expr::Fun(name, args))
 }
 

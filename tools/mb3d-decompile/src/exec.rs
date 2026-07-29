@@ -900,10 +900,18 @@ impl Machine {
     }
 
     fn fxch(&mut self, ins: &Instruction) -> Result<(), String> {
-        let i = if ins.op_count() == 0 {
-            1
-        } else {
-            st_index(ins.op0_register())?
+        // `fxch` with no operand means `fxch st1`, and decodes as naming st0.
+        // Exchanging the top of the stack with itself is a no-op, so that
+        // form can only be the implicit one — and reading it literally
+        // silently drops the swap, which is how Delphi's `Ln` gets its
+        // operands the right way round for `fyl2x`.
+        let i = match ins.op_count() {
+            0 => 1,
+            _ if !is_st(ins.op0_register()) => 1,
+            _ => match st_index(ins.op0_register())? {
+                0 => 1,
+                other => other,
+            },
         };
         let (a, b) = (self.st(0)?, self.st(i)?);
         self.set_st(0, b)?;

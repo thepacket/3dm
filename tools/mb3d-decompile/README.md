@@ -100,10 +100,23 @@ an exponent known at decompile time, which it is not.
 Not done: a handful of integer-load instructions, the branches whose comparison
 this model does not capture, and reading `.m3p` parameter files.
 
-Recognising idioms would also help readability more than coverage. An inlined
-helper currently comes back as its instruction sequence — `f2xm1`, `fscale` and
-`fyl2x` against ln 2 and log2(e) — which is arithmetically right and is really
-just `pow`.
+## Idioms
+
+Delphi has no `pow`: it open-codes `x^n` as `exp(n * ln x)`, and the FPU has
+neither `exp` nor `ln` either, so both are in turn built from `fldln2`,
+`fldl2e`, `f2xm1` and `fscale`. Left alone, a decode of that comes back as a
+page of logarithms that is arithmetically right and unreadable.
+
+Four exact identities undo it: `2^x - 1` then `+ 1` is `2^x`, `2^a * 2^b` is
+`2^(a+b)`, `ln 2 * log2 x` is `ln x`, and `2^(x * log2 e)` is `e^x` — after
+which `e^(n * ln x)` is `x^n`. Constants are folded too, so
+`log2(0.6931471805599453)` becomes a number rather than sitting mid-expression
+as a computation.
+
+The chain does not yet collapse all the way to `pow` on every formula: some
+come back as `exp2(ln(...))` nested, which says the stack on entry to an
+inlined helper is not always what the helper expects. That is an open bug, not
+a finished feature.
 
 ## Why the parameter slots matter
 
