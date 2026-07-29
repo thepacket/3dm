@@ -9,7 +9,7 @@ use crate::formulas::{
 };
 use crate::params::{
     BackgroundMap, BackgroundParams, DebugView, Light, LightDecay, LightKind, LightsParams,
-    Export, ImageFormat, MAX_EXPORT_PIXELS, MAX_LIGHTS, Material, Perspective, Post,
+    Export, ImageFormat, MAX_ANTIALIAS, MAX_LIGHTS, Material, Perspective, Post, downsample_srgb,
     SceneParams, Stop,
 };
 use crate::render::{
@@ -190,8 +190,15 @@ pub struct App {
     pending_background: Option<(u32, u32, Vec<u8>)>,
     /// Where an export is written, and how big.
     export: Export,
+    /// The settings the render in flight was started with. The panel stays
+    /// editable while the GPU works, and the file should be the one that was
+    /// actually asked for.
+    export_job: Option<Export>,
     /// Set for the one frame that asks the renderer to draw the export.
     export_requested: bool,
+    /// Largest texture this device will allocate, which is the real ceiling on
+    /// an export — and on how far it can be supersampled.
+    max_texture_dim: u32,
     /// Where the finished pixels land, filled on a wgpu mapping callback.
     export_slot: ExportSlot,
     /// What to tell the user about the last export.
@@ -204,6 +211,8 @@ impl App {
         let render_state = cc.wgpu_render_state.as_ref()?;
 
         let device = render_state.device.clone();
+        // Read before `device` is moved into the struct below.
+        let max_texture_dim = device.limits().max_texture_dimension_2d;
         let pipeline = FractalPipeline::new(&render_state.device, render_state.target_format);
         let encode_srgb = pipeline.encode_srgb;
         let cursor = pipeline.cursor.clone();
@@ -250,7 +259,9 @@ impl App {
             background_image: None,
             pending_background: None,
             export: Export::default(),
+            export_job: None,
             export_requested: false,
+            max_texture_dim,
             export_slot: ExportSlot::default(),
             export_status: None,
         })
@@ -282,9 +293,11 @@ impl App {
             cursor,
             last_render_size,
             export,
+            export_job,
             export_requested,
             export_slot,
             export_status,
+            max_texture_dim,
             ..
         } = self;
         let mut reset_view = false;
@@ -431,9 +444,11 @@ impl App {
                         export,
                         export_slot.in_flight(),
                         export_status.as_deref(),
+                        *max_texture_dim,
                         ui,
                     ) {
                         *export_requested = true;
+                        *export_job = Some(export.clone());
                         *export_status = None;
                     }
                 });
@@ -810,13 +825,20 @@ impl App {
         let Some((width, height, rgba)) = self.export_slot.take() else {
             return;
         };
+        // The settings as they were when the button was pressed, not as they
+        // are now — the panel stays editable while the GPU works.
+        let job = self.export_job.take().unwrap_or_else(|| self.export.clone());
+
+        let n = job.effective_antialias(self.max_texture_dim);
+        let (width, height, rgba) = downsample_srgb(&rgba, width, height, n);
+
         let Some(image) = image::RgbaImage::from_raw(width, height, rgba) else {
             self.export_status = Some("the readback was the wrong size".to_owned());
             return;
         };
 
         let mut encoded = std::io::Cursor::new(Vec::new());
-        let written = match self.export.format {
+        let written = match job.format {
             ImageFormat::Png => image.write_to(&mut encoded, image::ImageFormat::Png),
             // JPEG has no alpha, and ours carries the circle of confusion
             // rather than opacity — writing it would be meaningless anyway.
@@ -829,9 +851,10 @@ impl App {
             return;
         }
 
-        let name = self.export.file_name();
+        let name = job.file_name();
+        let aa = if n > 1 { format!(" at {n}x") } else { String::new() };
         self.export_status = Some(match save_bytes(&name, encoded.into_inner()) {
-            Ok(where_to) => format!("saved {width}x{height} to {where_to}"),
+            Ok(where_to) => format!("saved {width}x{height}{aa} to {where_to}"),
             Err(e) => format!("could not save {name}: {e}"),
         });
     }
@@ -1081,10 +1104,13 @@ impl App {
         // would give a 4K image the detail of a preview.
         let export = self.export_requested.then(|| {
             self.export_requested = false;
-            let size = [
-                self.export.width.clamp(16, MAX_EXPORT_PIXELS),
-                self.export.height.clamp(16, MAX_EXPORT_PIXELS),
-            ];
+            // Supersampled: the frame is rendered oversized and averaged down
+            // once it is back, so the uniforms describe the *big* frame and
+            // the marcher chases detail at that resolution.
+            let size = self
+                .export
+                .render_size(self.max_texture_dim)
+                .map(|v| v.max(16));
             let uniforms = Uniforms::build(
                 &self.camera,
                 // The scene as authored, never the reduced-quality version a
@@ -1455,6 +1481,7 @@ fn export_editor(
     export: &mut Export,
     busy: bool,
     status: Option<&str>,
+    max_dimension: u32,
     ui: &mut egui::Ui,
 ) -> bool {
     ui.horizontal(|ui| {
@@ -1479,13 +1506,13 @@ fn export_editor(
         ui.add(
             egui::DragValue::new(&mut export.width)
                 .speed(16)
-                .range(16..=MAX_EXPORT_PIXELS),
+                .range(16..=max_dimension),
         );
         ui.label("x");
         ui.add(
             egui::DragValue::new(&mut export.height)
                 .speed(16)
-                .range(16..=MAX_EXPORT_PIXELS),
+                .range(16..=max_dimension),
         );
     });
     ui.horizontal_wrapped(|ui| {
@@ -1501,6 +1528,42 @@ fn export_editor(
             }
         }
     });
+
+    ui.horizontal(|ui| {
+        ui.label("anti-aliasing");
+        for n in 1..=MAX_ANTIALIAS {
+            ui.selectable_value(&mut export.antialias, n, format!("{n}x"));
+        }
+    })
+    .response
+    .on_hover_text(
+        "Renders this many times over in each direction and averages the \
+         result down. A fractal's edge is wherever the marcher stopped rather \
+         than a polygon with a known normal, so there is nothing to \
+         reconstruct from — more rays is the only honest fix.",
+    );
+
+    // What will actually happen, which is not always what was asked for: the
+    // factor is reduced until the supersampled frame fits in one texture.
+    let effective = export.effective_antialias(max_dimension);
+    let [rw, rh] = export.render_size(max_dimension);
+    if effective > 1 {
+        ui.label(
+            egui::RichText::new(format!("renders {rw}x{rh}, then averages down"))
+                .small()
+                .weak(),
+        );
+    }
+    if effective < export.antialias {
+        ui.label(
+            egui::RichText::new(format!(
+                "{}x is as far as this GPU goes at that size ({max_dimension} px limit)",
+                effective
+            ))
+            .small()
+            .color(ui.visuals().warn_fg_color),
+        );
+    }
 
     let start = ui
         .add_enabled(!busy, egui::Button::new("Export image"))

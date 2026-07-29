@@ -373,10 +373,25 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
     // mapping. Rendered at the same size it should be pixel-identical to
     // DM3_POST=1, which is the check worth having — the export is only useful
     // if it produces the picture the window shows.
-    if std::env::var("DM3_EXPORT").is_ok() {
+    // DM3_EXPORT=<n> supersamples by n, exactly as the panel does: the frame
+    // is rendered n times oversized and averaged down. The width and height
+    // asked for on the command line are the *finished* size.
+    if let Ok(mode) = std::env::var("DM3_EXPORT") {
+        let aa: u32 = mode.parse().unwrap_or(1).clamp(1, 8);
+        let (big_w, big_h) = (width * aa, height * aa);
+        // Rebuilt at the supersampled size, or the marcher would chase detail
+        // for a frame a fraction of the one it is drawing.
+        let uniforms = Uniforms::build(
+            &camera,
+            &params,
+            [big_w as f32, big_h as f32],
+            0.0,
+            !format.is_srgb(),
+            [0.0, 0.0],
+        );
         let slot = three_dm::render::ExportSlot::default();
         assert!(
-            pipeline.export_frame(&device, &queue, key, [width, height], &uniforms, &slot),
+            pipeline.export_frame(&device, &queue, key, [big_w, big_h], &uniforms, &slot),
             "export_frame refused the request"
         );
         // The app services this from its per-frame maintenance; here there is
@@ -391,8 +406,10 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
                 break;
             }
         }
-        let (w, h, mut rgba) = pixels.expect("the export never landed");
-        assert_eq!((w, h), (width, height), "export came back the wrong size");
+        let (w, h, rgba) = pixels.expect("the export never landed");
+        assert_eq!((w, h), (big_w, big_h), "export came back the wrong size");
+        let (w, h, mut rgba) = three_dm::params::downsample_srgb(&rgba, w, h, aa);
+        assert_eq!((w, h), (width, height), "downsample landed on the wrong size");
         for pixel in rgba.chunks_exact_mut(4) {
             pixel[3] = 255;
         }

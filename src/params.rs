@@ -572,12 +572,20 @@ pub struct Export {
     pub format: ImageFormat,
     pub width: u32,
     pub height: u32,
+    /// Render this many times over in each direction and average the result
+    /// down. 1 is off.
+    ///
+    /// Supersampling rather than any cleverer scheme: a fractal's edge is not
+    /// a polygon edge with a known normal, it is wherever the marcher stopped,
+    /// so there is nothing to reconstruct from — the only honest fix is more
+    /// rays. It is quadratic in cost and worth it on a still, which is the one
+    /// place the time is not being paid every frame.
+    pub antialias: u32,
 }
 
-/// Beyond this an export is likely to exceed what the GPU will allocate for a
-/// single texture, and the failure arrives as a device loss rather than an
-/// error worth reporting.
-pub const MAX_EXPORT_PIXELS: u32 = 16384;
+/// The largest anti-aliasing factor offered. Beyond four the gain is invisible
+/// and the render is sixteen times the work already.
+pub const MAX_ANTIALIAS: u32 = 4;
 
 impl Default for Export {
     fn default() -> Self {
@@ -586,6 +594,7 @@ impl Default for Export {
             format: ImageFormat::default(),
             width: 1920,
             height: 1080,
+            antialias: 2,
         }
     }
 }
@@ -606,6 +615,89 @@ impl Export {
         }
         format!("{stem}.{}", self.format.extension())
     }
+
+    /// The anti-aliasing factor that actually fits, given what the GPU will
+    /// allocate for one texture.
+    ///
+    /// Asking for more than the device allows is not a warning the user can
+    /// act on mid-render — it is a device error that takes the app with it —
+    /// so the factor is reduced until the supersampled frame fits.
+    pub fn effective_antialias(&self, max_dimension: u32) -> u32 {
+        let longest = self.width.max(self.height).max(1);
+        let fits = (max_dimension / longest).max(1);
+        self.antialias.clamp(1, MAX_ANTIALIAS).min(fits)
+    }
+
+    /// The size actually rendered before the average-down.
+    pub fn render_size(&self, max_dimension: u32) -> [u32; 2] {
+        let n = self.effective_antialias(max_dimension);
+        [
+            (self.width * n).min(max_dimension),
+            (self.height * n).min(max_dimension),
+        ]
+    }
+}
+
+/// Averages an `n` x `n` block of pixels down to one, in linear light.
+///
+/// Averaging the stored bytes directly would be wrong: they are sRGB-encoded,
+/// and the mean of two encoded values is not the encoding of their mean. On a
+/// fractal — bright filigree against a near-black sky, which is most of every
+/// edge in the picture — that error shows up as edges that read too dark.
+pub fn downsample_srgb(src: &[u8], width: u32, height: u32, n: u32) -> (u32, u32, Vec<u8>) {
+    if n <= 1 {
+        return (width, height, src.to_vec());
+    }
+    let (out_w, out_h) = (width / n, height / n);
+    let to_linear = srgb_decode_table();
+    let mut out = Vec::with_capacity((out_w * out_h * 4) as usize);
+    let samples = (n * n) as f32;
+
+    for y in 0..out_h {
+        for x in 0..out_w {
+            let mut acc = [0.0f32; 4];
+            for dy in 0..n {
+                let row = ((y * n + dy) * width) as usize;
+                for dx in 0..n {
+                    let at = (row + (x * n + dx) as usize) * 4;
+                    for (channel, sum) in acc.iter_mut().take(3).enumerate() {
+                        *sum += to_linear[src[at + channel] as usize];
+                    }
+                    acc[3] += src[at + 3] as f32;
+                }
+            }
+            for sum in acc.iter().take(3) {
+                out.push(srgb_encode(sum / samples));
+            }
+            // Alpha carries the circle of confusion, not opacity, and is
+            // never display-encoded — so it averages as it stands.
+            out.push((acc[3] / samples).round().clamp(0.0, 255.0) as u8);
+        }
+    }
+    (out_w, out_h, out)
+}
+
+/// sRGB byte -> linear, for all 256 values. Cheaper than a `powf` per channel
+/// per sample, and at 4x that is sixteen of them per output pixel.
+fn srgb_decode_table() -> [f32; 256] {
+    std::array::from_fn(|i| {
+        let v = i as f32 / 255.0;
+        if v <= 0.04045 {
+            v / 12.92
+        } else {
+            ((v + 0.055) / 1.055).powf(2.4)
+        }
+    })
+}
+
+fn srgb_encode(v: f32) -> u8 {
+    let v = v.clamp(0.0, 1.0);
+    let encoded = if v <= 0.0031308 {
+        v * 12.92
+    } else {
+        1.055 * v.powf(1.0 / 2.4) - 0.055
+    };
+    (encoded * 255.0).round().clamp(0.0, 255.0) as u8
 }
 
 /// Mandelbulber's Rendering engine panel: how hard the marcher works and what
@@ -914,6 +1006,74 @@ mod export_tests {
     #[test]
     fn an_empty_name_still_produces_a_file() {
         assert_eq!(named("   ", ImageFormat::Png), "3dm.png");
+    }
+
+    fn sized(width: u32, height: u32, antialias: u32) -> Export {
+        Export {
+            width,
+            height,
+            antialias,
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn antialiasing_is_reduced_until_the_oversized_frame_fits() {
+        // 2000 x 4 would be 8000, which fits in 8192; x8 would not.
+        assert_eq!(sized(2000, 1000, 4).effective_antialias(8192), 4);
+        assert_eq!(sized(4000, 1000, 4).effective_antialias(8192), 2);
+        // Already at the limit: there is no room to supersample at all, and
+        // reporting 1 is what keeps the export from becoming a device error.
+        assert_eq!(sized(8192, 8192, 4).effective_antialias(8192), 1);
+    }
+
+    #[test]
+    fn the_rendered_size_is_the_finished_size_times_the_factor() {
+        assert_eq!(sized(1920, 1080, 2).render_size(8192), [3840, 2160]);
+        // Reduced to 2x, not 4x, so this is 1920x1080 doubled.
+        assert_eq!(sized(1920, 1080, 4).render_size(8192), [7680, 4320]);
+        assert_eq!(sized(1920, 1080, 1).render_size(8192), [1920, 1080]);
+    }
+
+    #[test]
+    fn one_times_is_a_byte_for_byte_passthrough() {
+        let src: Vec<u8> = (0..64).collect();
+        let (w, h, out) = downsample_srgb(&src, 4, 4, 1);
+        assert_eq!((w, h), (4, 4));
+        assert_eq!(out, src);
+    }
+
+    /// The whole reason the average is done in linear light. Half black and
+    /// half white is *not* sRGB 128 — mixing the stored bytes would give that,
+    /// and every antialiased edge in the picture would come out too dark.
+    #[test]
+    fn a_black_and_white_block_averages_to_linear_mid_grey() {
+        let b = [0u8, 0, 0, 255];
+        let w = [255u8, 255, 255, 255];
+        let mut src = Vec::new();
+        // One 2x2 block: two black, two white.
+        src.extend_from_slice(&b);
+        src.extend_from_slice(&w);
+        src.extend_from_slice(&w);
+        src.extend_from_slice(&b);
+
+        let (width, height, out) = downsample_srgb(&src, 2, 2, 2);
+        assert_eq!((width, height), (1, 1));
+        assert_eq!(out[0], 188, "linear mid-grey encodes to 188, not 128");
+        assert_eq!(out[3], 255, "alpha is not display-encoded and averages flat");
+    }
+
+    #[test]
+    fn a_uniform_block_survives_the_round_trip_unchanged() {
+        // Any constant colour must come back as itself: decode, average,
+        // re-encode has to be the identity or every flat area shifts.
+        for value in [0u8, 1, 17, 128, 200, 254, 255] {
+            let src: Vec<u8> = std::iter::repeat_n([value, value, value, 255], 16)
+                .flatten()
+                .collect();
+            let (_, _, out) = downsample_srgb(&src, 4, 4, 4);
+            assert_eq!(out[0], value, "{value} did not survive the round trip");
+        }
     }
 }
 
