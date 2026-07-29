@@ -110,9 +110,6 @@ fn main() {
 
 fn print_decompiled(f: &extract::Formula) {
     println!("{} — {} bytes", f.name, f.code.len());
-    if exec::has_branches(&f.code) {
-        println!("  (has control flow; the executor handles straight-line code only)");
-    }
     let result = exec::run(&f.code);
     for (place, value) in exec::final_stores(&result.stores) {
         println!("  {place} = {}", expr::render(&value));
@@ -141,9 +138,6 @@ fn decompile_all(formulas: &[extract::Formula]) {
     let mut reasons: BTreeMap<String, usize> = BTreeMap::new();
 
     for f in formulas {
-        if exec::has_branches(&f.code) {
-            continue;
-        }
         straight += 1;
         let result = exec::run(&f.code);
         if let Some(reason) = &result.bailed {
@@ -159,7 +153,7 @@ fn decompile_all(formulas: &[extract::Formula]) {
         recovered += 1;
     }
 
-    println!("straight-line formulas:  {straight}");
+    println!("formulas attempted:      {straight}");
     println!("fully recovered:         {recovered}");
     println!("ran but assigned nothing:{empty}");
     println!("bailed:                  {}", straight - recovered - empty);

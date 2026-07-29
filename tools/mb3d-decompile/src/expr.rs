@@ -36,6 +36,46 @@ impl std::fmt::Display for Place {
     }
 }
 
+/// How two values were compared. x87 sets its flags so that the unsigned
+/// integer conditions read as the float ones, which is why `jb` means "less
+/// than" here and not "below".
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Cmp {
+    Lt,
+    Le,
+    Gt,
+    Ge,
+    Eq,
+    Ne,
+}
+
+impl Cmp {
+    pub fn symbol(self) -> &'static str {
+        match self {
+            Cmp::Lt => "<",
+            Cmp::Le => "<=",
+            Cmp::Gt => ">",
+            Cmp::Ge => ">=",
+            Cmp::Eq => "==",
+            Cmp::Ne => "!=",
+        }
+    }
+
+    /// The condition that holds when this one does not — needed because a
+    /// conditional jump names the branch that is *taken*, while the code that
+    /// follows it is the branch that is not.
+    pub fn negate(self) -> Self {
+        match self {
+            Cmp::Lt => Cmp::Ge,
+            Cmp::Le => Cmp::Gt,
+            Cmp::Gt => Cmp::Le,
+            Cmp::Ge => Cmp::Lt,
+            Cmp::Eq => Cmp::Ne,
+            Cmp::Ne => Cmp::Eq,
+        }
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Op {
     Add,
@@ -74,6 +114,10 @@ pub enum Expr {
     /// rest. Kept as a named call rather than being given a variant each,
     /// because what matters downstream is only that the name survives.
     Fun(&'static str, Vec<Rc<Expr>>),
+    /// A comparison, which is only ever the test of a `Select`.
+    Test(Cmp, Rc<Expr>, Rc<Expr>),
+    /// The value a place holds after two paths rejoin.
+    Select(Rc<Expr>, Rc<Expr>, Rc<Expr>),
 }
 
 pub type E = Rc<Expr>;
@@ -148,6 +192,22 @@ pub fn call(name: &'static str, args: Vec<E>) -> E {
     Rc::new(Expr::Fun(name, args))
 }
 
+pub fn test(cmp: Cmp, a: E, b: E) -> E {
+    Rc::new(Expr::Test(cmp, a, b))
+}
+
+/// `if cond then a else b`, collapsing the case where the two agree.
+///
+/// They agree more often than one might expect: a branch that only assigns to
+/// some places leaves the rest identical on both paths, and emitting a select
+/// over two copies of the same value would bury the real conditional in noise.
+pub fn select(cond: E, a: E, b: E) -> E {
+    if a == b {
+        return a;
+    }
+    Rc::new(Expr::Select(cond, a, b))
+}
+
 /// Renders `e` as arithmetic, parenthesised only where precedence needs it.
 pub fn render(e: &Expr) -> String {
     let mut out = String::new();
@@ -190,6 +250,19 @@ fn write_expr(out: &mut String, e: &Expr, parent: u8) {
                 write_expr(out, arg, 0);
             }
             let _ = write!(out, ")");
+        }
+        Expr::Test(cmp, a, b) => {
+            write_expr(out, a, 1);
+            let _ = write!(out, " {} ", cmp.symbol());
+            write_expr(out, b, 1);
+        }
+        Expr::Select(cond, a, b) => {
+            let _ = write!(out, "if ");
+            write_expr(out, cond, 0);
+            let _ = write!(out, " then ");
+            write_expr(out, a, 0);
+            let _ = write!(out, " else ");
+            write_expr(out, b, 0);
         }
         Expr::Bin(op, a, b) => {
             let precedence = op.precedence();

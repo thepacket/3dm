@@ -54,18 +54,23 @@ description.
 `--decompile` with no name reports coverage across the corpus.
 
 ```
-straight-line formulas:  173
-fully recovered:         156
-ran but assigned nothing:6
-bailed:                  11
+formulas attempted:      457
+fully recovered:         262
+ran but assigned nothing:7
+bailed:                  188
 ```
 
-Done: extraction, the ABI table, a corpus survey, annotated disassembly, and a
-symbolic x87 executor for straight-line code.
+Done: extraction, the ABI table, a corpus survey, annotated disassembly, a
+symbolic x87 executor, and control flow.
 
-Not done: control flow for the 282 formulas with branches, the SSE2 path, a
-handful of integer-load instructions (`fild`, `fimul`, `fistp`), and reading
-`.m3p` parameter files.
+Branches are followed on both sides and reconciled where they meet, so a
+conditional comes out as one. The corpus is forward-only — no formula loops
+inside itself, the iteration loop is outside — which makes that a recursive
+walk over nested intervals rather than general control-flow reconstruction.
+
+Not done: the SSE2 path (`Movupd` alone accounts for 82 of the failures), a
+handful of integer-load instructions, sixteen formulas that call out to
+something, thirteen with a backward jump, and reading `.m3p` parameter files.
 
 ## Why the parameter slots matter
 

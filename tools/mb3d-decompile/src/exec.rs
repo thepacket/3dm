@@ -36,23 +36,68 @@ pub struct Decompiled {
     pub bailed: Option<String>,
 }
 
-/// Runs `code` symbolically.
+/// Runs `code` symbolically, following both sides of any branch.
 pub fn run(code: &[u8]) -> Decompiled {
+    let program = Program::decode(code);
     let mut machine = Machine::default();
-    let mut decoder = Decoder::with_ip(32, code, 0, DecoderOptions::NONE);
-    let mut instruction = Instruction::default();
-
-    while decoder.can_decode() {
-        decoder.decode_out(&mut instruction);
-        if let Err(reason) = machine.step(&instruction) {
-            machine.bailed = Some(reason);
-            break;
-        }
+    let result = machine.run_range(&program, 0, program.instructions.len());
+    if let Err(reason) = result {
+        machine.bailed = Some(reason);
     }
     Decompiled {
         stores: machine.stores,
         bailed: machine.bailed,
     }
+}
+
+/// The decoded instructions, with the index of each one by address.
+struct Program {
+    instructions: Vec<Instruction>,
+    /// Instruction address to its position in the list. Jump targets are
+    /// addresses; everything else here works in positions.
+    index_of: HashMap<u64, usize>,
+}
+
+impl Program {
+    fn decode(code: &[u8]) -> Self {
+        let mut decoder = Decoder::with_ip(32, code, 0, DecoderOptions::NONE);
+        let mut instructions = Vec::new();
+        let mut index_of = HashMap::new();
+        let mut ins = Instruction::default();
+        while decoder.can_decode() {
+            decoder.decode_out(&mut ins);
+            index_of.insert(ins.ip(), instructions.len());
+            instructions.push(ins);
+        }
+        Self {
+            instructions,
+            index_of,
+        }
+    }
+
+    fn position(&self, address: u64) -> Option<usize> {
+        self.index_of.get(&address).copied()
+    }
+}
+
+/// The comparison a conditional jump tests, given the operands it was set up
+/// with. x87 arranges its flags so the unsigned integer conditions read as the
+/// float ones, which is why `jb` is "less than" rather than "below".
+fn jump_condition(mnemonic: Mnemonic) -> Option<expr::Cmp> {
+    use expr::Cmp;
+    Some(match mnemonic {
+        Mnemonic::Jb => Cmp::Lt,
+        Mnemonic::Jbe => Cmp::Le,
+        Mnemonic::Ja => Cmp::Gt,
+        Mnemonic::Jae => Cmp::Ge,
+        Mnemonic::Je => Cmp::Eq,
+        Mnemonic::Jne => Cmp::Ne,
+        Mnemonic::Jl => Cmp::Lt,
+        Mnemonic::Jle => Cmp::Le,
+        Mnemonic::Jg => Cmp::Gt,
+        Mnemonic::Jge => Cmp::Ge,
+        _ => return None,
+    })
 }
 
 #[derive(Default)]
@@ -62,10 +107,189 @@ struct Machine {
     /// What each general register points at.
     regs: HashMap<Register, Ptr>,
     stores: Vec<(Place, E)>,
+    /// The current value of every place stored so far. Loads deliberately do
+    /// *not* consult this — keeping the compiler's temporaries as names is
+    /// what makes the output readable. It exists only to answer "what does
+    /// this place hold?" when two paths rejoin and have to be reconciled.
+    env: HashMap<Place, E>,
+    /// The operands of the last comparison, waiting for the jump that reads
+    /// its flags. x87 compares and branches are several instructions apart,
+    /// with `fnstsw`/`sahf` shuttling the flags between them.
+    pending_cmp: Option<(E, E)>,
     bailed: Option<String>,
 }
 
 impl Machine {
+    /// Runs instructions `[from, to)`, splitting at any conditional jump and
+    /// reconciling the two sides where they meet again.
+    ///
+    /// The corpus is forward-only — no formula loops inside itself, the
+    /// iteration loop is outside — so a branch always rejoins at an address
+    /// ahead of it, and the join is simply the earlier of the two paths'
+    /// destinations. That makes the whole thing a recursive walk over nested
+    /// intervals rather than a general control-flow reconstruction.
+    fn run_range(&mut self, program: &Program, from: usize, to: usize) -> Result<(), String> {
+        let mut at = from;
+        while at < to {
+            let ins = program.instructions[at];
+
+            if ins.is_jmp_short_or_near() {
+                // An unconditional jump forward is the tail of a `then` arm
+                // skipping over the `else`; the caller has already accounted
+                // for where it lands.
+                let target = program
+                    .position(ins.near_branch_target())
+                    .ok_or("jump outside the blob")?;
+                if target <= at {
+                    return Err(format!("backward jump at {:04x}", ins.ip()));
+                }
+                at = target;
+                continue;
+            }
+
+            if ins.is_jcc_short_or_near() {
+                at = self.branch(program, at, to)?;
+                continue;
+            }
+
+            self.step(&ins)
+                .map_err(|e| format!("{e} [{:?} at {:04x}]", ins.mnemonic(), ins.ip()))?;
+            at += 1;
+        }
+        Ok(())
+    }
+
+    /// Handles one conditional jump, returning where execution continues.
+    fn branch(
+        &mut self,
+        program: &Program,
+        at: usize,
+        limit: usize,
+    ) -> Result<usize, String> {
+        let ins = program.instructions[at];
+        let cmp = jump_condition(ins.mnemonic())
+            .ok_or_else(|| format!("{:?} at {:04x}", ins.mnemonic(), ins.ip()))?;
+        let (left, right) = self
+            .pending_cmp
+            .clone()
+            .ok_or_else(|| format!("jump with no comparison at {:04x}", ins.ip()))?;
+
+        let taken = program
+            .position(ins.near_branch_target())
+            .ok_or("branch outside the blob")?;
+        let fallthrough = at + 1;
+        if taken <= at {
+            return Err(format!("backward branch at {:04x}", ins.ip()));
+        }
+
+        // The jump's condition describes the *taken* path, and the code
+        // immediately after it is the path not taken — so the condition under
+        // which the fallthrough runs is the negation. Getting this the wrong
+        // way round swaps the arms of every conditional in the corpus and
+        // still produces arithmetic that looks entirely reasonable.
+        let condition = expr::test(cmp.negate(), left, right);
+
+        // Where the two rejoin. The taken side starts later, so it is the
+        // first candidate; if the fallthrough jumps somewhere further on, that
+        // is the real join instead.
+        let join = self.find_join(program, fallthrough, taken, limit)?;
+
+        let mut then_branch = self.fork();
+        then_branch.run_range(program, fallthrough, join.min(taken))?;
+        let mut else_branch = self.fork();
+        else_branch.run_range(program, taken, join)?;
+
+        self.merge(&condition, then_branch, else_branch)?;
+        Ok(join)
+    }
+
+    /// Where the two sides of a branch meet again.
+    fn find_join(
+        &self,
+        program: &Program,
+        fallthrough: usize,
+        taken: usize,
+        limit: usize,
+    ) -> Result<usize, String> {
+        // An `if` with no `else` falls straight into the taken target.
+        // An `if/else` ends its first arm with a jump past the second.
+        for at in fallthrough..taken.min(limit) {
+            let ins = program.instructions[at];
+            if ins.is_jmp_short_or_near() {
+                let target = program
+                    .position(ins.near_branch_target())
+                    .ok_or("jump outside the blob")?;
+                if target > taken {
+                    return Ok(target.min(limit));
+                }
+            }
+        }
+        Ok(taken.min(limit))
+    }
+
+    /// A copy of this machine's state, with the stores cleared.
+    ///
+    /// A branch's own stores are not emitted: only the values that survive to
+    /// the join are, as one merged assignment each. Emitting both arms' stores
+    /// unconditionally would state that things happened which happen only
+    /// sometimes.
+    fn fork(&self) -> Machine {
+        Machine {
+            fpu: self.fpu.clone(),
+            regs: self.regs.clone(),
+            env: self.env.clone(),
+            stores: Vec::new(),
+            pending_cmp: None,
+            bailed: None,
+        }
+    }
+
+    /// Reconciles two paths, emitting a `select` for everything they disagree
+    /// about and nothing for what they do not.
+    fn merge(
+        &mut self,
+        condition: &E,
+        then_branch: Machine,
+        else_branch: Machine,
+    ) -> Result<(), String> {
+        if then_branch.fpu.len() != else_branch.fpu.len() {
+            return Err("branches left the x87 stack at different depths".to_owned());
+        }
+        self.fpu = then_branch
+            .fpu
+            .iter()
+            .zip(else_branch.fpu.iter())
+            .map(|(a, b)| expr::select(condition.clone(), a.clone(), b.clone()))
+            .collect();
+
+        // Every place either side wrote, in the order the `then` arm reached
+        // them so the output keeps a sensible reading order.
+        let mut places: Vec<Place> = then_branch.stores.iter().map(|(p, _)| p.clone()).collect();
+        for (place, _) in &else_branch.stores {
+            if !places.contains(place) {
+                places.push(place.clone());
+            }
+        }
+        places.dedup();
+
+        for place in places {
+            let before = || {
+                self.env
+                    .get(&place)
+                    .cloned()
+                    .unwrap_or_else(|| expr::load(place.clone()))
+            };
+            let taken_value = then_branch.env.get(&place).cloned().unwrap_or_else(before);
+            let other_value = else_branch.env.get(&place).cloned().unwrap_or_else(before);
+            let merged = expr::select(condition.clone(), taken_value, other_value);
+            self.env.insert(place.clone(), merged.clone());
+            self.stores.push((place, merged));
+        }
+        self.regs = then_branch.regs;
+        self.pending_cmp = None;
+        Ok(())
+    }
+
     fn step(&mut self, ins: &Instruction) -> Result<(), String> {
         use Mnemonic::*;
 
@@ -83,6 +307,18 @@ impl Machine {
             // them, and a `jcc` acts on them. Refused as a unit below, so
             // these are only reached when nothing branches on them.
             Fnstsw | Sahf | Wait | Fclex | Fninit | Fldcw | Fnstcw => Ok(()),
+            // The compare itself. Its result lives in the FPU status word
+            // until an `fnstsw`/`sahf` pair moves it into the integer flags,
+            // so the operands are held here until a jump asks for them.
+            Fcom | Fcomp | Fcomi | Fcomip | Fucom | Fucomp | Fucomi | Fucomip => {
+                self.compare(ins, false)
+            }
+            Fcompp | Fucompp => self.compare(ins, true),
+            Ftst => {
+                let top = self.st(0)?;
+                self.pending_cmp = Some((top, expr::num(0.0)));
+                Ok(())
+            }
             Mov => self.mov(ins),
             Add => self.add_reg(ins),
             Fld => self.fld(ins),
@@ -114,8 +350,9 @@ impl Machine {
             // the formula's value depends on — except when it moves a pointer
             // this model is tracking, which `sub` is checked for.
             Sub => self.sub_reg(ins),
-            And | Or | Xor | Test | Cmp | Inc | Dec | Lea | Shl | Shr | Neg | Not | Movsx
-            | Movzx | Cdq | Xchg => Ok(()),
+            Cmp => self.compare_int(ins),
+            And | Or | Xor | Test | Inc | Dec | Lea | Shl | Shr | Neg | Not | Movsx | Movzx
+            | Cdq | Xchg => Ok(()),
             Fnop => Ok(()),
             // Transcendentals. Named rather than expanded: what matters is
             // that the operation survives into the output intact.
@@ -208,6 +445,54 @@ impl Machine {
         self.set_st(0, f(top, next))
     }
 
+    /// Records the operands of an x87 comparison for the jump that follows.
+    fn compare(&mut self, ins: &Instruction, pop_two: bool) -> Result<(), String> {
+        let left = self.st(0)?;
+        let right = match ins.op0_kind() {
+            OpKind::Memory => expr::load(self.place(ins)?),
+            // A compare naming `st0` is the implicit form: `fcom` with no
+            // operand decodes that way, and comparing the top of the stack
+            // with itself would say nothing. The real operand is `st1`.
+            OpKind::Register if is_st(ins.op0_register()) => {
+                let i = st_index(ins.op0_register())?;
+                self.st(if i == 0 { 1 } else { i })?
+            }
+            // `fcompp` and friends carry no explicit operand either.
+            _ => self.st(1)?,
+        };
+        self.pending_cmp = Some((left, right));
+        if matches!(ins.mnemonic(), Mnemonic::Fcomp | Mnemonic::Fucomp)
+            || ins.mnemonic() == Mnemonic::Fcomip
+            || ins.mnemonic() == Mnemonic::Fucomip
+        {
+            self.pop()?;
+        }
+        if pop_two {
+            self.pop()?;
+            self.pop()?;
+        }
+        Ok(())
+    }
+
+    /// The same for an integer compare, which is how the first-iteration
+    /// guard is written: `cmp dword [rec+bFirstIt], 0`.
+    fn compare_int(&mut self, ins: &Instruction) -> Result<(), String> {
+        let left = match ins.op0_kind() {
+            OpKind::Memory => expr::load(self.place(ins)?),
+            OpKind::Register => expr::load(Place::Unknown(format!("{:?}", ins.op0_register()))),
+            _ => return Ok(()),
+        };
+        let right = match ins.op1_kind() {
+            OpKind::Immediate8 | OpKind::Immediate8to32 | OpKind::Immediate32 => {
+                expr::num(ins.immediate32() as i32 as f64)
+            }
+            OpKind::Memory => expr::load(self.place(ins)?),
+            _ => return Ok(()),
+        };
+        self.pending_cmp = Some((left, right));
+        Ok(())
+    }
+
     /// `sub reg,imm` on a tracked pointer moves it, as `add` does.
     fn sub_reg(&mut self, ins: &Instruction) -> Result<(), String> {
         if ins.op0_kind() == OpKind::Register && ins.op1_kind() == OpKind::Immediate32 {
@@ -290,6 +575,7 @@ impl Machine {
         match ins.op0_kind() {
             OpKind::Memory => {
                 let place = self.place(ins)?;
+                self.env.insert(place.clone(), value.clone());
                 self.stores.push((place, value));
             }
             OpKind::Register => {
@@ -356,6 +642,9 @@ impl Machine {
         // st1, which is what the `p` forms use.
         let target = match ins.op_count() {
             0 => 1,
+            // Some encodings report operands that are not x87 registers; the
+            // implicit `st1, st0` form is what they mean.
+            _ if !is_st(ins.op0_register()) => 1,
             _ => {
                 let first = st_index(ins.op0_register())?;
                 // `fadd st0, st(i)` targets st0; `faddp st(i), st0` targets
@@ -365,6 +654,7 @@ impl Machine {
         };
         let other = match ins.op_count() {
             0 | 1 => 0,
+            _ if !is_st(ins.op1_register()) => 0,
             _ => st_index(ins.op1_register())?,
         };
 
@@ -434,6 +724,21 @@ impl Machine {
             Ptr::Unknown => Place::Unknown(format!("{:04x}", ins.ip())),
         })
     }
+}
+
+/// Whether a register is one of the x87 stack slots.
+fn is_st(reg: Register) -> bool {
+    matches!(
+        reg,
+        Register::ST0
+            | Register::ST1
+            | Register::ST2
+            | Register::ST3
+            | Register::ST4
+            | Register::ST5
+            | Register::ST6
+            | Register::ST7
+    )
 }
 
 fn st_index(reg: Register) -> Result<usize, String> {

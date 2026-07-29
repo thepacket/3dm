@@ -134,3 +134,51 @@ fn boxscale_occupies_two_slots() {
     assert_eq!(names[4], "Scale vary");
     assert_eq!(names[5], "FoldXMod");
 }
+
+/// A branching formula, checked against its description. Two things here are
+/// silent when wrong and would look perfectly reasonable: which arm of a
+/// conditional is which, and which two values a comparison is between.
+///
+/// Its description gives
+///
+/// ```text
+/// Scale = Scale + Scale_vary*(abs(Scale)-1)
+/// x = Fold-abs(abs(x+FoldXM)-Fold)-abs(FoldXM)
+/// if rr < sqr(Min_R) then m = Scale/sqr(Min_R) else
+/// if rr < 1 then m = Scale/rr else m = Scale
+/// ```
+///
+/// `Boxscale` occupies two slots because MB3D precomputes the pair the branch
+/// needs: `p1` is `Scale/sqr(Min_R)` and `p2` is `sqr(Min_R)`. That is why the
+/// recovered test reads `< p2` and its arm is the bare `p1`.
+#[test]
+fn aboxmod1_recovers_its_folds_and_its_conditional() {
+    let lines = decompile("ABoxMod1");
+    let joined = lines.join("\n");
+
+    // The first-iteration guard: initialise the running scale, or keep it.
+    assert_eq!(lines[0], "VaryScale = if bFirstIt <= 0 then p0 else VaryScale");
+    // Scale = Scale + Scale_vary*(abs(Scale)-1), with p4 = "Scale vary".
+    assert_eq!(lines[1], "VaryScale = VaryScale + (abs(VaryScale) - 1) * p4");
+
+    // Fold - abs(abs(x + FoldXMod) - Fold) - abs(FoldXMod), with p3 = Fold
+    // and p5 = FoldXMod, as the slot table says.
+    assert!(
+        joined.contains("-abs(abs(x + p5) - p3) + p3 + -abs(p5)"),
+        "the x fold should match the description"
+    );
+    assert!(joined.contains("-abs(abs(y + p6) - p3) + p3 + -abs(p6)"));
+    assert!(joined.contains("-abs(abs(z + p7) - p3) + p3 + -abs(p7)"));
+
+    // The outer test is against sqr(Min_R), and taking it yields the
+    // precomputed Scale/sqr(Min_R) rather than a division.
+    assert!(joined.contains("< p2 then p1 else"), "outer conditional");
+    // The inner one compares against 1 and divides. `1 >= rr` is the
+    // description's `rr < 1`: they differ only at exactly 1, where
+    // Scale/1 is Scale either way.
+    assert!(
+        joined.contains("if 1 >= ("),
+        "inner conditional should compare against 1, not against itself"
+    );
+    assert!(joined.contains("VaryScale / ("), "inner arm divides by rr");
+}
