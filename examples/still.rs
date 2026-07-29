@@ -190,6 +190,15 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
             params.picture.blur_opacity = n[3];
         }
     }
+    // "visibility,iterfog" — the two volumetric terms, so they can be checked
+    // without a window.
+    if let Ok(v) = std::env::var("DM3_VOLUME") {
+        let n: Vec<f32> = v.split(',').filter_map(|x| x.trim().parse().ok()).collect();
+        if n.len() == 2 {
+            params.shading.fog_visibility = n[0];
+            params.shading.iter_fog = n[1];
+        }
+    }
     let mut camera = Camera::default();
     camera.frame(params.fractal.bounding_radius);
     // DM3_PAN="dx,dy" moves the orbit target across the view, the way dragging

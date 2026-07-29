@@ -131,6 +131,23 @@ pub struct ShadingParams {
     pub background: [f32; 3],
     /// Distance fade toward the background colour.
     pub fog: f32,
+    /// Distance over which basic fog closes in. Zero turns it off.
+    pub fog_visibility: f32,
+    /// Colour of that fog. Separate from the background, so haze can sit in
+    /// front of a dark sky.
+    pub fog_color: [f32; 3],
+    /// The glow runs between these two as the ray grazes closer.
+    pub glow_near: [f32; 3],
+    pub glow_far: [f32; 3],
+    /// Fog laid on by how many iterations a point survived — the shape's own
+    /// structure rather than its distance, which is what makes it read as
+    /// depth inside a fractal rather than across a room.
+    pub iter_fog: f32,
+    /// Iteration fractions between which the fog ramps up.
+    pub iter_fog_low: f32,
+    pub iter_fog_high: f32,
+    pub iter_fog_near: [f32; 3],
+    pub iter_fog_far: [f32; 3],
 }
 
 impl Default for ShadingParams {
@@ -153,6 +170,18 @@ impl Default for ShadingParams {
             palette_freq: 1.0,
             background: [0.004, 0.006, 0.011],
             fog: 0.10,
+            fog_visibility: 0.0,
+            fog_color: [0.55, 0.62, 0.75],
+            // What the old `palette(0.35)` evaluated to. The glow used to be
+            // tinted by the palette at a fixed point; making it two explicit
+            // colours must not change how the default scene looks.
+            glow_near: [0.2354, 0.0612, 0.0395],
+            glow_far: [0.2354, 0.0612, 0.0395],
+            iter_fog: 0.0,
+            iter_fog_low: 0.15,
+            iter_fog_high: 0.9,
+            iter_fog_near: [0.30, 0.55, 0.95],
+            iter_fog_far: [1.0, 1.0, 1.0],
         }
     }
 }

@@ -150,6 +150,16 @@ pub struct Uniforms {
     ao_tint: [f32; 4],
     /// x = focus distance, y = aperture, z = max blur, w = blur opacity.
     dof: [f32; 4],
+    /// rgb = fog colour, w = visibility distance.
+    fog: [f32; 4],
+    /// rgb = near glow colour, w = glow intensity.
+    glow_a: [f32; 4],
+    /// rgb = far glow colour, w = iteration-fog strength.
+    glow_b: [f32; 4],
+    /// rgb = iteration fog near colour, w = low trim.
+    iter_fog_a: [f32; 4],
+    /// rgb = iteration fog far colour, w = high trim.
+    iter_fog_b: [f32; 4],
     // Field order from here down must match `fractal.wgsl` exactly. It is a
     // flat block of bytes with no names attached, so inserting a field on one
     // side and not the other silently shifts every offset past it — which
@@ -277,6 +287,21 @@ impl Uniforms {
                 pic.aperture,
                 pic.max_blur,
                 pic.blur_opacity,
+            ],
+            fog: [s.fog_color[0], s.fog_color[1], s.fog_color[2], s.fog_visibility],
+            glow_a: [s.glow_near[0], s.glow_near[1], s.glow_near[2], s.glow],
+            glow_b: [s.glow_far[0], s.glow_far[1], s.glow_far[2], s.iter_fog],
+            iter_fog_a: [
+                s.iter_fog_near[0],
+                s.iter_fog_near[1],
+                s.iter_fog_near[2],
+                s.iter_fog_low,
+            ],
+            iter_fog_b: [
+                s.iter_fog_far[0],
+                s.iter_fog_far[1],
+                s.iter_fog_far[2],
+                s.iter_fog_high.max(s.iter_fog_low + 1e-3),
             ],
             surface: [
                 mat.single_color[0],

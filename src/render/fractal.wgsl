@@ -39,6 +39,16 @@ struct Uniforms {
     ao_tint: vec4<f32>,
     // x = focus distance, y = aperture, z = max blur, w = blur opacity
     dof: vec4<f32>,
+    // rgb = fog colour, w = visibility distance
+    fog: vec4<f32>,
+    // rgb = near glow colour, w = glow intensity
+    glow_a: vec4<f32>,
+    // rgb = far glow colour, w = iteration-fog strength
+    glow_b: vec4<f32>,
+    // rgb = iteration fog near colour, w = low trim
+    iter_fog_a: vec4<f32>,
+    // rgb = iteration fog far colour, w = high trim
+    iter_fog_b: vec4<f32>,
     // rgb = flat surface colour, w = shading strength
     surface: vec4<f32>,
     // rgb = specular colour, w = brightness
@@ -499,6 +509,18 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
             color = mix(color, reflected * dm3_u.reflection.rgb, dm3_u.reflection.w);
         }
 
+        // Fog laid on by iteration count rather than by distance: a point that
+        // survived more iterations is deeper inside the structure, which is
+        // what gives a fractal its sense of interior depth. `escape` is that
+        // count as a fraction of the budget, already computed by the marcher.
+        if (dm3_u.glow_b.w > 0.001) {
+            let low = dm3_u.iter_fog_a.w;
+            let high = dm3_u.iter_fog_b.w;
+            let f = clamp((field.escape - low) / max(high - low, 1e-4), 0.0, 1.0);
+            let tint = mix(dm3_u.iter_fog_a.rgb, dm3_u.iter_fog_b.rgb, f);
+            color = mix(color, tint, f * dm3_u.glow_b.w);
+        }
+
         // Fog toward the background, by depth into the bounding volume.
         let depth = clamp((t - entry_t) / (2.0 * bounds), 0.0, 1.0);
         color = mix(color, dm3_u.bg.rgb, 1.0 - exp(-dm3_u.bg.w * depth * 3.0));
@@ -509,8 +531,20 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
         color = dm3_u.bg.rgb;
     }
 
-    // Glow applies to hit and miss alike — it is what makes the silhouette wisp.
-    color = color + palette(0.35) * struggle * struggle * dm3_u.shade.w;
+    // Basic fog: haze closing in over a visibility distance, with its own
+    // colour so it can sit in front of a dark sky rather than dissolving into
+    // it. Measured from where the ray entered the bounding volume, so it
+    // describes depth into the scene rather than distance from the camera.
+    if (dm3_u.fog.w > 0.0001) {
+        let travelled = max(t - entry_t, 0.0);
+        color = mix(color, dm3_u.fog.rgb, 1.0 - exp(-travelled / dm3_u.fog.w));
+    }
+
+    // Glow applies to hit and miss alike — it is what makes the silhouette
+    // wisp. It runs between two colours as the ray grazes closer, which is
+    // what turns a flat halo into something with a hot core.
+    let glow_tint = mix(dm3_u.glow_b.rgb, dm3_u.glow_a.rgb, struggle);
+    color = color + glow_tint * struggle * struggle * dm3_u.glow_a.w;
 
     // Reinhard-ish tonemap keeps the specular from clipping to flat white.
     // Skipped in HDR, where the point is to let highlights run past it.

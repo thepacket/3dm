@@ -392,6 +392,11 @@ impl App {
                     );
                     ui.add(egui::Slider::new(&mut s.specular, 0.0..=2.0).text("specular"));
                     ui.add(egui::Slider::new(&mut s.glow, 0.0..=1.5).text("glow"));
+                    ui.horizontal(|ui| {
+                        ui.color_edit_button_rgb(&mut s.glow_near);
+                        ui.color_edit_button_rgb(&mut s.glow_far);
+                        ui.label("glow core / edge");
+                    });
                 });
 
             egui::CollapsingHeader::new("Material editor")
@@ -450,6 +455,44 @@ impl App {
                     ui.add(egui::Slider::new(&mut p.blur_opacity, 0.0..=1.0).text("blur opacity"));
 
                     ui.add_space(6.0);
+                    let s = &mut params.shading;
+                    ui.label(egui::RichText::new("Volumetric").strong());
+                    ui.add(
+                        egui::DragValue::new(&mut s.fog_visibility)
+                            .speed(0.05)
+                            .range(0.0..=200.0)
+                            .prefix("fog visibility: "),
+                    )
+                    .on_hover_text(
+                        "Distance over which haze closes in, measured into the \
+                         scene rather than from the camera. Zero turns it off.",
+                    );
+                    ui.horizontal(|ui| {
+                        ui.color_edit_button_rgb(&mut s.fog_color);
+                        ui.label("fog colour");
+                    });
+
+                    ui.add(egui::Slider::new(&mut s.iter_fog, 0.0..=1.0).text("iteration fog"))
+                        .on_hover_text(
+                            "Fog by how many iterations a point survived rather \
+                             than by how far away it is — the shape's own \
+                             structure, which is what reads as interior depth.",
+                        );
+                    if s.iter_fog > 0.0 {
+                        ui.add(
+                            egui::Slider::new(&mut s.iter_fog_low, 0.0..=1.0).text("low trim"),
+                        );
+                        ui.add(
+                            egui::Slider::new(&mut s.iter_fog_high, 0.0..=1.0).text("high trim"),
+                        );
+                        ui.horizontal(|ui| {
+                            ui.color_edit_button_rgb(&mut s.iter_fog_near);
+                            ui.color_edit_button_rgb(&mut s.iter_fog_far);
+                            ui.label("shallow / deep");
+                        });
+                    }
+
+                    ui.add_space(6.0);
                     ui.label(egui::RichText::new("Post effects").strong());
                     ui.add(
                         egui::Slider::new(
@@ -460,6 +503,11 @@ impl App {
                     )
                     .on_hover_text("Spreads the channels radially, as a lens does.");
                     ui.add(egui::Slider::new(&mut s.glow, 0.0..=1.5).text("glow"));
+                    ui.horizontal(|ui| {
+                        ui.color_edit_button_rgb(&mut s.glow_near);
+                        ui.color_edit_button_rgb(&mut s.glow_far);
+                        ui.label("glow core / edge");
+                    });
                 });
 
             egui::CollapsingHeader::new("Image adjustments")
