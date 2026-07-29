@@ -241,6 +241,9 @@ fn emit(
          //! (<https://github.com/buddhi1980/mandelbulber2>, © Mandelbulber Team,\n\
          //! GPL-3.0). 3DM is GPL-3.0-or-later as a result.\n\n\
          use super::{DeFunction, Derivation, DeriveOp, GeneratedFormula, GeneratedParam, ParamKind};\n\n\
+         // A default that happens to equal a mathematical constant is data\n\
+         // from a formula file, not an approximation anyone wrote.\n\
+         #[allow(clippy::approx_constant, clippy::excessive_precision)]\n\
          pub static GENERATED: &[GeneratedFormula] = &[\n",
     );
 

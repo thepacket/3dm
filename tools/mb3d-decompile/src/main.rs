@@ -690,7 +690,8 @@ fn generate_file(formulas: &[extract::Formula], out: &std::path::Path) {
         text.push_str("        params: &[\n");
         for (i, (name, default)) in slots.iter().enumerate() {
             text.push_str(&format!(
-                "            GeneratedParam {{ path: {name:?}, kind: ParamKind::Float, offset: {i}, default: &[{default:?}] }},\n"
+                "            GeneratedParam {{ path: {name:?}, kind: ParamKind::Float, offset: {i}, default: &[{:?}] }},\n",
+                *default as f32
             ));
         }
         text.push_str("        ],\n        derivations: &[],\n");

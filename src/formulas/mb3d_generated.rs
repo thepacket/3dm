@@ -667,7 +667,7 @@
         params: &[
             GeneratedParam { path: "Y multiplier", kind: ParamKind::Float, offset: 0, default: &[1.0] },
             GeneratedParam { path: "Z multiplier", kind: ParamKind::Float, offset: 1, default: &[0.5] },
-            GeneratedParam { path: "Squares multiplier", kind: ParamKind::Float, offset: 2, default: &[-0.3333333333333333] },
+            GeneratedParam { path: "Squares multiplier", kind: ParamKind::Float, offset: 2, default: &[-0.33333334] },
             GeneratedParam { path: "Twist", kind: ParamKind::Float, offset: 3, default: &[0.0] },
         ],
         derivations: &[],
@@ -912,8 +912,8 @@
         add_c: false,
         bailout: 1024.0,
         params: &[
-            GeneratedParam { path: "Alpha 1", kind: ParamKind::Float, offset: 0, default: &[0.41421356] },
-            GeneratedParam { path: "Alpha 2", kind: ParamKind::Float, offset: 1, default: &[0.41421356] },
+            GeneratedParam { path: "Alpha 1", kind: ParamKind::Float, offset: 0, default: &[0.41421357] },
+            GeneratedParam { path: "Alpha 2", kind: ParamKind::Float, offset: 1, default: &[0.41421357] },
             GeneratedParam { path: "Cx1", kind: ParamKind::Float, offset: 2, default: &[0.0] },
             GeneratedParam { path: "Cy1", kind: ParamKind::Float, offset: 3, default: &[1.0] },
             GeneratedParam { path: "Cz1", kind: ParamKind::Float, offset: 4, default: &[1.0] },
@@ -949,7 +949,7 @@
         bailout: 2.0,
         params: &[
             GeneratedParam { path: "Scale", kind: ParamKind::Float, offset: 0, default: &[1.0] },
-            GeneratedParam { path: "Fix", kind: ParamKind::Float, offset: 1, default: &[1e-60] },
+            GeneratedParam { path: "Fix", kind: ParamKind::Float, offset: 1, default: &[0.0] },
         ],
         derivations: &[],
         wgsl: r####"
@@ -1021,7 +1021,7 @@
         params: &[
             GeneratedParam { path: "Power", kind: ParamKind::Float, offset: 0, default: &[2.0] },
             GeneratedParam { path: "Axiom 1", kind: ParamKind::Float, offset: 1, default: &[1.5707963] },
-            GeneratedParam { path: "Axiom 2", kind: ParamKind::Float, offset: 2, default: &[0.78539816] },
+            GeneratedParam { path: "Axiom 2", kind: ParamKind::Float, offset: 2, default: &[0.7853982] },
             GeneratedParam { path: "CosShift", kind: ParamKind::Float, offset: 3, default: &[0.0] },
             GeneratedParam { path: "CxM", kind: ParamKind::Float, offset: 4, default: &[1.0] },
             GeneratedParam { path: "CyM", kind: ParamKind::Float, offset: 5, default: &[1.0] },
@@ -2034,7 +2034,7 @@
         add_c: false,
         bailout: 1024.0,
         params: &[
-            GeneratedParam { path: "Scale", kind: ParamKind::Float, offset: 0, default: &[0.81649658092773] },
+            GeneratedParam { path: "Scale", kind: ParamKind::Float, offset: 0, default: &[0.8164966] },
         ],
         derivations: &[],
         wgsl: r####"
@@ -2148,7 +2148,7 @@
         add_c: false,
         bailout: 1024.0,
         params: &[
-            GeneratedParam { path: "Scale", kind: ParamKind::Float, offset: 0, default: &[0.81649658092773] },
+            GeneratedParam { path: "Scale", kind: ParamKind::Float, offset: 0, default: &[0.8164966] },
         ],
         derivations: &[],
         wgsl: r####"
@@ -2468,7 +2468,7 @@
             GeneratedParam { path: "fixX", kind: ParamKind::Float, offset: 0, default: &[0.0] },
             GeneratedParam { path: "fixLg", kind: ParamKind::Float, offset: 1, default: &[0.01] },
             GeneratedParam { path: "Mul", kind: ParamKind::Float, offset: 2, default: &[1.0] },
-            GeneratedParam { path: "Base", kind: ParamKind::Float, offset: 3, default: &[0.367879441] },
+            GeneratedParam { path: "Base", kind: ParamKind::Float, offset: 3, default: &[0.36787945] },
         ],
         derivations: &[],
         wgsl: r####"
@@ -2488,7 +2488,7 @@
             GeneratedParam { path: "fixY", kind: ParamKind::Float, offset: 0, default: &[0.0] },
             GeneratedParam { path: "fixLg", kind: ParamKind::Float, offset: 1, default: &[0.01] },
             GeneratedParam { path: "Mul", kind: ParamKind::Float, offset: 2, default: &[1.0] },
-            GeneratedParam { path: "Base", kind: ParamKind::Float, offset: 3, default: &[0.367879441] },
+            GeneratedParam { path: "Base", kind: ParamKind::Float, offset: 3, default: &[0.36787945] },
         ],
         derivations: &[],
         wgsl: r####"
@@ -2508,7 +2508,7 @@
             GeneratedParam { path: "fixZ", kind: ParamKind::Float, offset: 0, default: &[0.0] },
             GeneratedParam { path: "fixLg", kind: ParamKind::Float, offset: 1, default: &[0.01] },
             GeneratedParam { path: "Mul", kind: ParamKind::Float, offset: 2, default: &[1.0] },
-            GeneratedParam { path: "Base", kind: ParamKind::Float, offset: 3, default: &[0.367879441] },
+            GeneratedParam { path: "Base", kind: ParamKind::Float, offset: 3, default: &[0.36787945] },
         ],
         derivations: &[],
         wgsl: r####"
@@ -2736,7 +2736,7 @@
             GeneratedParam { path: "fixX", kind: ParamKind::Float, offset: 0, default: &[0.0] },
             GeneratedParam { path: "fixLg", kind: ParamKind::Float, offset: 1, default: &[0.0] },
             GeneratedParam { path: "Mul", kind: ParamKind::Float, offset: 2, default: &[-2.0] },
-            GeneratedParam { path: "Base", kind: ParamKind::Float, offset: 3, default: &[0.367879441] },
+            GeneratedParam { path: "Base", kind: ParamKind::Float, offset: 3, default: &[0.36787945] },
         ],
         derivations: &[],
         wgsl: r####"
@@ -2756,7 +2756,7 @@
             GeneratedParam { path: "fixY", kind: ParamKind::Float, offset: 0, default: &[0.0] },
             GeneratedParam { path: "fixLg", kind: ParamKind::Float, offset: 1, default: &[0.0] },
             GeneratedParam { path: "Mul", kind: ParamKind::Float, offset: 2, default: &[-2.0] },
-            GeneratedParam { path: "Base", kind: ParamKind::Float, offset: 3, default: &[0.367879441] },
+            GeneratedParam { path: "Base", kind: ParamKind::Float, offset: 3, default: &[0.36787945] },
         ],
         derivations: &[],
         wgsl: r####"
@@ -2775,7 +2775,7 @@
             GeneratedParam { path: "fixZ", kind: ParamKind::Float, offset: 0, default: &[0.0] },
             GeneratedParam { path: "fixLg", kind: ParamKind::Float, offset: 1, default: &[0.0] },
             GeneratedParam { path: "Mul", kind: ParamKind::Float, offset: 2, default: &[-2.0] },
-            GeneratedParam { path: "Base", kind: ParamKind::Float, offset: 3, default: &[0.367879441] },
+            GeneratedParam { path: "Base", kind: ParamKind::Float, offset: 3, default: &[0.36787945] },
         ],
         derivations: &[],
         wgsl: r####"
