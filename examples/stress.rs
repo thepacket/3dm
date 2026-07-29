@@ -14,14 +14,23 @@ use three_dm::{
     render::{FractalPipeline, Uniforms},
 };
 
-const W: u32 = 1280;
-const H: u32 = 800;
+/// Overridden from the command line, because the load has to resemble the one
+/// that misbehaves: a full-screen Retina window is twenty-one megapixels, and a
+/// comfortable 1280x800 exercises none of the same limits.
+static mut SIZE: [u32; 2] = [1280, 800];
+fn size() -> [u32; 2] {
+    unsafe { SIZE }
+}
 
 fn main() {
-    let frames: u32 = std::env::args()
-        .nth(1)
-        .and_then(|s| s.parse().ok())
-        .unwrap_or(3000);
+    let mut args = std::env::args().skip(1);
+    let frames: u32 = args.next().and_then(|s| s.parse().ok()).unwrap_or(3000);
+    if let (Some(w), Some(h)) = (
+        args.next().and_then(|s| s.parse().ok()),
+        args.next().and_then(|s| s.parse().ok()),
+    ) {
+        unsafe { SIZE = [w, h] };
+    }
     pollster::block_on(run(frames));
 }
 
@@ -58,8 +67,8 @@ async fn run(frames: u32) {
     let target = device.create_texture(&wgpu::TextureDescriptor {
         label: Some("3dm.stress.target"),
         size: wgpu::Extent3d {
-            width: W,
-            height: H,
+            width: size()[0],
+            height: size()[1],
             depth_or_array_layers: 1,
         },
         mip_level_count: 1,
@@ -92,10 +101,15 @@ async fn run(frames: u32) {
 
         // Scale wanders the way the adaptive path made it, so any per-size
         // reallocation shows up.
-        let scale = 0.5 + 0.5 * (phase * 0.3).sin().abs();
+        // DM3_SCALE=1 pins it to full size, for a load that resembles the app
+        // at "always full" rather than an average of reduced frames.
+        let scale = match std::env::var("DM3_SCALE").ok().and_then(|v| v.parse::<f32>().ok()) {
+            Some(fixed) => fixed,
+            None => 0.5 + 0.5 * (phase * 0.3).sin().abs(),
+        };
         let render_size = [
-            ((W as f32 * scale) as u32).max(16),
-            ((H as f32 * scale) as u32).max(16),
+            ((size()[0] as f32 * scale) as u32).max(16),
+            ((size()[1] as f32 * scale) as u32).max(16),
         ];
 
         let uniforms = Uniforms::build(
@@ -110,7 +124,7 @@ async fn run(frames: u32) {
 
         let mut encoder = device.create_command_encoder(&Default::default());
         pipeline.step_probe(&mut encoder, key, true);
-        pipeline.render_offscreen(&device, &queue, &mut encoder, key, [W, H], render_size);
+        pipeline.render_offscreen(&device, &queue, &mut encoder, key, size(), render_size);
         {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("3dm.stress.blit"),
@@ -131,12 +145,15 @@ async fn run(frames: u32) {
             pipeline.blit(&mut pass);
         }
         queue.submit([encoder.finish()]);
-        // Stands in for the per-frame maintenance a presenting app performs.
-        device.poll(wgpu::PollType::Poll).ok();
+        // Wait for the frame to finish, as presenting to a surface does. Without
+        // this the loop submits far faster than the GPU drains and the backlog
+        // grows without bound — which looks exactly like a memory leak, at a
+        // steady megabyte a frame, and is nothing of the sort.
+        device.poll(wgpu::PollType::wait_indefinitely()).ok();
 
-        if (i + 1) % 250 == 0 {
+        if (i + 1) % 25 == 0 {
             let now = std::time::Instant::now();
-            let ms = now.duration_since(last).as_secs_f32() * 1000.0 / 250.0;
+            let ms = now.duration_since(last).as_secs_f32() * 1000.0 / 25.0;
             last = now;
             let rss = rss_mb();
             println!(

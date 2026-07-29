@@ -81,6 +81,21 @@ impl Resolution {
     }
 }
 
+/// Frames per second the app will not exceed while navigating.
+///
+/// Without a cap the renderer draws as fast as the GPU allows, which means the
+/// GPU is busy every moment the camera is moving. At a full-screen size that is
+/// twenty-one megapixels of raymarching at around eleven frames a second with
+/// no idle time at all, and a thin laptop turns that into heat and then into
+/// thermal throttling — which degrades progressively and does not recover until
+/// it cools. Capping the rate leaves the GPU idle between frames.
+///
+/// It also explains why *reducing* the resolution could make things worse: a
+/// cheaper frame does not mean less work per second, it means more frames, and
+/// the GPU stays just as pegged while the camera stays responsive enough to
+/// keep going indefinitely.
+const DEFAULT_FPS_CAP: u32 = 60;
+
 /// Frame time the renderer aims for, in milliseconds. Above this the fractal is
 /// drawn at a smaller size and stretched; below it, the size creeps back up.
 ///
@@ -118,6 +133,8 @@ pub struct App {
     /// Driven by `frame_ms` toward [`TARGET_FRAME_MS`] while the camera moves.
     render_scale: f32,
     resolution: Resolution,
+    /// Upper bound on frames per second; 0 lifts it entirely.
+    fps_cap: u32,
     /// The scale used in [`Resolution::Fixed`].
     fixed_scale: f32,
     /// What the GPU last reported about the cursor ray and the space ahead.
@@ -172,6 +189,7 @@ impl App {
             frame_ms: 0.0,
             render_scale: 1.0,
             resolution: Resolution::default(),
+            fps_cap: DEFAULT_FPS_CAP,
             fixed_scale: 0.5,
             shader: (key, source.into()),
         })
@@ -198,6 +216,7 @@ impl App {
             formula_filter,
             resolution,
             fixed_scale,
+            fps_cap,
             cursor,
             last_render_size,
             ..
@@ -288,6 +307,28 @@ impl App {
                          to the window. At a full-screen size this is twenty-odd \
                          megapixels of raymarching, so drawing every one of them \
                          on every frame is a choice rather than a default.",
+                    );
+                    ui.horizontal(|ui| {
+                        ui.label("frame rate cap");
+                        ui.add(
+                            egui::DragValue::new(fps_cap)
+                                .range(0..=240)
+                                .speed(1)
+                                .custom_formatter(|v, _| {
+                                    if v < 1.0 {
+                                        "uncapped".to_owned()
+                                    } else {
+                                        format!("{v:.0} fps")
+                                    }
+                                }),
+                        );
+                    })
+                    .response
+                    .on_hover_text(
+                        "Uncapped, the GPU starts the next frame the moment it \
+                         finishes the last one and never idles while the camera \
+                         moves. On a laptop that becomes heat, and then thermal \
+                         throttling, which is slow to arrive and slow to leave.",
                     );
                     if *resolution == Resolution::Fixed {
                         ui.add(
@@ -444,6 +485,22 @@ impl App {
         }
     }
 
+    /// Schedules the next frame, no sooner than the frame-rate cap allows.
+    ///
+    /// Asking for a repaint immediately is what pegs the GPU: it will start the
+    /// next frame the instant it finishes this one, for as long as a key is
+    /// held. Spacing them leaves it idle in between.
+    fn request_next_frame(&self, ctx: &egui::Context) {
+        match self.fps_cap {
+            0 => ctx.request_repaint(),
+            cap => {
+                let budget = 1000.0 / cap as f32;
+                let remaining = (budget - self.frame_ms).max(0.0);
+                ctx.request_repaint_after(Duration::from_secs_f32(remaining / 1000.0));
+            }
+        }
+    }
+
     /// The target cross and its readout.
     ///
     /// The numbers are the point the wheel would travel to and how far away it
@@ -547,7 +604,7 @@ impl App {
         let dt = ui.input(|i| i.stable_dt).min(0.1);
         if self.keyboard_navigation(ui, dt) {
             self.interacting = true;
-            ui.ctx().request_repaint();
+            self.request_next_frame(ui.ctx());
         }
 
         if response.dragged() {
@@ -712,6 +769,8 @@ impl eframe::App for App {
         // While the camera is moving we render a cheap preview; schedule one
         // more frame shortly after so the full-quality image replaces it.
         if self.interacting {
+            // One more frame shortly after, so the cheap preview is replaced by
+            // the full-quality image once the camera settles.
             ui.ctx().request_repaint_after(Duration::from_millis(120));
         }
     }
