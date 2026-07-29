@@ -138,6 +138,30 @@ pub struct GeneratedFormula {
     pub wgsl: &'static str,
 }
 
+/// Tiles per row in the thumbnail atlas.
+///
+/// Derived from the corpus rather than written down, because the generator and
+/// the picker have to agree exactly and nothing checks them. A hardcoded 21
+/// was right for 425 formulas and silently wrong for 593: every thumbnail past
+/// the first row lands on the wrong formula, and the ones past the end of the
+/// atlas show nothing at all.
+pub const fn atlas_cols(count: usize) -> usize {
+    let mut cols = 1;
+    while cols * cols < count {
+        cols += 1;
+    }
+    cols
+}
+
+/// Rows in that atlas.
+///
+/// Not the same as the columns once the count stops being a perfect square:
+/// 593 formulas pack into 25 by 24, and reading the vertical step as one
+/// twenty-fifth stretches every row a little further off the tile it names.
+pub const fn atlas_rows(count: usize) -> usize {
+    count.div_ceil(atlas_cols(count))
+}
+
 /// Formula slots available in the stack. MB3D allows six; more than that is
 /// rarely legible and every slot costs shader instructions.
 pub const MAX_SLOTS: usize = 6;
@@ -828,6 +852,37 @@ impl FormulaStack {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// The picker reads the atlas by this grid and the generator writes it by
+    /// the same one. Nothing at runtime checks that the image on disk matches,
+    /// so a corpus that outgrows it shows every formula the wrong picture —
+    /// and the wrong picture looks exactly as convincing as the right one.
+    #[test]
+    fn the_atlas_grid_covers_the_corpus_and_matches_the_image() {
+        let count = generated::GENERATED.len();
+        let (cols, rows) = (atlas_cols(count), atlas_rows(count));
+        assert!(cols * rows >= count, "{cols}x{rows} cannot hold {count}");
+        // One row narrower would still hold them, which would mean the
+        // generator and this disagree about where a tile starts.
+        assert!(cols * (rows - 1) < count, "{rows} rows is one too many");
+
+        // The PNG's own header, read without a decoder: width and height are
+        // big-endian u32 at byte 16 of an IHDR chunk.
+        let png = include_bytes!("../assets/formula_thumbs.png");
+        let width = u32::from_be_bytes(png[16..20].try_into().unwrap()) as usize;
+        let height = u32::from_be_bytes(png[20..24].try_into().unwrap()) as usize;
+        assert_eq!(width % cols, 0, "atlas {width}px is not {cols} whole tiles");
+        assert_eq!(
+            (width / cols, height / rows),
+            (width / cols, width / cols),
+            "tiles are not square: the atlas is stale, rerun `--example thumbs`"
+        );
+        assert_eq!(
+            (width / (width / cols), height / (width / cols)),
+            (cols, rows),
+            "atlas holds a different grid than the picker reads"
+        );
+    }
 
     /// The shader skips the blend entirely for a plain slot, and that skip is
     /// what keeps every pre-existing stack rendering bit-for-bit as it did:

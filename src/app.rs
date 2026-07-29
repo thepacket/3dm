@@ -65,8 +65,13 @@ const KEY_PAN: f32 = 0.9;
 /// drift out of step with the formulas.
 const THUMBS_PNG: &[u8] = include_bytes!("../assets/formula_thumbs.png");
 
-/// Tiles per row in that atlas — it is square, so per column too.
-const THUMB_COLS: usize = 21;
+/// Tiles per row in that atlas — it is square, so per column too. Derived from
+/// the corpus, so growing it cannot leave the picker reading the wrong tiles.
+const THUMB_COLS: usize = crate::formulas::atlas_cols(GENERATED.len());
+
+/// Rows in it, which is not the same number unless the count happens to be a
+/// perfect square.
+const THUMB_ROWS: usize = crate::formulas::atlas_rows(GENERATED.len());
 
 /// Side of a thumbnail as drawn in the picker.
 const THUMB_SIZE: f32 = 44.0;
@@ -1414,11 +1419,11 @@ fn load_thumbnails(ctx: &egui::Context) -> Option<egui::TextureHandle> {
 
 /// The atlas region holding formula `index`.
 fn thumb_uv(index: usize) -> egui::Rect {
-    let step = 1.0 / THUMB_COLS as f32;
+    let (u, v) = (1.0 / THUMB_COLS as f32, 1.0 / THUMB_ROWS as f32);
     let (col, row) = (index % THUMB_COLS, index / THUMB_COLS);
     egui::Rect::from_min_size(
-        egui::pos2(col as f32 * step, row as f32 * step),
-        egui::vec2(step, step),
+        egui::pos2(col as f32 * u, row as f32 * v),
+        egui::vec2(u, v),
     )
 }
 

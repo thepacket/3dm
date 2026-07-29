@@ -74,7 +74,9 @@ async fn run() {
     let mut pipeline = FractalPipeline::new(&device, format);
 
     let count = GENERATED.len();
-    let cols = (count as f32).sqrt().ceil() as u32;
+    // The same derivation the picker uses, from the same function — the two
+    // must agree exactly and there is nothing to catch it if they do not.
+    let cols = three_dm::formulas::atlas_cols(count) as u32;
     let rows = (count as u32).div_ceil(cols);
     let mut atlas = vec![0u8; (cols * TILE * rows * TILE * 4) as usize];
     let atlas_w = cols * TILE;
