@@ -61,10 +61,12 @@ struct Uniforms {
     // The surface gradient, baked to a table so the shader does one read
     // rather than walking a list of stops per pixel.
     gradient: array<vec4<f32>, 64>,
-    // One vec4 per formula slot: x = start iteration, y = end iteration.
-    // Kept in a uniform rather than in generated code so that dragging a
-    // formula's iteration range does not rebuild the shader.
-    ranges: array<vec4<f32>, 6>,
+    // Two vec4s per formula slot, all of it in a uniform rather than in
+    // generated code so that dragging any of it does not rebuild the shader:
+    //   [2i]   x = start iteration, y = end iteration, z = period, w = phase
+    //   [2i+1] x = weight at the start, y = weight at the end,
+    //          z = axis mask as bits 1|2|4|8
+    ranges: array<vec4<f32>, 12>,
     // Every formula's parameters, one fixed-size block per slot. A transpiled
     // Mandelbulber formula can carry over a hundred floats — rotation matrices,
     // 4D offsets — which is why these live in a pool instead of in `ranges`.
@@ -161,6 +163,55 @@ struct Field {
     // Fraction of the iteration budget used before escaping, 0..1.
     escape: f32,
 };
+
+// ---------------------------------------------------------------------------
+// How a slot joins the iteration
+//
+// Mandelbulber gives each formula a stretch of the loop and applies it whole.
+// MB3D goes further, and these three are what it adds: a slot can take every
+// second iteration rather than every one, its strength can ramp across its
+// range, and it can be confined to chosen components of `z`. Between them a
+// hybrid can alternate, cross-fade, or act on a single axis — none of which a
+// contiguous range can express.
+// ---------------------------------------------------------------------------
+
+// Whether slot `gate` runs on iteration `i`.
+//
+// `i` is the loop counter as a float, which is what `Aux` carries. The range
+// test is left as the float comparison it has always been rather than being
+// routed through i32 — the two agree for every value this can hold, but the
+// point is not to disturb an expression the whole formula corpus renders on.
+fn dm3_slot_applies(i: f32, gate: vec4<f32>) -> bool {
+    if (i < gate.x || i >= gate.y) {
+        return false;
+    }
+    let period = max(i32(gate.z), 1);
+    if (period == 1) {
+        return true;
+    }
+    // Counted from the slot's own start, so shifting a range does not silently
+    // re-phase the alternation under it.
+    return (i32(i) - i32(gate.x)) % period == i32(gate.w);
+}
+
+// This slot's strength on iteration `i`, ramped across its range.
+fn dm3_slot_weight(i: f32, gate: vec4<f32>, shape: vec4<f32>) -> f32 {
+    if (shape.x == shape.y) {
+        return shape.x;
+    }
+    let span = max(gate.y - gate.x, 1.0);
+    return mix(shape.x, shape.y, clamp((i - gate.x) / span, 0.0, 1.0));
+}
+
+// Which components of `z` this slot may change, as 0 or 1 per component.
+fn dm3_slot_mask(shape: vec4<f32>) -> vec4<f32> {
+    let bits = i32(shape.z);
+    return vec4<f32>(
+        f32(bits & 1),
+        f32((bits >> 1) & 1),
+        f32((bits >> 2) & 1),
+        f32((bits >> 3) & 1));
+}
 
 // The distance estimator is generated from the formula stack — see
 // `render/codegen.rs`. It defines one `slot_N` function per active formula and

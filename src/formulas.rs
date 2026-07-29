@@ -669,6 +669,51 @@ pub struct FormulaSlot {
     /// iterations is what makes a hybrid look like two fractals fused rather
     /// than one muddy average of both.
     pub end_iter: i32,
+    /// Run this slot only every `period` iterations. 1 is every one.
+    ///
+    /// This and `phase` are MB3D's contribution, and they are what a range
+    /// alone cannot express: two formulas sharing the same stretch of the loop
+    /// and *alternating* within it, rather than occupying different stretches
+    /// of it. Period 2 with phases 0 and 1 is the classic pair.
+    pub period: i32,
+    /// Which iteration within each period this slot takes, counted from
+    /// `start_iter`.
+    pub phase: i32,
+    /// How much of this formula's result to keep, at the start and at the end
+    /// of its iteration range.
+    ///
+    /// Ramping one slot down while another ramps up is how a hybrid becomes a
+    /// blend rather than a seam — MB3D interpolating between slots. Both at 1
+    /// is "apply the formula outright", which is what every stack that never
+    /// touches this does.
+    pub weight_start: f32,
+    pub weight_end: f32,
+    /// Which components of `z` the formula is allowed to change. Clearing one
+    /// is what turns a transform into something that acts on a single axis.
+    pub axes: [bool; 4],
+}
+
+impl FormulaSlot {
+    /// The four axis flags as the bitfield the uniform carries.
+    pub fn axis_bits(&self) -> f32 {
+        let mut bits = 0u32;
+        for (i, on) in self.axes.iter().enumerate() {
+            if *on {
+                bits |= 1 << i;
+            }
+        }
+        bits as f32
+    }
+
+    /// True when this slot applies its formula outright — no alternation, no
+    /// weighting, no masking. The shader has a fast path for it, and it is
+    /// what every stack looked like before any of this existed.
+    pub fn is_plain(&self) -> bool {
+        self.period <= 1
+            && self.weight_start >= 1.0
+            && self.weight_end >= 1.0
+            && self.axes == [true; 4]
+    }
 }
 
 impl FormulaSlot {
@@ -679,6 +724,11 @@ impl FormulaSlot {
             params: kind.defaults(),
             start_iter: 0,
             end_iter: 32,
+            period: 1,
+            phase: 0,
+            weight_start: 1.0,
+            weight_end: 1.0,
+            axes: [true; 4],
         }
     }
 
@@ -778,6 +828,56 @@ impl FormulaStack {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// The shader skips the blend entirely for a plain slot, and that skip is
+    /// what keeps every pre-existing stack rendering bit-for-bit as it did:
+    /// `mix(a, b, 1.0)` is `a + (b - a)`, which is not exactly `b`. If a new
+    /// slot ever stops counting as plain by default, every picture moves.
+    #[test]
+    fn a_fresh_slot_joins_the_loop_plainly() {
+        let slot = FormulaSlot::builtin(Builtin::Mandelbulb);
+        assert!(slot.is_plain());
+        assert_eq!(slot.axis_bits(), 15.0, "all four axes set");
+    }
+
+    #[test]
+    fn any_gating_stops_a_slot_being_plain() {
+        let plain = FormulaSlot::builtin(Builtin::Mandelbulb);
+        for altered in [
+            FormulaSlot { period: 2, ..plain.clone() },
+            FormulaSlot { weight_start: 0.5, ..plain.clone() },
+            FormulaSlot { weight_end: 0.0, ..plain.clone() },
+            FormulaSlot { axes: [true, true, false, true], ..plain.clone() },
+        ] {
+            assert!(!altered.is_plain(), "{altered:?} should not be plain");
+        }
+    }
+
+    #[test]
+    fn axis_bits_pack_in_the_order_the_shader_unpacks_them() {
+        let mut slot = FormulaSlot::builtin(Builtin::Mandelbulb);
+        slot.axes = [true, false, false, false];
+        assert_eq!(slot.axis_bits(), 1.0);
+        slot.axes = [false, true, false, false];
+        assert_eq!(slot.axis_bits(), 2.0);
+        slot.axes = [false, false, true, false];
+        assert_eq!(slot.axis_bits(), 4.0);
+        slot.axes = [false, false, false, true];
+        assert_eq!(slot.axis_bits(), 8.0);
+    }
+
+    /// Gating lives in uniforms, so changing it must not force a recompile —
+    /// otherwise dragging the weight slider rebuilds the shader every frame.
+    #[test]
+    fn gating_does_not_change_the_shader_signature() {
+        let mut stack = FormulaStack::default();
+        let before = stack.signature();
+        stack.slots[0].period = 3;
+        stack.slots[0].phase = 1;
+        stack.slots[0].weight_start = 0.25;
+        stack.slots[0].axes = [true, false, true, false];
+        assert_eq!(stack.signature(), before);
+    }
 
     #[test]
     fn every_transpiled_formula_fits_its_pool_block() {

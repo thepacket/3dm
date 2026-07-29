@@ -59,6 +59,38 @@ fn preset(name: &str) -> FormulaStack {
             stack.slots.push(FormulaSlot::builtin(Builtin::Mandelbox));
             stack.slots.push(FormulaSlot::builtin(Builtin::Rotate));
         }
+        // MB3D's hybrid model, which a contiguous range cannot express: both
+        // formulas cover the whole loop and take alternate iterations.
+        "alternate" => {
+            let mut bulb = FormulaSlot::builtin(Builtin::Mandelbulb);
+            bulb.period = 2;
+            bulb.phase = 0;
+            let mut box_ = FormulaSlot::builtin(Builtin::Mandelbox);
+            box_.period = 2;
+            box_.phase = 1;
+            stack.slots.push(bulb);
+            stack.slots.push(box_);
+        }
+        // The same pair, cross-faded across the loop instead of alternating:
+        // the bulb hands over to the box rather than interleaving with it.
+        "crossfade" => {
+            let mut bulb = FormulaSlot::builtin(Builtin::Mandelbulb);
+            bulb.weight_start = 1.0;
+            bulb.weight_end = 0.0;
+            let mut box_ = FormulaSlot::builtin(Builtin::Mandelbox);
+            box_.weight_start = 0.0;
+            box_.weight_end = 1.0;
+            stack.slots.push(bulb);
+            stack.slots.push(box_);
+        }
+        // A rotation confined to one axis, which is the third thing a range
+        // cannot say.
+        "axisbox" => {
+            stack.slots.push(FormulaSlot::builtin(Builtin::Mandelbox));
+            let mut rot = FormulaSlot::builtin(Builtin::Rotate);
+            rot.axes = [true, false, false, true];
+            stack.slots.push(rot);
+        }
         // Anything else names a transpiled Mandelbulber formula, which is the
         // whole point of this example now: rendering one is the only way to
         // tell a correct translation from a merely compiling one.

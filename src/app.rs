@@ -2312,12 +2312,28 @@ fn stack_editor(
                                 // Swapping the formula must reset the
                                 // parameters — slot 1 of a Mandelbox means
                                 // something different than slot 1 of a bulb.
-                                let range = (slot.start_iter, slot.end_iter);
+                                // How the slot *joins the loop* is not about
+                                // the formula, though, so all of that carries
+                                // across.
+                                let gating = slot.clone();
                                 *slot = FormulaSlot::new(kind);
-                                slot.start_iter = range.0;
-                                slot.end_iter = range.1;
+                                slot.start_iter = gating.start_iter;
+                                slot.end_iter = gating.end_iter;
+                                slot.period = gating.period;
+                                slot.phase = gating.phase;
+                                slot.weight_start = gating.weight_start;
+                                slot.weight_end = gating.weight_end;
+                                slot.axes = gating.axes;
                             });
                         });
+
+                    // A slot that alternates, ramps or masks looks identical
+                    // to a plain one once its rows are scrolled past, and the
+                    // difference is the whole shape.
+                    if !slot.is_plain() {
+                        ui.label(egui::RichText::new("◆").small().weak())
+                            .on_hover_text("This slot is gated, weighted or axis-masked.");
+                    }
 
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                         if ui.small_button("✕").on_hover_text("Remove").clicked() {
@@ -2400,6 +2416,74 @@ fn stack_editor(
                         "Restrict this formula to part of the iteration loop. \
                          Overlapping ranges blend the formulas; disjoint ones \
                          fuse two distinct shapes.",
+                    );
+
+                    ui.horizontal(|ui| {
+                        ui.label("every");
+                        ui.add(
+                            egui::DragValue::new(&mut slot.period)
+                                .range(1..=8)
+                                .speed(0.05)
+                                .custom_formatter(|v, _| match v as i32 {
+                                    1 => "iteration".to_owned(),
+                                    2 => "2nd".to_owned(),
+                                    3 => "3rd".to_owned(),
+                                    n => format!("{n}th"),
+                                }),
+                        );
+                        if slot.period > 1 {
+                            ui.label("offset");
+                            ui.add(
+                                egui::DragValue::new(&mut slot.phase)
+                                    .range(0..=slot.period - 1)
+                                    .speed(0.05),
+                            );
+                        }
+                    })
+                    .response
+                    .on_hover_text(
+                        "Take only every Nth iteration of the range. Two \
+                         formulas over the same range, at period 2 and offsets \
+                         0 and 1, alternate — which a range on its own cannot \
+                         express, and which is where MB3D's hybrids come from.",
+                    );
+
+                    ui.horizontal(|ui| {
+                        ui.label("weight");
+                        ui.add(
+                            egui::DragValue::new(&mut slot.weight_start)
+                                .range(0.0..=1.0)
+                                .speed(0.01),
+                        );
+                        ui.label("to");
+                        ui.add(
+                            egui::DragValue::new(&mut slot.weight_end)
+                                .range(0.0..=1.0)
+                                .speed(0.01),
+                        );
+                    })
+                    .response
+                    .on_hover_text(
+                        "How much of this formula's result to keep, ramped \
+                         across its range. Fading one slot down while another \
+                         fades up turns a seam into a blend.\n\n\
+                         A partly weighted formula has no guaranteed distance \
+                         estimate — the blend of two valid estimators need not \
+                         be one — so expect to lower the step multiplier in \
+                         Rendering engine. Banded, laminated surfaces are that \
+                         and not detail.",
+                    );
+
+                    ui.horizontal(|ui| {
+                        ui.label("axes");
+                        for (axis, on) in ["x", "y", "z", "w"].iter().zip(slot.axes.iter_mut()) {
+                            ui.toggle_value(on, *axis);
+                        }
+                    })
+                    .response
+                    .on_hover_text(
+                        "Which components of z this formula may change. \
+                         Clearing one confines a transform to a single axis.",
                     );
                 });
             });

@@ -69,11 +69,31 @@ pub fn generate(stack: &FormulaStack) -> String {
             ""
         };
 
-        // The iteration range is a uniform read, so dragging it does not
-        // invalidate this pipeline.
+        // Everything about how the slot joins the loop — range, alternation,
+        // weight, axis mask — is a uniform read, so dragging any of it does
+        // not invalidate this pipeline.
+        //
+        // The blend is skipped whole when the slot is at full strength on
+        // every component, which is the overwhelmingly common case. That is
+        // not just a speed choice: `mix(a, b, 1.0)` evaluates as
+        // `a + 1.0 * (b - a)`, which is not bit-for-bit `b`, so routing an
+        // ordinary stack through it would move the picture.
+        let (gate, shape) = (index * 2, index * 2 + 1);
         dispatch.push_str(&format!(
-            "        if (aux.i >= dm3_u.ranges[{index}].x && aux.i < dm3_u.ranges[{index}].y) \
-             {{ z = slot_{index}(z, &aux);{add_c} }}\n"
+            "        if (dm3_slot_applies(aux.i, dm3_u.ranges[{gate}])) {{\n\
+             \x20           let z_prev = z;\n\
+             \x20           let de_prev = aux.de;\n\
+             \x20           z = slot_{index}(z, &aux);{add_c}\n\
+             \x20           let blend = dm3_slot_mask(dm3_u.ranges[{shape}])\n\
+             \x20               * dm3_slot_weight(aux.i, dm3_u.ranges[{gate}], dm3_u.ranges[{shape}]);\n\
+             \x20           if (!all(blend >= vec4<f32>(1.0))) {{\n\
+             \x20               z = mix(z_prev, z, blend);\n\
+             \x20               // The derivative has to follow the geometry it\n\
+             \x20               // describes, or a half-weight slot reports a\n\
+             \x20               // distance for a shape that is not there.\n\
+             \x20               aux.de = mix(de_prev, aux.de, max(blend.x, max(blend.y, blend.z)));\n\
+             \x20           }}\n\
+             \x20       }}\n"
         ));
     }
 

@@ -281,8 +281,9 @@ pub struct Uniforms {
     material: [f32; 4],
     /// The surface gradient, baked flat.
     gradient: [[f32; 4]; GRADIENT_LUT],
-    /// x = start iteration, y = end iteration, per slot.
-    ranges: [[f32; 4]; MAX_SLOTS],
+    /// Two per slot: how it is gated, then how it is blended. See
+    /// `dm3_slot_applies` and friends in `fractal.wgsl`.
+    ranges: [[f32; 4]; MAX_SLOTS * 2],
     pool: [[f32; 4]; POOL_VEC4S],
     /// x = how many of `lights` are live. Disabled lights are dropped on the
     /// way here rather than branched around per pixel.
@@ -410,10 +411,21 @@ impl Uniforms {
 
         // Each slot's parameters go to the same fixed address the generated
         // shader reads them from; anything the formula does not use stays zero.
-        let mut ranges = [[0.0f32; 4]; MAX_SLOTS];
+        let mut ranges = [[0.0f32; 4]; MAX_SLOTS * 2];
         let mut pool = [[0.0f32; 4]; POOL_VEC4S];
         for (index, slot) in params.stack.active() {
-            ranges[index] = [slot.start_iter as f32, slot.end_iter as f32, 0.0, 0.0];
+            ranges[index * 2] = [
+                slot.start_iter as f32,
+                slot.end_iter as f32,
+                slot.period.max(1) as f32,
+                slot.phase.max(0) as f32,
+            ];
+            ranges[index * 2 + 1] = [
+                slot.weight_start,
+                slot.weight_end,
+                slot.axis_bits(),
+                0.0,
+            ];
             // Mandelbulber recomputes its derived parameters after every edit;
             // 3DM does it here, on the way to the GPU, so the editable values
             // and the ones the shader reads can share one block.
