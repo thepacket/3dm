@@ -107,3 +107,30 @@ fn parameter_slots_follow_mb3ds_own_rule() {
     // Half a Double is not a slot.
     assert_eq!(parameter_slot(-20), None);
 }
+
+/// `[OPTIONS]` declarations do not map one-to-one onto parameter slots: some
+/// datatypes stand for several values. Numbering by declaration order instead
+/// misaligns every parameter after the first compound one.
+///
+/// `ABoxMod1` is the measurable case. It declares seven parameters, six of
+/// them plain `Double` and one `.Boxscale`, and its compiled code reads eight
+/// slots — so `Boxscale` is two, and `Fold` is `p3` rather than `p2`. That
+/// agrees with the arithmetic recovered from the code, where the value at
+/// `PVar-40` is the one the description calls `Fold`.
+#[test]
+fn boxscale_occupies_two_slots() {
+    use mb3d_decompile::{extract, options};
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/data/ABoxMod1.m3f");
+    let formula = extract::parse(&path).expect("fixture should parse");
+    let declared = options::declared(&formula.options).expect("known datatypes");
+    let names = options::slot_names(&declared);
+
+    assert_eq!(names.len(), 8, "seven declarations, eight slots");
+    assert_eq!(names[0], "Scale");
+    assert_eq!(names[1], "Min R 1");
+    assert_eq!(names[2], "Min R 2");
+    assert_eq!(names[3], "Fold");
+    assert_eq!(names[4], "Scale vary");
+    assert_eq!(names[5], "FoldXMod");
+}

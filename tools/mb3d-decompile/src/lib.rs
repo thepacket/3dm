@@ -4,6 +4,7 @@ pub mod abi;
 pub mod exec;
 pub mod expr;
 pub mod extract;
+pub mod options;
 
 /// Decompiles one `.m3f` to `place = expression` lines.
 pub fn decompile_file(path: &std::path::Path) -> Result<Vec<String>, String> {

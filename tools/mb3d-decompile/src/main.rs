@@ -14,7 +14,7 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
-use mb3d_decompile::{abi, exec, expr, extract};
+use mb3d_decompile::{abi, exec, expr, extract, options};
 
 fn main() {
     let mut args = std::env::args().skip(1);
@@ -25,6 +25,7 @@ fn main() {
     let mut only: Option<String> = None;
     let mut dump_asm = false;
     let mut decompile = false;
+    let mut params_report = false;
     while let Some(arg) = args.next() {
         match arg.as_str() {
             "--asm" => {
@@ -35,6 +36,7 @@ fn main() {
                 decompile = true;
                 only = args.next();
             }
+            "--params" => params_report = true,
             other => only = Some(other.to_owned()),
         }
     }
@@ -81,6 +83,11 @@ fn main() {
                 println!("; {line}");
             }
         }
+        return;
+    }
+
+    if params_report {
+        params(&formulas);
         return;
     }
 
@@ -300,4 +307,94 @@ fn survey(formulas: &[extract::Formula]) {
     for (name, count) in &by_count {
         println!("  {count:8}  {name}");
     }
+}
+
+
+/// Checks the `[OPTIONS]` slot table against what the code actually reads.
+///
+/// The two are derived independently — one from the declarations, one from the
+/// compiled formula's memory operands — so agreement is real evidence and a
+/// mismatch names a datatype whose slot count is wrong. Getting this wrong
+/// does not fail loudly: it maps a shared `.m3p`'s values onto the wrong
+/// parameters and renders a picture nobody made.
+fn params(formulas: &[extract::Formula]) {
+    let mut agreed = 0usize;
+    let mut short = 0usize;
+    let mut unknown: BTreeMap<String, usize> = BTreeMap::new();
+    let mut mismatches: Vec<String> = Vec::new();
+
+    for f in formulas {
+        let declared = match options::declared(&f.options) {
+            Ok(d) => d,
+            Err(keyword) => {
+                *unknown.entry(keyword).or_default() += 1;
+                continue;
+            }
+        };
+        let slots: usize = declared.iter().map(|d| d.slots).sum();
+        let Some(highest) = highest_param_slot(&f.code) else {
+            continue;
+        };
+        // The code may leave trailing parameters unread, but it must never
+        // read past the last one declared.
+        if highest < slots {
+            agreed += 1;
+            if highest + 1 < slots {
+                short += 1;
+            }
+        } else {
+            mismatches.push(format!(
+                "{}: declares {slots} slots, reads up to p{highest}",
+                f.name
+            ));
+        }
+    }
+
+    println!("slot table agrees:       {agreed}");
+    println!("  (of which unused tail: {short})");
+    println!("reads past declarations: {}", mismatches.len());
+    println!("unknown datatypes:       {}", unknown.values().sum::<usize>());
+    for (keyword, count) in &unknown {
+        println!("  {count:4}  .{keyword}");
+    }
+    for line in mismatches.iter().take(15) {
+        println!("  {line}");
+    }
+}
+
+/// The highest parameter slot a blob reads, by scanning its memory operands.
+fn highest_param_slot(code: &[u8]) -> Option<usize> {
+    use iced_x86::{Decoder, DecoderOptions, Instruction, OpKind, Register};
+
+    // Which register holds PVar is not fixed — some formulas keep it in esi,
+    // others in edi — so both candidates are followed and the load that
+    // reaches record offset 48 decides.
+    let mut decoder = Decoder::with_ip(32, code, 0, DecoderOptions::NONE);
+    let mut ins = Instruction::default();
+    let mut pvar: Option<Register> = None;
+    let mut record: Option<Register> = None;
+    let mut highest: Option<usize> = None;
+
+    while decoder.can_decode() {
+        decoder.decode_out(&mut ins);
+        if ins.mnemonic() == iced_x86::Mnemonic::Mov && ins.op0_kind() == OpKind::Register {
+            if ins.op1_kind() == OpKind::Memory {
+                let base = ins.memory_base();
+                let displacement = ins.memory_displacement64() as i32 as i64;
+                if base == Register::EBP && displacement > 0 {
+                    record = Some(ins.op0_register());
+                } else if Some(base) == record && displacement == abi::PVAR_OFFSET {
+                    pvar = Some(ins.op0_register());
+                }
+            }
+            continue;
+        }
+        if Some(ins.memory_base()) == pvar && ins.memory_base() != Register::None {
+            let displacement = ins.memory_displacement64() as i32 as i64;
+            if let Some(slot) = abi::parameter_slot(displacement) {
+                highest = Some(highest.map_or(slot, |h: usize| h.max(slot)));
+            }
+        }
+    }
+    highest
 }

@@ -93,10 +93,30 @@ Constants count up from `PVar + 0`; parameters count down from `PVar - 16`;
 each steps by its datatype's size. `Kalisets1` confirms it exactly — two
 declared parameters, `Scale` then `Fix`, read from `-16` and `-24`.
 
-One loose end: `ABoxMod1` declares seven parameters but its slots skip two.
-The suspect is `.Boxscale Min R`, the only user parameter in that file
-declared without a `Double` type word, which suggests the `[OPTIONS]` parser
-recognises datatypes this tool does not yet.
+Declarations are **not** one per slot. MB3D's parser expands its three-angle
+datatypes into X, Y and Z entries and its six-angle type into six, and
+`.Boxscale` is two. `ABoxMod1` is the measurable case: seven declarations, six
+of them plain `Double`, and its compiled code reads eight slots — so `Fold` is
+`p3`, not `p2`, which is what the recovered arithmetic says too.
+
+`--params` derives the slot count from the declarations and, independently,
+the highest slot the code actually reads, then compares them:
+
+```
+slot table agrees:       254
+  (of which unused tail: 79)
+reads past declarations: 34
+unknown datatypes:       0
+```
+
+The two sides come from completely different places, so agreement is evidence
+rather than a tautology, and a disagreement names the formula. That is how
+`.DRECI2` and `.SRECI2` — datatypes postdating the keyword list quoted above —
+were sized at two slots each: at two the check agrees on 254 formulas, at one
+on 247, and the seven that move are exactly the ones declaring them.
+
+The 34 that still read past their declarations are mostly IFS formulas
+overrunning by one to three slots. Those datatypes are still wrong.
 
 ## Verified
 
