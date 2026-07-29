@@ -73,17 +73,64 @@ const THUMB_COLS: usize = crate::formulas::atlas_cols(GENERATED.len());
 /// perfect square.
 const THUMB_ROWS: usize = crate::formulas::atlas_rows(GENERATED.len());
 
+/// How much larger than egui's defaults every piece of text is drawn.
+///
+/// egui's defaults are tuned for a dense tool panel read at a normal desktop
+/// distance. This is a program for looking at pictures, often on a large
+/// display from further back, and at the default size the labels beside the
+/// controls were being read at roughly the size of the thumbnails they
+/// described — which is to say, not read.
+const TEXT_SCALE: f32 = 1.25;
+
+/// Label colour, against [`egui::Visuals::dark`]'s panel fill.
+///
+/// egui's dark theme draws ordinary labels at gray(140), which clears the
+/// accessibility floor and still reads as murky next to a bright render. These
+/// two are simply lighter; the contrast they achieve is asserted in the tests
+/// below rather than eyeballed.
+const TEXT_GRAY: u8 = 200;
+const TEXT_GRAY_INTERACTIVE: u8 = 225;
+
+/// The app's departures from egui's stock style.
+///
+/// A free function rather than a closure at the call site so the tests can
+/// measure what it produces without standing up an app.
+fn apply_ui_style(style: &mut egui::Style) {
+    style.spacing.slider_width = 150.0;
+
+    for (_, font) in style.text_styles.iter_mut() {
+        font.size = (font.size * TEXT_SCALE).round();
+    }
+
+    let widgets = &mut style.visuals.widgets;
+    // Labels and other text that is not itself a control.
+    widgets.noninteractive.fg_stroke.color = egui::Color32::from_gray(TEXT_GRAY);
+    // Text on a control at rest. Hovered and active are already near-white.
+    widgets.inactive.fg_stroke.color = egui::Color32::from_gray(TEXT_GRAY_INTERACTIVE);
+}
+
 /// Side of a thumbnail as drawn in the picker.
 ///
-/// Icon-sized rather than a preview: the picker's job is to let you scan a
-/// column of shapes, and a taller row means fewer of them on screen at once.
-const THUMB_SIZE: f32 = 30.0;
+/// The atlas tiles are 64px, so this is native resolution: drawing them at 30,
+/// as this once did, threw away more than half the detail that exists and left
+/// a fractal too small to actually judge. In a tool made for looking at
+/// pictures the thumbnail *is* the content, not a bullet point beside the name
+/// — so it is sized to be looked at, and the row count follows from that rather
+/// than the other way round.
+const THUMB_SIZE: f32 = 64.0;
+
+/// Guards the regression this replaced — shrinking the pictures below the
+/// resolution that exists, to fit more rows on screen. A compile error rather
+/// than a test, because the two numbers are known at compile time and the
+/// atlas cannot be regenerated smaller without someone editing `TILE` too.
+const _: () = assert!(THUMB_SIZE >= 64.0, "the atlas tiles are 64px");
 
 /// Formulas the picker aims to show without scrolling.
 ///
-/// Mandelbulber manages fourteen. A popup that shows one is a list you have to
-/// already know your way around, which defeats having pictures at all.
-const PICKER_ROWS: f32 = 14.0;
+/// Fewer than the fourteen this once chased, and deliberately: fourteen rows of
+/// something illegible is a worse catalogue than nine you can read. egui clamps
+/// the popup to the window anyway, so this is an upper bound, not a promise.
+const PICKER_ROWS: f32 = 9.0;
 
 /// Height of one row: the thumbnail plus egui's default item spacing.
 const PICKER_ROW: f32 = THUMB_SIZE + 6.0;
@@ -257,9 +304,7 @@ impl App {
         let cursor = pipeline.cursor.clone();
 
         cc.egui_ctx.set_visuals(egui::Visuals::dark());
-        cc.egui_ctx.all_styles_mut(|style| {
-            style.spacing.slider_width = 150.0;
-        });
+        cc.egui_ctx.all_styles_mut(apply_ui_style);
 
         let thumbs = load_thumbnails(&cc.egui_ctx);
 
@@ -2896,5 +2941,68 @@ mod nav_tests {
         };
         assert!(travel(3.0) > travel(1.0));
         assert!(travel(0.3) < travel(1.0));
+    }
+}
+
+#[cfg(test)]
+mod legibility_tests {
+    use super::*;
+
+    /// WCAG relative luminance: sRGB decoded to linear light, then weighted.
+    fn relative_luminance(c: egui::Color32) -> f32 {
+        let channel = |v: u8| {
+            let v = v as f32 / 255.0;
+            if v <= 0.04045 {
+                v / 12.92
+            } else {
+                ((v + 0.055) / 1.055).powf(2.4)
+            }
+        };
+        0.2126 * channel(c.r()) + 0.7152 * channel(c.g()) + 0.0722 * channel(c.b())
+    }
+
+    /// The WCAG contrast ratio between two colours, from 1:1 to 21:1.
+    fn contrast(a: egui::Color32, b: egui::Color32) -> f32 {
+        let (a, b) = (relative_luminance(a), relative_luminance(b));
+        (a.max(b) + 0.05) / (a.min(b) + 0.05)
+    }
+
+    fn styled() -> egui::Style {
+        let mut style = egui::Style {
+            visuals: egui::Visuals::dark(),
+            ..Default::default()
+        };
+        apply_ui_style(&mut style);
+        style
+    }
+
+    /// 4.5:1 is WCAG AA for body text. This is a tool for judging pictures, so
+    /// the text around them has no business being the hard part to read.
+    #[test]
+    fn every_text_colour_clears_the_contrast_floor() {
+        let style = styled();
+        let background = style.visuals.panel_fill;
+        for (what, colour) in [
+            ("label", style.visuals.widgets.noninteractive.fg_stroke.color),
+            ("control", style.visuals.widgets.inactive.fg_stroke.color),
+            ("hovered", style.visuals.widgets.hovered.fg_stroke.color),
+        ] {
+            let ratio = contrast(colour, background);
+            assert!(ratio >= 4.5, "{what} text is {ratio:.2}:1, want >= 4.5:1");
+        }
+    }
+
+    #[test]
+    fn text_is_larger_than_egui_ships_with() {
+        let stock = egui::Style::default();
+        let ours = styled();
+        for (style, font) in ours.text_styles.iter() {
+            let before = stock.text_styles[style].size;
+            assert!(
+                font.size > before,
+                "{style:?} is {}px, was {before}px",
+                font.size
+            );
+        }
     }
 }

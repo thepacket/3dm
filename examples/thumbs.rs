@@ -80,6 +80,11 @@ async fn run() {
     let rows = (count as u32).div_ceil(cols);
     let mut atlas = vec![0u8; (cols * TILE * rows * TILE * 4) as usize];
     let atlas_w = cols * TILE;
+    // How many formulas ended up at each framing. Printed at the end because
+    // the coverage test that picks a frame reads the rendered pixels, so
+    // anything that changes how a tile *looks* can silently change how tightly
+    // every shape is framed. A shift in this tally is the signal.
+    let mut framings = std::collections::BTreeMap::<String, usize>::new();
 
     for (index, f) in GENERATED.iter().enumerate() {
         let mut params = SceneParams {
@@ -92,6 +97,18 @@ async fn run() {
         params.retune_for_stack();
         params.fractal.iterations = 14;
         params.march.max_steps = 128;
+
+        // A thumbnail is not a small render of the scene — it is a picture in a
+        // catalogue, and it is read at 64 pixels against a dark panel. The
+        // scene's own near-black background (luma ~18 once encoded) put the
+        // whole atlas within a few levels of the UI behind it: dark shape on
+        // dark ground, which is exactly the "too dark" complaint. So the tile
+        // gets a lighter ground and a little more ambient light, purely for the
+        // catalogue. None of this touches SceneParams::default(), so the scene
+        // the app opens with is unchanged.
+        params.background.color1 = [0.055, 0.065, 0.085];
+        params.shading.ambient = 0.55;
+        params.picture.brightness = 1.1;
 
         let (key, source) = params.shader();
 
@@ -109,6 +126,11 @@ async fn run() {
         // a speck in the middle of the tile. Try progressively tighter frames
         // and keep the first that fills a reasonable part of the picture.
         let mut best: Option<Vec<u8>> = None;
+        // Reported so a change to the tile's *look* can be checked against the
+        // framing it produces. The two are coupled through the coverage test,
+        // and a brighter tile that quietly reframes every shape smaller would
+        // undo the point of the exercise.
+        let mut chosen = f32::NAN;
         for scale in [1.0, 0.55, 0.3, 0.16] {
             let mut camera = Camera::default();
             camera.frame(params.fractal.bounding_radius * scale);
@@ -211,11 +233,14 @@ async fn run() {
             let good = (0.10..=0.85).contains(&coverage);
             if good || best.is_none() {
                 best = Some(tile);
+                chosen = scale;
             }
             if good {
                 break;
             }
         }
+
+        *framings.entry(format!("{chosen}")).or_insert(0usize) += 1;
 
         if let Some(tile) = best {
             let (tx0, ty0) = ((index as u32 % cols) * TILE, (index as u32 / cols) * TILE);
@@ -245,4 +270,10 @@ async fn run() {
         "assets/formula_thumbs.png: {count} tiles, {cols}x{rows} of {TILE}px, {:.1} KB",
         bytes as f32 / 1024.0
     );
+    let tally = framings
+        .iter()
+        .map(|(scale, n)| format!("{scale}x{n}"))
+        .collect::<Vec<_>>()
+        .join("  ");
+    println!("framings chosen: {tally}");
 }
