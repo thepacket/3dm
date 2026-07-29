@@ -169,6 +169,41 @@ on 247, and the seven that move are exactly the ones declaring them.
 The 34 that still read past their declarations are mostly IFS formulas
 overrunning by one to three slots. Those datatypes are still wrong.
 
+## Auditing the whole corpus
+
+Three bugs so far produced arithmetic that was wrong and looked entirely
+reasonable: a conditional with its arms swapped, a compare against itself, and
+an `fxch` that read as a no-op and turned every power in the corpus into
+`log2(ln 2)`. None crashed. Each was found only by putting one formula's output
+next to the maths its author wrote down — and the formulas checked that way are
+exactly the ones already known to work.
+
+`--audit` does it for everything at once. It compares *vocabulary* rather than
+values: proving two expressions equal would need symbolic algebra and agreement
+about names the two sides do not share, but a description saying "sqrt" against
+a decode with no square root disagree about something real.
+
+```
+formulas stating their maths and decoding: 77
+  agreeing on every operation:             27
+  carrying un-collapsed scaffolding:       21
+  using something undescribed:             21
+  missing something described:             47
+
+of those, explained by the open-coding bug:  14
+```
+
+Seventy-seven formulas is twenty-five times what was being checked by hand, and
+the correlation is the useful part: fourteen of the disagreements are one bug,
+not fourteen findings. A formula whose author wrote `^` and whose decode carries
+`log2` is the reassembly chain failing, and fixing that fixes all of them.
+
+Two known false-positive classes, both benign. A commented-out line is not a
+description of what the formula does — `ABoxMod1` says
+`// rr = pow(...) <- removed to speedup` — and those are skipped. An operation
+applied to a constant folds away, so an author writing `sqrt(2)` leaves no
+square root for the audit to find.
+
 ## Verified
 
 Against formulas that published their own mathematics, in

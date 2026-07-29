@@ -14,7 +14,7 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
-use mb3d_decompile::{abi, exec, expr, extract, options};
+use mb3d_decompile::{abi, audit, exec, expr, extract, options};
 
 fn main() {
     let mut args = std::env::args().skip(1);
@@ -26,6 +26,7 @@ fn main() {
     let mut dump_asm = false;
     let mut decompile = false;
     let mut params_report = false;
+    let mut audit_report = false;
     while let Some(arg) = args.next() {
         match arg.as_str() {
             "--asm" => {
@@ -37,6 +38,7 @@ fn main() {
                 only = args.next();
             }
             "--params" => params_report = true,
+            "--audit" => audit_report = true,
             other => only = Some(other.to_owned()),
         }
     }
@@ -83,6 +85,11 @@ fn main() {
                 println!("; {line}");
             }
         }
+        return;
+    }
+
+    if audit_report {
+        run_audit(&formulas);
         return;
     }
 
@@ -391,4 +398,106 @@ fn highest_param_slot(code: &[u8]) -> Option<usize> {
         }
     }
     highest
+}
+
+
+/// Compares every recovered formula against what its author wrote down.
+///
+/// Reported in three columns because they mean different things. Scaffolding
+/// is a decode this tool did not finish reassembling — `log2` and its
+/// relatives are how the FPU builds `pow`, not something a fractal formula
+/// asks for. An unexplained operation is one the decode invented. A missing
+/// one is an operation the author described and the decode does not perform.
+/// The first is a known gap, the other two are how a wrong decode announces
+/// itself.
+fn run_audit(formulas: &[extract::Formula]) {
+    let mut checkable = 0usize;
+    let mut clean = 0usize;
+    let mut with_scaffolding = Vec::new();
+    let mut with_unexplained = Vec::new();
+    let mut with_missing = Vec::new();
+
+    for f in formulas {
+        if !audit::states_its_maths(&f.description) {
+            continue;
+        }
+        let result = exec::run(&f.code);
+        if result.bailed.is_some() {
+            continue;
+        }
+        let rendered: Vec<String> = exec::final_stores(&result.stores)
+            .into_iter()
+            .map(|(place, value)| format!("{place} = {}", expr::render(&value)))
+            .collect();
+        if rendered.is_empty() {
+            continue;
+        }
+        checkable += 1;
+
+        let said = audit::from_description(&f.description);
+        let did = audit::from_expressions(&rendered);
+
+        let scaffolding = did.scaffolding();
+        let unexplained: Vec<_> = did
+            .unexplained(&said)
+            .into_iter()
+            .filter(|op| !audit::SCAFFOLDING.contains(op))
+            .collect();
+        let missing = did.missing(&said);
+
+        if !scaffolding.is_empty() {
+            with_scaffolding.push(format!("{}: {}", f.name, scaffolding.join(", ")));
+        }
+        if !unexplained.is_empty() {
+            with_unexplained.push(format!("{}: {}", f.name, unexplained.join(", ")));
+        }
+        if !missing.is_empty() {
+            with_missing.push(format!("{}: {}", f.name, missing.join(", ")));
+        }
+        if scaffolding.is_empty() && unexplained.is_empty() && missing.is_empty() {
+            clean += 1;
+        }
+    }
+
+    // The most useful line in the report. A formula whose author wrote "^" or
+    // "power" and whose decode carries `log2`/`exp2` instead is not two
+    // findings: it is one, and it is the open-coding chain failing to
+    // reassemble. Correlating them separates that known bug from anything new.
+    let scaffolded: std::collections::BTreeSet<&str> = with_scaffolding
+        .iter()
+        .filter_map(|line| line.split(':').next())
+        .collect();
+    let correlated = with_missing
+        .iter()
+        .filter(|line| line.contains("pow"))
+        .filter(|line| line.split(':').next().is_some_and(|n| scaffolded.contains(n)))
+        .count();
+
+    println!("formulas stating their maths and decoding: {checkable}");
+    println!("  agreeing on every operation:             {clean}");
+    println!("  carrying un-collapsed scaffolding:       {}", with_scaffolding.len());
+    println!("  using something undescribed:             {}", with_unexplained.len());
+    println!("  missing something described:             {}", with_missing.len());
+    println!();
+    println!("of those, explained by the open-coding bug:  {correlated}");
+    println!("  (author wrote a power; decode has log2/exp2 instead)");
+    println!("known false positives in `missing`: an operation applied to a");
+    println!("constant folds away, so a described sqrt(2) leaves no sqrt behind.");
+
+    for (title, list) in [
+        ("scaffolding", &with_scaffolding),
+        ("undescribed", &with_unexplained),
+        ("missing", &with_missing),
+    ] {
+        if list.is_empty() {
+            continue;
+        }
+        println!("\n{title}:");
+        for line in list.iter().take(12) {
+            println!("  {line}");
+        }
+        if list.len() > 12 {
+            println!("  ... and {} more", list.len() - 12);
+        }
+    }
 }

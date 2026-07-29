@@ -1,6 +1,7 @@
 //! Library face of the decompiler, so its results can be asserted on.
 
 pub mod abi;
+pub mod audit;
 pub mod exec;
 pub mod expr;
 pub mod extract;
