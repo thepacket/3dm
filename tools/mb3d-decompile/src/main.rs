@@ -537,7 +537,13 @@ fn print_wgsl(f: &extract::Formula) {
         std::process::exit(1);
     }
     let stores = exec::final_stores(&result.stores);
-    let body = match emit::body(&stores) {
+    let de_option_early: i32 = f
+        .options
+        .iter()
+        .find(|(k, _)| k.eq_ignore_ascii_case("DEoption"))
+        .and_then(|(_, v)| v.trim().parse().ok())
+        .unwrap_or(0);
+    let body = match emit::body_with_derivative(&stores, emit::is_analytic(de_option_early)) {
         Ok(body) => body,
         Err(reason) => {
             eprintln!("{}: cannot be emitted — {reason}", f.name);
@@ -564,10 +570,7 @@ fn print_wgsl(f: &extract::Formula) {
     println!("        name: {:?},", f.name);
     println!("        source: {:?},", format!("{}.m3f", f.name));
     println!("        param_floats: {},", slots.len());
-    match emit::de_function(de_option) {
-        Ok(de) => println!("        de_function: {de},"),
-        Err(reason) => println!("        // UNRESOLVED de_function: {reason}"),
-    }
+    println!("        de_function: {},", emit::de_function(de_option));
     // MB3D formulas add their own J1..J3, where Mandelbulber leaves `+ c` to
     // the caller. Setting this true would add it twice.
     println!("        add_c: false,");
@@ -643,7 +646,15 @@ fn generate_file(formulas: &[extract::Formula], out: &std::path::Path) {
         if stores.is_empty() {
             continue;
         }
-        let Ok(body) = emit::body(&stores) else { continue };
+        let de_option: i32 = f
+            .options
+            .iter()
+            .find(|(k, _)| k.eq_ignore_ascii_case("DEoption"))
+            .and_then(|(_, v)| v.trim().parse().ok())
+            .unwrap_or(0);
+        let Ok(body) = emit::body_with_derivative(&stores, emit::is_analytic(de_option)) else {
+            continue;
+        };
         let Ok(declared) = options::declared(&f.options) else {
             continue;
         };
@@ -662,23 +673,19 @@ fn generate_file(formulas: &[extract::Formula], out: &std::path::Path) {
         {
             continue;
         }
-        let de_option: i32 = f
-            .options
-            .iter()
-            .find(|(k, _)| k.eq_ignore_ascii_case("DEoption"))
-            .and_then(|(_, v)| v.trim().parse().ok())
-            .unwrap_or(0);
-        // Until the analytic case is settled by rendering, everything takes
-        // the delta estimator: it measures the distance by sampling and needs
-        // no derivative from the formula at all, so it is right for the -1
-        // formulas and safe for the rest.
-        let _ = de_option;
-
+        // Prefixed, because thirteen MB3D names also exist in Mandelbulber's
+        // corpus — `Kalisets1` is in both — and a lookup by name returns
+        // whichever comes first. Without this the MB3D half is unreachable and
+        // silently answers with Mandelbulber's formula of the same name, which
+        // renders perfectly and is the wrong fractal.
         text.push_str("    GeneratedFormula {\n");
-        text.push_str(&format!("        name: {:?},\n", f.name));
+        text.push_str(&format!("        name: {:?},\n", format!("M3D {}", f.name)));
         text.push_str(&format!("        source: {:?},\n", format!("{}.m3f", f.name)));
         text.push_str(&format!("        param_floats: {},\n", slots.len().max(1)));
-        text.push_str("        de_function: DeFunction::Delta,\n");
+        text.push_str(&format!(
+            "        de_function: {},\n",
+            emit::de_function(de_option)
+        ));
         text.push_str("        add_c: false,\n");
         let bailout: f32 = f
             .options

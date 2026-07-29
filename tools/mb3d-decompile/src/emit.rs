@@ -140,7 +140,25 @@ fn locals_in(e: &Expr, into: &mut BTreeSet<i64>) {
 /// which is a shader that will not compile rather than one that is wrong.
 /// Zero is what the frame held anyway.
 pub fn body(stores: &[(Place, crate::expr::E)]) -> Result<String, String> {
+    body_with_derivative(stores, false)
+}
+
+/// The same, bridging MB3D's derivative convention when the formula uses one.
+///
+/// `//DEoption > 0 if analytic on X4` — a formula with a positive DEoption
+/// maintains its own derivative in the fourth component and expects to find
+/// the running value there. 3DM keeps it in `aux.de` instead, so it is handed
+/// over on the way in and taken back on the way out. Without that the formula
+/// differentiates whatever happened to be in `w`, which is a shape with a
+/// distance estimate belonging to something else.
+pub fn body_with_derivative(
+    stores: &[(Place, crate::expr::E)],
+    analytic: bool,
+) -> Result<String, String> {
     let mut out = String::new();
+    if analytic {
+        out.push_str("\t\tz.w = (*aux).de;\n");
+    }
     let mut slots: BTreeSet<i64> = BTreeSet::new();
     for (place, value) in stores {
         if let Place::Local(at) = place {
@@ -156,6 +174,9 @@ pub fn body(stores: &[(Place, crate::expr::E)]) -> Result<String, String> {
         let target = place_wgsl(place)?;
         let rendered = expression(value)?;
         out.push_str(&format!("\t\t{target} = {rendered};\n"));
+    }
+    if analytic {
+        out.push_str("\t\t(*aux).de = z.w;\n");
     }
     // 3DM wraps a body in a function returning the transformed vector, so the
     // body has to hand it back. Mandelbulber's transpiled bodies end the same
@@ -176,13 +197,22 @@ pub fn body(stores: &[(Place, crate::expr::E)]) -> Result<String, String> {
 /// guessed: 3DM keeps the derivative in `aux.de`, so an import has to move it
 /// out of `w`, and which closed form to pair it with is not recorded anywhere
 /// in the file. Rendering one and looking at it is the only way to settle it.
-pub fn de_function(de_option: i32) -> Result<&'static str, String> {
-    match de_option {
-        -1 => Ok("DeFunction::Delta"),
-        n if n > 0 => Err(format!(
-            "DEoption {n} keeps the derivative in w; the closed form to pair \
-             with that is not in the file and has to be settled by rendering"
-        )),
-        n => Err(format!("DEoption {n} is not documented")),
+pub fn de_function(de_option: i32) -> &'static str {
+    if de_option > 0 {
+        // MB3D's own estimator is `Rout * Ln(Rout) * scale / dr` with `Rout`
+        // the squared radius — the logarithmic form, and the same family as
+        // 3DM's. The derivative it divides by is the one the formula keeps in
+        // `w`, which `body_with_derivative` hands to `aux.de`.
+        "DeFunction::Logarithmic"
+    } else {
+        // No analytic derivative to use, so the distance is measured by
+        // sampling instead. That asks nothing of the formula and is right
+        // rather than merely safe here.
+        "DeFunction::Delta"
     }
+}
+
+/// Whether this formula maintains its own derivative.
+pub fn is_analytic(de_option: i32) -> bool {
+    de_option > 0
 }

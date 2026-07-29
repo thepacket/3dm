@@ -50716,10 +50716,10 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
     },
     // Mandelbulb 3D formulas, recovered by tools/mb3d-decompile.
     GeneratedFormula {
-        name: "ABoxMod1",
+        name: "M3D ABoxMod1",
         source: "ABoxMod1.m3f",
         param_floats: 8,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -50734,20 +50734,22 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		(*aux).actual_scale = select((*aux).actual_scale, __MB2P0__, ((*aux).i <= 0.0));
 		(*aux).actual_scale = ((*aux).actual_scale + ((abs((*aux).actual_scale) - 1.0) * __MB2P4__));
 		z.w = (z.w * select(select((*aux).actual_scale, ((*aux).actual_scale / (((((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__))) * ((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__)))) + (((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))) * ((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))))) + (((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__))) * ((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__)))))), (1.0 >= (((((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__))) * ((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__)))) + (((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))) * ((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))))) + (((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__))) * ((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__))))))), __MB2P1__, ((((((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__))) * ((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__)))) + (((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))) * ((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))))) + (((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__))) * ((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__))))) < __MB2P2__)));
 		z.z = ((((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__))) * select(select((*aux).actual_scale, ((*aux).actual_scale / (((((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__))) * ((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__)))) + (((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))) * ((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))))) + (((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__))) * ((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__)))))), (1.0 >= (((((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__))) * ((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__)))) + (((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))) * ((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))))) + (((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__))) * ((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__))))))), __MB2P1__, ((((((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__))) * ((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__)))) + (((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))) * ((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))))) + (((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__))) * ((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__))))) < __MB2P2__))) + (*aux).const_c.z);
 		z.y = ((((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))) * select(select((*aux).actual_scale, ((*aux).actual_scale / (((((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__))) * ((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__)))) + (((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))) * ((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))))) + (((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__))) * ((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__)))))), (1.0 >= (((((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__))) * ((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__)))) + (((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))) * ((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))))) + (((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__))) * ((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__))))))), __MB2P1__, ((((((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__))) * ((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__)))) + (((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))) * ((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))))) + (((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__))) * ((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__))))) < __MB2P2__))) + (*aux).const_c.x);
 		z.x = ((((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__))) * select(select((*aux).actual_scale, ((*aux).actual_scale / (((((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__))) * ((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__)))) + (((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))) * ((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))))) + (((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__))) * ((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__)))))), (1.0 >= (((((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__))) * ((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__)))) + (((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))) * ((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))))) + (((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__))) * ((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__))))))), __MB2P1__, ((((((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__))) * ((-(abs((abs((z.y + __MB2P6__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P6__)))) + (((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))) * ((-(abs((abs((z.x + __MB2P5__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P5__))))) + (((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__))) * ((-(abs((abs((z.z + __MB2P7__)) - __MB2P3__))) + __MB2P3__) + -(abs(__MB2P7__))))) < __MB2P2__))) + (*aux).const_c.y);
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "ABoxMod2",
+        name: "M3D ABoxMod2",
         source: "ABoxMod2.m3f",
         param_floats: 6,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -50760,18 +50762,20 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		z.w = (z.w * select(select(__MB2P0__, (__MB2P0__ / select(((__MB2P4__ * __MB2P4__) + ((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * (abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)))), ((((abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) - __MB2P5__) * (abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) - __MB2P5__)) + (__MB2P4__ * __MB2P4__)) + ((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * (abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)))), (abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) > __MB2P5__))), (1.0 >= select(((__MB2P4__ * __MB2P4__) + ((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * (abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)))), ((((abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) - __MB2P5__) * (abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) - __MB2P5__)) + (__MB2P4__ * __MB2P4__)) + ((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * (abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)))), (abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) > __MB2P5__)))), __MB2P1__, (select(((__MB2P4__ * __MB2P4__) + ((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * (abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)))), ((((abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) - __MB2P5__) * (abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) - __MB2P5__)) + (__MB2P4__ * __MB2P4__)) + ((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * (abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)))), (abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) > __MB2P5__)) < __MB2P2__)));
 		z.z = (((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z)) * select(select(__MB2P0__, (__MB2P0__ / select(((__MB2P4__ * __MB2P4__) + ((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * (abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)))), ((((abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) - __MB2P5__) * (abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) - __MB2P5__)) + (__MB2P4__ * __MB2P4__)) + ((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * (abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)))), (abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) > __MB2P5__))), (1.0 >= select(((__MB2P4__ * __MB2P4__) + ((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * (abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)))), ((((abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) - __MB2P5__) * (abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) - __MB2P5__)) + (__MB2P4__ * __MB2P4__)) + ((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * (abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)))), (abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) > __MB2P5__)))), __MB2P1__, (select(((__MB2P4__ * __MB2P4__) + ((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * (abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)))), ((((abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) - __MB2P5__) * (abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) - __MB2P5__)) + (__MB2P4__ * __MB2P4__)) + ((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * (abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)))), (abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) > __MB2P5__)) < __MB2P2__))) + (*aux).const_c.z);
 		z.y = ((__MB2P4__ * select(select(__MB2P0__, (__MB2P0__ / select(((__MB2P4__ * __MB2P4__) + ((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * (abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)))), ((((abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) - __MB2P5__) * (abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) - __MB2P5__)) + (__MB2P4__ * __MB2P4__)) + ((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * (abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)))), (abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) > __MB2P5__))), (1.0 >= select(((__MB2P4__ * __MB2P4__) + ((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * (abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)))), ((((abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) - __MB2P5__) * (abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) - __MB2P5__)) + (__MB2P4__ * __MB2P4__)) + ((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * (abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)))), (abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) > __MB2P5__)))), __MB2P1__, (select(((__MB2P4__ * __MB2P4__) + ((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * (abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)))), ((((abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) - __MB2P5__) * (abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) - __MB2P5__)) + (__MB2P4__ * __MB2P4__)) + ((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * (abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)))), (abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) > __MB2P5__)) < __MB2P2__))) + (*aux).const_c.y);
 		z.x = (((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * select(select(__MB2P0__, (__MB2P0__ / select(((__MB2P4__ * __MB2P4__) + ((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * (abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)))), ((((abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) - __MB2P5__) * (abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) - __MB2P5__)) + (__MB2P4__ * __MB2P4__)) + ((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * (abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)))), (abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) > __MB2P5__))), (1.0 >= select(((__MB2P4__ * __MB2P4__) + ((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * (abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)))), ((((abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) - __MB2P5__) * (abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) - __MB2P5__)) + (__MB2P4__ * __MB2P4__)) + ((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * (abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)))), (abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) > __MB2P5__)))), __MB2P1__, (select(((__MB2P4__ * __MB2P4__) + ((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * (abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)))), ((((abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) - __MB2P5__) * (abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) - __MB2P5__)) + (__MB2P4__ * __MB2P4__)) + ((abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)) * (abs((z.x + __MB2P3__)) - (abs((z.x - __MB2P3__)) + z.x)))), (abs((abs((z.z + __MB2P3__)) - (abs((z.z - __MB2P3__)) + z.z))) > __MB2P5__)) < __MB2P2__))) + (*aux).const_c.x);
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "ABoxVaryScale",
+        name: "M3D ABoxVaryScale",
         source: "ABoxVaryScale.m3f",
         param_floats: 6,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -50784,20 +50788,22 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		(*aux).actual_scale = select((*aux).actual_scale, __MB2P0__, ((*aux).i <= 0.0));
 		(*aux).actual_scale = ((*aux).actual_scale + ((abs((*aux).actual_scale) - 1.0) * __MB2P4__));
 		z.w = (z.w * select(select((*aux).actual_scale, ((*aux).actual_scale / exp2(((((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634) - round(((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634))) + round(((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634))))), (1.0 >= exp2(((((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634) - round(((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634))) + round(((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634)))))), __MB2P1__, (exp2(((((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634) - round(((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634))) + round(((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634)))) < __MB2P2__)));
 		z.z = ((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select((*aux).actual_scale, ((*aux).actual_scale / exp2(((((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634) - round(((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634))) + round(((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634))))), (1.0 >= exp2(((((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634) - round(((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634))) + round(((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634)))))), __MB2P1__, (exp2(((((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634) - round(((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634))) + round(((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634)))) < __MB2P2__))) + (*aux).const_c.z);
 		z.y = ((__MB2P3__ * select(select((*aux).actual_scale, ((*aux).actual_scale / exp2(((((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634) - round(((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634))) + round(((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634))))), (1.0 >= exp2(((((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634) - round(((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634))) + round(((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634)))))), __MB2P1__, (exp2(((((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634) - round(((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634))) + round(((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634)))) < __MB2P2__))) + (*aux).const_c.y);
 		z.x = (((__MB2P3__ + __MB2P3__) * select(select((*aux).actual_scale, ((*aux).actual_scale / exp2(((((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634) - round(((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634))) + round(((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634))))), (1.0 >= exp2(((((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634) - round(((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634))) + round(((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634)))))), __MB2P1__, (exp2(((((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634) - round(((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634))) + round(((log((((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__)))))))) + (__MB2P3__ * __MB2P3__)) + ((__MB2P3__ + __MB2P3__) * (__MB2P3__ + __MB2P3__)))) * __MB2P5__) * 1.4426950408889634)))) < __MB2P2__))) + (*aux).const_c.x);
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "ABoxVaryScale2",
+        name: "M3D ABoxVaryScale2",
         source: "ABoxVaryScale2.m3f",
         param_floats: 7,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -50811,20 +50817,22 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		(*aux).actual_scale = select((*aux).actual_scale, __MB2P0__, ((*aux).i <= 0.0));
 		(*aux).actual_scale = ((*aux).actual_scale + ((abs((*aux).actual_scale) - 1.0) * __MB2P4__));
 		z.w = (z.w * select(select((*aux).actual_scale, ((*aux).actual_scale / exp2(((((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634) - round(((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634))) + round(((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634))))), (1.0 >= exp2(((((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634) - round(((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634))) + round(((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634)))))), __MB2P1__, (exp2(((((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634) - round(((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634))) + round(((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634)))) < __MB2P2__)));
 		z.z = ((select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))) * select(select((*aux).actual_scale, ((*aux).actual_scale / exp2(((((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634) - round(((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634))) + round(((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634))))), (1.0 >= exp2(((((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634) - round(((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634))) + round(((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634)))))), __MB2P1__, (exp2(((((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634) - round(((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634))) + round(((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634)))) < __MB2P2__))) + (*aux).const_c.z);
 		z.y = ((__MB2P3__ * select(select((*aux).actual_scale, ((*aux).actual_scale / exp2(((((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634) - round(((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634))) + round(((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634))))), (1.0 >= exp2(((((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634) - round(((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634))) + round(((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634)))))), __MB2P1__, (exp2(((((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634) - round(((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634))) + round(((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634)))) < __MB2P2__))) + (*aux).const_c.y);
 		z.x = (((__MB2P3__ + __MB2P3__) * select(select((*aux).actual_scale, ((*aux).actual_scale / exp2(((((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634) - round(((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634))) + round(((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634))))), (1.0 >= exp2(((((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634) - round(((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634))) + round(((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634)))))), __MB2P1__, (exp2(((((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634) - round(((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634))) + round(((log(abs(((exp2(((((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(select(select(z.z, (-(z.z) - (__MB2P3__ + __MB2P3__)), (z.z < select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))), (-(z.z) + (__MB2P3__ + __MB2P3__)), (z.z >= select(select(z.y, (-(z.y) - (__MB2P3__ + __MB2P3__)), (z.y < select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))), (-(z.y) + (__MB2P3__ + __MB2P3__)), (z.y >= select(select(z.x, (-(z.x) - (__MB2P3__ + __MB2P3__)), (z.x < -(__MB2P3__))), (-(z.x) + (__MB2P3__ + __MB2P3__)), (z.x >= -(__MB2P3__))))))))) * __MB2P6__) * 1.4426950408889634)))) + exp2(((((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634) - round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs(__MB2P3__)) * __MB2P6__) * 1.4426950408889634))))) + exp2(((((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634) - round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))) + round(((log(abs((__MB2P3__ + __MB2P3__))) * __MB2P6__) * 1.4426950408889634))))))) * __MB2P5__) * 1.4426950408889634)))) < __MB2P2__))) + (*aux).const_c.x);
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "ATetraVS2",
+        name: "M3D ATetraVS2",
         source: "ATetraVS2.m3f",
         param_floats: 6,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -50837,6 +50845,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		(*aux).actual_scale = select((*aux).actual_scale, __MB2P0__, ((*aux).i <= 0.0));
 		(*aux).actual_scale = ((*aux).actual_scale + ((abs((*aux).actual_scale) - 1.0) * __MB2P4__));
 		z.y = select(select(z.y, (-((((z.x + (__MB2P3__ * -0.7071067811865476)) - (__MB2P3__ * -0.7071067811865476)) - (__MB2P3__ * -0.7071067811865476))) + (__MB2P3__ * -0.7071067811865476)), (0.0 >= ((((z.x + (__MB2P3__ * -0.7071067811865476)) - (__MB2P3__ * -0.7071067811865476)) - (__MB2P3__ * -0.7071067811865476)) + (((z.y + (__MB2P3__ * -0.7071067811865476)) - (__MB2P3__ * -0.7071067811865476)) - (__MB2P3__ * -0.7071067811865476))))), (-((z.x + (__MB2P3__ * -0.7071067811865476))) - (__MB2P3__ * -0.7071067811865476)), (0.0 <= ((z.x + (__MB2P3__ * -0.7071067811865476)) + (z.y + (__MB2P3__ * -0.7071067811865476)))));
@@ -50849,14 +50858,15 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 		z.z = ((z.x * select(select((*aux).actual_scale, ((*aux).actual_scale / ((((z.x * z.x) + (z.y * z.y)) + (z.z * z.z)) * __MB2P5__)), (1.0 >= ((((z.x * z.x) + (z.y * z.y)) + (z.z * z.z)) * __MB2P5__))), __MB2P1__, (((((z.x * z.x) + (z.y * z.y)) + (z.z * z.z)) * __MB2P5__) < __MB2P2__))) + (*aux).const_c.z);
 		z.y = ((z.y * select(select((*aux).actual_scale, ((*aux).actual_scale / ((((z.x * z.x) + (z.y * z.y)) + (z.z * z.z)) * __MB2P5__)), (1.0 >= ((((z.x * z.x) + (z.y * z.y)) + (z.z * z.z)) * __MB2P5__))), __MB2P1__, (((((z.x * z.x) + (z.y * z.y)) + (z.z * z.z)) * __MB2P5__) < __MB2P2__))) + (*aux).const_c.y);
 		z.x = ((z.z * select(select((*aux).actual_scale, ((*aux).actual_scale / ((((z.x * z.x) + (z.y * z.y)) + (z.z * z.z)) * __MB2P5__)), (1.0 >= ((((z.x * z.x) + (z.y * z.y)) + (z.z * z.z)) * __MB2P5__))), __MB2P1__, (((((z.x * z.x) + (z.y * z.y)) + (z.z * z.z)) * __MB2P5__) < __MB2P2__))) + (*aux).const_c.x);
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "Aexion1",
+        name: "M3D Aexion1",
         source: "Aexion1.m3f",
         param_floats: 1,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -50864,6 +50874,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		z.x = select(z.x, (abs(((z.x + z.y) + z.z)) + __MB2P0__), ((*aux).i == 0.0));
 		z.y = select(z.y, (abs(((z.z - z.x) - z.y)) + __MB2P0__), ((*aux).i == 0.0));
 		z.z = select(z.z, (abs(((z.y - z.x) - z.z)) + __MB2P0__), ((*aux).i == 0.0));
@@ -50876,11 +50887,12 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 		z.y = ((((z.z * z.w) + (z.z * z.w)) - ((z.x * z.x) - (z.y * z.y))) + (*aux).const_c.y);
 		z.z = (((z.w - (((z.x * z.y) + (z.x * z.y)) * ((z.x * z.y) + (z.x * z.y)))) + z.z) + (*aux).const_c.z);
 		z.w = ((z.z - (z.w - (((z.x * z.y) + (z.x * z.y)) * ((z.x * z.y) + (z.x * z.y))))) + (*aux).const_c.w);
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "BPine_only",
+        name: "M3D BPine_only",
         source: "BPine_only.m3f",
         param_floats: 3,
         de_function: DeFunction::Delta,
@@ -50908,7 +50920,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "BT2Pine",
+        name: "M3D BT2Pine",
         source: "BT2Pine.m3f",
         param_floats: 5,
         de_function: DeFunction::Delta,
@@ -50950,10 +50962,10 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "Barnsley2_4Dc",
+        name: "M3D Barnsley2_4Dc",
         source: "Barnsley2_4Dc.m3f",
         param_floats: 8,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -50968,6 +50980,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		z.x = select((z.x - __MB2P0__), (z.x + __MB2P0__), (__MB2P7__ <= (((z.x * (*aux).const_c.y) * __MB2P5__) + ((z.y * (*aux).const_c.x) * __MB2P6__))));
 		z.y = select((z.y - __MB2P1__), (z.y + __MB2P1__), (__MB2P7__ <= (((z.x * (*aux).const_c.y) * __MB2P5__) + ((z.y * (*aux).const_c.x) * __MB2P6__))));
 		z.z = select((z.z - __MB2P2__), (z.z + __MB2P2__), (__MB2P7__ <= (((z.x * (*aux).const_c.y) * __MB2P5__) + ((z.y * (*aux).const_c.x) * __MB2P6__))));
@@ -50976,14 +50989,15 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 		z.z = ((((z.z * (*aux).const_c.x) + -((z.w * (*aux).const_c.y))) + (z.x * (*aux).const_c.z)) + -((z.y * (*aux).const_c.w)));
 		z.y = ((((z.y * (*aux).const_c.x) + (z.x * (*aux).const_c.y)) + -((z.w * (*aux).const_c.z))) + -((z.z * (*aux).const_c.w)));
 		z.x = ((((z.x * (*aux).const_c.x) + -((z.y * (*aux).const_c.y))) + -((z.z * (*aux).const_c.z))) + (z.w * (*aux).const_c.w));
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "Barnsley2_4Dnc",
+        name: "M3D Barnsley2_4Dnc",
         source: "Barnsley2_4Dnc.m3f",
         param_floats: 8,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -50998,6 +51012,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		z.x = select((z.x - __MB2P0__), (z.x + __MB2P0__), (__MB2P7__ <= (((z.x * (*aux).const_c.y) * __MB2P5__) + ((z.y * (*aux).const_c.x) * __MB2P6__))));
 		z.y = select((z.y - __MB2P1__), (z.y + __MB2P1__), (__MB2P7__ <= (((z.x * (*aux).const_c.y) * __MB2P5__) + ((z.y * (*aux).const_c.x) * __MB2P6__))));
 		z.z = select((z.z - __MB2P2__), (z.z + __MB2P2__), (__MB2P7__ <= (((z.x * (*aux).const_c.y) * __MB2P5__) + ((z.y * (*aux).const_c.x) * __MB2P6__))));
@@ -51006,11 +51021,12 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 		z.z = ((((z.x * (*aux).const_c.z) + -((z.y * (*aux).const_c.w))) + (z.z * (*aux).const_c.x)) + (z.w * (*aux).const_c.y));
 		z.y = ((((z.x * (*aux).const_c.y) + (z.y * (*aux).const_c.x)) + (z.z * (*aux).const_c.w)) + -((z.w * (*aux).const_c.z)));
 		z.x = ((((z.x * (*aux).const_c.x) + -((z.y * (*aux).const_c.y))) + -((z.z * (*aux).const_c.z))) + -((z.w * (*aux).const_c.w)));
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "Benesi1Pow2",
+        name: "M3D Benesi1Pow2",
         source: "Benesi1Pow2.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -51027,7 +51043,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "Benesi2Pow2",
+        name: "M3D Benesi2Pow2",
         source: "Benesi2Pow2.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -51044,7 +51060,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "Benesi2Pow6",
+        name: "M3D Benesi2Pow6",
         source: "Benesi2Pow6.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -51061,7 +51077,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "BenesiPine1",
+        name: "M3D BenesiPine1",
         source: "BenesiPine1.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -51099,7 +51115,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "BenesiPine2",
+        name: "M3D BenesiPine2",
         source: "BenesiPine2.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -51138,7 +51154,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "Beth322",
+        name: "M3D Beth322",
         source: "Beth322.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -51155,7 +51171,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "Beth323",
+        name: "M3D Beth323",
         source: "Beth323.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -51186,7 +51202,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "Beth432",
+        name: "M3D Beth432",
         source: "Beth432.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -51203,10 +51219,10 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "Beth641",
+        name: "M3D Beth641",
         source: "Beth641.m3f",
         param_floats: 1,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -51214,15 +51230,17 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		z.x = (((((((((z.w * z.w) + (z.z * z.z)) + (z.y * z.y)) * (z.x * z.x)) * -10.0) + (((((z.w * z.w) * (z.w * z.w)) + ((z.y * z.y) * (z.y * z.y))) + ((z.z * z.z) * (z.z * z.z))) * 5.0)) + (((z.x * z.x) * (z.x * z.x)) * 3.0)) * z.x) + (*aux).const_c.x);
 		z.y = (((((((((z.w * z.w) * (z.w * z.w)) + ((z.x * z.x) * (z.x * z.x))) + ((z.z * z.z) * (z.z * z.z))) * 5.0) + (((((z.w * z.w) + (z.z * z.z)) + (z.x * z.x)) * (z.y * z.y)) * -10.0)) + (((z.y * z.y) * (z.y * z.y)) * 3.0)) * z.y) + (*aux).const_c.y);
 		z.z = (((((((((z.w * z.w) * (z.w * z.w)) + ((z.x * z.x) * (z.x * z.x))) + ((z.y * z.y) * (z.y * z.y))) * 5.0) + (((((z.w * z.w) + (z.y * z.y)) + (z.x * z.x)) * (z.z * z.z)) * -10.0)) + (((z.z * z.z) * (z.z * z.z)) * 3.0)) * z.z) + (*aux).const_c.z);
 		z.w = (((((z.w * z.w) + (((((((z.z * z.z) * (z.z * z.z)) + (((z.y * z.y) * (z.y * z.y)) + ((z.x * z.x) * (z.x * z.x)))) * 5.0) + (((z.w * z.w) * (z.w * z.w)) * 3.0)) * (((z.z * z.z) + (z.x * z.x)) + (z.y * z.y))) * -10.0)) * z.w) + (*aux).const_c.w) + __MB2P0__);
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "BristorBrot",
+        name: "M3D BristorBrot",
         source: "BristorBrot.m3f",
         param_floats: 3,
         de_function: DeFunction::Delta,
@@ -51242,7 +51260,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "BulboxP-2",
+        name: "M3D BulboxP-2",
         source: "BulboxP-2.m3f",
         param_floats: 10,
         de_function: DeFunction::Delta,
@@ -51291,10 +51309,10 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "CommQuat",
+        name: "M3D CommQuat",
         source: "CommQuat.m3f",
         param_floats: 5,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -51306,15 +51324,17 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		z.x = (((((z.x * z.x) - (z.y * z.y)) - ((z.w * z.z) + (z.w * z.z))) * __MB2P0__) + (*aux).const_c.x);
 		z.y = ((((((z.x * z.y) + (z.x * z.y)) + (z.z * z.z)) - (z.w * z.w)) * __MB2P1__) + (*aux).const_c.y);
 		z.z = (((((z.x * z.z) - (z.y * z.w)) + ((z.x * z.z) - (z.y * z.w))) * __MB2P2__) + (*aux).const_c.z);
 		z.w = ((((((z.w * z.x) + (z.z * z.y)) + ((z.w * z.x) + (z.z * z.y))) * __MB2P3__) + __MB2P4__) + (*aux).const_c.w);
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "CosinePow2",
+        name: "M3D CosinePow2",
         source: "CosinePow2.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -51332,7 +51352,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "CosinePow8",
+        name: "M3D CosinePow8",
         source: "CosinePow8.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -51350,10 +51370,10 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "CubicQuat",
+        name: "M3D CubicQuat",
         source: "CubicQuat.m3f",
         param_floats: 7,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -51367,15 +51387,17 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		z.w = (((((z.x * z.w) * __MB2P3__) + ((z.x * z.w) * __MB2P3__)) + __MB2P4__) + (*aux).const_c.w);
 		z.z = ((((z.x * z.z) * __MB2P2__) + ((z.x * z.z) * __MB2P2__)) + (*aux).const_c.z);
 		z.y = (((((z.x * z.y) * __MB2P1__) + ((z.x * z.y) * __MB2P1__)) + (*aux).const_c.y) + ((*aux).const_c.x * __MB2P6__));
 		z.x = (((-((((z.y * z.y) * __MB2P1__) + (((z.z * z.z) * __MB2P2__) + ((z.w * z.w) * __MB2P3__)))) + ((z.x * z.x) * __MB2P0__)) + (*aux).const_c.x) + ((*aux).const_c.y * __MB2P5__));
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "Faehrten",
+        name: "M3D Faehrten",
         source: "Faehrten.m3f",
         param_floats: 4,
         de_function: DeFunction::Delta,
@@ -51396,10 +51418,10 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "Hopf4D",
+        name: "M3D Hopf4D",
         source: "Hopf4D.m3f",
         param_floats: 2,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -51408,6 +51430,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		var t16: f32 = 0.0;
 		var t8: f32 = 0.0;
 		t8 = (-((((z.z * z.z) + (z.w * z.w)) / ((z.x * z.x) + (z.y * z.y)))) + 1.0);
@@ -51416,11 +51439,12 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 		z.z = (((((z.z * z.z) - (z.w * z.w)) * t16) * __MB2P1__) + (*aux).const_c.z);
 		z.y = ((((z.x * z.y) * t8) + ((z.x * z.y) * t8)) + (*aux).const_c.y);
 		z.x = ((((z.x * z.x) - (z.y * z.y)) * t8) + (*aux).const_c.x);
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "IQ-bulb",
+        name: "M3D IQ-bulb",
         source: "IQ-bulb.m3f",
         param_floats: 5,
         de_function: DeFunction::Delta,
@@ -51456,7 +51480,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "IQ_NormBulb",
+        name: "M3D IQ_NormBulb",
         source: "IQ_NormBulb.m3f",
         param_floats: 5,
         de_function: DeFunction::Delta,
@@ -51492,7 +51516,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "IQ_NormBulb_NoYZ",
+        name: "M3D IQ_NormBulb_NoYZ",
         source: "IQ_NormBulb_NoYZ.m3f",
         param_floats: 5,
         de_function: DeFunction::Delta,
@@ -51528,7 +51552,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "IQ_PineTree",
+        name: "M3D IQ_PineTree",
         source: "IQ_PineTree.m3f",
         param_floats: 5,
         de_function: DeFunction::Delta,
@@ -51564,7 +51588,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "IQ_PineTree_NoYZ",
+        name: "M3D IQ_PineTree_NoYZ",
         source: "IQ_PineTree_NoYZ.m3f",
         param_floats: 5,
         de_function: DeFunction::Delta,
@@ -51600,7 +51624,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "IdesFormula",
+        name: "M3D IdesFormula",
         source: "IdesFormula.m3f",
         param_floats: 5,
         de_function: DeFunction::Delta,
@@ -51622,10 +51646,10 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "JCube3",
+        name: "M3D JCube3",
         source: "JCube3.m3f",
         param_floats: 9,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -51641,6 +51665,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		var t0: f32 = 0.0;
 		var t8: f32 = 0.0;
 		var t16: f32 = 0.0;
@@ -51654,11 +51679,12 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 		z.x = select((((select(select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), (select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))) >= select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))))) - __MB2P5__) * t0) + __MB2P5__), select(select(select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), (select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))) >= select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))))), (((select(select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), (select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))) >= select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))))) - __MB2P2__) * t8) + __MB2P2__), (select(select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), (select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))) >= select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))))) > (select(select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), (select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))) >= select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))))) + t24))), (t16 > select(select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), (select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))) >= select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y))))))));
 		z.y = select((((select(select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), (select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))) >= select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))))) - __MB2P6__) * t0) + __MB2P6__), select(select(select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), (select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))) >= select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))))), (((select(select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), (select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))) >= select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))))) - __MB2P3__) * t8) + __MB2P3__), (select(select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), (select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))) >= select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))))) > (select(select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), (select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))) >= select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))))) + t24))), (t16 > select(select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), (select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))) >= select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y))))))));
 		z.z = select((((z.z - __MB2P7__) * t0) + __MB2P7__), select(z.z, (((z.z - __MB2P4__) * t8) + __MB2P4__), (select(select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), (select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))) >= select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))))) > (select(select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), (select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))) >= select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))))) + t24))), (t16 > select(select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))), (select(select(z.y, z.x, (z.x >= z.y)), select(z.x, z.y, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y)))) >= select(select(z.x, z.y, (z.x >= z.y)), select(z.y, z.x, (z.x >= z.y)), (select(z.x, z.y, (z.x >= z.y)) < select(z.y, z.x, (z.x >= z.y))))))));
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "Kalisets1",
+        name: "M3D Kalisets1",
         source: "Kalisets1.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -51677,10 +51703,10 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "Lambda4Dc",
+        name: "M3D Lambda4Dc",
         source: "Lambda4Dc.m3f",
         param_floats: 4,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -51691,6 +51717,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		z.w = (((-((z.x * z.w)) + -((z.x * z.w))) + (-((z.y * z.z)) + -((z.y * z.z)))) + __MB2P3__);
 		z.z = (((-((z.x * z.z)) + -((z.x * z.z))) + ((z.y * z.w) + (z.y * z.w))) + __MB2P2__);
 		z.y = (((-((z.x * z.y)) + -((z.x * z.y))) + ((z.z * z.w) + (z.z * z.w))) + __MB2P1__);
@@ -51699,14 +51726,15 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 		z.z = ((((z.z * (*aux).const_c.x) + -((z.w * (*aux).const_c.y))) + (z.x * (*aux).const_c.z)) + -((z.y * (*aux).const_c.w)));
 		z.y = ((((z.y * (*aux).const_c.x) + (z.x * (*aux).const_c.y)) + -((z.w * (*aux).const_c.z))) + -((z.z * (*aux).const_c.w)));
 		z.x = ((((z.x * (*aux).const_c.x) + -((z.y * (*aux).const_c.y))) + -((z.z * (*aux).const_c.z))) + (z.w * (*aux).const_c.w));
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "Lambda4Dnc",
+        name: "M3D Lambda4Dnc",
         source: "Lambda4Dnc.m3f",
         param_floats: 4,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -51717,6 +51745,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		z.w = ((-((z.x * z.w)) + -((z.x * z.w))) + __MB2P3__);
 		z.z = ((-((z.x * z.z)) + -((z.x * z.z))) + __MB2P2__);
 		z.y = ((-((z.x * z.y)) + -((z.x * z.y))) + __MB2P1__);
@@ -51725,11 +51754,12 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 		z.z = ((((z.x * (*aux).const_c.z) + -((z.y * (*aux).const_c.w))) + (z.z * (*aux).const_c.x)) + (z.w * (*aux).const_c.y));
 		z.y = ((((z.x * (*aux).const_c.y) + (z.y * (*aux).const_c.x)) + (z.z * (*aux).const_c.w)) + -((z.w * (*aux).const_c.z)));
 		z.x = ((((z.x * (*aux).const_c.x) + -((z.y * (*aux).const_c.y))) + -((z.z * (*aux).const_c.z))) + -((z.w * (*aux).const_c.w)));
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "MagVsXYZ",
+        name: "M3D MagVsXYZ",
         source: "MagVsXYZ.m3f",
         param_floats: 7,
         de_function: DeFunction::Delta,
@@ -51773,7 +51803,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "MagVsXYZabs",
+        name: "M3D MagVsXYZabs",
         source: "MagVsXYZabs.m3f",
         param_floats: 7,
         de_function: DeFunction::Delta,
@@ -51817,7 +51847,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "MagVsXYZabs2",
+        name: "M3D MagVsXYZabs2",
         source: "MagVsXYZabs2.m3f",
         param_floats: 7,
         de_function: DeFunction::Delta,
@@ -51861,7 +51891,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "MagVsXYZabs3",
+        name: "M3D MagVsXYZabs3",
         source: "MagVsXYZabs3.m3f",
         param_floats: 7,
         de_function: DeFunction::Delta,
@@ -51905,7 +51935,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "MagVsXYZmsw",
+        name: "M3D MagVsXYZmsw",
         source: "MagVsXYZmsw.m3f",
         param_floats: 7,
         de_function: DeFunction::Delta,
@@ -51952,7 +51982,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "Makin-NSR-tri",
+        name: "M3D Makin-NSR-tri",
         source: "Makin-NSR-tri.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -51988,7 +52018,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "Makin3D-1",
+        name: "M3D Makin3D-1",
         source: "Makin3D-1.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -52005,7 +52035,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "Makin3D-2",
+        name: "M3D Makin3D-2",
         source: "Makin3D-2.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -52022,7 +52052,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "Makin3D-3-4",
+        name: "M3D Makin3D-3-4",
         source: "Makin3D-3-4.m3f",
         param_floats: 3,
         de_function: DeFunction::Delta,
@@ -52042,10 +52072,10 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "Makin4D p2b",
+        name: "M3D Makin4D p2b",
         source: "Makin4D p2b.m3f",
         param_floats: 1,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -52053,6 +52083,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		z.y = (((z.x * z.y) + (z.x * z.y)) + ((z.x * z.y) + (z.x * z.y)));
 		z.x = (((z.x * z.x) - (z.y * z.y)) + ((z.x * z.x) - (z.y * z.y)));
 		z.x = (z.x * (-(((((z.x * z.x) + (z.y * z.y)) + ((z.z * z.z) + (z.w * z.w))) / sqrt(((z.x * z.x) + (z.y * z.y))))) + 1.0));
@@ -52063,14 +52094,15 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 		z.y = ((*aux).const_c.y + z.y);
 		z.z = ((*aux).const_c.z + z.z);
 		z.w = (((*aux).const_c.w + __MB2P0__) + z.w);
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "Makin4D p4b",
+        name: "M3D Makin4D p4b",
         source: "Makin4D p4b.m3f",
         param_floats: 1,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -52078,6 +52110,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		z.y = (((z.x * z.y) + (z.x * z.y)) + ((z.x * z.y) + (z.x * z.y)));
 		z.x = (((z.x * z.x) - (z.y * z.y)) + ((z.x * z.x) - (z.y * z.y)));
 		z.x = (z.x * (-(((((z.x * z.x) + (z.y * z.y)) + ((z.z * z.z) + (z.w * z.w))) / sqrt(((z.x * z.x) + (z.y * z.y))))) + 1.0));
@@ -52094,14 +52127,15 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 		z.y = ((*aux).const_c.y + z.y);
 		z.z = ((*aux).const_c.z + z.z);
 		z.w = (((*aux).const_c.w + __MB2P0__) + z.w);
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "Makin4D p8b",
+        name: "M3D Makin4D p8b",
         source: "Makin4D p8b.m3f",
         param_floats: 2,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -52110,6 +52144,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		z.y = (((z.x * z.y) + (z.x * z.y)) + ((z.x * z.y) + (z.x * z.y)));
 		z.x = (((z.x * z.x) - (z.y * z.y)) + ((z.x * z.x) - (z.y * z.y)));
 		z.x = (z.x * (-(((((z.x * z.x) + (z.y * z.y)) + ((z.z * z.z) + (z.w * z.w))) / sqrt(((z.x * z.x) + (z.y * z.y))))) + 1.0));
@@ -52132,14 +52167,15 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 		z.y = ((*aux).const_c.y + z.y);
 		z.z = ((*aux).const_c.z + z.z);
 		z.w = (((*aux).const_c.w + __MB2P0__) + z.w);
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "Mandel4DBiC",
+        name: "M3D Mandel4DBiC",
         source: "Mandel4DBiC.m3f",
         param_floats: 1,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -52147,15 +52183,17 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		z.w = ((((z.z * z.w) + (z.z * z.w)) + (*aux).const_c.w) + __MB2P0__);
 		z.z = (((z.z * z.z) - (z.w * z.w)) + (*aux).const_c.z);
 		z.y = (((z.x * z.y) + (z.x * z.y)) + (*aux).const_c.y);
 		z.x = (((z.x * z.x) - (z.y * z.y)) + (*aux).const_c.x);
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "MandelView",
+        name: "M3D MandelView",
         source: "MandelView.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -52188,10 +52226,10 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "MandyCousin",
+        name: "M3D MandyCousin",
         source: "MandyCousin.m3f",
         param_floats: 6,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -52204,18 +52242,20 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		z.w = (((((z.x * z.w) + (z.y * z.z)) * __MB2P4__) + (*aux).const_c.w) + __MB2P5__);
 		z.z = ((((z.x * z.z) * __MB2P2__) + ((z.y * z.w) * __MB2P3__)) + (*aux).const_c.z);
 		z.y = ((((z.x * z.y) + (z.z * z.w)) * __MB2P1__) + (*aux).const_c.y);
 		z.x = ((((((z.x * z.x) + -((z.y * z.y))) + -((z.z * z.z))) + (z.w * z.w)) * __MB2P0__) + (*aux).const_c.x);
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "MandyCousin2",
+        name: "M3D MandyCousin2",
         source: "MandyCousin2.m3f",
         param_floats: 6,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -52228,18 +52268,20 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		z.w = (((((z.x * z.w) + (z.y * z.z)) * __MB2P4__) + (*aux).const_c.w) + __MB2P5__);
 		z.z = ((((z.x * z.z) * __MB2P2__) + ((z.y * z.w) * __MB2P3__)) + (*aux).const_c.z);
 		z.y = ((((z.x * z.y) - (z.z * z.w)) * __MB2P1__) + (*aux).const_c.y);
 		z.x = ((((((z.x * z.x) + -((z.y * z.y))) + -((z.z * z.z))) - (z.w * z.w)) * __MB2P0__) + (*aux).const_c.x);
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "MandyCousin3",
+        name: "M3D MandyCousin3",
         source: "MandyCousin3.m3f",
         param_floats: 6,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -52252,15 +52294,17 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		z.w = (((((z.x * z.w) - (z.y * z.z)) * __MB2P4__) + (*aux).const_c.w) + __MB2P5__);
 		z.z = ((((z.x * z.z) * __MB2P2__) + ((z.y * z.w) * __MB2P3__)) + (*aux).const_c.z);
 		z.y = ((((z.x * z.y) + (z.z * z.w)) * __MB2P1__) + (*aux).const_c.y);
 		z.x = ((((((z.x * z.x) + -((z.y * z.y))) + (z.z * z.z)) + (z.w * z.w)) * __MB2P0__) + (*aux).const_c.x);
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "MsltoeFoldQuat",
+        name: "M3D MsltoeFoldQuat",
         source: "MsltoeFoldQuat.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -52277,7 +52321,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "PseudoXDB",
+        name: "M3D PseudoXDB",
         source: "PseudoXDB.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -52295,25 +52339,27 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "QuadrayBrot",
+        name: "M3D QuadrayBrot",
         source: "QuadrayBrot.m3f",
         param_floats: 1,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		z.w = (((abs((((*aux).const_c.x - (*aux).const_c.y) - (*aux).const_c.z)) - (z.z * z.z)) + (z.w * z.w)) + ((z.x * z.y) + (z.x * z.y)));
 		z.z = (((abs(((-((*aux).const_c.x) + (*aux).const_c.y) - (*aux).const_c.z)) + (z.z * z.z)) - (z.w * z.w)) + ((z.x * z.y) + (z.x * z.y)));
 		z.y = (((abs(((-((*aux).const_c.x) - (*aux).const_c.y) + (*aux).const_c.z)) + (z.y * z.y)) - (z.x * z.x)) + ((z.w * z.z) + (z.w * z.z)));
 		z.x = (((abs((((*aux).const_c.x + (*aux).const_c.y) + (*aux).const_c.z)) + (z.x * z.x)) - (z.y * z.y)) + ((z.w * z.z) + (z.w * z.z)));
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "QuickDudley",
+        name: "M3D QuickDudley",
         source: "QuickDudley.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -52330,7 +52376,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "QuickDudleyKM",
+        name: "M3D QuickDudleyKM",
         source: "QuickDudleyKM.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -52347,7 +52393,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "RuckerBrot1",
+        name: "M3D RuckerBrot1",
         source: "RuckerBrot1.m3f",
         param_floats: 4,
         de_function: DeFunction::Delta,
@@ -52368,7 +52414,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_Abs4d",
+        name: "M3D _Abs4d",
         source: "_Abs4d.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -52386,7 +52432,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_AbsX",
+        name: "M3D _AbsX",
         source: "_AbsX.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -52402,7 +52448,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_AbsY",
+        name: "M3D _AbsY",
         source: "_AbsY.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -52418,7 +52464,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_AbsZ",
+        name: "M3D _AbsZ",
         source: "_AbsZ.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -52434,10 +52480,10 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_AmazingBox",
+        name: "M3D _AmazingBox",
         source: "_AmazingBox.m3f",
         param_floats: 3,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -52447,15 +52493,17 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		z.w = (z.w * select(select(__MB2P0__, (__MB2P0__ / ((((abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z)) * (abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z))) + ((abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)) * (abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)))) + ((abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x)) * (abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x))))), (1.0 >= ((((abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z)) * (abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z))) + ((abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)) * (abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)))) + ((abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x)) * (abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x)))))), __MB2P1__, (((((abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z)) * (abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z))) + ((abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)) * (abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)))) + ((abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x)) * (abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x)))) < __MB2P2__)));
 		z.z = ((abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z)) * select(select(__MB2P0__, (__MB2P0__ / ((((abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z)) * (abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z))) + ((abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)) * (abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)))) + ((abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x)) * (abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x))))), (1.0 >= ((((abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z)) * (abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z))) + ((abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)) * (abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)))) + ((abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x)) * (abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x)))))), __MB2P1__, (((((abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z)) * (abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z))) + ((abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)) * (abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)))) + ((abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x)) * (abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x)))) < __MB2P2__)));
 		z.y = ((abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)) * select(select(__MB2P0__, (__MB2P0__ / ((((abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z)) * (abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z))) + ((abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)) * (abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)))) + ((abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x)) * (abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x))))), (1.0 >= ((((abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z)) * (abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z))) + ((abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)) * (abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)))) + ((abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x)) * (abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x)))))), __MB2P1__, (((((abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z)) * (abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z))) + ((abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)) * (abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)))) + ((abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x)) * (abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x)))) < __MB2P2__)));
 		z.x = ((abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x)) * select(select(__MB2P0__, (__MB2P0__ / ((((abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z)) * (abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z))) + ((abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)) * (abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)))) + ((abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x)) * (abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x))))), (1.0 >= ((((abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z)) * (abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z))) + ((abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)) * (abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)))) + ((abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x)) * (abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x)))))), __MB2P1__, (((((abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z)) * (abs((z.z + 1.0)) - (abs((z.z - 1.0)) + z.z))) + ((abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)) * (abs((z.y + 1.0)) - (abs((z.y - 1.0)) + z.y)))) + ((abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x)) * (abs((z.x + 1.0)) - (abs((z.x - 1.0)) + z.x)))) < __MB2P2__)));
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "_BRotateFromMag",
+        name: "M3D _BRotateFromMag",
         source: "_BRotateFromMag.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -52478,7 +52526,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_BRotateToMag",
+        name: "M3D _BRotateToMag",
         source: "_BRotateToMag.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -52498,7 +52546,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_BSkewXmaxV1",
+        name: "M3D _BSkewXmaxV1",
         source: "_BSkewXmaxV1.m3f",
         param_floats: 9,
         de_function: DeFunction::Delta,
@@ -52526,7 +52574,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_BT1_4D_Transform1",
+        name: "M3D _BT1_4D_Transform1",
         source: "_BT1_4D_Transform1.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -52559,7 +52607,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_BT1_4D_clampXYZ",
+        name: "M3D _BT1_4D_clampXYZ",
         source: "_BT1_4D_clampXYZ.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -52596,7 +52644,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_BT1_Transform1",
+        name: "M3D _BT1_Transform1",
         source: "_BT1_Transform1.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -52624,7 +52672,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_BT2_Transform2",
+        name: "M3D _BT2_Transform2",
         source: "_BT2_Transform2.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -52654,7 +52702,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_BT3_Transform3",
+        name: "M3D _BT3_Transform3",
         source: "_BT3_Transform3.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -52684,7 +52732,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_BT4_Transform4",
+        name: "M3D _BT4_Transform4",
         source: "_BT4_Transform4.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -52714,7 +52762,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_BT5b_Transform5b",
+        name: "M3D _BT5b_Transform5b",
         source: "_BT5b_Transform5b.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -52744,7 +52792,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_BenesiSpheric",
+        name: "M3D _BenesiSpheric",
         source: "_BenesiSpheric.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -52770,7 +52818,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_BenesiT1",
+        name: "M3D _BenesiT1",
         source: "_BenesiT1.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -52798,7 +52846,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_BenesiT2",
+        name: "M3D _BenesiT2",
         source: "_BenesiT2.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -52828,7 +52876,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_BenesiT3",
+        name: "M3D _BenesiT3",
         source: "_BenesiT3.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -52858,7 +52906,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_BenesiUnSpheric",
+        name: "M3D _BenesiUnSpheric",
         source: "_BenesiUnSpheric.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -52886,7 +52934,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_CelticMode",
+        name: "M3D _CelticMode",
         source: "_CelticMode.m3f",
         param_floats: 4,
         de_function: DeFunction::Delta,
@@ -52906,7 +52954,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_DonutTransform",
+        name: "M3D _DonutTransform",
         source: "_DonutTransform.m3f",
         param_floats: 3,
         de_function: DeFunction::Delta,
@@ -52940,25 +52988,27 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_Exp4D",
+        name: "M3D _Exp4D",
         source: "_Exp4D.m3f",
         param_floats: 1,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		z.x = ((exp2(((z.x * 1.4426950408889634) % 1.0)) * exp(z.x)) * cos(sqrt((((z.w * z.w) + (z.y * z.y)) + (z.z * z.z)))));
 		z.y = (z.y * select(((exp2(((z.x * 1.4426950408889634) % 1.0)) * exp(z.x)) * sin(sqrt((((z.w * z.w) + (z.y * z.y)) + (z.z * z.z))))), (((exp2(((z.x * 1.4426950408889634) % 1.0)) * exp(z.x)) * sin(sqrt((((z.w * z.w) + (z.y * z.y)) + (z.z * z.z))))) / sqrt((((z.w * z.w) + (z.y * z.y)) + (z.z * z.z)))), (1e-200 != sqrt((((z.w * z.w) + (z.y * z.y)) + (z.z * z.z))))));
 		z.z = (z.z * select(((exp2(((z.x * 1.4426950408889634) % 1.0)) * exp(z.x)) * sin(sqrt((((z.w * z.w) + (z.y * z.y)) + (z.z * z.z))))), (((exp2(((z.x * 1.4426950408889634) % 1.0)) * exp(z.x)) * sin(sqrt((((z.w * z.w) + (z.y * z.y)) + (z.z * z.z))))) / sqrt((((z.w * z.w) + (z.y * z.y)) + (z.z * z.z)))), (1e-200 != sqrt((((z.w * z.w) + (z.y * z.y)) + (z.z * z.z))))));
 		z.w = (z.w * select(((exp2(((z.x * 1.4426950408889634) % 1.0)) * exp(z.x)) * sin(sqrt((((z.w * z.w) + (z.y * z.y)) + (z.z * z.z))))), (((exp2(((z.x * 1.4426950408889634) % 1.0)) * exp(z.x)) * sin(sqrt((((z.w * z.w) + (z.y * z.y)) + (z.z * z.z))))) / sqrt((((z.w * z.w) + (z.y * z.y)) + (z.z * z.z)))), (1e-200 != sqrt((((z.w * z.w) + (z.y * z.y)) + (z.z * z.z))))));
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "_Folding1",
+        name: "M3D _Folding1",
         source: "_Folding1.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -52976,7 +53026,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_FoldingInfy",
+        name: "M3D _FoldingInfy",
         source: "_FoldingInfy.m3f",
         param_floats: 4,
         de_function: DeFunction::Delta,
@@ -52998,7 +53048,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_FoldingOct",
+        name: "M3D _FoldingOct",
         source: "_FoldingOct.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -53015,7 +53065,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_FoldingVar",
+        name: "M3D _FoldingVar",
         source: "_FoldingVar.m3f",
         param_floats: 12,
         de_function: DeFunction::Delta,
@@ -53043,7 +53093,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_HexaTransform",
+        name: "M3D _HexaTransform",
         source: "_HexaTransform.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -53066,7 +53116,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_HopSqrtX",
+        name: "M3D _HopSqrtX",
         source: "_HopSqrtX.m3f",
         param_floats: 4,
         de_function: DeFunction::Delta,
@@ -53085,7 +53135,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_HopSqrtY",
+        name: "M3D _HopSqrtY",
         source: "_HopSqrtY.m3f",
         param_floats: 4,
         de_function: DeFunction::Delta,
@@ -53104,7 +53154,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_HopSqrtZ",
+        name: "M3D _HopSqrtZ",
         source: "_HopSqrtZ.m3f",
         param_floats: 4,
         de_function: DeFunction::Delta,
@@ -53123,7 +53173,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_LinCombineCxyz",
+        name: "M3D _LinCombineCxyz",
         source: "_LinCombineCxyz.m3f",
         param_floats: 9,
         de_function: DeFunction::Delta,
@@ -53149,7 +53199,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_LinCombineXYZ",
+        name: "M3D _LinCombineXYZ",
         source: "_LinCombineXYZ.m3f",
         param_floats: 9,
         de_function: DeFunction::Delta,
@@ -53175,7 +53225,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_LogX",
+        name: "M3D _LogX",
         source: "_LogX.m3f",
         param_floats: 4,
         de_function: DeFunction::Delta,
@@ -53195,7 +53245,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_LogY",
+        name: "M3D _LogY",
         source: "_LogY.m3f",
         param_floats: 4,
         de_function: DeFunction::Delta,
@@ -53215,7 +53265,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_LogZ",
+        name: "M3D _LogZ",
         source: "_LogZ.m3f",
         param_floats: 4,
         de_function: DeFunction::Delta,
@@ -53235,7 +53285,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_NeoSqrX",
+        name: "M3D _NeoSqrX",
         source: "_NeoSqrX.m3f",
         param_floats: 4,
         de_function: DeFunction::Delta,
@@ -53254,7 +53304,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_NeoSqrY",
+        name: "M3D _NeoSqrY",
         source: "_NeoSqrY.m3f",
         param_floats: 4,
         de_function: DeFunction::Delta,
@@ -53273,7 +53323,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_NeoSqrZ",
+        name: "M3D _NeoSqrZ",
         source: "_NeoSqrZ.m3f",
         param_floats: 4,
         de_function: DeFunction::Delta,
@@ -53292,7 +53342,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_PolyFolding",
+        name: "M3D _PolyFolding",
         source: "_PolyFolding.m3f",
         param_floats: 5,
         de_function: DeFunction::Delta,
@@ -53313,7 +53363,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_QuadrayTransform",
+        name: "M3D _QuadrayTransform",
         source: "_QuadrayTransform.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -53335,7 +53385,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_QuadrayTransform2",
+        name: "M3D _QuadrayTransform2",
         source: "_QuadrayTransform2.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -53359,10 +53409,10 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_ScaleC4d",
+        name: "M3D _ScaleC4d",
         source: "_ScaleC4d.m3f",
         param_floats: 2,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -53371,6 +53421,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		z.x = (z.x * __MB2P0__);
 		z.y = (z.y * __MB2P0__);
 		z.z = (z.z * __MB2P0__);
@@ -53379,14 +53430,15 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 		(*aux).const_c.y = ((*aux).const_c.y * __MB2P1__);
 		(*aux).const_c.z = ((*aux).const_c.z * __MB2P1__);
 		(*aux).const_c.w = ((*aux).const_c.w * __MB2P1__);
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "_Scaling",
+        name: "M3D _Scaling",
         source: "_Scaling.m3f",
         param_floats: 1,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -53394,18 +53446,20 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		z.x = (z.x * __MB2P0__);
 		z.y = (z.y * __MB2P0__);
 		z.z = (z.z * __MB2P0__);
 		z.w = (z.w * __MB2P0__);
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "_Scalingplus",
+        name: "M3D _Scalingplus",
         source: "_Scalingplus.m3f",
         param_floats: 4,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -53416,15 +53470,17 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		z.w = (z.w * __MB2P3__);
 		z.z = (z.z * __MB2P2__);
 		z.y = (z.y * __MB2P1__);
 		z.x = (z.x * __MB2P0__);
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "_SinePow2",
+        name: "M3D _SinePow2",
         source: "_SinePow2.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -53443,7 +53499,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_SinhX",
+        name: "M3D _SinhX",
         source: "_SinhX.m3f",
         param_floats: 4,
         de_function: DeFunction::Delta,
@@ -53463,7 +53519,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_SinhY",
+        name: "M3D _SinhY",
         source: "_SinhY.m3f",
         param_floats: 4,
         de_function: DeFunction::Delta,
@@ -53482,7 +53538,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_SinhZ",
+        name: "M3D _SinhZ",
         source: "_SinhZ.m3f",
         param_floats: 4,
         de_function: DeFunction::Delta,
@@ -53501,7 +53557,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_SphereInvC",
+        name: "M3D _SphereInvC",
         source: "_SphereInvC.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -53521,16 +53577,17 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_SphereInvC4d",
+        name: "M3D _SphereInvC4d",
         source: "_SphereInvC4d.m3f",
         param_floats: 1,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		(*aux).const_c.w = ((*aux).const_c.w * (1.0 / (((*aux).const_c.x * (*aux).const_c.x) + (((*aux).const_c.y * (*aux).const_c.y) + (((*aux).const_c.z * (*aux).const_c.z) + ((*aux).const_c.w * (*aux).const_c.w))))));
 		(*aux).const_c.z = ((*aux).const_c.z * (1.0 / (((*aux).const_c.x * (*aux).const_c.x) + (((*aux).const_c.y * (*aux).const_c.y) + (((*aux).const_c.z * (*aux).const_c.z) + ((*aux).const_c.w * (*aux).const_c.w))))));
 		(*aux).const_c.y = ((*aux).const_c.y * (1.0 / (((*aux).const_c.x * (*aux).const_c.x) + (((*aux).const_c.y * (*aux).const_c.y) + (((*aux).const_c.z * (*aux).const_c.z) + ((*aux).const_c.w * (*aux).const_c.w))))));
@@ -53539,14 +53596,15 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 		z.z = (z.z * (1.0 / ((z.x * z.x) + ((z.y * z.y) + ((z.z * z.z) + (z.w * z.w))))));
 		z.y = (z.y * (1.0 / ((z.x * z.x) + ((z.y * z.y) + ((z.z * z.z) + (z.w * z.w))))));
 		z.x = (z.x * (1.0 / ((z.x * z.x) + ((z.y * z.y) + ((z.z * z.z) + (z.w * z.w))))));
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "_Tanh4D",
+        name: "M3D _Tanh4D",
         source: "_Tanh4D.m3f",
         param_floats: 5,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
@@ -53558,6 +53616,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		z.w = ((((z.x * __MB2P3__) + (z.y * __MB2P2__)) + -((z.z * __MB2P1__))) + (z.w * __MB2P0__));
 		z.z = ((((z.x * __MB2P2__) + -((z.y * __MB2P3__))) + (z.z * __MB2P0__)) + (z.w * __MB2P1__));
 		z.y = ((((z.x * __MB2P1__) + (z.y * __MB2P0__)) + (z.z * __MB2P3__)) + -((z.w * __MB2P2__)));
@@ -53570,11 +53629,12 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 		z.y = (((1.0 / ((((z.w * z.w) + (z.y * z.y)) + (z.z * z.z)) + ((z.x + 1.0) * (z.x + 1.0)))) * (((z.x + 1.0) * z.y) + -((z.y * (z.x + -1.0))))) * __MB2P4__);
 		z.z = (((1.0 / ((((z.w * z.w) + (z.y * z.y)) + (z.z * z.z)) + ((z.x + 1.0) * (z.x + 1.0)))) * (((z.x + 1.0) * z.z) + -(((z.x + -1.0) * z.z)))) * __MB2P4__);
 		z.w = (((1.0 / ((((z.w * z.w) + (z.y * z.y)) + (z.z * z.z)) + ((z.x + 1.0) * (z.x + 1.0)))) * (((z.x + 1.0) * z.w) + -(((z.x + -1.0) * z.w)))) * __MB2P4__);
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "_Translate",
+        name: "M3D _Translate",
         source: "_Translate.m3f",
         param_floats: 3,
         de_function: DeFunction::Delta,
@@ -53594,7 +53654,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_TranslateC4d",
+        name: "M3D _TranslateC4d",
         source: "_TranslateC4d.m3f",
         param_floats: 8,
         de_function: DeFunction::Delta,
@@ -53624,7 +53684,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_YplusSinZ",
+        name: "M3D _YplusSinZ",
         source: "_YplusSinZ.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -53639,7 +53699,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_YplusSinZ2",
+        name: "M3D _YplusSinZ2",
         source: "_YplusSinZ2.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -53656,7 +53716,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_addC",
+        name: "M3D _addC",
         source: "_addC.m3f",
         param_floats: 3,
         de_function: DeFunction::Delta,
@@ -53676,7 +53736,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_boxtiling",
+        name: "M3D _boxtiling",
         source: "_boxtiling.m3f",
         param_floats: 4,
         de_function: DeFunction::Delta,
@@ -53698,7 +53758,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_conj",
+        name: "M3D _conj",
         source: "_conj.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -53714,7 +53774,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_conj2D",
+        name: "M3D _conj2D",
         source: "_conj2D.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -53729,24 +53789,26 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_conj4D",
+        name: "M3D _conj4D",
         source: "_conj4D.m3f",
         param_floats: 1,
-        de_function: DeFunction::Delta,
+        de_function: DeFunction::Logarithmic,
         add_c: false,
         bailout: 1024.0,
         params: &[
         ],
         derivations: &[],
         wgsl: r####"
+		z.w = (*aux).de;
 		z.y = -(z.y);
 		z.z = -(z.z);
 		z.w = -(z.w);
+		(*aux).de = z.w;
 	return z;
 "####,
     },
     GeneratedFormula {
-        name: "_cosmartin",
+        name: "M3D _cosmartin",
         source: "_cosmartin.m3f",
         param_floats: 5,
         de_function: DeFunction::Delta,
@@ -53769,7 +53831,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_dynamic",
+        name: "M3D _dynamic",
         source: "_dynamic.m3f",
         param_floats: 5,
         de_function: DeFunction::Delta,
@@ -53791,7 +53853,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_gnarl2D",
+        name: "M3D _gnarl2D",
         source: "_gnarl2D.m3f",
         param_floats: 5,
         de_function: DeFunction::Delta,
@@ -53812,7 +53874,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_gnarl2D_2",
+        name: "M3D _gnarl2D_2",
         source: "_gnarl2D_2.m3f",
         param_floats: 6,
         de_function: DeFunction::Delta,
@@ -53834,7 +53896,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_gnarl3D",
+        name: "M3D _gnarl3D",
         source: "_gnarl3D.m3f",
         param_floats: 6,
         de_function: DeFunction::Delta,
@@ -53857,7 +53919,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_hopalm2",
+        name: "M3D _hopalm2",
         source: "_hopalm2.m3f",
         param_floats: 6,
         de_function: DeFunction::Delta,
@@ -53880,7 +53942,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_hopalong",
+        name: "M3D _hopalong",
         source: "_hopalong.m3f",
         param_floats: 6,
         de_function: DeFunction::Delta,
@@ -53903,7 +53965,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_hyc3Dinv",
+        name: "M3D _hyc3Dinv",
         source: "_hyc3Dinv.m3f",
         param_floats: 4,
         de_function: DeFunction::Delta,
@@ -53927,7 +53989,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_invbisp",
+        name: "M3D _invbisp",
         source: "_invbisp.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -53952,7 +54014,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_invcylindrical",
+        name: "M3D _invcylindrical",
         source: "_invcylindrical.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -53968,7 +54030,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_invspherical",
+        name: "M3D _invspherical",
         source: "_invspherical.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -53985,7 +54047,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_invtorical",
+        name: "M3D _invtorical",
         source: "_invtorical.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -54002,7 +54064,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_invtorical2",
+        name: "M3D _invtorical2",
         source: "_invtorical2.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -54031,7 +54093,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_kamtor",
+        name: "M3D _kamtor",
         source: "_kamtor.m3f",
         param_floats: 14,
         de_function: DeFunction::Delta,
@@ -54062,7 +54124,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_lorenz",
+        name: "M3D _lorenz",
         source: "_lorenz.m3f",
         param_floats: 5,
         de_function: DeFunction::Delta,
@@ -54085,7 +54147,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_planeFold",
+        name: "M3D _planeFold",
         source: "_planeFold.m3f",
         param_floats: 3,
         de_function: DeFunction::Delta,
@@ -54105,7 +54167,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_poincare",
+        name: "M3D _poincare",
         source: "_poincare.m3f",
         param_floats: 5,
         de_function: DeFunction::Delta,
@@ -54130,7 +54192,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_quadist",
+        name: "M3D _quadist",
         source: "_quadist.m3f",
         param_floats: 7,
         de_function: DeFunction::Delta,
@@ -54154,7 +54216,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_rabinovich-f",
+        name: "M3D _rabinovich-f",
         source: "_rabinovich-f.m3f",
         param_floats: 5,
         de_function: DeFunction::Delta,
@@ -54176,7 +54238,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_reciprocalX",
+        name: "M3D _reciprocalX",
         source: "_reciprocalX.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -54191,7 +54253,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_reciprocalX2",
+        name: "M3D _reciprocalX2",
         source: "_reciprocalX2.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -54207,7 +54269,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_reciprocalX3",
+        name: "M3D _reciprocalX3",
         source: "_reciprocalX3.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -54224,7 +54286,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_reciprocalX3b",
+        name: "M3D _reciprocalX3b",
         source: "_reciprocalX3b.m3f",
         param_floats: 6,
         de_function: DeFunction::Delta,
@@ -54245,7 +54307,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_reciprocalY2",
+        name: "M3D _reciprocalY2",
         source: "_reciprocalY2.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -54261,7 +54323,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_reciprocalY3",
+        name: "M3D _reciprocalY3",
         source: "_reciprocalY3.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -54278,7 +54340,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_reciprocalY3b",
+        name: "M3D _reciprocalY3b",
         source: "_reciprocalY3b.m3f",
         param_floats: 6,
         de_function: DeFunction::Delta,
@@ -54299,7 +54361,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_reciprocalZ2",
+        name: "M3D _reciprocalZ2",
         source: "_reciprocalZ2.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -54315,7 +54377,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_reciprocalZ3",
+        name: "M3D _reciprocalZ3",
         source: "_reciprocalZ3.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -54332,7 +54394,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_reciprocalZ3b",
+        name: "M3D _reciprocalZ3b",
         source: "_reciprocalZ3b.m3f",
         param_floats: 6,
         de_function: DeFunction::Delta,
@@ -54353,7 +54415,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_rossler",
+        name: "M3D _rossler",
         source: "_rossler.m3f",
         param_floats: 5,
         de_function: DeFunction::Delta,
@@ -54376,7 +54438,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_scaleC",
+        name: "M3D _scaleC",
         source: "_scaleC.m3f",
         param_floats: 3,
         de_function: DeFunction::Delta,
@@ -54396,7 +54458,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_skew",
+        name: "M3D _skew",
         source: "_skew.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -54415,7 +54477,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_sphereXinv",
+        name: "M3D _sphereXinv",
         source: "_sphereXinv.m3f",
         param_floats: 4,
         de_function: DeFunction::Delta,
@@ -54439,7 +54501,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_sphereYinv",
+        name: "M3D _sphereYinv",
         source: "_sphereYinv.m3f",
         param_floats: 4,
         de_function: DeFunction::Delta,
@@ -54463,7 +54525,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_sphereZinv",
+        name: "M3D _sphereZinv",
         source: "_sphereZinv.m3f",
         param_floats: 4,
         de_function: DeFunction::Delta,
@@ -54487,7 +54549,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_sqr_3D",
+        name: "M3D _sqr_3D",
         source: "_sqr_3D.m3f",
         param_floats: 4,
         de_function: DeFunction::Delta,
@@ -54508,7 +54570,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_sqr_4D",
+        name: "M3D _sqr_4D",
         source: "_sqr_4D.m3f",
         param_floats: 5,
         de_function: DeFunction::Delta,
@@ -54531,7 +54593,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_tocylindrical",
+        name: "M3D _tocylindrical",
         source: "_tocylindrical.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -54547,7 +54609,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_toruspinv1",
+        name: "M3D _toruspinv1",
         source: "_toruspinv1.m3f",
         param_floats: 5,
         de_function: DeFunction::Delta,
@@ -54572,7 +54634,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_toruspinv2",
+        name: "M3D _toruspinv2",
         source: "_toruspinv2.m3f",
         param_floats: 5,
         de_function: DeFunction::Delta,
@@ -54597,7 +54659,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_toruspinv3",
+        name: "M3D _toruspinv3",
         source: "_toruspinv3.m3f",
         param_floats: 5,
         de_function: DeFunction::Delta,
@@ -54622,7 +54684,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_tospherical",
+        name: "M3D _tospherical",
         source: "_tospherical.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -54639,7 +54701,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_totorical",
+        name: "M3D _totorical",
         source: "_totorical.m3f",
         param_floats: 1,
         de_function: DeFunction::Delta,
@@ -54656,7 +54718,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_totorical2",
+        name: "M3D _totorical2",
         source: "_totorical2.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -54675,7 +54737,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_updateC",
+        name: "M3D _updateC",
         source: "_updateC.m3f",
         param_floats: 2,
         de_function: DeFunction::Delta,
@@ -54694,7 +54756,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_vanderpol",
+        name: "M3D _vanderpol",
         source: "_vanderpol.m3f",
         param_floats: 8,
         de_function: DeFunction::Delta,
@@ -54720,7 +54782,7 @@ z = vec4<f32>(z.z, z.y, z.x, z.w); break;
 "####,
     },
     GeneratedFormula {
-        name: "_vanderpol2",
+        name: "M3D _vanderpol2",
         source: "_vanderpol2.m3f",
         param_floats: 9,
         de_function: DeFunction::Delta,
