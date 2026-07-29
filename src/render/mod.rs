@@ -185,6 +185,17 @@ pub struct Uniforms {
     lights_meta: [f32; 4],
     /// [`LIGHT_VEC4S`] consecutive vec4s per light — see [`pack_light`].
     lights: [[f32; 4]; MAX_LIGHTS * LIGHT_VEC4S],
+    /// rgb = background colour at the horizon, w = background brightness.
+    bg2: [f32; 4],
+    /// rgb = background colour below the horizon, w = background gamma.
+    bg3: [f32; 4],
+    /// x = 1 with a three-colour gradient, y = 1 when the image is in use,
+    /// z = map type, w = horizontal scale.
+    bg_flags: [f32; 4],
+    /// x = vertical scale, yz = texture offset.
+    bg_tex: [f32; 4],
+    /// Rows of the rotation applied to a ray before it samples the image.
+    bg_rot: [[f32; 4]; 3],
 }
 
 /// How many vec4s one light occupies. Must match `Light` in `fractal.wgsl`.
@@ -269,6 +280,7 @@ impl Uniforms {
         let s = &params.shading;
         let mat = &params.material;
         let pic = &params.picture;
+        let bg = &params.background;
 
         // Each slot's parameters go to the same fixed address the generated
         // shader reads them from; anything the formula does not use stays zero.
@@ -352,7 +364,10 @@ impl Uniforms {
                 s.palette_amp[2],
                 s.palette_freq,
             ],
-            bg: [s.background[0], s.background[1], s.background[2], s.fog],
+            // Colour #1 alone, not the gradient: this doubles as the fog
+            // target and the ambient sky tint, and both want one colour rather
+            // than whatever happens to be overhead.
+            bg: [bg.color1[0], bg.color1[1], bg.color1[2], s.fog],
             picture: [pic.brightness, pic.contrast, pic.gamma.max(1e-3), pic.saturation],
             view: [
                 pic.perspective as u32 as f32,
@@ -417,6 +432,27 @@ impl Uniforms {
             pool,
             lights_meta: [live as f32, 0.0, 0.0, 0.0],
             lights,
+            bg2: [bg.color2[0], bg.color2[1], bg.color2[2], bg.brightness],
+            bg3: [bg.color3[0], bg.color3[1], bg.color3[2], bg.gamma.max(1e-3)],
+            bg_flags: [
+                if bg.three_colors { 1.0 } else { 0.0 },
+                // Provisional. Whether an image is actually loaded is the
+                // pipeline's to know, so `upload` clears this again if there
+                // is nothing to sample — falling back to the colours beats
+                // drawing a frame of flat white.
+                if bg.textured { 1.0 } else { 0.0 },
+                bg.map as u32 as f32,
+                // A zero scale divides the texture coordinate by nothing.
+                if bg.h_scale.abs() < 1e-4 { 1e-4 } else { bg.h_scale },
+
+            ],
+            bg_tex: [
+                if bg.v_scale.abs() < 1e-4 { 1e-4 } else { bg.v_scale },
+                bg.offset[0],
+                bg.offset[1],
+                0.0,
+            ],
+            bg_rot: bg.rotation_rows(),
         }
     }
 }
@@ -488,6 +524,56 @@ impl CursorProbe {
     }
 }
 
+/// A 1x1 stand-in so the background binding is never empty.
+///
+/// Its contents are never read: `upload` forces the textured-background flag
+/// off whenever this is what is bound.
+fn blank_texture(device: &wgpu::Device) -> wgpu::Texture {
+    device.create_texture(&wgpu::TextureDescriptor {
+        label: Some("3dm.background.blank"),
+        size: wgpu::Extent3d {
+            width: 1,
+            height: 1,
+            depth_or_array_layers: 1,
+        },
+        mip_level_count: 1,
+        sample_count: 1,
+        dimension: wgpu::TextureDimension::D2,
+        format: wgpu::TextureFormat::Rgba8UnormSrgb,
+        usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+        view_formats: &[],
+    })
+}
+
+/// The fractal pass's bind group. Rebuilt whenever a background image
+/// replaces the one bound before it.
+fn background_bind_group(
+    device: &wgpu::Device,
+    layout: &wgpu::BindGroupLayout,
+    uniforms: &wgpu::Buffer,
+    view: &wgpu::TextureView,
+    sampler: &wgpu::Sampler,
+) -> wgpu::BindGroup {
+    device.create_bind_group(&wgpu::BindGroupDescriptor {
+        label: Some("3dm.fractal.bg"),
+        layout,
+        entries: &[
+            wgpu::BindGroupEntry {
+                binding: 0,
+                resource: uniforms.as_entire_binding(),
+            },
+            wgpu::BindGroupEntry {
+                binding: 1,
+                resource: wgpu::BindingResource::TextureView(view),
+            },
+            wgpu::BindGroupEntry {
+                binding: 2,
+                resource: wgpu::BindingResource::Sampler(sampler),
+            },
+        ],
+    })
+}
+
 /// Long-lived GPU objects, stashed in egui's `callback_resources` so they are
 /// created once rather than per frame.
 pub struct FractalPipeline {
@@ -518,6 +604,10 @@ pub struct FractalPipeline {
     /// True when the surface format is linear and we must apply the sRGB
     /// transfer function in the shader ourselves.
     pub encode_srgb: bool,
+    background_sampler: wgpu::Sampler,
+    /// False while the blank 1x1 stand-in is bound, which is what stops the
+    /// shader being told to sample an image that is not there.
+    has_background_texture: bool,
 }
 
 impl FractalPipeline {
@@ -531,26 +621,59 @@ impl FractalPipeline {
 
         let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("3dm.fractal.bgl"),
-            entries: &[wgpu::BindGroupLayoutEntry {
-                binding: 0,
-                visibility: wgpu::ShaderStages::VERTEX_FRAGMENT,
-                ty: wgpu::BindingType::Buffer {
-                    ty: wgpu::BufferBindingType::Uniform,
-                    has_dynamic_offset: false,
-                    min_binding_size: None,
+            entries: &[
+                wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStages::VERTEX_FRAGMENT,
+                    ty: wgpu::BindingType::Buffer {
+                        ty: wgpu::BufferBindingType::Uniform,
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    count: None,
                 },
-                count: None,
-            }],
+                // The background image. Always bound — a shader cannot have an
+                // optional binding, so with nothing loaded this is one white
+                // pixel and `bg_flags.y` is forced off.
+                wgpu::BindGroupLayoutEntry {
+                    binding: 1,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Texture {
+                        sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                        view_dimension: wgpu::TextureViewDimension::D2,
+                        multisampled: false,
+                    },
+                    count: None,
+                },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 2,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                    count: None,
+                },
+            ],
         });
 
-        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("3dm.fractal.bg"),
-            layout: &bind_group_layout,
-            entries: &[wgpu::BindGroupEntry {
-                binding: 0,
-                resource: uniform_buffer.as_entire_binding(),
-            }],
+        let background_view =
+            blank_texture(device).create_view(&wgpu::TextureViewDescriptor::default());
+        let background_sampler = device.create_sampler(&wgpu::SamplerDescriptor {
+            label: Some("3dm.background.sampler"),
+            // Repeating horizontally is what lets the horizontal scale tile a
+            // panorama; vertically it would wrap the sky onto the ground.
+            address_mode_u: wgpu::AddressMode::Repeat,
+            address_mode_v: wgpu::AddressMode::ClampToEdge,
+            mag_filter: wgpu::FilterMode::Linear,
+            min_filter: wgpu::FilterMode::Linear,
+            ..Default::default()
         });
+
+        let bind_group = background_bind_group(
+            device,
+            &bind_group_layout,
+            &uniform_buffer,
+            &background_view,
+            &background_sampler,
+        );
 
         // One float, but a copy destination has to be 256-byte aligned.
         let probe_target = device.create_texture(&wgpu::TextureDescriptor {
@@ -695,7 +818,79 @@ impl FractalPipeline {
             last_viewport: [0.0, 0.0],
             cursor: CursorProbe::new(),
             encode_srgb: !target_format.is_srgb(),
+            background_sampler,
+            has_background_texture: false,
         }
+    }
+
+    /// Replaces the background image with `rgba`, which must be tightly packed.
+    ///
+    /// Rebuilds the bind group rather than writing into the old texture: a
+    /// panorama that replaces another is rarely the same size, and this runs
+    /// once per image rather than once per frame.
+    pub fn set_background_image(
+        &mut self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        width: u32,
+        height: u32,
+        rgba: &[u8],
+    ) {
+        let size = wgpu::Extent3d {
+            width: width.max(1),
+            height: height.max(1),
+            depth_or_array_layers: 1,
+        };
+        let texture = device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("3dm.background.image"),
+            size,
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            // sRGB: the file's bytes are display-encoded, and everything the
+            // shader mixes them with is linear.
+            format: wgpu::TextureFormat::Rgba8UnormSrgb,
+            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+            view_formats: &[],
+        });
+        queue.write_texture(
+            wgpu::TexelCopyTextureInfo {
+                texture: &texture,
+                mip_level: 0,
+                origin: wgpu::Origin3d::ZERO,
+                aspect: wgpu::TextureAspect::All,
+            },
+            rgba,
+            wgpu::TexelCopyBufferLayout {
+                offset: 0,
+                bytes_per_row: Some(4 * size.width),
+                rows_per_image: Some(size.height),
+            },
+            size,
+        );
+
+        let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+        self.bind_group = background_bind_group(
+            device,
+            &self.bind_group_layout,
+            &self.uniform_buffer,
+            &view,
+            &self.background_sampler,
+        );
+        self.has_background_texture = true;
+    }
+
+    /// Drops the background image, so the colours are drawn again.
+    pub fn clear_background_image(&mut self, device: &wgpu::Device) {
+        let view = blank_texture(device).create_view(&wgpu::TextureViewDescriptor::default());
+        self.bind_group = background_bind_group(
+            device,
+            &self.bind_group_layout,
+            &self.uniform_buffer,
+            &view,
+            &self.background_sampler,
+        );
+        self.has_background_texture = false;
     }
 
     /// Compiles the pipeline for `key` if it is not cached yet.
@@ -1010,6 +1205,14 @@ impl FractalPipeline {
 
     /// Push a new scene to the GPU. Cheap enough to do every frame.
     pub fn upload(&self, queue: &wgpu::Queue, uniforms: &Uniforms) {
+        let mut uniforms = *uniforms;
+        // The scene can ask for a textured background before an image has been
+        // dropped on the window. The bound texture is 1x1 white in that case,
+        // which would wash the whole frame out.
+        if !self.has_background_texture {
+            uniforms.bg_flags[1] = 0.0;
+        }
+        let uniforms = &uniforms;
         queue.write_buffer(&self.uniform_buffer, 0, bytemuck::bytes_of(uniforms));
     }
 
@@ -1049,6 +1252,9 @@ pub struct FractalCallback {
     pub shader_key: u64,
     /// Shared with the app so an unchanged stack costs no allocation.
     pub shader_source: Arc<str>,
+    /// A newly dropped background image, as tightly packed RGBA. Present on
+    /// exactly the one frame that follows the drop.
+    pub background: Option<(u32, u32, Vec<u8>)>,
 }
 
 impl CallbackTrait for FractalCallback {
@@ -1062,6 +1268,11 @@ impl CallbackTrait for FractalCallback {
     ) -> Vec<wgpu::CommandBuffer> {
         if let Some(res) = resources.get_mut::<FractalPipeline>() {
             res.ensure(device, self.shader_key, &self.shader_source);
+            // Before the upload: `upload` reads `has_background_texture` to
+            // decide whether the shader may sample it.
+            if let Some((w, h, rgba)) = &self.background {
+                res.set_background_image(device, queue, *w, *h, rgba);
+            }
             res.upload(queue, &self.uniforms);
             let stable = res.last_viewport == self.viewport;
             res.last_viewport = self.viewport;
@@ -1109,6 +1320,7 @@ pub fn callback(
     render_size: [u32; 2],
     shader_key: u64,
     shader_source: Arc<str>,
+    background: Option<(u32, u32, Vec<u8>)>,
 ) -> egui::PaintCallback {
     egui_wgpu::Callback::new_paint_callback(
         rect,
@@ -1118,6 +1330,7 @@ pub fn callback(
             render_size,
             shader_key,
             shader_source,
+            background,
         },
     )
 }

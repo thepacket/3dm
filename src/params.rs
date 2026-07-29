@@ -271,6 +271,117 @@ impl Default for LightsParams {
     }
 }
 
+/// How a background image is wrapped around the scene.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum BackgroundMap {
+    /// Longitude across, latitude up: the usual 2:1 panorama.
+    #[default]
+    Equirectangular,
+    /// Two fisheye circles side by side, as a 360 camera produces.
+    DoubleHemisphere,
+    /// Projected flat, as though pinned on a wall the camera faces.
+    Flat,
+}
+
+impl BackgroundMap {
+    pub const ALL: [Self; 3] = [
+        Self::Equirectangular,
+        Self::DoubleHemisphere,
+        Self::Flat,
+    ];
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Equirectangular => "equirectangular",
+            Self::DoubleHemisphere => "double hemisphere",
+            Self::Flat => "flat",
+        }
+    }
+}
+
+/// What sits behind the fractal.
+///
+/// Kept apart from [`ShadingParams`] because none of it is lighting: the fog
+/// target and the ambient sky tint read `color1` and nothing else, so a
+/// gradient or an image changes what you see past the shape without changing
+/// how the shape itself is lit.
+#[derive(Clone, PartialEq, Debug)]
+pub struct BackgroundParams {
+    /// The colour overhead, and the one flat backgrounds use throughout.
+    /// Linear, not sRGB.
+    pub color1: [f32; 3],
+    /// Enables `color2` at the horizon and `color3` below it.
+    pub three_colors: bool,
+    pub color2: [f32; 3],
+    pub color3: [f32; 3],
+    pub brightness: f32,
+    pub gamma: f32,
+    /// Draw `texture` instead of the colours. Ignored while none is loaded.
+    pub textured: bool,
+    pub map: BackgroundMap,
+    pub h_scale: f32,
+    pub v_scale: f32,
+    pub offset: [f32; 2],
+    /// Yaw, pitch and roll applied to the ray before it samples the image,
+    /// in degrees — which is how the panel states it.
+    pub rotation: [f32; 3],
+}
+
+impl Default for BackgroundParams {
+    fn default() -> Self {
+        Self {
+            color1: [0.004, 0.006, 0.011],
+            three_colors: false,
+            // Mandelbulber's own blue / white / green, kept so that ticking
+            // the box gives the gradient it gives there rather than three
+            // shades of the existing near-black.
+            color2: [0.7, 0.7, 0.7],
+            color3: [0.0, 0.06, 0.0],
+            brightness: 1.0,
+            gamma: 1.0,
+            textured: false,
+            map: BackgroundMap::default(),
+            h_scale: 1.0,
+            v_scale: 1.0,
+            offset: [0.0, 0.0],
+            rotation: [0.0, 0.0, 0.0],
+        }
+    }
+}
+
+impl BackgroundParams {
+    /// The ray rotation as three row vectors, ready for the uniform.
+    ///
+    /// Built here rather than in the shader: it is the same matrix for every
+    /// pixel, and the shader already has enough trigonometry per ray.
+    pub fn rotation_rows(&self) -> [[f32; 4]; 3] {
+        let (a, b, c) = (
+            self.rotation[0].to_radians(),
+            self.rotation[1].to_radians(),
+            self.rotation[2].to_radians(),
+        );
+        let (sa, ca) = (a.sin(), a.cos());
+        let (sb, cb) = (b.sin(), b.cos());
+        let (sc, cc) = (c.sin(), c.cos());
+        // Yaw about y, then pitch about x, then roll about z.
+        [
+            [
+                ca * cc + sa * sb * sc,
+                cb * sc,
+                -sa * cc + ca * sb * sc,
+                0.0,
+            ],
+            [
+                -ca * sc + sa * sb * cc,
+                cb * cc,
+                sa * sc + ca * sb * cc,
+                0.0,
+            ],
+            [sa * cb, -sb, ca * cb, 0.0],
+        ]
+    }
+}
+
 /// Lighting, ambient occlusion and colour.
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct ShadingParams {
@@ -294,8 +405,6 @@ pub struct ShadingParams {
     pub palette_phase: f32,
     /// How strongly the orbit trap modulates colour.
     pub palette_freq: f32,
-    /// Background colour behind the fractal.
-    pub background: [f32; 3],
     /// Distance fade toward the background colour.
     pub fog: f32,
     /// Distance over which basic fog closes in. Zero turns it off.
@@ -333,7 +442,6 @@ impl Default for ShadingParams {
             palette_amp: [0.45, 0.42, 0.40],
             palette_phase: 0.0,
             palette_freq: 1.0,
-            background: [0.004, 0.006, 0.011],
             fog: 0.10,
             fog_visibility: 0.0,
             fog_color: [0.55, 0.62, 0.75],
@@ -550,6 +658,7 @@ pub struct SceneParams {
     pub march: MarchParams,
     pub shading: ShadingParams,
     pub lights: LightsParams,
+    pub background: BackgroundParams,
     pub material: Material,
     pub picture: Picture,
     /// Diagnostic override; [`DebugView::Off`] renders normally.

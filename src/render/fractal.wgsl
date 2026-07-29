@@ -78,6 +78,17 @@ struct Uniforms {
     // element stride is obvious on both sides. See `light_*` accessors below
     // and `pack_light` in `render/mod.rs`, which must agree exactly.
     lights: array<vec4<f32>, 40>,
+    // rgb = background colour at the horizon, w = background brightness
+    bg2: vec4<f32>,
+    // rgb = background colour below the horizon, w = background gamma
+    bg3: vec4<f32>,
+    // x = 1 with a three-colour gradient, y = 1 when the image is in use,
+    // z = map type, w = horizontal scale
+    bg_flags: vec4<f32>,
+    // x = vertical scale, yz = texture offset
+    bg_tex: vec4<f32>,
+    // Rows of the rotation applied to a ray before it samples the image.
+    bg_rot: array<vec4<f32>, 3>,
 };
 
 const LIGHT_VEC4S: i32 = 5;
@@ -90,6 +101,14 @@ const LIGHT_CONE: f32 = 2.0;
 // locals, and one called `u` shadowed this binding so that every `u.pool` read
 // in that formula became a field access on an f32.
 @group(0) @binding(0) var<uniform> dm3_u: Uniforms;
+// The background panorama. One white pixel when none is loaded, in which case
+// `bg_flags.y` is zero and nothing ever samples it.
+@group(0) @binding(1) var dm3_bg_tex: texture_2d<f32>;
+@group(0) @binding(2) var dm3_bg_samp: sampler;
+
+const BG_EQUIRECTANGULAR: f32 = 0.0;
+const BG_DOUBLE_HEMISPHERE: f32 = 1.0;
+const BG_FLAT: f32 = 2.0;
 
 struct VsOut {
     @builtin(position) clip_pos: vec4<f32>,
@@ -327,6 +346,94 @@ fn visible_lights(ro: vec3<f32>, rd: vec3<f32>) -> vec3<f32> {
     return sum;
 }
 
+// What lies behind the fractal along `rd`: a flat colour, a vertical gradient,
+// or a panorama.
+//
+// Everywhere the old code read `bg.rgb` for what the eye sees now calls this.
+// The two places that did *not* — the fog target and the ambient sky tint —
+// still read `bg.rgb`, which is colour #1: both want one settled colour rather
+// than whatever happens to be overhead at that pixel.
+fn background_color(rd: vec3<f32>) -> vec3<f32> {
+    var pixel: vec3<f32>;
+
+    if (dm3_u.bg_flags.y > 0.5) {
+        // Rotate the ray rather than the image, which is the same thing and
+        // costs three dot products instead of a resample.
+        let v = normalize(vec3<f32>(
+            dot(dm3_u.bg_rot[0].xyz, rd),
+            dot(dm3_u.bg_rot[1].xyz, rd),
+            dot(dm3_u.bg_rot[2].xyz, rd)));
+        var uv: vec2<f32>;
+
+        if (dm3_u.bg_flags.z < BG_DOUBLE_HEMISPHERE - 0.5) {
+            // Equirectangular: longitude across, latitude up.
+            let lon = atan2(v.x, -v.z);
+            let lat = asin(clamp(v.y, -1.0, 1.0));
+            uv = vec2<f32>(
+                (lon / (2.0 * 3.14159265) + 0.5) / dm3_u.bg_flags.w,
+                (0.5 - lat / 3.14159265) / dm3_u.bg_tex.x);
+        } else if (dm3_u.bg_flags.z < BG_FLAT - 0.5) {
+            // Double hemisphere: two fisheye circles side by side, the front
+            // half in the left one and the back half in the right.
+            var lon = atan2(v.y, v.x);
+            var lat = atan2(-v.z, length(v.xy));
+            var half_offset = 0.0;
+            if (lat < 0.0) {
+                lat = -lat;
+                lon = 3.14159265 - lon;
+                half_offset = 0.5;
+            }
+            let r = 1.0 - lat / (0.5 * 3.14159265);
+            uv = vec2<f32>(
+                0.25 + cos(lon) * r * 0.25 + half_offset,
+                0.5 + sin(lon) * r * 0.5);
+        } else {
+            // Flat: a backdrop hung square to the view, filling the frame at
+            // scale 1. Worked out in the camera's own frame rather than the
+            // world's — pinning it to a world plane instead puts a seam across
+            // the picture wherever the ray turns away from that plane.
+            let camera_space = vec3<f32>(
+                dot(rd, dm3_u.cam_right.xyz),
+                dot(rd, dm3_u.cam_up.xyz),
+                dot(rd, dm3_u.cam_fwd.xyz));
+            let r = normalize(vec3<f32>(
+                dot(dm3_u.bg_rot[0].xyz, camera_space),
+                dot(dm3_u.bg_rot[1].xyz, camera_space),
+                dot(dm3_u.bg_rot[2].xyz, camera_space)));
+            // Behind the camera there is no plane to hit; hold the edge.
+            let forward = max(r.z, 1e-4);
+            let tan_half = dm3_u.cam_pos.w;
+            let aspect = dm3_u.screen.x / max(dm3_u.screen.y, 1.0);
+            uv = vec2<f32>(
+                (r.x / forward) / (2.0 * tan_half * aspect) / dm3_u.bg_flags.w + 0.5,
+                (-r.y / forward) / (2.0 * tan_half) / dm3_u.bg_tex.x + 0.5);
+        }
+
+        uv = uv + vec2<f32>(dm3_u.bg_tex.y, dm3_u.bg_tex.z);
+        pixel = textureSampleLevel(dm3_bg_tex, dm3_bg_samp, uv, 0.0).rgb;
+    } else if (dm3_u.bg_flags.x > 0.5) {
+        // Colour #1 overhead, #2 at the horizon, #3 underneath — the same two
+        // linear runs Mandelbulber uses, about its own up axis.
+        let grad = clamp(rd.y, -1.0, 1.0) + 1.0;
+        if (grad < 1.0) {
+            pixel = mix(dm3_u.bg3.rgb, dm3_u.bg2.rgb, grad);
+        } else {
+            pixel = mix(dm3_u.bg2.rgb, dm3_u.bg.rgb, grad - 1.0);
+        }
+    } else {
+        pixel = dm3_u.bg.rgb;
+    }
+
+    // Brightness then gamma, exactly as Mandelbulber orders them. Skipped
+    // rather than applied as identities: `pow(x, 1.0)` is not guaranteed to
+    // return `x` bit-for-bit, and the default background must not move.
+    pixel = pixel * dm3_u.bg2.w;
+    if (abs(dm3_u.bg3.w - 1.0) > 1e-6) {
+        pixel = pow(max(pixel, vec3<f32>(0.0)), vec3<f32>(1.0 / dm3_u.bg3.w));
+    }
+    return pixel;
+}
+
 // Compares the true distance field against the distance we walked along the
 // normal; where the field lags behind, geometry is nearby and occluding.
 fn ambient_occlusion(p: vec3<f32>, n: vec3<f32>) -> f32 {
@@ -428,7 +535,7 @@ fn reflected_color(ro: vec3<f32>, rd: vec3<f32>, eps_scale: f32, pixel_angle: f3
     let b = dot(rd, ro);
     let disc = b * b - (dot(ro, ro) - bounds * bounds);
     if (disc < 0.0) {
-        return dm3_u.bg.rgb;
+        return background_color(rd);
     }
 
     var t = max(-b - sqrt(disc), 0.0);
@@ -457,7 +564,7 @@ fn reflected_color(ro: vec3<f32>, rd: vec3<f32>, eps_scale: f32, pixel_angle: f3
         if (t > dm3_u.march.y) { break; }
         steps = steps + 1;
     }
-    return dm3_u.bg.rgb + visible_lights(ro, rd);
+    return background_color(rd) + visible_lights(ro, rd);
 }
 
 // The ray through a pixel, under the chosen projection.
@@ -527,9 +634,16 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
     if (disc < 0.0) {
         // Ray misses the fractal's bounding sphere entirely. Nothing can be in
         // the way, so the lights are drawn unconditionally.
-        var bg = dm3_u.bg.rgb + visible_lights(ro, rd);
+        var bg = background_color(rd) + visible_lights(ro, rd);
+        // The same tone map and grading every other pixel gets. Skipping them
+        // here used to be invisible against a near-black backdrop, but it
+        // prints the bounding sphere onto any bright background as a disc of
+        // slightly the wrong colour.
+        if (dm3_u.view.y < 0.5) { bg = bg / (1.0 + bg * 0.35); }
+        bg = adjust(bg);
         if (dm3_u.screen.w > 0.5) { bg = linear_to_srgb(bg); }
-        return vec4<f32>(bg, 1.0);
+        // `hit` is false, so the depth this reads is the far plane either way.
+        return vec4<f32>(bg, circle_of_confusion(0.0, false));
     }
     t = max(-b - sqrt(disc), 0.0);
     // Distance at which the ray entered the bounding sphere. Fog is measured
@@ -697,7 +811,7 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
         if (view != 0) { return shade_out(vec3<f32>(0.0)); }
         // Any light with a visibility above zero is drawn where the ray misses
         // everything, so a lamp can be seen rather than only inferred.
-        color = dm3_u.bg.rgb + visible_lights(ro, rd);
+        color = background_color(rd) + visible_lights(ro, rd);
     }
 
     // Basic fog: haze closing in over a visibility distance, with its own

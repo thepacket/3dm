@@ -275,6 +275,32 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
     });
     let view = target.create_view(&wgpu::TextureViewDescriptor::default());
 
+    // DM3_BG picks the background: `gradient` for the three-colour sky, or a
+    // path to an image to wrap around the scene. DM3_BG_MAP chooses how that
+    // image is projected — the one part of this the colours cannot show.
+    match std::env::var("DM3_BG").as_deref() {
+        Ok("gradient") => {
+            params.background.three_colors = true;
+            params.background.color1 = [0.05, 0.18, 0.55];
+            params.background.color2 = [0.75, 0.75, 0.75];
+            params.background.color3 = [0.0, 0.15, 0.02];
+        }
+        Ok(path) if !path.is_empty() => {
+            let decoded = image::open(path)
+                .unwrap_or_else(|e| panic!("could not read background {path}: {e}"))
+                .to_rgba8();
+            let (w, h) = (decoded.width(), decoded.height());
+            pipeline.set_background_image(&device, &queue, w, h, &decoded.into_raw());
+            params.background.textured = true;
+            params.background.map = match std::env::var("DM3_BG_MAP").as_deref() {
+                Ok("double") => three_dm::params::BackgroundMap::DoubleHemisphere,
+                Ok("flat") => three_dm::params::BackgroundMap::Flat,
+                _ => three_dm::params::BackgroundMap::Equirectangular,
+            };
+        }
+        _ => {}
+    }
+
     pipeline.upload(
         &queue,
         &Uniforms::build(

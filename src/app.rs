@@ -6,7 +6,8 @@ use std::time::Duration;
 use crate::camera::Camera;
 use crate::formulas::{Builtin, DeMode, FormulaKind, FormulaSlot, generated::GENERATED};
 use crate::params::{
-    DebugView, Light, LightDecay, LightKind, LightsParams, MAX_LIGHTS, Material, Perspective,
+    BackgroundMap, BackgroundParams, DebugView, Light, LightDecay, LightKind, LightsParams,
+    MAX_LIGHTS, Material, Perspective,
     SceneParams, Stop,
 };
 use crate::render::{CursorProbe, FractalPipeline, Uniforms, callback};
@@ -177,6 +178,12 @@ pub struct App {
     /// Which light the Lights panel is editing. Mandelbulber gives each one a
     /// tab; with eight of them a row of tabs is the same idea in less space.
     selected_light: usize,
+    /// Name of the background image currently on the GPU, for the panel to
+    /// show. `None` means nothing is loaded and the colours are drawn.
+    background_image: Option<String>,
+    /// A decoded image waiting to be handed to the renderer, which can only
+    /// happen inside the paint callback where the device and queue exist.
+    pending_background: Option<(u32, u32, Vec<u8>)>,
 }
 
 impl App {
@@ -228,6 +235,8 @@ impl App {
             fixed_scale: 0.5,
             shader: (key, source.into()),
             selected_light: 0,
+            background_image: None,
+            pending_background: None,
         })
     }
 
@@ -613,12 +622,14 @@ impl App {
             egui::CollapsingHeader::new("Background")
                 .default_open(false)
                 .show(ui, |ui| {
-                    let s = &mut params.shading;
-                    ui.horizontal(|ui| {
-                        ui.color_edit_button_rgb(&mut s.background);
-                        ui.label("background");
-                    });
-                    ui.add(egui::Slider::new(&mut s.fog, 0.0..=1.0).text("fog"));
+                    background_editor(
+                        &mut params.background,
+                        self.background_image.as_deref(),
+                        ui,
+                    );
+                    ui.add_space(6.0);
+                    ui.add(egui::Slider::new(&mut params.shading.fog, 0.0..=1.0).text("fog"))
+                        .on_hover_text("Fade toward colour #1 with depth into the fractal.");
                 });
 
             egui::CollapsingHeader::new("Camera")
@@ -754,6 +765,51 @@ impl App {
                 let spent = self.frame_start.map(|t| t.elapsed()).unwrap_or_default();
                 ctx.request_repaint_after(budget.saturating_sub(spent));
             }
+        }
+    }
+
+    /// Takes an image dropped on the window as the background panorama.
+    ///
+    /// Drag and drop rather than a file dialog because egui hands over the
+    /// *bytes* on web and a path on desktop, and this only has to care about
+    /// the difference in one place. Decoding happens here; handing the pixels
+    /// to wgpu waits for the paint callback, which is the only place with a
+    /// device.
+    fn accept_dropped_background(&mut self, ctx: &egui::Context) {
+        let dropped = ctx.input(|i| i.raw.dropped_files.clone());
+        let Some(file) = dropped.into_iter().next_back() else {
+            return;
+        };
+
+        let name = file
+            .path
+            .as_ref()
+            .map(|p| p.display().to_string())
+            .unwrap_or_else(|| file.name.clone());
+
+        let bytes: Option<Vec<u8>> = match (&file.bytes, &file.path) {
+            (Some(b), _) => Some(b.to_vec()),
+            #[cfg(not(target_arch = "wasm32"))]
+            (None, Some(path)) => std::fs::read(path).ok(),
+            _ => None,
+        };
+        let Some(bytes) = bytes else {
+            log::warn!("could not read dropped file {name}");
+            return;
+        };
+
+        match image::load_from_memory(&bytes) {
+            Ok(decoded) => {
+                let rgba = decoded.to_rgba8();
+                let (w, h) = (rgba.width(), rgba.height());
+                self.pending_background = Some((w, h, rgba.into_raw()));
+                self.background_image = Some(name);
+                // Dropping an image is only ever a request to see it.
+                self.params.background.textured = true;
+            }
+            // A dropped file that is not an image is a slip, not an error
+            // worth a dialog — the panel still says nothing is loaded.
+            Err(e) => log::warn!("{name} is not an image this build can decode: {e}"),
         }
     }
 
@@ -958,6 +1014,7 @@ impl App {
             render_size,
             self.shader.0,
             Arc::clone(&self.shader.1),
+            self.pending_background.take(),
         ));
 
         // After the fractal, not before. egui paints a layer in the order
@@ -986,6 +1043,7 @@ impl eframe::App for App {
         }
 
         self.frame_start = Some(std::time::Instant::now());
+        self.accept_dropped_background(ui.ctx());
         self.service_gpu();
         let dt = ui.input(|i| i.stable_dt).min(0.1);
         self.elapsed += dt;
@@ -1237,6 +1295,75 @@ fn thumb_uv(index: usize) -> egui::Rect {
         egui::pos2(col as f32 * step, row as f32 * step),
         egui::vec2(step, step),
     )
+}
+
+/// Mandelbulber's Background tab: a colour or gradient, or a panorama.
+///
+/// `loaded` names the image currently bound, if any. The panel offers no file
+/// browser: a dropped file arrives with its bytes already read on both desktop
+/// and web, where a path would only work on one of them.
+fn background_editor(bg: &mut BackgroundParams, loaded: Option<&str>, ui: &mut egui::Ui) {
+    ui.label(egui::RichText::new("Colours").strong());
+    ui.horizontal(|ui| {
+        ui.color_edit_button_rgb(&mut bg.color1);
+        ui.label("colour #1");
+    });
+    ui.checkbox(&mut bg.three_colors, "3-colour gradient")
+        .on_hover_text("Colour #1 overhead, #2 at the horizon, #3 below it.");
+    if bg.three_colors {
+        ui.horizontal(|ui| {
+            ui.color_edit_button_rgb(&mut bg.color2);
+            ui.label("colour #2");
+        });
+        ui.horizontal(|ui| {
+            ui.color_edit_button_rgb(&mut bg.color3);
+            ui.label("colour #3");
+        });
+    }
+    ui.add(egui::Slider::new(&mut bg.brightness, 0.0..=4.0).text("brightness"));
+    ui.add(egui::Slider::new(&mut bg.gamma, 0.1..=4.0).text("gamma"));
+
+    ui.add_space(6.0);
+    ui.label(egui::RichText::new("Image").strong());
+    match loaded {
+        Some(name) => {
+            ui.checkbox(&mut bg.textured, "textured background");
+            ui.label(egui::RichText::new(name).weak());
+        }
+        None => {
+            ui.add_enabled(false, egui::Checkbox::new(&mut bg.textured, "textured background"));
+            ui.label(
+                egui::RichText::new("drop a PNG or JPEG on the window")
+                    .weak()
+                    .italics(),
+            );
+        }
+    }
+    if loaded.is_none() {
+        return;
+    }
+
+    egui::ComboBox::from_label("map type")
+        .selected_text(bg.map.label())
+        .show_ui(ui, |ui| {
+            for map in BackgroundMap::ALL {
+                ui.selectable_value(&mut bg.map, map, map.label());
+            }
+        });
+    ui.add(egui::Slider::new(&mut bg.h_scale, 0.1..=8.0).text("horizontal scale"));
+    ui.add(egui::Slider::new(&mut bg.v_scale, 0.1..=8.0).text("vertical scale"));
+    ui.label("texture offset");
+    ui.horizontal(|ui| {
+        for (axis, value) in ["x", "y"].iter().zip(bg.offset.iter_mut()) {
+            ui.add(
+                egui::DragValue::new(value)
+                    .speed(0.005)
+                    .prefix(format!("{axis} ")),
+            );
+        }
+    });
+    ui.label("rotation\u{b0}");
+    vector_row(ui, &mut bg.rotation, 0.5);
 }
 
 /// Mandelbulber's Lights tab: the settings shared by every light, then one

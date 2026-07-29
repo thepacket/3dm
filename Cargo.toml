@@ -14,8 +14,12 @@ name = "3dm"
 path = "src/main.rs"
 
 [dependencies]
-# Only to decode the formula thumbnail atlas at startup — one PNG, once.
-image = { version = "0.25.10", default-features = false, features = ["png"] }
+# The formula thumbnail atlas at startup, and any background panorama dropped
+# on the window. JPEG is here for the second: panoramas are photographs.
+image = { version = "0.25.10", default-features = false, features = [
+    "jpeg",
+    "png",
+] }
 bytemuck = { version = "1.25.2", features = ["derive"] }
 eframe = { version = "0.35.0", default-features = false, features = [
     "default_fonts",
