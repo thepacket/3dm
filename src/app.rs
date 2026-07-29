@@ -125,6 +125,8 @@ pub struct App {
     cursor: CursorProbe,
     /// Cursor position over the viewport in normalised device coords, y up.
     cursor_ndc: [f32; 2],
+    /// Size the fractal was last drawn at, for the diagnostics readout.
+    last_render_size: [u32; 2],
     /// Generated WGSL for the current stack, together with the signature it was
     /// generated from. Regenerated only when the stack's structure changes, so
     /// dragging a parameter never rebuilds a shader.
@@ -162,6 +164,7 @@ impl App {
             formula_filter: String::new(),
             cursor,
             cursor_ndc: [0.0, 0.0],
+            last_render_size: [0, 0],
             encode_srgb,
             adaptive_quality: true,
             interacting: false,
@@ -195,6 +198,8 @@ impl App {
             formula_filter,
             resolution,
             fixed_scale,
+            cursor,
+            last_render_size,
             ..
         } = self;
         let mut reset_view = false;
@@ -376,6 +381,48 @@ impl App {
                         "Render one shading term on its own. The final image is a \
                          product of all of them, so a dark result cannot tell you \
                          which one is responsible — this can.",
+                    );
+
+                    ui.separator();
+                    // Here to answer one question: when the app degrades after a
+                    // while of navigating, is something accumulating or is the
+                    // view simply expensive? Memory that only climbs says the
+                    // first; a probe counter that stops climbing says a readback
+                    // has stalled and is holding a mapping open.
+                    let (readbacks, in_flight) = cursor.progress();
+                    egui::Grid::new("diag.counters")
+                        .num_columns(2)
+                        .spacing([10.0, 2.0])
+                        .show(ui, |ui| {
+                            let mut row = |k: &str, v: String| {
+                                ui.label(egui::RichText::new(k).weak());
+                                ui.label(egui::RichText::new(v).monospace());
+                                ui.end_row();
+                            };
+                            row(
+                                "rendered at",
+                                format!("{} x {}", last_render_size[0], last_render_size[1]),
+                            );
+                            row("probe readbacks", format!("{readbacks}"));
+                            row(
+                                "probe state",
+                                match in_flight {
+                                    0 => "idle",
+                                    1 => "copied",
+                                    _ => "mapping",
+                                }
+                                .to_owned(),
+                            );
+                            row("resident memory", format!("{:.0} MB", resident_mb()));
+                        });
+                    ui.label(
+                        egui::RichText::new(
+                            "If memory climbs and never falls while navigating, \
+                             something is accumulating. If the readback count \
+                             stops rising, the probe has stalled.",
+                        )
+                        .small()
+                        .weak(),
                     );
                 });
 
@@ -582,6 +629,7 @@ impl App {
         // The shader sizes its hit threshold from this, so it must be the size
         // actually rendered — not the window's — or a reduced frame would chase
         // detail it has no pixels for.
+        self.last_render_size = render_size;
         let uniforms = Uniforms::build(
             &self.camera,
             &self.effective_params(),
@@ -777,6 +825,27 @@ fn formula_picker(ui: &mut egui::Ui, filter: &mut String, mut choose: impl FnMut
                 }
             }
         });
+}
+
+/// This process's resident memory, in megabytes.
+///
+/// Shelling out to `ps` rather than linking a platform crate: it is a
+/// diagnostic readout, refreshed only while the Diagnostics section is open.
+#[cfg(not(target_arch = "wasm32"))]
+fn resident_mb() -> f32 {
+    std::process::Command::new("ps")
+        .args(["-o", "rss=", "-p", &std::process::id().to_string()])
+        .output()
+        .ok()
+        .and_then(|o| String::from_utf8(o.stdout).ok())
+        .and_then(|s| s.trim().parse::<f32>().ok())
+        .map(|kb| kb / 1024.0)
+        .unwrap_or(0.0)
+}
+
+#[cfg(target_arch = "wasm32")]
+fn resident_mb() -> f32 {
+    0.0
 }
 
 /// Every binding, in one place.

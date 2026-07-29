@@ -219,6 +219,9 @@ pub struct CursorProbe {
     target: Arc<[AtomicU32; 4]>,
     clearance: Arc<AtomicU32>,
     state: Arc<AtomicU8>,
+    /// Readbacks that have landed. If this stops climbing while the camera is
+    /// moving, the probe has stalled mid-cycle and is holding a mapping open.
+    completed: Arc<AtomicU32>,
 }
 
 impl CursorProbe {
@@ -229,7 +232,16 @@ impl CursorProbe {
             // restricted by a measurement that does not exist yet.
             clearance: Arc::new(AtomicU32::new(f32::INFINITY.to_bits())),
             state: Arc::new(AtomicU8::new(probe_state::IDLE)),
+            completed: Arc::new(AtomicU32::new(0)),
         }
+    }
+
+    /// Readbacks completed, and whether a cycle is currently in flight.
+    pub fn progress(&self) -> (u32, u8) {
+        (
+            self.completed.load(Ordering::Relaxed),
+            self.state.load(Ordering::Relaxed),
+        )
     }
 
     /// Clear space directly ahead of the camera, or infinity before the first
@@ -528,7 +540,7 @@ impl FractalPipeline {
 
     /// Draws the fractal into the offscreen target, creating it if the size
     /// changed. Returns false if there is nothing to draw yet.
-    fn render_offscreen(
+    pub fn render_offscreen(
         &mut self,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
@@ -628,7 +640,7 @@ impl FractalPipeline {
     }
 
     /// Stretches the offscreen frame across egui's target.
-    fn blit(&self, render_pass: &mut wgpu::RenderPass<'_>) {
+    pub fn blit(&self, render_pass: &mut wgpu::RenderPass<'_>) {
         let Some((_, _, bind_group)) = &self.offscreen else {
             return;
         };
@@ -702,6 +714,7 @@ impl FractalPipeline {
                 let target = Arc::clone(&probe.target);
                 let clearance = Arc::clone(&probe.clearance);
                 let state = Arc::clone(&probe.state);
+                let completed = Arc::clone(&probe.completed);
                 let buffer = self.probe_readback.clone();
                 self.probe_readback.slice(..).map_async(
                     wgpu::MapMode::Read,
@@ -724,6 +737,7 @@ impl FractalPipeline {
                                 clearance.store(ahead.to_bits(), Ordering::Relaxed);
                             }
                         }
+                        completed.fetch_add(1, Ordering::Relaxed);
                         state.store(probe_state::IDLE, Ordering::Release);
                     },
                 );
@@ -752,6 +766,13 @@ impl FractalPipeline {
         render_pass.set_pipeline(pipeline);
         render_pass.set_bind_group(0, &self.bind_group, &[]);
         render_pass.draw(0..3, 0..1);
+    }
+
+    /// Bytes of GPU memory wgpu is currently holding, if the backend reports
+    /// it. A number that only ever grows while navigating is a leak.
+    pub fn allocated_bytes(&self, device: &wgpu::Device) -> Option<u64> {
+        let report = device.generate_allocator_report()?;
+        Some(report.total_allocated_bytes)
     }
 
     /// Number of distinct stack structures compiled so far — surfaced in the UI
