@@ -278,7 +278,9 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
     // with the right button does — put it on a surface feature and DM3_ZOOM
     // then closes in on that feature rather than on the origin.
     if let Ok(p) = std::env::var("DM3_PAN") {
-        let mut it = p.split(',').map(|v| v.trim().parse::<f32>().expect("DM3_PAN is dx,dy"));
+        let mut it = p
+            .split(',')
+            .map(|v| v.trim().parse::<f32>().expect("DM3_PAN is dx,dy"));
         camera.pan(it.next().unwrap_or(0.0), it.next().unwrap_or(0.0));
     }
     // DM3_FLY descends along the view direction, the way W does in the app.
@@ -287,6 +289,18 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
     }
     if let Ok(z) = std::env::var("DM3_ZOOM").map(|v| v.parse::<f32>()) {
         camera.zoom(z.expect("DM3_ZOOM must be a number"));
+    }
+    // DM3_FOV narrows the field of view without moving the eye, which is how to
+    // magnify a long way without the camera burying itself in the solid — the
+    // failure that makes DM3_ZOOM useless past a few hundred times. Magnifying
+    // this way isolates *precision* from everything else: the eye stays at a
+    // fixed distance, so coordinate magnitudes do not change, and the only thing
+    // shrinking is the gap between neighbouring pixel rays. When that gap falls
+    // under what f32 can resolve at these magnitudes, adjacent rays round to the
+    // same position and the picture quantises into flat blocks. That is the
+    // precision wall, and this is how to find it rather than calculate it.
+    if let Ok(f) = std::env::var("DM3_FOV").map(|v| v.parse::<f32>()) {
+        camera.fov_y = f.expect("DM3_FOV must be a number (degrees)");
     }
     let (key, source) = params.shader();
     pipeline.ensure(&device, key, &source);
@@ -399,7 +413,6 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
         mapped_at_creation: false,
     });
 
-
     // DM3_EXPORT drives the app's real export path instead of this example's
     // own readback: same pipeline call the Export button makes, same slot, same
     // mapping. Rendered at the same size it should be pixel-identical to
@@ -441,11 +454,16 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
         let (w, h, rgba) = pixels.expect("the export never landed");
         assert_eq!((w, h), (big_w, big_h), "export came back the wrong size");
         let (w, h, mut rgba) = three_dm::params::downsample_srgb(&rgba, w, h, aa);
-        assert_eq!((w, h), (width, height), "downsample landed on the wrong size");
+        assert_eq!(
+            (w, h),
+            (width, height),
+            "downsample landed on the wrong size"
+        );
         for pixel in rgba.chunks_exact_mut(4) {
             pixel[3] = 255;
         }
-        image::save_buffer(path, &rgba, w, h, image::ColorType::Rgba8).expect("could not write PNG");
+        image::save_buffer(path, &rgba, w, h, image::ColorType::Rgba8)
+            .expect("could not write PNG");
         return;
     }
 
@@ -516,7 +534,9 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
     readback
         .slice(..)
         .map_async(wgpu::MapMode::Read, move |r| tx.send(r).ok().unwrap_or(()));
-    device.poll(wgpu::PollType::wait_indefinitely()).expect("GPU poll failed");
+    device
+        .poll(wgpu::PollType::wait_indefinitely())
+        .expect("GPU poll failed");
     rx.recv().expect("map channel closed").expect("map failed");
 
     let mapped = readback.slice(..).get_mapped_range();
@@ -559,7 +579,10 @@ async fn render(path: &str, width: u32, height: u32, stack_name: &str) {
         // The cursor sits at screen centre here, so its ray is the view axis
         // and the two readings can be sanity-checked against each other.
         let cursor = match pipeline.cursor.target() {
-            Some((p, d)) => format!("cursor hit ({:.3}, {:.3}, {:.3}) at {d:.3}", p[0], p[1], p[2]),
+            Some((p, d)) => format!(
+                "cursor hit ({:.3}, {:.3}, {:.3}) at {d:.3}",
+                p[0], p[1], p[2]
+            ),
             None => "cursor over empty space".to_owned(),
         };
         println!(
