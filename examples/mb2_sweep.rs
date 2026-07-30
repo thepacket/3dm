@@ -86,8 +86,12 @@ fn main() {
         Some(other) => panic!("unknown --de={other}, want log or linear"),
         None => None,
     };
+    // `--list` prints one `VERDICT<TAB>name<TAB>kind` line per formula, which is
+    // what lets the usable set be *derived* from a sweep rather than curated by
+    // hand and left to rot as the corpus changes.
+    let list = args.iter().any(|a| a == "--list");
     let out_dir = args.into_iter().find(|a| !a.starts_with("--"));
-    pollster::block_on(run(out_dir.as_deref(), hybrid, rotate, stagger, de));
+    pollster::block_on(run(out_dir.as_deref(), hybrid, rotate, stagger, de, list));
 }
 
 /// The scene for one sweep entry.
@@ -206,6 +210,7 @@ async fn run(
     rotate: bool,
     stagger: bool,
     de: Option<DeMode>,
+    list: bool,
 ) {
     if let Some(d) = out_dir {
         std::fs::create_dir_all(d).expect("cannot create output directory");
@@ -367,6 +372,9 @@ async fn run(
                 }
             };
             hybrid_tally[verdict as usize] += 1;
+            if list {
+                println!("VERDICT\t{}\t{verdict:?}", f.name);
+            }
             if verdict == Hybrid::Inert {
                 inert.push(f.name);
             }
@@ -398,6 +406,9 @@ async fn run(
         };
 
         tally[verdict as usize] += 1;
+        if list {
+            println!("VERDICT\t{}\t{verdict:?}", f.name);
+        }
         if verdict != Verdict::Rendered {
             failures.push((f.name, verdict));
         }

@@ -11,7 +11,9 @@
 //! the formula's index in `GENERATED` — no manifest to keep in step.
 
 use eframe::wgpu;
-use three_dm::formulas::{FormulaKind, FormulaSlot, FormulaStack, generated::GENERATED};
+use three_dm::formulas::{
+    Builtin, DeFunction, FormulaKind, FormulaSlot, FormulaStack, generated::GENERATED,
+};
 use three_dm::{
     Camera, SceneParams,
     render::{FractalPipeline, Uniforms},
@@ -87,9 +89,29 @@ async fn run() {
     let mut framings = std::collections::BTreeMap::<String, usize>::new();
 
     for (index, f) in GENERATED.iter().enumerate() {
+        // A transform — a fold, a rotation, an offset — contributes no distance
+        // estimate of its own and has no standalone shape. Rendering one alone,
+        // which is what this did, produces an empty tile: correct, and useless
+        // as a catalogue picture. A third of the Mandelbulber corpus is
+        // transforms, so that was a third of the picker showing nothing.
+        //
+        // So a transform is drawn the way it is *used*: stacked on a Mandelbulb,
+        // the same base `mb2_sweep --hybrid` tests them against. The tile then
+        // shows what the fold does to a shape you already recognise, which is
+        // the only thing a picture can usefully say about a fold.
+        let is_transform = f.de_function == DeFunction::None;
+        let slots = if is_transform {
+            vec![
+                FormulaSlot::builtin(Builtin::Mandelbulb),
+                FormulaSlot::new(FormulaKind::Generated(index)),
+            ]
+        } else {
+            vec![FormulaSlot::new(FormulaKind::Generated(index))]
+        };
+
         let mut params = SceneParams {
             stack: FormulaStack {
-                slots: vec![FormulaSlot::new(FormulaKind::Generated(index))],
+                slots,
                 de_mode_override: None,
             },
             ..Default::default()

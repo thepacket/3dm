@@ -1409,11 +1409,11 @@ fn formula_picker(
     }
 
     ui.separator();
-    ui.add(egui::TextEdit::singleline(filter).hint_text("filter by name, or M3D…"))
+    ui.add(egui::TextEdit::singleline(filter).hint_text("filter by name…"))
         .on_hover_text(
-            "Both corpora are in this list: Mandelbulber's under their own \
-             names, and Mandelbulb 3D's prefixed `M3D`. Typing that prefix \
-             narrows it to the MB3D formulas.",
+            "Mandelbulber's formulas, under their own names. Only the ones that \
+             actually draw something are listed — a formula that renders nothing \
+             is left out rather than offered and found wanting.",
         );
 
     let needle = filter.to_lowercase();
@@ -1424,6 +1424,13 @@ fn formula_picker(
             // browse rather than a penalty for not knowing the name — and egui
             // only lays out the rows actually on screen.
             for (i, f) in GENERATED.iter().enumerate() {
+                // A catalogue entry that draws nothing is worse than no entry:
+                // it costs a click and a shader compile to find that out. What
+                // counts as unusable is measured, not guessed — see
+                // `formulas::UNUSABLE`.
+                if !FormulaKind::Generated(i).in_picker() {
+                    continue;
+                }
                 if !needle.is_empty() && !f.name.to_lowercase().contains(&needle) {
                     continue;
                 }

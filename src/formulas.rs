@@ -529,6 +529,80 @@ pub enum FormulaKind {
     Generated(usize),
 }
 
+/// Whether the Mandelbulb 3D corpus appears in the formula picker.
+///
+/// Off. The 168 `M3D ` formulas compile and 140 of them draw *something*, but
+/// looking at what they draw — a contact sheet of all of them, 2026-07-30 — it
+/// is overwhelmingly plain spheres, banded spheres, speckle shells and dots
+/// rather than fractals. The sweep's own verdict is no help here: it scores
+/// detail by high-frequency variation, and noise has more of that than any real
+/// surface, so a broken formula rates as the *best* kind of result. The cause is
+/// diagnosed (the distance estimator, not the arithmetic) and the work is
+/// paused, so they are kept out of the picker rather than offered as if usable.
+///
+/// They stay in `GENERATED`: they cost nothing, `FormulaKind::find` still
+/// resolves them so `still` and `mb2_sweep` can render them, and an `.m3p`
+/// importer would need them by name. Flip this to put them back.
+pub const SHOW_MB3D_IN_PICKER: bool = false;
+
+/// Transpiled formulas kept out of the picker because they do not produce a
+/// fractal, by measurement rather than taste.
+///
+/// The criterion differs by what the formula *is*, because judging a fold by
+/// what it draws alone is meaningless:
+///
+///   * a formula with its own estimator has to render detail on its own —
+///     `mb2_sweep --list` must call it `Rendered`, not `Empty` or `Featureless`;
+///   * a transform (estimator [`DeFunction::None`]) has to visibly change a
+///     Mandelbulb it is stacked on — `mb2_sweep --hybrid --list` must call it
+///     `Reshaped`.
+///
+/// Two exemptions matter, and skipping them would have hidden twenty working
+/// transforms. A transform that is inert only because **its own defaults are
+/// zero or an identity rotation** is not broken — it is a no-op until edited,
+/// which is true in Mandelbulber too. And one that does nothing at zero degrees
+/// but reshapes the base once its angles are dialled in (`--hybrid --rotate`)
+/// is working; the rotation family is the whole point of the Euler-angle
+/// derivation. Both are kept.
+///
+/// Regenerate by running those three sweeps and applying the rules above. The
+/// test below fails if a name here no longer exists, so the list cannot rot
+/// into silently doing nothing.
+pub const UNUSABLE: &[&str] = &[
+    "Aexion4dV2",
+    "ImaginaryScatorPower2",
+    "MandelbulbJuliabulb",
+    "MandelbulbKaliMulti",
+    "MandelbulbMulti2",
+    "MandelbulbQuat",
+    "MsltoeToroidalMulti",
+    "ScatorPower2StdR",
+    "Testing4d",
+    "TestingTransform2",
+    "TransfAddConstantMod1",
+    "TransfAddConstantMod2",
+    "TransfAddConstantVaryV1",
+    "TransfAddCpixel4d",
+    "TransfAddExp2Z",
+    "TransfBenesiT4",
+    "TransfBenesiT5b",
+    "TransfDELinearCube",
+    "TransfDIFSClipCustom",
+    "TransfDIFSHelixMenger",
+    "TransfDIFSTorusMenger",
+    "TransfGnarl",
+    "TransfIterationWeight",
+    "TransfIterationWeight4d",
+    "TransfLinCombineCXYZ",
+    "TransfOffsetSCurve4d",
+    "TransfParabFold",
+    "TransfRotateAboutVec3",
+    "TransfRotationIterControls",
+    "TransfSinAdd",
+    "TransfSupershape",
+    "TransfZvectorAxisSwap",
+];
+
 impl FormulaKind {
     pub fn name(self) -> &'static str {
         match self {
@@ -538,11 +612,34 @@ impl FormulaKind {
     }
 
     /// Looks up a transpiled formula by its Mandelbulber name.
+    ///
+    /// Deliberately finds formulas the picker hides: the sweeps have to be able
+    /// to render one to re-check whether it is still unusable, and an `.m3p`
+    /// naming one must resolve rather than fail.
     pub fn find(name: &str) -> Option<Self> {
         GENERATED
             .iter()
             .position(|f| f.name.eq_ignore_ascii_case(name))
             .map(Self::Generated)
+    }
+
+    /// Whether this formula is offered in the picker.
+    ///
+    /// The picker is a catalogue, and a catalogue entry that draws nothing is
+    /// worse than no entry — it costs a click and a wait to learn that. See
+    /// [`UNUSABLE`] for the measured criterion and [`SHOW_MB3D_IN_PICKER`] for
+    /// the corpus-level switch. Hand-written builtins are always offered.
+    pub fn in_picker(self) -> bool {
+        match self {
+            Self::Builtin(_) => true,
+            Self::Generated(i) => {
+                let name = GENERATED[i].name;
+                if name.starts_with("M3D ") {
+                    return SHOW_MB3D_IN_PICKER;
+                }
+                !UNUSABLE.contains(&name)
+            }
+        }
     }
 
     pub fn de_kind(self) -> DeKind {
@@ -1030,5 +1127,35 @@ mod tests {
         // bulb.power defaults to 9 in Mandelbulber; a zeroed block renders
         // nothing, which is why the recovered defaults are load-bearing.
         assert!(slot.params.contains(&9.0));
+    }
+
+    /// A name in `UNUSABLE` that no longer exists silently stops hiding
+    /// anything, and the picker quietly regains an entry that draws nothing.
+    #[test]
+    fn every_unusable_name_still_exists() {
+        for name in UNUSABLE {
+            assert!(
+                GENERATED.iter().any(|f| f.name == *name),
+                "UNUSABLE lists {name}, which is not in the corpus any more"
+            );
+        }
+    }
+
+    /// The hidden set is a tail, not a policy. If this trips, either the corpus
+    /// regressed badly or the criterion in `UNUSABLE` has been misapplied.
+    #[test]
+    fn the_picker_offers_most_of_the_corpus() {
+        let mb2 = GENERATED
+            .iter()
+            .enumerate()
+            .filter(|(_, f)| !f.name.starts_with("M3D "));
+        let total = mb2.clone().count();
+        let offered = mb2
+            .filter(|(i, _)| FormulaKind::Generated(*i).in_picker())
+            .count();
+        assert!(
+            offered * 10 >= total * 9,
+            "picker offers only {offered} of {total} Mandelbulber formulas"
+        );
     }
 }

@@ -32,6 +32,11 @@ fn main() {
         .to_rgba8();
     let (w, h) = img.dimensions();
 
+    if std::env::args().any(|a| a == "--per-tile") {
+        per_tile(&img);
+        return;
+    }
+
     let mut all = Vec::with_capacity((w * h) as usize);
     // The atlas is drawn over a transparent clear, so alpha separates the shape
     // from the empty ground around it. Averaging the ground in would report a
@@ -87,5 +92,84 @@ fn main() {
             share * 100.0,
             "#".repeat((share * 200.0).round() as usize)
         );
+    }
+}
+
+/// Classifies every tile, which is what answers "why is this picker entry
+/// blank?" — and the two blank cases have different causes.
+///
+/// A tile the generator never wrote is still fully transparent, because the
+/// atlas starts zeroed and `thumbs` skips a formula whose shader will not
+/// build. A tile it *did* write but which holds nothing but its own background
+/// is a formula that compiled and then drew nothing at any framing it tried.
+/// The first is a build failure, the second a rendering one, and conflating
+/// them sends you looking in the wrong place.
+fn per_tile(img: &image::RgbaImage) {
+    use three_dm::formulas::generated::GENERATED;
+
+    const TILE: u32 = 64;
+    let cols = three_dm::formulas::atlas_cols(GENERATED.len()) as u32;
+
+    let mut unwritten = Vec::new();
+    let mut featureless = Vec::new();
+    let mut ok = 0usize;
+
+    for (index, f) in GENERATED.iter().enumerate() {
+        let (tx, ty) = ((index as u32 % cols) * TILE, (index as u32 / cols) * TILE);
+
+        let mut opaque = 0usize;
+        let mut min = f32::MAX;
+        let mut max = f32::MIN;
+        for y in 0..TILE {
+            for x in 0..TILE {
+                let p = img.get_pixel(tx + x, ty + y).0;
+                if p[3] > 8 {
+                    opaque += 1;
+                }
+                let l = luma(&p);
+                min = min.min(l);
+                max = max.max(l);
+            }
+        }
+
+        // Nothing opaque at all: the tile was never drawn into.
+        if opaque == 0 {
+            unwritten.push(f.name);
+        // Drawn, but every pixel is the same shade — background only.
+        } else if max - min < 4.0 {
+            featureless.push(f.name);
+        } else {
+            ok += 1;
+        }
+    }
+
+    let split = |names: &[&str]| {
+        let m3d = names.iter().filter(|n| n.starts_with("M3D ")).count();
+        (names.len() - m3d, m3d)
+    };
+    let (u_mb2, u_m3d) = split(&unwritten);
+    let (f_mb2, f_m3d) = split(&featureless);
+
+    println!("{} tiles: {ok} with a picture", GENERATED.len());
+    println!(
+        "  never drawn (shader would not build): {} ({u_mb2} MB2, {u_m3d} M3D)",
+        unwritten.len()
+    );
+    println!(
+        "  drawn but empty (background only):    {} ({f_mb2} MB2, {f_m3d} M3D)",
+        featureless.len()
+    );
+
+    for (title, names) in [
+        ("never drawn", &unwritten),
+        ("drawn but empty", &featureless),
+    ] {
+        if names.is_empty() {
+            continue;
+        }
+        println!("\n{title}:");
+        for n in names.iter() {
+            println!("    {n}");
+        }
     }
 }
