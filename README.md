@@ -9,7 +9,7 @@ orbit-trap palette, ray-marched soft shadows and ambient occlusion, and
 composites under an egui control panel. The CPU only owns the camera and the
 parameter set.
 
-![the default scene](docs/default-scene.png)
+![3DM rendering a detailed Mandelbulb scene](docs/hero.png)
 
 ## Status
 
