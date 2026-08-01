@@ -13,6 +13,8 @@ parameter set.
 
 ## Status
 
+3DM is in an early development phase, not ready for use.
+
 Milestone 2 — the hybrid formula stack.
 
 A fractal is an ordered stack of formulas, each applied inside a single
